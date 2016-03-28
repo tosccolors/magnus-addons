@@ -252,7 +252,7 @@
             <blockTable colWidths="450.0">
             <tr>
                 <td>
-                    <para style="Standard"><b>Bankrekening</b> [[ b.footer == True and (b.bank and b.bank.name) or '' ]] <b>IBAN</b> [[ b.footer == True and (b.acc_number) or '' ]] <b>BIC</b> [[ b.footer == True and (b.bank_bic) or removeParentNode('para') ]]</para>
+                    <para style="Standard"><b>Bankrekening</b> [[ b.footer == True and (b.bank and b.bank.name) or '' ]] <b>IBAN</b> [[ b.footer == True and (b.acc_number) or '' ]] <b>BIC</b> [[ b.footer == True and (b.bank_bic) or removeParentNode('para') and '' ]]</para>
                 </td>
             </tr>
             </blockTable>
