@@ -180,7 +180,7 @@
                     <para style="Standard"></para>
                 </td>
                 <td>
-                    <para style="terp_default_Right_9">[[ o.currency_id.symbol or "" ]] [[ (o.amount_untaxed) or '' ]]</para>
+                    <para style="terp_default_Right_9">[[ o.currency_id.symbol or "" ]] [[ (o.amount_untaxed) or "0.00" ]]</para>
                 </td>
             </tr>
          </blockTable>
@@ -198,7 +198,7 @@
                     <para style="Standard"></para>
                 </td>
                 <td>
-                    <para style="terp_default_Right_9">[[ o.currency_id.symbol or "" ]][[ (t.amount) or '' ]]</para>
+                    <para style="terp_default_Right_9">[[ o.currency_id.symbol or "" ]] [[ (t.amount) or '' ]]</para>
                 </td>
               </tr>
               </blockTable>
@@ -252,7 +252,7 @@
             <blockTable colWidths="450.0">
             <tr>
                 <td>
-                    <para style="Standard"><b>Bankrekening</b> [[ b.footer == True and (b.bank and b.bank.name) or '' ]] <b>IBAN</b> [[ b.footer == True and (b.acc_number) or '' ]] <b>BIC</b> [[ b.footer == True and (b.bank_bic) or '' ]]</para>
+                    <para style="Standard"><b>Bankrekening</b> [[ b.footer == True and (b.bank and b.bank.name) or removeParentNode('para') ]] <b>IBAN</b> [[ b.footer == True and (b.acc_number) or '' ]] <b>BIC</b> [[ b.footer == True and (b.bank_bic) or '' ]]</para>
                 </td>
             </tr>
             </blockTable>
