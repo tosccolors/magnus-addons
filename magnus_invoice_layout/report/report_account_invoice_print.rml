@@ -77,7 +77,7 @@
                     <para style="Standard_bold">Datum</para>
                 </td>
                 <td>
-                    <para style="Standard">[[ get_date(o.date_invoice) or ' ' ]]</para>
+                    <para style="Standard">[[ get_date(o.date_invoice) or '' ]]</para>
                 </td>
             </tr>
             <tr>
@@ -93,7 +93,7 @@
                     <para style="Standard_bold">Maand</para>
                 </td>
                 <td>
-                    <para style="Standard">[[ new_date(o.date_due) or '' ]]</para>
+                    <para style="Standard">[[ new_date(o.period_id) or '' ]]</para>
                 </td>
             </tr>
             <tr>
@@ -180,7 +180,7 @@
                     <para style="Standard"></para>
                 </td>
                 <td>
-                    <para style="terp_default_Right_9">[[ o.currency_id.symbol or "" ]] [[ (o.amount_untaxed) or 0.00" ]]</para>
+                    <para style="terp_default_Right_9">[[ o.currency_id.symbol or "" ]] [[ (o.amount_untaxed) or "0.00" ]]</para>
                 </td>
             </tr>
          </blockTable>
@@ -241,7 +241,7 @@
         <blockTable colWidths="450.0">
             <tr>
                 <td>
-                    <para style="Standard"><b>Betaaltermijn</b> Binnen [[ (o.payment_term.name) or '' ]] <b>[[ (o.partner_id and o.partner_id.company_id and o.partner_id.company_id.name) or '' ]]</b></para>
+                    <para style="Standard"><b>Betaaltermijn: </b>Binnen [[ (o.payment_term.name) or '' ]] <b>[[ (o.partner_id and o.partner_id.company_id and o.partner_id.company_id.name) or '' ]]</b></para>
                 </td>
             </tr>
         </blockTable>
@@ -252,7 +252,7 @@
             <blockTable colWidths="450.0">
             <tr>
                 <td>
-                    <para style="Standard"><b>Bankrekening</b> [[ b.footer == True and (b.bank and b.bank.name) or '' ]] <b>IBAN</b> [[ b.footer == True and (b.acc_number) or '' ]] <b>BIC</b> [[ b.footer == True and (b.bank_bic) or removeParentNode('para') and '' ]]</para>
+                    <para style="Standard">[[ b.footer != True and removeParentNode('para') ]]<b>Bankrekening:</b> [[ b.footer == True and (b.bank and b.bank.name) or '']] <b>IBAN</b> [[ b.footer == True and (b.acc_number) or '' ]] <b>BIC</b> [[ b.footer == True and (b.bank_bic) or '' ]]</para>
                 </td>
             </tr>
             </blockTable>
