@@ -90,14 +90,6 @@
             </tr>
             <tr>
                 <td>
-                    <para style="Standard_bold">Maand</para>
-                </td>
-                <td>
-                    <para style="Standard">[[ new_date(o.period_id) or '' ]]</para>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     <para style="Standard_bold">Uw referentie</para>
                 </td>
                 <td>
