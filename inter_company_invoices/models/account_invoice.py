@@ -26,6 +26,9 @@ class account_invoice(orm.Model):
             # do not consider invoices that have already been auto-generated, nor the invoices that were already validated in the past
             company_obj = self.pool.get('res.company')
             suid = SUPERUSER_ID
+            auto_invoice = self.pool.get('account.invoice').search(cr, suid, [('auto_invoice_id', '=', invoice.id), ('state', '!=', 'cancel')])
+            if auto_invoice:
+                raise Warning("An auto-generated Intercompany invoice is already existing and not cancelled")
             company = company_obj.find_company_from_partner(cr, suid, invoice.partner_id.id,)
             if company and company.auto_generate_invoices and not invoice.auto_generated:
                 intercompany_uid = company.intercompany_user_id and company.intercompany_user_id.id or False
