@@ -26,22 +26,22 @@ class account_invoice(orm.Model):
             # do not consider invoices that have already been auto-generated, nor the invoices that were already validated in the past
             company_obj = self.pool.get('res.company')
             suid = SUPERUSER_ID
-            auto_invoice = self.pool.get('account.invoice').search(cr, suid, [('auto_invoice_id', '=', invoice.id), ('state', '!=', 'cancel')])
-            if auto_invoice:
-                raise Warning("An auto-generated Intercompany invoice is already existing and not cancelled")
             company = company_obj.find_company_from_partner(cr, suid, invoice.partner_id.id,)
             if company and company.auto_generate_invoices and not invoice.auto_generated:
-                intercompany_uid = company.intercompany_user_id and company.intercompany_user_id.id or False
-                if not intercompany_uid:
-                    raise Warning("Provide one user for intercompany relation for %s " % company.name)
-                if invoice.type == 'out_invoice':
-                    self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'in_invoice', 'purchase')
-                elif invoice.type == 'in_invoice':
-                    self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'out_invoice', 'sale')
-                elif invoice.type == 'out_refund':
-                    self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'in_refund', 'purchase_refund')
-                elif invoice.type == 'in_refund':
-                    self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'out_refund', 'sale_refund')
+                auto_invoice = self.pool.get('account.invoice').search(cr, suid, [('auto_invoice_id', '=', invoice.id), ('state', '!=', 'cancel')])
+                if not auto_invoice:
+                    #raise Warning("An auto-generated Intercompany invoice is already existing and not cancelled")
+                    intercompany_uid = company.intercompany_user_id and company.intercompany_user_id.id or False
+                    if not intercompany_uid:
+                        raise Warning("Provide one user for intercompany relation for %s " % company.name)
+                    if invoice.type == 'out_invoice':
+                        self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'in_invoice', 'purchase')
+                    elif invoice.type == 'in_invoice':
+                        self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'out_invoice', 'sale')
+                    elif invoice.type == 'out_refund':
+                        self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'in_refund', 'purchase_refund')
+                    elif invoice.type == 'in_refund':
+                        self.inter_company_create_invoice(cr, intercompany_uid, company, invoice, 'out_refund', 'sale_refund')
         return super(account_invoice, self).invoice_validate(cr, uid, ids, context=context)
 
     def inter_company_create_invoice(self, cr, uid, company, invoice, inv_type, journal_type, context=None):
