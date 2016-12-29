@@ -21,7 +21,10 @@
 {
     'name': 'Inter Company Module for Invoices',
     'version': '7.0.1.1.0',
-    'description': ''' Module for synchronization of Invoices between several companies. For example, this allows you to have a Customer Invoice created automatically when a Supplier Invoice is validated with another company of the system as supplier, and inversely.
+    'description': ''' Module for synchronization of Invoices between
+     several companies. For example, this allows you to have a Customer Invoice created
+    automatically when a Supplier Invoice is validated with another
+     company of the system as supplier, and inversely.
 
     Supported documents are invoices/refunds.
 ''',
