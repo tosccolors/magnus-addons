@@ -18,15 +18,14 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, fields
+from openerp.osv import osv, orm, fields
 
 
-class account_invoice(osv.osv):
+class account_invoice(orm.Model):
     _inherit = 'account.invoice'
 
     _columns = {
         'invoice_description': fields.text('Description'),
-
     }
 
     def invoice_print(self, cr, uid, ids, context=None):
@@ -47,10 +46,7 @@ class account_invoice(osv.osv):
             'nodestroy': True
         }
 
-account_invoice()
-
-
-class res_company(osv.osv):
+class res_company(orm.Model):
     _inherit = 'res.company'
 
     _columns = {
@@ -59,6 +55,5 @@ class res_company(osv.osv):
             help='Set Background Image for Report'),
     }
 
-res_company()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

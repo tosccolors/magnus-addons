@@ -17,10 +17,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+
 import time
 from datetime import datetime
 from openerp.report import report_sxw
-
 
 class account_invoice(report_sxw.rml_parse):
 
