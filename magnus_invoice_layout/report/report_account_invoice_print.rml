@@ -129,7 +129,7 @@
 
 
         <section>
-            <para style="Standard">[[ repeatIn(o.invoice_line,'l') ]]</para>
+            <para style="Standard">[[ repeatIn(o.invoice_line_ids,'l') ]]</para>
 
             <blockTable colWidths="190.0,30.0,105.0,125.0" style="Tableau2">
                 <tr>
@@ -185,7 +185,7 @@
             </tr>
          </blockTable>
          <section>
-         <para style="Standard">[[ repeatIn(o.tax_line,'t') ]]</para>
+         <para style="Standard">[[ repeatIn(o.tax_line_ids,'t') ]]</para>
          <blockTable colWidths="190.0,30.0,105.0,125.0" style="Tableau2">
               <tr>
                 <td>
@@ -247,7 +247,7 @@
         </blockTable>
 
         <section>
-            <para style="Standard">[[ repeatIn(o.company_id.bank_ids,'b') ]]</para>
+            <para style="Standard">[[ repeatIn(o.company_id.partner_id.bank_ids,'b') ]]</para>
 
             <blockTable colWidths="450.0">
             <tr>
