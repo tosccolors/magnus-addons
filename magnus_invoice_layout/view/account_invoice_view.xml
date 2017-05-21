@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="account.invoice_form" />
             <field name="priority" eval="90" />
             <field name="arch" type="xml">
-                <xpath expr="//notebook/page[@string='Invoice Lines']" position="after">
+                <xpath expr="//notebook/page[1]" position="after">
                     <page string="Invoice Description">
                         <div class="oe_clear">
                             <label for="invoice_description"/>
@@ -25,7 +25,7 @@
             <field name="inherit_id" ref="base.view_company_form" />
             <field name="priority" eval="90" />
             <field name="arch" type="xml">
-                <xpath expr="//form/sheet/notebook/page[@string='General Information']" position="inside">
+                <xpath expr="//form/sheet/notebook/page[1]" position="inside">
                     <separator string="Background Image for Report"/>
                     <field name="report_background_image" widget="image" class="oe_avatar oe_left"/>
                 </xpath>
