@@ -20,7 +20,7 @@
 
 import time
 from datetime import datetime
-from openerp.report import report_sxw
+from odoo.report import report_sxw
 
 class account_invoice(report_sxw.rml_parse):
 

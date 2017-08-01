@@ -18,42 +18,47 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, orm, fields
+from odoo import fields, models, api
 
 
-class account_invoice(orm.Model):
+class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
-    _columns = {
-        'invoice_description': fields.text('Description'),
-    }
+    invoice_description = fields.Text('Description')
 
-    def invoice_print(self, cr, uid, ids, context=None):
-        '''
-        This function prints the invoice and mark it as sent, so that we can see more easily the next step of the workflow
-        '''
-        assert len(ids) == 1, 'This option should only be used for a single id at a time.'
-        self.write(cr, uid, ids, {'sent': True}, context=context)
-        datas = {
-            'ids': ids,
-            'model': 'account.invoice.custom',
-            'form': self.read(cr, uid, ids[0], context=context)
-        }
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'account.invoice.custom',
-            'datas': datas,
-            'nodestroy': True
-        }
+    @api.multi
+    def invoice_print(self):
+        """ Print the invoice and mark it as sent, so that we can see more
+            easily the next step of the workflow
+        """
+        self.ensure_one()
+        self.sent = True
+        return self.env['report'].get_action(self, 'account.invoice.custom')
 
-class res_company(orm.Model):
+#    def invoice_print(self, cr, uid, ids, context=None):
+#        '''
+#        This function prints the invoice and mark it as sent, so that we can see more easily the next step of the workflow
+#        '''
+#        assert len(ids) == 1, 'This option should only be used for a single id at a time.'
+#        self.write(cr, uid, ids, {'sent': True}, context=context)
+#        datas = {
+#            'ids': ids,
+#            'model': 'account.invoice.custom',
+#            'form': self.read(cr, uid, ids[0], context=context)
+#        }
+#        return {
+#            'type': 'ir.actions.report.xml',
+#            'report_name': 'account.invoice.custom',
+#            'datas': datas,
+#            'nodestroy': True
+#        }
+
+class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    _columns = {
-        'report_background_image': fields.binary(
+    report_background_image = fields.Binary(
             'Background Image for Report',
-            help='Set Background Image for Report'),
-    }
+            help='Set Background Image for Report')
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

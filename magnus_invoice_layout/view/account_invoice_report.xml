@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
 
         <report auto="False"
@@ -15,4 +15,4 @@
             header="False"/>
 
     </data>
-</openerp>
+</odoo>
