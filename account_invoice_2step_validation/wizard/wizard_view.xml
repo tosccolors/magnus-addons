@@ -1,0 +1,58 @@
+<openerp>
+    <data>
+
+        <record id="account_invoice_author_view" model="ir.ui.view">
+            <field name="name">account.invoice.author.form</field>
+            <field name="model">account.invoice.author</field>
+            <field name="arch" type="xml">
+                <form string="Authorize Open Invoices" version="7.0">
+                    <p class="oe_grey">
+                        Once open invoices are authorized, they will be available for payment
+                    </p>
+                    <footer>
+                        <button string="Authorize Invoices" name="invoice_author" type="object" default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_account_invoice_author"
+            multi="True"
+            key2="client_action_multi" name="Authorize Open Invoices"
+            res_model="account.invoice.author" src_model="account.invoice"
+            view_mode="form" target="new" view_type="form"
+            view_id="account_invoice_author_view"
+            groups="account_invoice_2step_validation.authorize"/>
+
+
+        <record id="account_invoice_verifier_view" model="ir.ui.view">
+            <field name="name">account.invoice.verifier.form</field>
+            <field name="model">account.invoice.verifier</field>
+            <field name="arch" type="xml">
+                <form string="Authorize Open Invoices" version="7.0">
+                    <p class="oe_grey">
+                        Once authorized invoices greater than the treshold in company are verified, they will be available for payment
+                    </p>
+                    <footer>
+                        <button string="Verify Invoices" name="invoice_verifier" type="object" default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window id="action_account_invoice_verifier"
+            multi="True"
+            key2="client_action_multi" name="Verify Authorized Invoices"
+            res_model="account.invoice.verifier" src_model="account.invoice"
+            view_mode="form" target="new" view_type="form"
+            view_id="account_invoice_verifier_view"
+            groups="account_invoice_2step_validation.verification"/>
+
+        
+
+    </data>
+</openerp>

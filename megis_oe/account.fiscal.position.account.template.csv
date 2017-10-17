@@ -1,0 +1,13 @@
+id,account_dest_id/id,account_src_id/id,position_id/id
+megis-oe.position_account_eu_purchase_high_1,megis-oe.a_7015,megis-oe.a_7001,megis-oe.fiscal_position_template_eu
+megis-oe.position_account_eu_purchase_high_2,megis-oe.a_7016,megis-oe.a_7010,megis-oe.fiscal_position_template_eu
+megis-oe.position_account_eu_sales_service_trade_high_1,megis-oe.a_8130,megis-oe.a_8100,megis-oe.fiscal_position_template_eu
+megis-oe.position_account_eu_sales_service_trade_high_2,megis-oe.a_8140,megis-oe.a_8110,megis-oe.fiscal_position_template_eu
+megis-oe.position_account_eu_sales_service_trade_high_3,megis-oe.a_8150,megis-oe.a_8120,megis-oe.fiscal_position_template_eu
+megis-oe.position_account_eu_sales_service_trade_high_4,megis-oe.a_8151,megis-oe.a_8121,megis-oe.fiscal_position_template_eu
+megis-oe.position_account_non_eu_purchase_high_1,megis-oe.a_7019,megis-oe.a_7010,megis-oe.fiscal_position_template_non_eu
+megis-oe.position_account_non_eu_purchase_high_2,megis-oe.a_7018,megis-oe.a_7001,megis-oe.fiscal_position_template_non_eu
+megis-oe.position_account_non_eu_sales_service_trade_high_1,megis-oe.a_8160,megis-oe.a_8100,megis-oe.fiscal_position_template_non_eu
+megis-oe.position_account_non_eu_sales_service_trade_high_2,megis-oe.a_8170,megis-oe.a_8110,megis-oe.fiscal_position_template_non_eu
+megis-oe.position_account_non_eu_sales_service_trade_high_3,megis-oe.a_8180,megis-oe.a_8120,megis-oe.fiscal_position_template_non_eu
+megis-oe.position_account_non_eu_sales_service_trade_high_4,megis-oe.a_8181,megis-oe.a_8121,megis-oe.fiscal_position_template_non_eu

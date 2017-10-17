@@ -1,0 +1,2 @@
+id,code_digits,visible,complete_tax_set,property_account_expense_id/id,property_account_expense_categ_id/id,property_account_income_id/id,property_account_income_categ_id/id,name,parent_id/id,property_account_payable_id/id,property_account_receivable_id/id,currency_id/id,transfer_account_id/id
+megis-oe.megis-oe_chart_template,4,True,True,,megis-oe.a_7001,,megis-oe.a_8100,Gooimeer Grootboekschema,,megis-oe.a_1500,megis-oe.a_1300,base.EUR,megis-oe.transfer_account

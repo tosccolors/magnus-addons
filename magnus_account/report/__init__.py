@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 ##############################################################################
 #
 #    Copyright 2016 BAS Solutions
@@ -18,37 +19,6 @@
 #
 ##############################################################################
 
-{
-    "name": "Magnus Account Invoice Layout",
-    "version": "2.0",
-    "author": "BAS Solutions",
-    "website": "https://www.bas-solutions.nl",
-    "category": "Account",
-    "depends": [
-        "base",
-        "account",
-    ],
-    "summary": "Magnus Account Invoice Layout",
-    "description": """
-        NSM Account Invoice Layout
-    """,
-    'images': [
-    ],
-    'data': [
-    ],
-    "init_xml": [
-    ],
-    "update_xml": [
-        "view/account_invoice_report.xml",
-        "view/account_invoice_view.xml",
-    ],
-    'demo_xml': [
-    ],
-    'test': [
-    ],
-    'installable': False,
-    'auto_install': False,
-    'application': False,
-}
+import report_account_invoice
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

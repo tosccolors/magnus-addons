@@ -1,0 +1,321 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* account_invoice_2step_validation
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-09 11:30+0000\n"
+"PO-Revision-Date: 2017-08-09 11:30+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "Accounting Documents"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "Amount"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.invoice_supplier_form_auth
+msgid "Ask Refund"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.invoice_supplier_form_auth
+msgid "Authorize"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_author_view
+msgid "Authorize Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.actions.act_window,name:account_invoice_2step_validation.action_account_invoice_author
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_author_view
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_verifier_view
+msgid "Authorize Open Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model,name:account_invoice_2step_validation.model_account_invoice_author
+msgid "Authorize the selected invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Authorized"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Authorized Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Authorized Invoices greater than Verification treshold"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:res.groups,name:account_invoice_2step_validation.authorize
+msgid "Betaling Fiattering"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_author_view
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_verifier_view
+msgid "Cancel"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.invoice_supplier_cancel_auth
+msgid "Cancel Invoice"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model,name:account_invoice_2step_validation.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_nsm_res_company_form_improv02
+msgid "Configuration"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author_create_uid
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier_create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author_create_date
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier_create_date
+msgid "Created on"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "Currency"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "Dates"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author_display_name
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier_display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:res.groups,name:account_invoice_2step_validation.goedk_facturen
+msgid "Factuur Controleur"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author_id
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier_id
+msgid "ID"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,help:account_invoice_2step_validation.field_account_invoice_payment_term
+msgid "If you use payment terms, the due date will be computed automatically at the generation of accounting entries. If you keep the payment term and the due date empty, it means direct payment. The payment term may compute several due dates, for example 50% now, 50% in one month."
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model,name:account_invoice_2step_validation.model_account_invoice
+msgid "Invoice"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_res_company_verify_setting
+msgid "Invoice Amount bigger than"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: code:addons/account_invoice_2step_validation/models/account_invoice.py:130
+#, python-format
+msgid "Invoice must be in draft, Pro-forma or open state in order to be cancelled."
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author___last_update
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier___last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author_write_uid
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier_write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_author_write_date
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verifier_write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_verifier_view
+msgid "Once authorized invoices greater than the treshold in company are verified, they will be available for payment"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_author_view
+msgid "Once open invoices are authorized, they will be available for payment"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Open Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Paid"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Paid Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_payment_term
+msgid "Payment Terms"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Posted Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Proforma/Open/Authorized/Paid Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.invoice_supplier_form_auth
+msgid "Re-open"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "Reconciliation"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: code:addons/account_invoice_2step_validation/wizard/wizard.py:42
+#, python-format
+msgid "Selected invoice(s) cannot be authorized as they are not in 'Open' state."
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: code:addons/account_invoice_2step_validation/wizard/wizard.py:63
+#, python-format
+msgid "Selected invoice(s) cannot be verified as they are not in 'Authorized' state."
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "States"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_move_line_form_improv
+msgid "Taxes"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_nsm_res_company_form_improv02
+msgid "Tweede procuratiegrens"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.invoice_supplier_form_auth
+msgid "Un-verify"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Unpaid"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Unpaid Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:res.groups,name:account_invoice_2step_validation.verification
+msgid "Verification"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model.fields,field_description:account_invoice_2step_validation.field_account_invoice_verif_tresh_exceeded
+msgid "Verification Treshold"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Verified"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "Verified Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.invoice_supplier_form_auth
+msgid "Verify"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.actions.act_window,name:account_invoice_2step_validation.action_account_invoice_verifier
+msgid "Verify Authorized Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_verifier_view
+msgid "Verify Invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model,name:account_invoice_2step_validation.model_account_invoice_verifier
+msgid "Verify the selected invoices"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.model,name:account_invoice_2step_validation.model_account_payment_line_create
+msgid "Wizard to create payment lines"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_author_view
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.account_invoice_verifier_view
+msgid "or"
+msgstr ""
+
+#. module: account_invoice_2step_validation
+#: model:ir.ui.view,arch_db:account_invoice_2step_validation.view_account_invoice_filter_auth
+msgid "to be Verified"
+msgstr ""
+

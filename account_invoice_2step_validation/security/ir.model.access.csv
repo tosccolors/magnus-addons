@@ -1,0 +1,16 @@
+id,group_id/id,perm_create,perm_read,perm_write,perm_unlink,name,model_id/id
+access_res_partner_bank,goedk_facturen,0,1,0,0,bank gf,account.model_res_partner_bank
+access_account_invoice_tax,goedk_facturen,0,1,0,0,factuur_tax gf,account.model_account_invoice_tax
+access_account_invoice_line,goedk_facturen,0,1,1,0,fctuurregel gf,account.model_account_invoice_line
+access_account_move_line,goedk_facturen,0,1,0,0,Boekingsregel gf,account.model_account_move_line
+access_account_move,goedk_facturen,0,1,0,0,boeking gf,account.model_account_move
+access_account_invoice,goedk_facturen,0,1,1,0,factuur gf,account.model_account_invoice
+access_account_tax,goedk_facturen,0,1,0,0,tax gf,account.model_account_tax
+access_mail_message,goedk_facturen,1,1,1,0,mail.message gf,mail.model_mail_message
+access_mail_mail,goedk_facturen,1,1,1,0,mail.mail gf,fetchmail.model_mail_mail
+access_res_partner_category,goedk_facturen,0,1,0,0,res.partner.category gf,base.model_res_partner_category
+access_project_task,goedk_facturen,0,1,0,0,project.task gf,project.model_project_task
+access_mail_message_subtype,goedk_facturen,1,1,1,0,message subtype gf,mail.model_mail_message_subtype
+access_res_partner,goedk_facturen,0,1,0,0,res.partner gf,account.model_res_partner
+access_account_account,goedk_facturen,0,1,0,0,rekening gf,account.model_account_account
+access_account_account_type,goedk_facturen,0,1,0,0,rekening.categorie gf,account.model_account_account_type

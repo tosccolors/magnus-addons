@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    Copyright 2016 BAS Solutions
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -18,37 +19,19 @@
 #
 ##############################################################################
 
-{
-    "name": "Magnus Account Invoice Layout",
-    "version": "2.0",
-    "author": "BAS Solutions",
-    "website": "https://www.bas-solutions.nl",
-    "category": "Account",
-    "depends": [
-        "base",
-        "account",
-    ],
-    "summary": "Magnus Account Invoice Layout",
-    "description": """
-        NSM Account Invoice Layout
-    """,
-    'images': [
-    ],
-    'data': [
-    ],
-    "init_xml": [
-    ],
-    "update_xml": [
-        "view/account_invoice_report.xml",
-        "view/account_invoice_view.xml",
-    ],
-    'demo_xml': [
-    ],
-    'test': [
-    ],
-    'installable': False,
-    'auto_install': False,
-    'application': False,
-}
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from odoo import api, fields, models, _
+
+
+class AnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+
+    regel_naar_slam = fields.Boolean('Regel is naar SLAM')
+    datum_naar_slam = fields.Date('Datum regel naar SLAM', required=False)
+
+
+class Journal(models.Model):
+    _inherit = 'account.journal'
+
+    slam_relevant = fields.Boolean('Slam Export', default=False, help='If the journal entries of theis journal should be exported to SLAM')
+

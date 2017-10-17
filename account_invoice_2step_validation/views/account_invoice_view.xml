@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+	<!-- color definition for supplier invoice tree status 'auth' -->
+        <record id="invoice_tree_auth" model="ir.ui.view">
+            <field name="name">account.invoice.tree.inherit_auth</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_tree"/>
+            <field name="arch" type="xml">
+                <tree position="attributes">
+                    <attribute name="colors">blue:state == 'draft';black:state in ('proforma','proforma2','auth', 'verified');green:state == 'paid';purple:state == 'open';gray:state == 'cancel'</attribute>
+                </tree>
+            </field>
+        </record>
+	<!-- show 'account_id' to group 'account.goedk_facturen' in supplier invoice form invoice_line
+	    and button 'Authorize' and statusbar to show status "Goedgekeurd" in supplier invoice form -->
+	    
+        <record id="invoice_supplier_form_auth" model="ir.ui.view">
+            <field name="name">account.invoice.supplier.form.inherit_auth</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <data>
+		            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="replace">
+                        <field name="account_id" groups="account.group_account_invoice,account_invoice_2step_validation.goedk_facturen"
+                                domain="[('company_id', '=', parent.company_id), ('internal_type', '=', 'other')]"
+                                />
+                    </xpath>
+
+                    <xpath expr="//header/button[@name='action_invoice_open']" position="after">
+                        <button name="action_invoice_auth" states="open" string="Authorize" type="object" class="oe_highlight" groups="account_invoice_2step_validation.authorize"/>
+                        <button name="action_unauthorize" states="auth" string="Re-open" type="object" class="oe_highlight" groups="account_invoice_2step_validation.authorize"/>
+                    </xpath>
+                    <xpath expr="//header/button[@name='action_invoice_open']" position="before">
+                        <field name="verif_tresh_exceeded" invisible="True" />
+                        <button name="action_invoice_verify" string="Verify" type="object" attrs="{'invisible':['|' ,('verif_tresh_exceeded','!=', True),('state','not in',['open','auth'])]}"
+                                class="oe_highlight" groups="account_invoice_2step_validation.verification"/>
+                        <button name="action_unverify" states="verified" string="Un-verify" type="object" groups="account_invoice_2step_validation.verification"/>
+                    </xpath>
+
+                    <xpath expr="//header/button[@name='%(account.action_account_invoice_refund)d']" position="replace">
+                        <button name="%(account.action_account_invoice_refund)d" type='action' string='Ask Refund'
+                                attrs="{'invisible': ['|',('type', 'in', ['in_refund','out_refund']),('state','not in',('open','paid', 'auth'))]}"
+                                groups="account.group_account_invoice"/>
+                    </xpath>
+		            <xpath expr="//header/field[@name='state']"	position="replace">
+                        <field name="state" widget="statusbar" statusbar_visible="draft,open,auth,verified,paid" statusbar_colors='{"proforma":"blue","proforma2":"blue"}'/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+	<!-- add "Cancel Invoice" button to status "Goedgekeurd" in supplier invoice form -->
+        <record id="invoice_supplier_cancel_auth" model="ir.ui.view">
+            <field name="name">megis_auth.invoice_supplier_cancel_form_inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account_cancel.invoice_supplier_cancel_form_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_invoice_cancel']" position="replace">
+                    <button name="action_invoice_cancel" type="object" states="draft,proforma2,open,auth,verified" string="Cancel Invoice" groups="account.group_account_invoice"/>
+                </xpath>
+            </field>
+        </record>
+
+	    <!-- adapt invoice selection regarding Authorized invoices -->
+	    <record id="view_account_invoice_filter_auth" model="ir.ui.view">
+            <field name="name">megis_auth.invoice.select</field>
+            <field name="model">account.invoice</field>
+	        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <data>
+		            <xpath expr="//search/filter[@name='invoices']" position="replace">
+                        <filter name="auth2" string="to be Verified" domain="[('state','=','auth'),('verif_tresh_exceeded','=', True)]" help="Authorized Invoices greater than Verification treshold"/>
+                        <filter name="verif" string="Verified" domain="[('state','=','verified')]" help="Verified Invoices"/>
+			            <filter name="invoices" string="Posted Invoices" domain="[('state','not in',['draft','cancel'])]" help="Proforma/Open/Authorized/Paid Invoices"/>
+                    </xpath>
+		            <xpath expr="//search/filter[@name='unpaid']" position="replace">
+			            <filter name="unpaid" string="Unpaid" domain="[('state','in',['open','auth'])]" help="Unpaid Invoices"/>
+		            </xpath>
+                    <xpath expr="//search/filter[@name='draft']" position="after">
+			            <filter name="open" string="Open Invoices" domain="[('state','=','open')]" help="Open Invoices"/>
+                        <filter name="auth" string="Authorized" domain="[('state','=','auth')]" help="Authorized Invoices"/>
+                    </xpath>
+		            <xpath expr="//search/filter[@name='unpaid']" position="after">
+			            <filter name="paid" string="Paid" domain="[('state','=',['paid'])]" help="Paid Invoices"/>
+		            </xpath>
+		        </data>
+            </field>
+        </record>
+
+    </data>
+</openerp>

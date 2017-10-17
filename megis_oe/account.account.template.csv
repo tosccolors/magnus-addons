@@ -1,0 +1,296 @@
+id,user_type_id/id,reconcile,nocreate,code,name
+megis-oe.a_root,megis-oe.user_type_view_depcrecated,False,False,0,GOOIMEER  STANDAARD GROOTBOEKSCHEMA
+megis-oe.a_0,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 0,"VASTE ACTIVA, EIGEN VERMOGEN, LANGLOPEND VREEMD VERMOGEN EN VOORZIENINGEN"
+megis-oe.a_1,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 1,"FINANCIELE REKENINGEN, KORTLOPENDE VORDERINGEN EN SCHULDEN"
+megis-oe.a_2,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 2,TUSSENREKENINGEN
+megis-oe.a_3,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 3,ONDERHANDEN WERK
+megis-oe.a_4,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 4,KOSTENREKENINGEN
+megis-oe.a_5,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 5,INDIRECTE KOSTEN
+megis-oe.a_6,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 6,FABRIKAGEREKENINGEN
+megis-oe.a_7,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 7,KOSTEN VAN DE OMZET
+megis-oe.a_8,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 8,VERKOOPRESULTATEN
+megis-oe.a_9,megis-oe.user_type_view_depcrecated,False,False,RUBRIEK 9,OVERIGE RESULTATEN
+megis-oe.a_00,megis-oe.user_type_view_depcrecated,False,False,0,IMMATERIELE ACTIVA
+megis-oe.a_0010,account.data_account_type_current_assets,False,False,10,Aanschafwaarde Goodwill
+megis-oe.a_0011,account.data_account_type_current_assets,False,False,11,Afschrijving Goodwill
+megis-oe.a_01,megis-oe.user_type_view_depcrecated,False,False,1,ONROERENDE GOEDEREN
+megis-oe.a_0100,account.data_account_type_current_assets,False,False,100,Aanschafwaarde Verbouwingen
+megis-oe.a_0101,account.data_account_type_current_assets,False,False,101,Afschrijving Verbouwingen
+megis-oe.a_02,megis-oe.user_type_view_depcrecated,False,False,2,COMPUTER HARD-/SOFTWARE & INVENTARIS
+megis-oe.a_020,megis-oe.user_type_view_depcrecated,False,False,20,SOFTWARE
+megis-oe.a_0200,account.data_account_type_current_assets,False,False,200,Aanschafwaarde Software
+megis-oe.a_0201,account.data_account_type_current_assets,False,False,201,Afschrijving Software
+megis-oe.a_023,megis-oe.user_type_view_depcrecated,False,False,23,HARDWARE
+megis-oe.a_0230,account.data_account_type_current_assets,False,False,230,Aanschafwaarde Hardware
+megis-oe.a_0231,account.data_account_type_current_assets,False,False,231,Afschrijving Hardware
+megis-oe.a_026,megis-oe.user_type_view_depcrecated,False,False,26,INVENTARIS
+megis-oe.a_0260,account.data_account_type_current_assets,False,False,260,Aanschafwaarde Inventaris
+megis-oe.a_0261,account.data_account_type_current_assets,False,False,261,Afschrijving Inventaris
+megis-oe.a_03,megis-oe.user_type_view_depcrecated,False,False,3,VERVOERMIDDELEN
+megis-oe.a_0300,account.data_account_type_current_assets,False,False,300,Aanschafwaarde Vervoermiddelen
+megis-oe.a_0301,account.data_account_type_current_assets,False,False,301,Afschrijving Vervoermiddelen
+megis-oe.a_05,megis-oe.user_type_view_depcrecated,False,False,5,FINANCIELE VASTE ACTIVA EN LANGLOPENDE VORDERINGEN
+megis-oe.a_050,megis-oe.user_type_view_depcrecated,False,False,50,FINANCIELE VASTE ACTIVA
+megis-oe.a_0500,account.data_account_type_current_assets,False,False,500,Meerderheidsdeelnemingen
+megis-oe.a_0510,account.data_account_type_current_assets,False,False,510,Minderheidsdeelnemingen
+megis-oe.a_055,megis-oe.user_type_view_depcrecated,False,False,55,LANGLOPENDE VORDERINGEN
+megis-oe.a_0550,account.data_account_type_current_assets,False,False,550,Vorderingen op deelnemingen
+megis-oe.a_0565,account.data_account_type_current_assets,False,False,565,Leningen u/g 1
+megis-oe.a_0566,account.data_account_type_current_assets,False,False,566,Leningen u/g 2
+megis-oe.a_0567,account.data_account_type_current_assets,False,False,567,Leningen u/g 3
+megis-oe.a_0568,account.data_account_type_current_assets,False,False,568,Leningen u/g 4
+megis-oe.a_0569,account.data_account_type_current_assets,False,False,569,Leningen u/g 5
+megis-oe.a_0570,account.data_account_type_current_assets,False,False,570,Waarborgsommen
+megis-oe.a_0580,account.data_account_type_current_assets,False,False,580,Financieringskosten
+megis-oe.a_0581,account.data_account_type_current_assets,False,False,581,Financieringskosten huurkoop
+megis-oe.a_06,megis-oe.user_type_view_depcrecated,False,False,6,EIGEN VERMOGEN
+megis-oe.a_0600,megis-oe.user_type_equity,False,False,600,Aandelenkapitaal
+megis-oe.a_0606,megis-oe.user_type_equity,False,False,606,Wettelijke reserves
+megis-oe.a_0607,megis-oe.user_type_equity,False,False,607,Overige reserves
+megis-oe.a_07,megis-oe.user_type_view_depcrecated,False,False,7,VOORZIENINGEN
+megis-oe.a_0700,megis-oe.user_type_equity,False,False,700,Pensioenverplichtingen
+megis-oe.a_0703,megis-oe.user_type_equity,False,False,703,Stamrechtverplichtingen
+megis-oe.a_0711,megis-oe.user_type_equity,False,False,711,Assurantie eigen risico
+megis-oe.a_0712,megis-oe.user_type_equity,False,False,712,Garantieverplichtingen
+megis-oe.a_0720,megis-oe.user_type_equity,False,False,720,Voorziening deelnemingen
+megis-oe.a_0750,megis-oe.user_type_equity,False,False,750,Latente belastingverpl.
+megis-oe.a_08,megis-oe.user_type_view_depcrecated,False,False,8,LANGLOPENDE SCHULDEN EN AFLOSSINGEN
+megis-oe.a_080,megis-oe.user_type_view_depcrecated,False,False,80,LANGLOPENDE SCHULDEN
+megis-oe.a_0820,account.data_account_type_current_liabilities,False,False,820,Leningen o/g 1
+megis-oe.a_0821,account.data_account_type_current_liabilities,False,False,821,Leningen o/g 2
+megis-oe.a_0830,account.data_account_type_current_liabilities,False,False,830,Huurkoopverplichtingen
+megis-oe.a_0840,account.data_account_type_current_liabilities,False,False,840,Lease-verplichtingen
+megis-oe.a_0850,account.data_account_type_current_liabilities,False,False,850,Rekening-courant directie
+megis-oe.a_086,megis-oe.user_type_view_depcrecated,False,False,86,AFLOSSINGEN
+megis-oe.a_0860,account.data_account_type_current_liabilities,False,False,860,Lease-verplichtingen
+megis-oe.a_0861,account.data_account_type_current_liabilities,False,False,861,Huurkoopverplichtingen
+megis-oe.a_10,megis-oe.user_type_view_depcrecated,False,False,10,LIQUIDE MIDDELEN
+megis-oe.a_1000,account.data_account_type_liquidity,False,False,1000,Kas
+megis-oe.a_1002,account.data_account_type_liquidity,False,False,1002,Bank
+megis-oe.a_1020,account.data_account_type_liquidity,False,False,1020,Kas  valuta
+megis-oe.a_1100,account.data_account_type_liquidity,False,False,1100,ABN-AMRO bank
+megis-oe.a_1110,account.data_account_type_liquidity,False,False,1110,RABO bank
+megis-oe.a_1200,account.data_account_type_liquidity,False,False,1200,Postbank
+megis-oe.a_1298,account.data_account_type_current_assets,False,False,1298,Kruisposten
+megis-oe.a_13,megis-oe.user_type_view_depcrecated,False,False,13,VORDERINGEN
+megis-oe.a_130,megis-oe.user_type_view_depcrecated,False,False,130,DEBITEUREN
+megis-oe.a_1300,account.data_account_type_receivable,True,False,1300,Debiteuren
+megis-oe.a_1350,account.data_account_type_current_assets,False,False,1350,Dubieuze debiteuren
+megis-oe.a_1360,account.data_account_type_current_assets,False,False,1360,Voorziening dubieuze debiteuren
+megis-oe.a_140,megis-oe.user_type_view_depcrecated,False,False,140,OVERIGE VORDERINGEN
+megis-oe.a_1410,account.data_account_type_current_assets,False,False,1410,Voorschotten personeel
+megis-oe.a_1420,account.data_account_type_current_assets,False,False,1420,Rekening-courant directie
+megis-oe.a_1450,account.data_account_type_current_assets,False,False,1450,Vooruitbetaalde kosten
+megis-oe.a_1455,account.data_account_type_current_assets,False,False,1455,Te ontvangen ziekengeld
+megis-oe.a_1460,account.data_account_type_current_assets,False,False,1460,Rek.crt. Eurogroup Consulting B.V.
+megis-oe.a_1461,account.data_account_type_current_assets,False,False,1461,Rek.crt. Magnus Technology Consultants B.V. 
+megis-oe.a_1462,account.data_account_type_current_assets,False,False,1462,Rek.crt. Magnus Technology Solutions B.V. 
+megis-oe.a_1463,account.data_account_type_current_assets,False,False,1463,Rek.crt. bQuind B.V.
+megis-oe.a_1490,account.data_account_type_current_assets,False,False,1490,Overige vorderingen
+megis-oe.a_15,megis-oe.user_type_view_depcrecated,False,False,15,KORTLOPENDE SCHULDEN
+megis-oe.a_150,megis-oe.user_type_view_depcrecated,False,False,150,CREDITEUREN
+megis-oe.a_1500,account.data_account_type_payable,True,False,1500,Crediteuren
+megis-oe.a_1510,account.data_account_type_current_liabilities,True,False,1510,Personeels Crediteuren
+megis-oe.a_160,megis-oe.user_type_view_depcrecated,False,False,160,OMZETBELASTING
+megis-oe.vat_payable_low,megis-oe.user_type_tax,False,False,1601,Btw af te dragen laag
+megis-oe.vat_payable_high,megis-oe.user_type_tax,False,False,1602,Btw af te dragen hoog
+megis-oe.vat_payable0,megis-oe.user_type_tax,False,False,1603,Btw af te dragen overig
+megis-oe.vat_refund_low,megis-oe.user_type_tax,False,False,1611,Btw te vorderen laag
+megis-oe.vat_refund_high,megis-oe.user_type_tax,False,False,1612,Btw te vorderen hoog
+megis-oe.vat_refund0,megis-oe.user_type_tax,False,False,1613,Btw te vorderen overig
+megis-oe.a_1620,megis-oe.user_type_tax,False,False,1620,Btw-afdracht
+megis-oe.a_1625,megis-oe.user_type_tax,False,False,1625,Btw oude jaren
+megis-oe.vat_payable_verlegd,megis-oe.user_type_tax,False,False,1631,Af te dragen Btw-verlegd
+megis-oe.vat_refund_verlegd,megis-oe.user_type_tax,False,False,1632,Te vorderen Btw-verlegd
+megis-oe.a_165,megis-oe.user_type_view_depcrecated,False,False,165,BELASTINGEN
+megis-oe.a_1660,account.data_account_type_current_liabilities,False,False,1660,Loonheffing
+megis-oe.a_1665,account.data_account_type_current_liabilities,False,False,1665,Afdracht loonheffing
+megis-oe.a_1670,account.data_account_type_current_liabilities,False,False,1670,Vennootschapsbelasting
+megis-oe.a_1675,account.data_account_type_current_liabilities,False,False,1675,Dividendbelasting
+megis-oe.a_1677,account.data_account_type_current_liabilities,False,False,1677,Investeringsaftrek
+megis-oe.a_170,megis-oe.user_type_view_depcrecated,False,False,170,LONEN EN SOCIALE LASTEN
+megis-oe.a_1700,account.data_account_type_current_liabilities,False,False,1700,Netto lonen
+megis-oe.a_1705,account.data_account_type_current_liabilities,False,False,1705,Reservering vakantiegeld
+megis-oe.a_1710,account.data_account_type_current_liabilities,False,False,1710,Reservering vakantiedagen
+megis-oe.a_1715,account.data_account_type_current_liabilities,False,False,1715,Reservering bonus
+megis-oe.a_1720,account.data_account_type_current_liabilities,False,False,1720,Lening personeel
+megis-oe.a_1725,account.data_account_type_current_liabilities,False,False,1725,Pensioenpremies
+megis-oe.a_1730,account.data_account_type_current_liabilities,False,False,1730,Te betalen WIA/exedent premie
+megis-oe.a_1735,account.data_account_type_current_liabilities,False,False,1735,Te betalen overlijdensrisico verzekering
+megis-oe.a_1740,account.data_account_type_current_liabilities,False,False,1740,Te betalen ziektekostenverzekering
+megis-oe.a_1745,account.data_account_type_current_liabilities,False,False,1745,Te verrekenen telefoonkosten
+megis-oe.a_1750,account.data_account_type_current_liabilities,False,False,1750,Bedrijfsfitness
+megis-oe.a_180,megis-oe.user_type_view_depcrecated,False,False,180,OVERLOPENDE POSTEN
+megis-oe.a_1800,account.data_account_type_current_liabilities,False,False,1800,Vooruit gefactureerde bedragen
+megis-oe.a_1810,account.data_account_type_current_liabilities,False,False,1810,Te betalen autokosten
+megis-oe.a_1820,account.data_account_type_current_liabilities,False,False,1820,Te betalen accountantskosten
+megis-oe.a_1830,account.data_account_type_current_liabilities,False,False,1830,Te betalen rente
+megis-oe.a_1840,account.data_account_type_current_liabilities,False,False,1840,Te betalen dividend
+megis-oe.a_1850,account.data_account_type_current_liabilities,False,False,1850,Vooruit ontvangen bedragen
+megis-oe.a_1860,account.data_account_type_current_liabilities,False,False,1860,Overige te betalen posten
+megis-oe.a_2000,account.data_account_type_liquidity,False,False,2000,Netto lonen
+megis-oe.a_2100,account.data_account_type_liquidity,False,False,2100,Tussenrekening balans
+megis-oe.a_2110,account.data_account_type_liquidity,False,False,2110,Tussenrek. autom. betalingen
+megis-oe.a_2120,account.data_account_type_liquidity,False,False,2120,Tussenrek. autom. loonbetalingen
+megis-oe.a_2240,account.data_account_type_liquidity,False,False,2240,Tussenrekening correcties
+megis-oe.a_2500,account.data_account_type_liquidity,False,False,2500,Vraagposten
+megis-oe.a_3200,account.data_account_type_liquidity,False,False,3200,Onderhanden werk
+megis-oe.a_40,megis-oe.user_type_view_depcrecated,False,False,40,PERSONEELSKOSTEN
+megis-oe.a_4000,account.data_account_type_expenses,False,False,4000,Lonen en salarissen
+megis-oe.a_4001,account.data_account_type_expenses,False,False,4001,Andere salaris componenten
+megis-oe.a_4005,account.data_account_type_expenses,False,False,4005,Vakantiegeld
+megis-oe.a_4006,account.data_account_type_expenses,False,False,4006,Vakantiedagen
+megis-oe.a_4007,account.data_account_type_expenses,False,False,4007,Overwerk
+megis-oe.a_4010,account.data_account_type_expenses,False,False,4010,Bonussen
+megis-oe.a_4011,account.data_account_type_expenses,False,False,4011,Jubileum uitkering
+megis-oe.a_4013,account.data_account_type_expenses,False,False,4013,Bijzondere beloningen
+megis-oe.a_4020,account.data_account_type_expenses,False,False,4020,Uitkering ziekengeld
+megis-oe.a_4021,account.data_account_type_expenses,False,False,4021,Ontvangen subsidie S & O
+megis-oe.a_4030,account.data_account_type_expenses,False,False,4030,Sociale lasten
+megis-oe.a_4031,account.data_account_type_expenses,False,False,4031,Eindheffing loonbelastng
+megis-oe.a_4032,account.data_account_type_expenses,False,False,4032,Pensioenpremies
+megis-oe.a_4033,account.data_account_type_expenses,False,False,4033,Wia / exedent verzekering
+megis-oe.a_4034,account.data_account_type_expenses,False,False,4034,Medische verzekering Werknemer
+megis-oe.a_4035,account.data_account_type_expenses,False,False,4035,Overlijdensrisicoverzekering
+megis-oe.a_4036,account.data_account_type_expenses,False,False,4036,Contractuele kosten vergoeding
+megis-oe.a_4040,account.data_account_type_expenses,False,False,4040,Tijdelijke werknemers
+megis-oe.a_4041,account.data_account_type_expenses,False,False,4041,Uitzendkrachten
+megis-oe.a_4045,account.data_account_type_expenses,False,False,4045,Managementvergoedingen
+megis-oe.a_4050,account.data_account_type_expenses,False,False,4050,Kantinekosten
+megis-oe.a_4054,account.data_account_type_expenses,False,False,4054,Autokostenvergoeding
+megis-oe.a_4055,account.data_account_type_expenses,False,False,4055,Reiskosten
+megis-oe.a_4058,account.data_account_type_expenses,False,False,4058,Belastingvrije uitkeringen
+megis-oe.a_4060,account.data_account_type_expenses,False,False,4060,Wervingskosten personeel
+megis-oe.a_4061,account.data_account_type_expenses,False,False,4061,Opleidingskosten
+megis-oe.a_4062,account.data_account_type_expenses,False,False,4062,Vergoeding studiekosten
+megis-oe.a_4063,account.data_account_type_expenses,False,False,4063,Kosten salarisverwerking
+megis-oe.a_4064,account.data_account_type_expenses,False,False,4064,Arbodienst
+megis-oe.a_4065,account.data_account_type_expenses,False,False,4065,Mobiele telefoonkosten
+megis-oe.a_4070,account.data_account_type_expenses,False,False,4070,Geschenken personeel
+megis-oe.a_4080,account.data_account_type_expenses,False,False,4080,Bedrijfsuitjes/ Jaarlijks Diner
+megis-oe.a_4090,account.data_account_type_expenses,False,False,4090,Overige personeelskosten
+megis-oe.a_4099,account.data_account_type_expenses,False,False,4099,Doorbelaste personeelskosten
+megis-oe.a_41,megis-oe.user_type_view_depcrecated,False,False,41,HUISVESTINGSKOSTEN
+megis-oe.a_4100,account.data_account_type_expenses,False,False,4100,Huur
+megis-oe.a_4110,account.data_account_type_expenses,False,False,4110,Service kosten
+megis-oe.a_4115,account.data_account_type_expenses,False,False,4115,Belastingen onr. Goed
+megis-oe.a_4120,account.data_account_type_expenses,False,False,4120,Energiekosten
+megis-oe.a_4125,account.data_account_type_expenses,False,False,4125,Schoonmaakkosten
+megis-oe.a_4130,account.data_account_type_expenses,False,False,4130,Assurantie onroerend goed
+megis-oe.a_4185,account.data_account_type_expenses,False,False,4185,Ontvangen huren
+megis-oe.a_4190,account.data_account_type_expenses,False,False,4190,Overige huisvestingskosten
+megis-oe.a_4199,account.data_account_type_expenses,False,False,4199,Doorbelaste huisvestingskosten
+megis-oe.a_42,megis-oe.user_type_view_depcrecated,False,False,42,TRAININGSKOSTEN
+megis-oe.a_4200,account.data_account_type_expenses,False,False,4200,Trainingskosten (extern)
+megis-oe.a_4201,account.data_account_type_expenses,False,False,4201,Trainingskosten (intern)
+megis-oe.a_4204,account.data_account_type_expenses,False,False,4204,Seminars (extern)
+megis-oe.a_4210,account.data_account_type_expenses,False,False,4210,Doorbelaste trainingskosten 
+megis-oe.a_43,megis-oe.user_type_view_depcrecated,False,False,43,KANTOORKOSTEN
+megis-oe.a_4300,account.data_account_type_expenses,False,False,4300,Contributies/abonnementen
+megis-oe.a_4305,account.data_account_type_expenses,False,False,4305,Kantoorbenodigdh./drukw.
+megis-oe.a_4310,account.data_account_type_expenses,False,False,4310,Onderhoud kantoorinventaris
+megis-oe.a_4311,account.data_account_type_expenses,False,False,4311,Huur kantoorapparatuur
+megis-oe.a_4315,account.data_account_type_expenses,False,False,4315,Telefoon/telefax
+megis-oe.a_4317,account.data_account_type_expenses,False,False,4317,Internetaansluiting
+megis-oe.a_4320,account.data_account_type_expenses,False,False,4320,Porti
+megis-oe.a_4325,account.data_account_type_expenses,False,False,4325,Administratiekosten
+megis-oe.a_4330,account.data_account_type_expenses,False,False,4330,Softwarekosten
+megis-oe.a_4335,account.data_account_type_expenses,False,False,4335,SAP- Systeemkosten
+megis-oe.a_4350,account.data_account_type_expenses,False,False,4350,Assurantie algemeen
+megis-oe.a_4390,account.data_account_type_expenses,False,False,4390,Overige kantoorkosten
+megis-oe.a_4399,account.data_account_type_expenses,False,False,4399,Doorbelaste kantoorkosten
+megis-oe.a_44,megis-oe.user_type_view_depcrecated,False,False,44,VERVOERSKOSTEN
+megis-oe.a_4400,account.data_account_type_expenses,False,False,4400,Leasekosten auto's
+megis-oe.a_4405,account.data_account_type_expenses,False,False,4405,Onderhoud auto's
+megis-oe.a_4410,account.data_account_type_expenses,False,False,4410,Brandstoffen auto's
+megis-oe.a_4415,account.data_account_type_expenses,False,False,4415,Assuranties auto's
+megis-oe.a_4420,account.data_account_type_expenses,False,False,4420,Wegenbelasting
+megis-oe.a_4450,account.data_account_type_expenses,False,False,4450,Vaste autovergoeding
+megis-oe.a_4460,account.data_account_type_expenses,False,False,4460,Kilometervergoeding
+megis-oe.a_4470,account.data_account_type_expenses,False,False,4470,Eigen bijdrage auto's
+megis-oe.a_4480,account.data_account_type_expenses,False,False,4480,Privé-gebruik auto's
+megis-oe.a_4490,account.data_account_type_expenses,False,False,4490,Overige vervoerskosten
+megis-oe.a_4499,account.data_account_type_expenses,False,False,4499,Doorbelaste autokosten
+megis-oe.a_45,megis-oe.user_type_view_depcrecated,False,False,45,MARKETINGKOSTEN
+megis-oe.a_4517,account.data_account_type_expenses,False,False,4517,Relatiegeschenken
+megis-oe.a_4530,account.data_account_type_expenses,False,False,4530,Reclame
+megis-oe.a_4535,account.data_account_type_expenses,False,False,4535,Advertenties
+megis-oe.a_4540,account.data_account_type_expenses,False,False,4540,Beurskosten
+megis-oe.a_4550,account.data_account_type_expenses,False,False,4550,Websitekosten
+megis-oe.a_4560,account.data_account_type_expenses,False,False,4560,Seminars (intern) Magnutude
+megis-oe.a_4570,account.data_account_type_expenses,False,False,4570,Marketing advieskosten
+megis-oe.a_4580,account.data_account_type_expenses,False,False,4580,MTEC
+megis-oe.a_4590,account.data_account_type_expenses,False,False,4590,Overige marketing/verkoopkosten
+megis-oe.a_4599,account.data_account_type_expenses,False,False,4599,Doorbelaste marketingkosten
+megis-oe.a_46,megis-oe.user_type_view_depcrecated,False,False,46,ALGEMENE KOSTEN
+megis-oe.a_4600,account.data_account_type_expenses,False,False,4600,Accountantskosten
+megis-oe.a_4605,account.data_account_type_expenses,False,False,4605,Advieskosten
+megis-oe.a_4610,account.data_account_type_expenses,False,False,4610,Juridische kosten
+megis-oe.a_4620,account.data_account_type_expenses,False,False,4620,Assuranties
+megis-oe.a_4630,account.data_account_type_expenses,False,False,4630,Vergaderkosten
+megis-oe.a_4650,account.data_account_type_expenses,False,False,4650,Afschrijving dubieuze debiteuren
+megis-oe.a_4660,account.data_account_type_expenses,False,False,4660,Overige algemene kosten
+megis-oe.a_465,megis-oe.user_type_view_depcrecated,False,False,465,REIS EN VERBLIJFSKOSTEN
+megis-oe.a_4680,account.data_account_type_expenses,False,False,4680,Reis en verblijfkosten
+megis-oe.a_4695,account.data_account_type_expenses,False,False,4695,Representatiekosten
+megis-oe.a_47,megis-oe.user_type_view_depcrecated,False,False,47,FINANCIERINGSKOSTEN
+megis-oe.a_4700,account.data_account_type_expenses,False,False,4700,Bankkosten
+megis-oe.a_4710,account.data_account_type_expenses,False,False,4710,Rente bankkrediet
+megis-oe.a_4715,account.data_account_type_expenses,False,False,4715,Kosten belastingdienst
+megis-oe.a_4720,account.data_account_type_expenses,False,False,4720,Rente leasecontracten
+megis-oe.a_4730,account.data_account_type_expenses,False,False,4730,Rente huurkoopcontracten
+megis-oe.a_4750,account.data_account_type_expenses,False,False,4750,Rente lening u/g
+megis-oe.a_4755,account.data_account_type_expenses,False,False,4755,Rente lening o/g
+megis-oe.a_4790,account.data_account_type_expenses,False,False,4790,Overige rentelasten
+megis-oe.a_4795,account.data_account_type_expenses,False,False,4795,Overige rentebaten
+megis-oe.a_48,megis-oe.user_type_view_depcrecated,False,False,48,AFSCHRIJVINGEN
+megis-oe.a_4800,account.data_account_type_expenses,False,False,4800,Afschr.kosten Goodwill
+megis-oe.a_4810,account.data_account_type_expenses,False,False,4810,Afschr.kosten Verbouwingen
+megis-oe.a_4820,account.data_account_type_expenses,False,False,4820,Afschr.kosten Software
+megis-oe.a_4830,account.data_account_type_expenses,False,False,4830,Afschr.kosten Hardware
+megis-oe.a_4840,account.data_account_type_expenses,False,False,4840,Afschr.kosten Inventaris
+megis-oe.a_4850,account.data_account_type_expenses,False,False,4850,Afschr.kosten Vervoermiddelen
+megis-oe.a_49,megis-oe.user_type_view_depcrecated,False,False,49,OVERIGE BATEN EN LASTEN
+megis-oe.a_4900,account.data_account_type_expenses,False,False,4900,Boekwinst van vaste activa
+megis-oe.a_4910,account.data_account_type_expenses,False,False,4910,Ontvangen schadevergoed.
+megis-oe.a_4915,account.data_account_type_expenses,False,False,4915,Voordelige koersverschil.
+megis-oe.a_4948,account.data_account_type_expenses,False,False,4948,Overige baten
+megis-oe.a_4950,account.data_account_type_expenses,False,False,4950,Boekverlies vaste activa
+megis-oe.a_4955,account.data_account_type_expenses,False,False,4955,Kosten omzetbelasting
+megis-oe.a_4960,account.data_account_type_expenses,False,False,4960,Kosten loonbelasting
+megis-oe.a_4970,account.data_account_type_expenses,False,False,4970,Betaalde schadevergoed.
+megis-oe.a_4975,account.data_account_type_expenses,False,False,4975,Nadelige koersverschillen
+megis-oe.a_4980,account.data_account_type_expenses,False,False,4980,Kasverschillen
+megis-oe.a_4998,account.data_account_type_expenses,False,False,4998,Overige lasten
+megis-oe.a_7000,account.data_account_type_expenses,False,False,7000,Inkoop subcontractors (intern) 
+megis-oe.a_7001,account.data_account_type_expenses,False,False,7001,Inkoop subcontractors (extern) 
+megis-oe.a_7010,account.data_account_type_expenses,False,False,7010,Inkoop hard-/software
+megis-oe.a_7015,account.data_account_type_expenses,False,False,7015,Inkoop subcontractors EU
+megis-oe.a_7016,account.data_account_type_expenses,False,False,7016,Inkoop hard-/software EU
+megis-oe.a_7018,account.data_account_type_expenses,False,False,7018,Inkoop import subcontractors buiten EU
+megis-oe.a_7019,account.data_account_type_expenses,False,False,7019,Inkoop import hard-/software buiten EU
+megis-oe.a_7020,account.data_account_type_expenses,False,False,7020,Project gerelateerde kosten
+megis-oe.a_80,megis-oe.user_type_view_depcrecated,False,False,80,OMZET INTERCOMPANY
+megis-oe.a_8000,account.data_account_type_revenue,False,False,8000,Omzet intercompany
+megis-oe.a_81,megis-oe.user_type_view_depcrecated,False,False,81,OMZET DERDEN
+megis-oe.a_8100,account.data_account_type_revenue,False,False,8100,Omzet consultants uren
+megis-oe.a_8110,account.data_account_type_revenue,False,False,8110,Omzet hard-/software
+megis-oe.a_8120,account.data_account_type_revenue,False,False,8120,Omzet doorberekende kosten
+megis-oe.a_8121,account.data_account_type_revenue,False,False,8121,Omzet kilometervergoeding
+megis-oe.a_8130,account.data_account_type_revenue,False,False,8130,Omzet consultants uren 0% EU
+megis-oe.a_8140,account.data_account_type_revenue,False,False,8140,Omzet hard-/software 0% EU
+megis-oe.a_8150,account.data_account_type_revenue,False,False,8150,Omzet doorberekende kosten 0% EU
+megis-oe.a_8151,account.data_account_type_revenue,False,False,8151,Omzet kilometervergoeding 0% EU
+megis-oe.a_8160,account.data_account_type_revenue,False,False,8160,Omzet consultants uren niet-EU
+megis-oe.a_8170,account.data_account_type_revenue,False,False,8170,Omzet hard-/software niet-EU
+megis-oe.a_8180,account.data_account_type_revenue,False,False,8180,Omzet doorberekende kosten niet-EU
+megis-oe.a_8181,account.data_account_type_revenue,False,False,8181,Omzet kilometervergoeding niet-EU
+megis-oe.a_9010,account.data_account_type_revenue,False,False,9010,Winst bij verkoop deelnem.
+megis-oe.a_9100,account.data_account_type_expenses,False,False,9100,Voorz. Verlies deelnem.
+megis-oe.a_9110,account.data_account_type_expenses,False,False,9110,Verlies verkoop deelnem.
+megis-oe.a_9150,account.data_account_type_expenses,False,False,9150,Reorganisatiekosten
+megis-oe.a_9900,account.data_account_type_revenue,False,False,9900,Vpb normaal resultaat
+megis-oe.a_9950,account.data_account_type_revenue,False,False,9950,Vpb bijzonder resultaat
+megis-oe.a_9990,account.data_account_type_liquidity,False,False,9990,Memoriaal
+megis-oe.a_9999,account.data_account_type_revenue,False,False,9999,Winst
+megis-oe.transfer_account,account.data_account_type_current_assets,TRUE,False,TA,Intermediary Transfer Account

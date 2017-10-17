@@ -18,37 +18,29 @@
 #
 ##############################################################################
 
-{
-    "name": "Magnus Account Invoice Layout",
-    "version": "2.0",
-    "author": "BAS Solutions",
-    "website": "https://www.bas-solutions.nl",
-    "category": "Account",
-    "depends": [
-        "base",
-        "account",
-    ],
-    "summary": "Magnus Account Invoice Layout",
-    "description": """
-        NSM Account Invoice Layout
-    """,
-    'images': [
-    ],
-    'data': [
-    ],
-    "init_xml": [
-    ],
-    "update_xml": [
-        "view/account_invoice_report.xml",
-        "view/account_invoice_view.xml",
-    ],
-    'demo_xml': [
-    ],
-    'test': [
-    ],
-    'installable': False,
-    'auto_install': False,
-    'application': False,
-}
+from odoo import fields, models, api
+
+
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
+
+    invoice_description = fields.Text('Description')
+
+    @api.multi
+    def invoice_print(self):
+        """ Print the invoice and mark it as sent, so that we can see more
+            easily the next step of the workflow
+        """
+        self.ensure_one()
+        self.sent = True
+        return self.env['report'].get_action(self, 'account.invoice.custom')
+
+class ResCompany(models.Model):
+    _inherit = 'res.company'
+
+    report_background_image = fields.Binary(
+            'Background Image for Report',
+            help='Set Background Image for Report')
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
