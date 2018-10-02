@@ -5,11 +5,14 @@
     'name': "magnus_invoicing",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        This module introduces an advanced professional services invoicing process,
+        offering fixed price, time and material, licensing and several combinations
+         thereof """,
 
     'description': """
-        Long description of module's purpose
+        This module introduces an advanced professional services invoicing process,
+        offering fixed price, time and material, licensing and several combinations
+         thereof. 
     """,
 
     'author': "Magnus",
@@ -18,7 +21,7 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
-    'category': 'Uncategorized',
+    'category': 'module_category_specific_industry_applications',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
@@ -28,6 +31,7 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/views.xml',
+        'views/account_analytic_view.xml',
         'views/templates.xml',
     ],
     # only loaded in demonstration mode

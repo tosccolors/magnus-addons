@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--record id="view_account_analytic_line_form_inherit_account" model="ir.ui.view">
+            <field name="name">account.analytic.line.form.inherit.account</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='account_id']" position="after">
+                        <field name="general_account_id"/>
+                        <field name="ref"/>
+                        <field name="partner_id"/>
+                        <field name="move_id" readonly="1"/>
+                    </xpath>
+                    <xpath expr="//field[@name='amount']" position="after">
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="amount_currency" invisible="1"/>
+                        <field name="analytic_amount_currency"/>
+                        <field name="product_id"/>
+                        <field name="product_uom_id" class="oe_inline"/>
+                    </xpath>
+                </data>
+            </field>
+        </record-->
+        <record id="view_account_analytic_line_tree_inherit_magnus_invoicing" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.inherit.magnus.invoicing</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_tree"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='name']" position="after">
+                        <field name="child_ids" />
+                        <field name="user_id" />
+                        <field name="product_id" />
+                    </xpath>
+                    <xpath expr="//field[@name='account_id']" position="after">
+                        <field name="project_id" />
+                        <field name="task_id" />
+                    </xpath>
+                    <xpath expr="//field[@name='unit_amount']" position="after">
+                        <field name="product_uom_id" />
+                    </xpath>
+                </data>
+            </field>
+        </record>
+        <record id="view_account_analytic_line_filter_inherit_account" model="ir.ui.view">
+            <field name="name">account.analytic.line.select.inherit.account</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_filter"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='name']" position="before">
+                        <filter name="hours" string="Hours" domain="[('product_uom_id','=',%(product.product_uom_hour)d)]"/>
+                        <field name="task_id" />
+                    </xpath>
+                    <xpath expr="//field[@name='date']" position="after">
+                        <field name="user_id"/>
+                        <field name="task_id" />
+                    </xpath>
+                    <xpath expr="//group[@name='groupby']" position="after">
+                        <filter string="Professional" context="{'group_by':'user_id'}"/>
+                        <filter string="Task" context="{'group_by':'task_id'}"/>
+                        <filter string="Measure" context="{'group_by':'product_uom_id'}"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <!--record id="view_account_analytic_line_pivot" model="ir.ui.view">
+            <field name="name">account.analytic.line.pivot</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_pivot"/>
+            <field name="arch" type="xml">
+                <field name="account_id" position="after">
+                    <field name="partner_id" type="row"/>
+                </field>
+            </field>
+        </record-->
+
+
+
+    </data>
+</odoo>
