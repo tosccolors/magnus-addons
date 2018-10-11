@@ -33,6 +33,7 @@
         'views/views.xml',
         'views/account_analytic_view.xml',
         'views/templates.xml',
+        'views/analytic_invoice.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
