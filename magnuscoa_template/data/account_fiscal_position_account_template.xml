@@ -75,7 +75,7 @@
             model="account.fiscal.position.account.template">
             <field name="position_id"     ref="fiscal_position_template_eu" />
             <field name="account_src_id"  ref="8110" />
-            <field name="account_dest_id" ref="8040" />
+            <field name="account_dest_id" ref="8140" />
         </record>
         <record
             id="fiscal_position_account_eu_5"

@@ -12,7 +12,7 @@
             <field name="applicability">accounts</field>
         </record>
         <record id="account_tag_3" model="account.account.tag">
-            <field name="name">02 Computer Hard-/Software & Inventaris</field>
+            <field name="name">02 Computer Hard-/Software Inventaris</field>
             <field name="applicability">accounts</field>
         </record>
         <record id="account_tag_4" model="account.account.tag">
