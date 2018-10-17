@@ -331,14 +331,6 @@
             <field eval="True" name="reconcile"/>
             <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
         </record>
-        <record id="1298" model="account.account.template">
-            <field name="code">1298</field>
-            <field name="name">Kruisposten</field>
-            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
-            <field name="chart_template_id" ref="magnus_chart_template"/>
-            <field eval="False" name="reconcile"/>
-            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
-        </record>
         <record id="recv" model="account.account.template">
             <field name="code">1300</field>
             <field name="name">Debiteuren</field>
