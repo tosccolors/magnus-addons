@@ -79,7 +79,7 @@ class AnalyticInvoice(models.Model):
                 for item in result:
 
                     vals = {
-#                        'analytic_invoice_id': self.id,
+                        'analytic_invoice_id': self.id,
                         'name': '/',
                         'user_id': item.get('user_id')[0] if item.get(
                             'user_id') != False else False,
@@ -94,7 +94,7 @@ class AnalyticInvoice(models.Model):
                         'unit_amount': item.get('unit_amount'),
                     }
 #                    result_data.append((0,0,vals))
-                    self.user_total_ids = (0,0,vals)
+#                    self.user_total_ids = [(0,0,vals)]
                     aut_id = self.env['analytic.user.total'].create(vals)
                     aal_domain = time_domain + [
                         ('user_id','=',vals['user_id']),
@@ -196,6 +196,10 @@ class AnalyticInvoice(models.Model):
         'Group By Month',
         default=True
     )
+
+    def create(self, vals):
+        res = super(AnalyticInvoice, self).create(vals)
+
 
 class AnalyticUserTotal(models.Model):
     _name = "analytic.user.total"
