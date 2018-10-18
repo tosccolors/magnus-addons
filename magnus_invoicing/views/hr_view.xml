@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Employee -->
+       <record id="view_employee_form_feerate" model="ir.ui.view">
+            <field name="name">hr.employee.form.feerate</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <field name="user_id" position="after">
+                    <field name="product_id"/>
+                    <field name="fee_rate"/>
+                </field>
+            </field>
+        </record>
+
+       <record id="view_employee_tree_feerate" model="ir.ui.view">
+            <field name="name">hr.employee.tree.feerate</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_tree"/>
+            <field name="arch" type="xml">
+                <field name="job_id" position="after">
+                    <field name="product_id" />
+                    <field name="fee_rate" />
+                </field>
+            </field>
+        </record>
+
+</odoo>

@@ -30,7 +30,6 @@
             <field name="arch" type="xml">
                 <data>
                     <xpath expr="//field[@name='name']" position="after">
-                        <field name="child_ids" />
                         <field name="user_id" />
                         <field name="product_id" />
                     </xpath>

@@ -25,12 +25,14 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['hr_timesheet_sheet'],
+    'depends': ['date_range','hr_timesheet_sheet'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/views.xml',
+        'data/data.xml',
+        'views/hr_view.xml',
+        'views/task_view.xml',
         'views/account_analytic_view.xml',
         'views/templates.xml',
         'views/analytic_invoice.xml',

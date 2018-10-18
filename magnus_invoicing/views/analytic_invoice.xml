@@ -7,52 +7,127 @@
             <field name="arch" type="xml">
                 <form string="Create invoices" >
                 <header>
-                    <group>
-                        <field name="partner_id" string="Client"/>
-                        <field name="account_analytic_ids"
-                               string="Charge Codes" readonly="0" >
-                            <tree create="true" edit="false" delete="true" copy="false">
-                                <field name="name" string="Name" readonly="1"/>
-                            </tree>
-                        </field>
-                        <field name="month_id" string="Invoicing Period"/>
-                    </group>
+                     <group colspan="6" col="6">
+                        <group>
+                            <field name="partner_id" string="Client"/>
+                            <field name="account_analytic_ids"
+                                   string="Charge Codes" readonly="0" >
+                                <tree create="true" edit="false" delete="true" copy="false">
+                                    <field name="name" string="Name" readonly="1"/>
+                                </tree>
+                            </field>
+                            <field name="month_id" string="Invoicing Period"/>
+                        </group>
+                         <group>
+                            <field name="task_user_ids"
+                                   string="Fee Rates" readonly="0" >
+                                <tree create="false" edit="true" delete="false"
+                                      copy="false">
+                                    <field name="task_id" string="Task"
+                                           readonly="1"/>
+                                    <field name="user_id" string="Fee Earner"
+                                           readonly="1"/>
+                                    <field name="product_id" string="Fee?"
+                                           readonly="0"/>
+                                    <field name="fee_rate" string="Fee Rate"
+                                           readonly="0"/>
+                                </tree>
+                            </field>
+                        </group>
+                         <group>
+                            <!--field name="partner_id" string="Client"/>
+                            <field name="account_analytic_ids"
+                                   string="Charge Codes" readonly="0" >
+                                <tree create="true" edit="false" delete="true" copy="false">
+                                    <field name="name" string="Name" readonly="1"/>
+                                </tree>
+                            </field>
+                            <field name="month_id" string="Invoicing Period"/-->
+                        </group>
+                     </group>
                 </header>
                 <sheet>
+                    <field name="invoice_line_ids"
+                           context="{'type': 'out_invoice'}" >
+                        <tree string="Bill lines" editable="bottom">
+                            <field name="sequence" widget="handle" />
+                            <field name="product_id"
+                                context="{'partner_id': parent.partner_id}"/>
+                            <field name="name"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="account_id" groups="account.group_account_user"
+                                domain="[('company_id', '=', parent.company_id), ('internal_type', '=', 'other'), ('deprecated', '=', False)]"/>
+                            <field name="account_analytic_id" groups="analytic.group_analytic_accounting"
+                                domain="[('company_id', '=', parent.company_id)]"/>
+                            <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
+                            <field name="quantity"/>
+                            <field name="uom_id" groups="product.group_uom"/>
+                            <field name="price_unit"/>
+                            <field name="discount" groups="base.group_no_one"/>
+                            <!--field name="invoice_line_tax_ids"
+                            widget="many2many_tags" context="{'type':parent.type}"
+                                domain="[('type_tax_use','=','sale'),
+                                ('company_id', '=', parent
+                                .company_id)]" options="{'no_create': True}"/-->
+                            <field name="price_subtotal"/>
+                            <field name="currency_id" invisible="1"/>
+                        </tree>
+                    </field>
                     <notebook>
-                        <page string="Invoice Lines" name="invoice_line">
-                            <field name="invoice_line_ids"
-                                   context="{'type': 'out_invoice'}" >
-                                <tree string="Bill lines" editable="bottom">
-                                    <field name="sequence" widget="handle" />
+                        <!--page string="Invoice Lines" name="invoice_line">
+                        </page-->
+                        <page string="Time Lines" name="time_line">
+                            <group>
+                                <group>
+                                    <field name="time_line_ids" >
+                                        <tree string="Time lines" create="true" edit="false" delete="true" copy="false">
+                                            <field name="user_id" />
+                                            <field name="date" />
+                                            <field name="product_id"
+                                                context="{'partner_id': parent.partner_id}"/>
+                                            <field name="name"/>
+                                            <field name="company_id" invisible="1"/>
+                                            <field name="unit_amount" />
+                                            <field name="account_id" />
+                                            <field name="amount"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <field name="user_total_ids" >
+                                        <tree string="Total Time" >
+                                            <field name="user_id" />
+                                            <field name="task_id" />
+                                            <field name="month_id" />
+                                            <field name="week_id" />
+                                            <field name="children_ids"/>
+                                            <field name="name"/>
+                                            <field name="unit_amount"
+                                                   sum="Total Hours"/>
+                                            <field name="fee_rate" />
+                                            <field name="amount"
+                                                   sum="Total Amount"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Analytic Cost Lines" name="cost_line">
+                            <field name="cost_line_ids" >
+                                <tree string="Cost Lines" create="true" edit="false" delete="true" copy="false">
+                                    <field name="user_id" />
+                                    <field name="date" />
                                     <field name="product_id"
                                         context="{'partner_id': parent.partner_id}"/>
+                                    <field name="general_account_id" />
                                     <field name="name"/>
                                     <field name="company_id" invisible="1"/>
-                                    <field name="account_id" groups="account.group_account_user"
-                                        domain="[('company_id', '=', parent.company_id), ('internal_type', '=', 'other'), ('deprecated', '=', False)]"/>
-                                    <field name="account_analytic_id" groups="analytic.group_analytic_accounting"
-                                        domain="[('company_id', '=', parent.company_id)]"/>
-                                    <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
-                                    <field name="quantity"/>
-                                    <field name="uom_id" groups="product.group_uom"/>
-                                    <field name="price_unit"/>
-                                    <field name="discount" groups="base.group_no_one"/>
-                                    <!--field name="invoice_line_tax_ids"
-                                    widget="many2many_tags" context="{'type':parent.type}"
-                                        domain="[('type_tax_use','=','sale'),
-                                        ('company_id', '=', parent
-                                        .company_id)]" options="{'no_create': True}"/-->
-                                    <field name="price_subtotal"/>
-                                    <field name="currency_id" invisible="1"/>
+                                    <field name="unit_amount" />
+                                    <field name="account_id" />
+                                    <field name="amount"/>
                                 </tree>
                             </field>
                         </page>
-                        <!--page string="Analytic Time Lines" name="time_line">
-
-                        </page>
-                        <page string="Analytic Cost Lines" name="cost_line">
-                        </page-->
                     </notebook>
                 </sheet>
                 </form>

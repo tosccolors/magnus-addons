@@ -57,38 +57,41 @@ class AccountAnalyticLine(models.Model):
             ('company_id', '=', self.company_id.id),
             ('company_id', '=', False),
         ]
-        date_range = self.env['date.range'].search(s_args,
-                                                   limit=1,
-                                                   order='company_id asc')
+        date_range = self.env['date.range'].search(
+            s_args,
+            limit=1,
+            order='company_id asc'
+        )
         return date_range
 
 
     invoiced = fields.Boolean(
         'Invoiced'
     )
-    parent_id = fields.Many2one(
-        'account.analytic.line',
+    invoiceable = fields.Boolean(
+        'Invoiceable'
+    )
+    user_total_id = fields.Many2one(
+        'analytic.user.total',
         string='Summary Reference',
         ondelete='cascade',
         index=True
     )
-    child_ids = fields.One2many(
-        'account.analytic.line', 'parent_id',
-        string='Detail Time Lines',
-        readonly=True,
-        copy=False
+    week_id = fields.Many2one(
+        'date.range',
+        compute=_compute_week_month,
+        string='Week',
+        store=True,
     )
-    week_id = fields.Many2one('date.range',
-                                compute=_compute_week_month,
-                                string='Week',
-                                store=True, )
-    month_id = fields.Many2one('date.range',
-                                compute=_compute_week_month,
-                                string='Month',
-                                store=True, )
+    month_id = fields.Many2one(
+        'date.range',
+        compute=_compute_week_month,
+        string='Month',
+        store=True,
+    )
 
 
-    @api.model
+    '''@api.model
     def create(self, vals):
 #        import pdb; pdb.set_trace()
         res = super(AccountAnalyticLine, self).create(vals)
@@ -144,7 +147,7 @@ class AccountAnalyticLine(models.Model):
                     line.parent_id = res2.id
                 res2.unit_amount = ua
                 res2.amount = a
-        return res
+        return res'''
 
 
 class AccountInvoiceLine(models.Model):
@@ -156,4 +159,5 @@ class AccountInvoiceLine(models.Model):
         ondelete='cascade',
         index=True
     )
+
 
