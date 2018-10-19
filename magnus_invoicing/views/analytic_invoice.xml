@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_analytic_invoice_form" model="ir.ui.view">
+            <field name="name">Invoicing Client Projects</field>
+            <field name="model">analytic.invoice</field>
+            <field name="arch" type="xml">
+                <form string="Create invoices" >
+                <header>
+                     <group colspan="6" col="6">
+                        <group>
+                            <field name="partner_id" string="Client"/>
+                            <field name="account_analytic_ids"
+                                   string="Charge Codes" readonly="0" >
+                                <tree create="true" edit="false" delete="true" copy="false">
+                                    <field name="name" string="Name" readonly="1"/>
+                                </tree>
+                            </field>
+                            <field name="month_id" string="Invoicing Period"/>
+                        </group>
+                         <group>
+                            <field name="task_user_ids"
+                                   string="Fee Rates" readonly="0" >
+                                <tree create="false" edit="true" delete="false"
+                                      copy="false">
+                                    <field name="task_id" string="Task"
+                                           readonly="1"/>
+                                    <field name="user_id" string="Fee Earner"
+                                           readonly="1"/>
+                                    <field name="product_id" string="Fee?"
+                                           readonly="0"/>
+                                    <field name="fee_rate" string="Fee Rate"
+                                           readonly="0"/>
+                                </tree>
+                            </field>
+                        </group>
+                         <group>
+                            <!--field name="partner_id" string="Client"/>
+                            <field name="account_analytic_ids"
+                                   string="Charge Codes" readonly="0" >
+                                <tree create="true" edit="false" delete="true" copy="false">
+                                    <field name="name" string="Name" readonly="1"/>
+                                </tree>
+                            </field>
+                            <field name="month_id" string="Invoicing Period"/-->
+                        </group>
+                     </group>
+                </header>
+                <sheet>
+                    <field name="invoice_line_ids"
+                           context="{'type': 'out_invoice'}" >
+                        <tree string="Bill lines" editable="bottom">
+                            <field name="sequence" widget="handle" />
+                            <field name="product_id"
+                                context="{'partner_id': parent.partner_id}"/>
+                            <field name="name"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="account_id" groups="account.group_account_user"
+                                domain="[('company_id', '=', parent.company_id), ('internal_type', '=', 'other'), ('deprecated', '=', False)]"/>
+                            <field name="account_analytic_id" groups="analytic.group_analytic_accounting"
+                                domain="[('company_id', '=', parent.company_id)]"/>
+                            <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
+                            <field name="quantity"/>
+                            <field name="uom_id" groups="product.group_uom"/>
+                            <field name="price_unit"/>
+                            <field name="discount" groups="base.group_no_one"/>
+                            <!--field name="invoice_line_tax_ids"
+                            widget="many2many_tags" context="{'type':parent.type}"
+                                domain="[('type_tax_use','=','sale'),
+                                ('company_id', '=', parent
+                                .company_id)]" options="{'no_create': True}"/-->
+                            <field name="price_subtotal"/>
+                            <field name="currency_id" invisible="1"/>
+                        </tree>
+                    </field>
+                    <notebook>
+                        <!--page string="Invoice Lines" name="invoice_line">
+                        </page-->
+                        <page string="Time Lines" name="time_line">
+                            <group>
+                                <group>
+                                    <field name="time_line_ids" >
+                                        <tree string="Time lines" create="true" edit="false" delete="true" copy="false">
+                                            <field name="user_id" />
+                                            <field name="date" />
+                                            <field name="product_id"
+                                                context="{'partner_id': parent.partner_id}"/>
+                                            <field name="name"/>
+                                            <field name="company_id" invisible="1"/>
+                                            <field name="unit_amount" />
+                                            <field name="account_id" />
+                                            <field name="amount"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <field name="user_total_ids" >
+                                        <tree string="Total Time" >
+                                            <field name="user_id" />
+                                            <field name="task_id" />
+                                            <field name="month_id" />
+                                            <field name="week_id" />
+                                            <field name="children_ids"/>
+                                            <field name="name"/>
+                                            <field name="unit_amount"
+                                                   sum="Total Hours"/>
+                                            <field name="fee_rate" />
+                                            <field name="amount"
+                                                   sum="Total Amount"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Analytic Cost Lines" name="cost_line">
+                            <field name="cost_line_ids" >
+                                <tree string="Cost Lines" create="true" edit="false" delete="true" copy="false">
+                                    <field name="user_id" />
+                                    <field name="date" />
+                                    <field name="product_id"
+                                        context="{'partner_id': parent.partner_id}"/>
+                                    <field name="general_account_id" />
+                                    <field name="name"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <field name="unit_amount" />
+                                    <field name="account_id" />
+                                    <field name="amount"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_analytic_invoice_tree" model="ir.ui.view">
+            <field name="name">Invoicing Client Projects Tree</field>
+            <field name="model">analytic.invoice</field>
+            <field name="arch" type="xml">
+                <tree string="Create invoices" >
+                        <field name="partner_id" string="Client"/>
+                        <field name="account_analytic_ids"/>
+                        <field name="month_id" string="Invoicing Period"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_view_analytic_invoice" model="ir.actions.act_window">
+            <field name="name">Make Invoices</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">analytic.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_analytic_invoice_tree"/>
+            <!--field name="target">new</field-->
+            <!--field name="groups_id" eval="[(4,
+            ref('sale_advertising_order.group_advertising_sales_user'))]"/-->
+        </record>
+
+        <record id="action_view_analytic_invoice_view_tree"
+                model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_analytic_invoice_tree"/>
+            <field name="act_window_id" ref="action_view_analytic_invoice"/>
+        </record>
+
+        <record id="action_view_analytic_invoice_view_form"
+                model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_analytic_invoice_form"/>
+            <field name="act_window_id" ref="action_view_analytic_invoice"/>
+        </record>
+
+        <!-- Top menu item -->
+        <menuitem name="Analytic Invoicing"
+            id="menu_analytic_invoicing"
+            sequence="40"/>
+
+        <menuitem id="menu_analytic" name="Time and Billing"
+                  parent="menu_analytic_invoicing"
+                  sequence="2"/>
+        <menuitem id="menu_action_analytic_invoice"
+                  action="action_view_analytic_invoice" name="Draft Invoices"
+                  parent="menu_analytic" sequence="20" />
+
+    </data>
+</odoo>
