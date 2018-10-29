@@ -2,25 +2,21 @@
 # Copyright 2018 Magnus ((www.magnus.nl).)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+from lxml import etree
 
 
 class AnalyticInvoice(models.Model):
     _name = "analytic.invoice"
     _description = "Analytic Invoice"
     _order = "date_to desc"
+    _rec_name = 'partner_id'
+
 
     @api.one
-    @api.depends('partner_id', 'account_analytic_ids', 'month_id', 'gb_task',
-                 'gb_week', 'gb_month')
-    def _compute_objects(self):
-        partner_id = self.partner_id or False
-        if partner_id and len(self.account_analytic_ids) == 0:
-            account_analytic = self.env['account.analytic.account'].search([
-                ('partner_id','=', self.partner_id.id)])
-            if len(account_analytic) > 0:
-                self.account_analytic_ids = \
-                    [(6,0,account_analytic.ids)]
+    @api.depends('partner_id','account_analytic_ids', 'month_id')
+    def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
             if self.month_id:
@@ -28,25 +24,53 @@ class AnalyticInvoice(models.Model):
                 domain += [('account_id', 'in', account_analytic_ids)]
             else:
                 domain = [('account_id', 'in', account_analytic_ids)]
+
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('product_uom_id','=', hrs)]
-            self.time_line_ids = self.env['account.analytic.line'].search(
-                time_domain).ids
-            cost_domain = domain + [('product_uom_id', '!=', hrs),
-                                        ('amount','<', 0)]
-            self.cost_line_ids = self.env['account.analytic.line'].search(
-                cost_domain).ids
-            revenue_domain = domain + [('product_uom_id', '!=', hrs),
-                                        ('amount', '>', 0)]
-            self.revenue_line_ids = self.env['account.analytic.line'].search(
-                revenue_domain).ids
-#            import pdb;
-#            pdb.set_trace()
+            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'invoiced']),
+                                    '|',('invoiceable', '=', True),('invoiced', '=', True)]
+
+            self.time_line_ids = self.env['account.analytic.line'].search(time_domain).ids
+
+            cost_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '<', 0)]
+            self.cost_line_ids = self.env['account.analytic.line'].search(cost_domain).ids
+
+            revenue_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '>', 0)]
+            self.revenue_line_ids = self.env['account.analytic.line'].search(revenue_domain).ids
+        else:
+            self.time_line_ids = []
+            self.cost_line_ids = []
+            self.revenue_line_ids = []
+
+
+    @api.one
+    @api.depends('partner_id', 'account_analytic_ids', 'month_id', 'gb_week')
+    def _compute_objects(self):
+        partner_id = self.partner_id or False
+        if partner_id and len(self.account_analytic_ids) == 0:
+            account_analytic = self.env['account.analytic.account'].search([
+                ('partner_id', '=', self.partner_id.id)])
+            if len(account_analytic) > 0:
+                self.account_analytic_ids = \
+                    [(6, 0, account_analytic.ids)]
+
+        if len(self.account_analytic_ids) > 0:
+            account_analytic_ids = self.account_analytic_ids.ids
+            if self.month_id:
+                domain = self.month_id.get_domain('date')
+                domain += [('account_id', 'in', account_analytic_ids)]
+            else:
+                domain = [('account_id', 'in', account_analytic_ids)]
+
+            hrs = self.env.ref('product.product_uom_hour').id
+            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'invoiced']),
+                                    '|',('invoiceable', '=', True),('invoiced', '=', True)]
+
             fields_grouped = [
                 'id',
                 'user_id',
                 'task_id',
                 'account_id',
+                'product_id',
                 'month_id',
                 'week_id',
                 'unit_amount'
@@ -55,6 +79,7 @@ class AnalyticInvoice(models.Model):
                 'user_id',
                 'task_id',
                 'account_id',
+                'product_id',
                 'month_id',
             ]
             if self.gb_week:
@@ -63,21 +88,17 @@ class AnalyticInvoice(models.Model):
                 time_domain,
                 fields_grouped,
                 grouped_by,
-                offset=0, 
-                limit=None, 
-                orderby=False, 
+                offset=0,
+                limit=None,
+                orderby=False,
                 lazy=False
             )
-            if len(result) > 0:
-                if self.user_total_ids:
-                    self.env['analytic.user.total'].search(
-                        [('id','in', self.user_total_ids.ids)]).unlink()
-#                ids = self.user_total_ids.ids
-#                result_data = []
-#                for id in ids:
-#                    result_data.append((2,id))
-                for item in result:
+            taskUserObj = self.env['task.user']
+            taskUserIds = []
 
+            if len(result) > 0:
+                userTotData = []
+                for item in result:
                     vals = {
                         'analytic_invoice_id': self.id,
                         'name': '/',
@@ -87,35 +108,54 @@ class AnalyticInvoice(models.Model):
                             'task_id') != False else False,
                         'account_id': item.get('account_id')[0] if item.get(
                             'account_id') != False else False,
-                        'month_id': item.get('month_id')[0] if item.get(
+                        'gb_month_id': item.get('month_id')[0] if item.get(
                             'month_id') != False else False,
-                        'week_id': item.get('week_id')[0] if self.gb_week
-                            and item.get('week_id') != False else False,
+                        'gb_week_id': item.get('week_id')[0] if self.gb_week and item.get('week_id') != False else False,
                         'unit_amount': item.get('unit_amount'),
+                        'product_id': item.get('product_id'),
                     }
-#                    result_data.append((0,0,vals))
-#                    self.user_total_ids = [(0,0,vals)]
-                    aut_id = self.env['analytic.user.total'].create(vals)
+
+                    # aut_id = self.env['analytic.user.total'].create(vals)
                     aal_domain = time_domain + [
-                        ('user_id','=',vals['user_id']),
-                        ('task_id','=',vals['task_id']),
-                        ('account_id','=',vals['account_id']),
-                        ('month_id','=',vals['month_id']),
+                        ('user_id', '=', vals['user_id']),
+                        ('task_id', '=', vals['task_id']),
+                        ('account_id', '=', vals['account_id']),
+                        ('month_id', '=', vals['gb_month_id']),
                     ]
-                    if vals['week_id']:
-                        aal_domain += [('week_id','=', vals['week_id'])]
+                    if vals['gb_week_id']:
+                        aal_domain += [('week_id', '=', vals['gb_week_id'])]
 
-                    aal = self.env['account.analytic.line'].search(aal_domain)
-                    aal.write({'user_total_id': aut_id.id})
-#                self.user_total_ids = result_data
+                    childData = []
+                    for aal in self.env['account.analytic.line'].search(aal_domain):
+                        childData.append((4, aal.id))
+                    vals['children_ids'] = childData
 
+                    userTotData.append((0, 0, vals))
 
+                    taskUser = taskUserObj.search([('task_id', '=', vals['task_id']),('user_id', '=', vals['user_id'])])
+                    taskUserIds += taskUser.ids
+
+                self.user_total_ids = userTotData
+
+                if taskUserIds:
+                    taskUserIds = list(set(taskUserIds))
+                    self.task_user_ids = [(6, 0, taskUserIds)]
+                else:
+                    self.task_user_ids = [(6, 0, [])]
 
     @api.model
     def _get_fiscal_month_domain(self):
         # We have access to self.env in this context.
         fm = self.env.ref('account_fiscal_month.date_range_fiscal_month').id
         return [('type_id', '=', fm)]
+
+    def _compute_invoice_count(self):
+        for line in self:
+            line.invoice_count = len(line.invoice_ids.ids)
+
+    @api.multi
+    def action_done(self):
+        self.state = 'invoiced'
 
     name = fields.Char
 
@@ -151,17 +191,17 @@ class AnalyticInvoice(models.Model):
     )
     time_line_ids = fields.Many2many(
         'account.analytic.line',
-        compute='_compute_objects',
+        compute='_compute_analytic_lines',
         string='Time Line',
     )
     cost_line_ids = fields.Many2many(
         'account.analytic.line',
-        compute='_compute_objects',
+        compute='_compute_analytic_lines',
         string='Cost Line',
     )
     revenue_line_ids = fields.Many2many(
         'account.analytic.line',
-        compute='_compute_objects',
+        compute='_compute_analytic_lines',
         string='Revenue Line',
     )
     user_total_ids = fields.One2many(
@@ -196,9 +236,133 @@ class AnalyticInvoice(models.Model):
         'Group By Month',
         default=True
     )
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('open', 'In Progress'),
+        ('invoiced', 'Invoiced'),
+    ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
+    invoice_count = fields.Integer('Invoices', compute='_compute_invoice_count')
+
+
+    @api.model
     def create(self, vals):
         res = super(AnalyticInvoice, self).create(vals)
+        user_total_ids = self.env['analytic.user.total'].search(
+            [('analytic_invoice_id', '=', False)])
+        if user_total_ids:
+            user_total_ids.unlink()
+        return res
+
+    @api.multi
+    def write(self, vals):
+        res = super(AnalyticInvoice, self).write(vals)
+        user_total_ids = self.env['analytic.user.total'].search(
+            [('analytic_invoice_id', '=', False)])
+        if user_total_ids:
+            user_total_ids.unlink()
+        return res
+
+    @api.model
+    def _prepare_invoice(self, lines):
+        self.ensure_one()
+        journal_id = self.env['account.invoice'].default_get(['journal_id'])['journal_id']
+        if not journal_id:
+            raise UserError(_('Please define an accounting sale journal for this company.'))
+        vals = {
+            # 'date_invoice': invoice_date,
+            # 'date': posting_date or False,
+            'type': 'out_invoice',
+            'account_id': self.partner_id.property_account_receivable_id.id,
+            'partner_id': self.partner_id.id,
+            'invoice_line_ids': lines['lines'],
+            # 'comment': lines['name'],
+            'payment_term_id': self.partner_id.property_payment_term_id.id or False,
+            'journal_id': journal_id,
+            'fiscal_position_id': self.partner_id.property_account_position_id.id or False,
+            'user_id': self.env.user.id,
+            'company_id': self.env.user.company_id.id,
+            # 'operating_unit_id': operating_unit.id,
+            # 'payment_mode_id': payment_mode.id or False,
+            # 'partner_bank_id': payment_mode.fixed_journal_id.bank_account_id.id
+            # if payment_mode.bank_account_link == 'fixed'
+            # else partner.bank_ids and partner.bank_ids[0].id or False,
+        }
+        return vals
+
+
+    @api.multi
+    def _prepare_invoice_line(self, line):
+        """
+        Prepare the dict of values to create the new invoice line for a sales order line.
+
+        :param line: sales order line to invoice
+        """
+        line.ensure_one()
+        account = line.product_id.property_account_income_id or line.product_id.categ_id.property_account_income_categ_id
+        if not account and line.product_id:
+            raise UserError(
+                _('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
+                (line.product_id.name, line.product_id.id, line.product_id.categ_id.name))
+
+        fpos = self.partner_id.property_account_position_id
+        if fpos:
+            account = fpos.map_account(account)
+
+        res = {
+            'name': line.product_id.name or '/',
+            # 'sequence': line.sequence,
+            'origin': '/',
+            'account_id': account.id,
+            'price_unit': line.fee_rate,
+            'quantity': line.unit_amount,
+            # 'discount': line.discount,
+            'uom_id': line.product_uom_id.id,
+            'product_id': line.product_id and line.product_id.id or False,
+            # 'layout_category_id': line.layout_category_id and line.layout_category_id.id or False,
+            # 'invoice_line_tax_ids': [(6, 0, line.tax_id.ids or [])],
+            'account_analytic_id': line.account_id and line.account_id.id or False,
+            'analytic_tag_ids': [(6, 0, line.tag_ids.ids or [])],
+            'analytic_invoice_id':line.analytic_invoice_id.id
+        }
+        return res
+
+    @api.one
+    def generate_invoice(self):
+        invoices = {}
+        invoices['lines'] = []
+        user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
+        for line in user_summary_lines:
+            inv_line_vals = self._prepare_invoice_line(line)
+            invoices['lines'].append((0, 0, inv_line_vals))
+        if invoices['lines']:
+            if self.invoice_ids:
+                invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
+                invoice.write({'lines':invoices['lines']})
+            else:
+                vals = self._prepare_invoice(invoices)
+                invoice = self.env['account.invoice'].create(vals)
+                invoice.compute_taxes()
+                self.invoice_ids = [(4, invoice.id)]
+        for line in user_summary_lines:
+            line.children_ids.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
+            line.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
+        if self.state == 'draft':
+            self.state = 'open'
+        return True
+
+
+    @api.multi
+    def action_view_invoices(self):
+        self.ensure_one()
+        action = self.env.ref('account.action_invoice_tree1').read()[0]
+        invoices = self.mapped('invoice_ids')
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif invoices:
+            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            action['res_id'] = invoices.id
+        return action
 
 
 class AnalyticUserTotal(models.Model):
@@ -236,11 +400,11 @@ class AnalyticUserTotal(models.Model):
         readonly=True,
         copy=False
     )
-    week_id = fields.Many2one(
+    gb_week_id = fields.Many2one(
         'date.range',
         string='Week',
     )
-    month_id = fields.Many2one(
+    gb_month_id = fields.Many2one(
         'date.range',
         string='Month',
     )

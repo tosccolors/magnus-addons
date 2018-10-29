@@ -7,16 +7,27 @@
             <field name="arch" type="xml">
                 <form string="Create invoices" >
                 <header>
-                     <group colspan="6" col="6">
+                    <button name="generate_invoice" type="object" string="Generate Invoice" states="draft"/>
+                    <button name="generate_invoice" type="object" string="Re-Generate Invoice" states="open"/>
+                    <button name="action_done" type="object" string="Invoiced" states="open"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open,invoiced"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="action_view_invoices" type="object" icon="fa-usd" attrs="{'invisible': [('invoice_count','=',0)]}">
+                            <field string="Invoices" name="invoice_count" widget="statinfo" attrs="{'invisible': [('invoice_count','=',0)]}"/>
+                        </button>
+                    </div>
+                    <group colspan="6" col="6">
                         <group>
-                            <field name="partner_id" string="Client"/>
+                            <field name="partner_id" string="Client" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
                             <field name="account_analytic_ids"
-                                   string="Charge Codes" readonly="0" >
+                                   string="Charge Codes" readonly="0" attrs="{'readonly': [('state','in',('open','invoiced'))]}">
                                 <tree create="true" edit="false" delete="true" copy="false">
                                     <field name="name" string="Name" readonly="1"/>
                                 </tree>
                             </field>
-                            <field name="month_id" string="Invoicing Period"/>
+                            <field name="month_id" string="Invoicing Period" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
                         </group>
                          <group>
                             <field name="task_user_ids"
@@ -45,10 +56,8 @@
                             <field name="month_id" string="Invoicing Period"/-->
                         </group>
                      </group>
-                </header>
-                <sheet>
                     <field name="invoice_line_ids"
-                           context="{'type': 'out_invoice'}" >
+                           context="{'type': 'out_invoice'}" attrs="{'readonly': [('state','=','invoiced')]}">
                         <tree string="Bill lines" editable="bottom">
                             <field name="sequence" widget="handle" />
                             <field name="product_id"
@@ -98,8 +107,8 @@
                                         <tree string="Total Time" >
                                             <field name="user_id" />
                                             <field name="task_id" />
-                                            <field name="month_id" />
-                                            <field name="week_id" />
+                                            <field name="gb_month_id" />
+                                            <field name="gb_week_id" />
                                             <field name="children_ids"/>
                                             <field name="name"/>
                                             <field name="unit_amount"
@@ -174,17 +183,7 @@
             <field name="act_window_id" ref="action_view_analytic_invoice"/>
         </record>
 
-        <!-- Top menu item -->
-        <menuitem name="Analytic Invoicing"
-            id="menu_analytic_invoicing"
-            sequence="40"/>
 
-        <menuitem id="menu_analytic" name="Time and Billing"
-                  parent="menu_analytic_invoicing"
-                  sequence="2"/>
-        <menuitem id="menu_action_analytic_invoice"
-                  action="action_view_analytic_invoice" name="Draft Invoices"
-                  parent="menu_analytic" sequence="20" />
 
     </data>
 </odoo>

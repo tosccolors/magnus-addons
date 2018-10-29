@@ -14,7 +14,7 @@ class AccountAnalyticLine(models.Model):
     @api.depends('date','product_uom_id')
     def _compute_week_month(self):
         for line in self:
-            if not line.product_uom_id == self.env.ref('product.'
+            if line.product_uom_id != self.env.ref('product.'
                                                        'product_uom_hour'):
                 continue
             if line.date:
@@ -50,7 +50,7 @@ class AccountAnalyticLine(models.Model):
         """
 #        date_str = fields.Date.to_string(date)
         s_args = [
-            ('type_name', '=', 'Fiscal Month'),
+            ('type_name', '=', 'Fiscal month'),
             ('date_start', '<=', date),
             ('date_end', '>=', date),
             '|',
@@ -71,10 +71,15 @@ class AccountAnalyticLine(models.Model):
     invoiceable = fields.Boolean(
         'Invoiceable'
     )
+    # user_total_id = fields.Many2one(
+    #     'analytic.user.total',
+    #     string='Summary Reference',
+    #     ondelete='cascade',
+    #     index=True
+    # )
     user_total_id = fields.Many2one(
         'analytic.user.total',
         string='Summary Reference',
-        ondelete='cascade',
         index=True
     )
     week_id = fields.Many2one(
@@ -89,7 +94,33 @@ class AccountAnalyticLine(models.Model):
         string='Month',
         store=True,
     )
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('open', 'Confirmed'),
+        ('delayed', 'Delayed'),
+        ('invoiceable', 'To be Invoiced'),
+        ('invoiced', 'Invoiced'),
+    ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
+    # total_amount = fields.Monetary(string='Subtotal Amount', compute='_compute_amount', required=True, store=True)
+
+    # @api.one
+    # @api.depends('task_id','user_id','product_id', 'unit_amount')
+    # def _compute_amount(self):
+    #     task_user = self.env['task.user']
+    #     if self.task_id and self.user_id:
+    #         taskUsers = task_user.search([('task_id', '=', self.task_id.id), ('user_id', '=', self.user_id.id), ('product_id', '=', self.product_id.id)], limit=1)
+    #         self.total_amount = taskUsers.fee_rate * self.unit_amount or 0.0
+
+    def _check_state(self):
+        """
+        to check if any lines states updates comes from timesheets allow to modify
+        :return: True or super
+        """
+        context = self.env.context.copy()
+        if 'UpdateState' in context or not 'active_model' in context:
+            return True
+        return super(AccountAnalyticLine, self)._check_state()
 
     '''@api.model
     def create(self, vals):

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_analytic_line_status" model="ir.ui.view">
+            <field name="name">Analytic Line Status</field>
+            <field name="model">analytic.line.status</field>
+            <field name="arch" type="xml">
+                <form string="Analytic Line Status">
+                    <p>
+                        All selected analytic entries will be marked as following.
+                    </p>
+                    <field name="name" col="4" colspan="6" required="True"/>
+                    <footer>
+                        <button name="analytic_invoice_lines" string="Update Entries" type="object" class="oe_highlight"/>
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_view_analytic_line_status" model="ir.actions.act_window">
+            <field name="name">Update Entries</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">analytic.line.status</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_analytic_line_status"/>
+            <field name="target">new</field>
+        </record>
+
+        <record model="ir.values" id="analytic_line_status">
+            <field name="model_id" ref="model_account_analytic_line" />
+            <field name="name">Update Entries</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_view_analytic_line_status'))" />
+            <field name="key">action</field>
+            <field name="model">account.analytic.line</field>
+        </record>
+
+    </data>
+</odoo>
