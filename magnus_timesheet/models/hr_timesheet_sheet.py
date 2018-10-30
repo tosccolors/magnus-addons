@@ -11,22 +11,27 @@ from dateutil.relativedelta import relativedelta
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
 
-    def _current_week(self):
+    @api.model
+    def default_get(self, fields):
+        rec = super(HrTimesheetSheet, self).default_get(fields)
         dt = datetime.now()
         week = self.env['date.range'].search([('type_id','=','week'), ('date_start', '=', dt-timedelta(days=dt.weekday()))], limit=1)
-        if not week:
+        if week:
+            rec.update({'week_id': week.id})
+        else:
             if self._uid == SUPERUSER_ID:
                 raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
             else:
                 raise UserError(_('Please contact administrator.'))
-        return week.id
+        return rec
+
 
     def _get_domain(self):
         last_month = datetime.strftime(datetime.now().date() - relativedelta(months=1), "%Y-%m-%d")
         next_month = datetime.strftime(datetime.now().date() + relativedelta(months=1), "%Y-%m-%d")
         return [('type_id','=','week'), ('active','=',True), ('date_end', '>=', last_month), ('date_start', '<=', next_month)]
 
-    week_id = fields.Many2one('date.range', domain=_get_domain, string="Timesheet Week", default=_current_week, required=True)
+    week_id = fields.Many2one('date.range', domain=_get_domain, string="Timesheet Week", required=True)
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
