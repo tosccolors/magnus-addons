@@ -49,4 +49,32 @@
                 </field>
             </field>
         </record>
+
+        <!--<record id="view_task_user_form" model="ir.ui.view">-->
+            <!--<field name="name">task.user.form</field>-->
+            <!--<field name="model">task.user</field>-->
+            <!--<field name="arch" type="xml">-->
+                <!--<form>-->
+                    <!--<group>-->
+                        <!--<field name="user_id"/>-->
+                        <!--<field name="product_id"/>-->
+                        <!--<field name="fee_rate"/>-->
+                        <!--<field name="task_id"/>-->
+                    <!--</group>-->
+                <!--</form>-->
+            <!--</field>-->
+        <!--</record>-->
+
+        <record id="view_task_user_tree" model="ir.ui.view">
+            <field name="name">task.user.tree</field>
+            <field name="model">task.user</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="fee_rate"/>
+                    <field name="task_id"/>
+                </tree>
+            </field>
+        </record>
 </odoo>

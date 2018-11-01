@@ -11,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
 
+
     @api.model
     def default_get(self, fields):
         rec = super(HrTimesheetSheet, self).default_get(fields)
@@ -23,6 +24,7 @@ class HrTimesheetSheet(models.Model):
                 raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
             else:
                 raise UserError(_('Please contact administrator.'))
+
         return rec
 
 
@@ -30,6 +32,7 @@ class HrTimesheetSheet(models.Model):
         last_month = datetime.strftime(datetime.now().date() - relativedelta(months=1), "%Y-%m-%d")
         next_month = datetime.strftime(datetime.now().date() + relativedelta(months=1), "%Y-%m-%d")
         return [('type_id','=','week'), ('active','=',True), ('date_end', '>=', last_month), ('date_start', '<=', next_month)]
+
 
     week_id = fields.Many2one('date.range', domain=_get_domain, string="Timesheet Week", required=True)
 
