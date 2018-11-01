@@ -17,8 +17,17 @@ class HrTimesheetSheet(models.Model):
         """
         context = self.env.context.copy()
         res = super(HrTimesheetSheet, self).action_timesheet_done()
-        context.update({'UpdateState':True})
-        self.timesheet_ids.with_context(context).write({'state':'open'})
+        # context.update({'UpdateState':True})
+        # self.timesheet_ids.with_context(context).write({'state':'open'})
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                    UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+            """ % (cond, rec))
         return res
 
     @api.multi
@@ -30,5 +39,14 @@ class HrTimesheetSheet(models.Model):
         if self.timesheet_ids.filtered('invoiced'):
             raise UserError(_('You cannot modify an entry in a invoiced timesheet'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        self.timesheet_ids.write({'state':'draft'})
+
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                    UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s
+            """ % (cond, rec))
         return res

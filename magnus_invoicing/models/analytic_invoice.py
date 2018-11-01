@@ -96,7 +96,7 @@ class AnalyticInvoice(models.Model):
             taskUserObj = self.env['task.user']
             taskUserIds = []
 
-            if len(result) > 0:
+            if len(result) > 0:               
                 userTotData = []
                 for item in result:
                     vals = {
@@ -134,7 +134,6 @@ class AnalyticInvoice(models.Model):
 
                     taskUser = taskUserObj.search([('task_id', '=', vals['task_id']),('user_id', '=', vals['user_id'])])
                     taskUserIds += taskUser.ids
-
                 self.user_total_ids = userTotData
 
                 if taskUserIds:
@@ -244,23 +243,24 @@ class AnalyticInvoice(models.Model):
 
     invoice_count = fields.Integer('Invoices', compute='_compute_invoice_count')
 
-
-    @api.model
-    def create(self, vals):
-        res = super(AnalyticInvoice, self).create(vals)
+    def unlink_rec(self):
         user_total_ids = self.env['analytic.user.total'].search(
             [('analytic_invoice_id', '=', False)])
         if user_total_ids:
-            user_total_ids.unlink()
-        return res
+            cond = '='
+            rec = user_total_ids.ids[0]
+            if len(user_total_ids) > 1:
+                cond = 'IN'
+                rec = tuple(user_total_ids.ids)
+            self.env.cr.execute("""
+                                DELETE FROM  analytic_user_total WHERE id %s %s
+                        """ % (cond, rec))
+
 
     @api.multi
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
-        user_total_ids = self.env['analytic.user.total'].search(
-            [('analytic_invoice_id', '=', False)])
-        if user_total_ids:
-            user_total_ids.unlink()
+        self.unlink_rec()
         return res
 
     @api.model
@@ -345,8 +345,19 @@ class AnalyticInvoice(models.Model):
                 invoice.compute_taxes()
                 self.invoice_ids = [(4, invoice.id)]
         for line in user_summary_lines:
-            line.children_ids.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
-            line.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
+            # line.children_ids.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
+            # line.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
+            cond = '='
+            rec = line.children_ids.ids[0]
+            if len(line.children_ids) > 1:
+                cond = 'IN'
+                rec = tuple(line.children_ids.ids)
+            self.env.cr.execute("""
+                        UPDATE account_analytic_line SET state = 'invoiced', invoiced = true WHERE id %s %s
+                """ % (cond, rec))
+            self.env.cr.execute("""
+                        UPDATE analytic_user_total SET state = 'invoiced', invoiced = true WHERE id = %s
+                """ % (line.id))
         if self.state == 'draft':
             self.state = 'open'
         return True
@@ -408,7 +419,6 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
-
 
 
 
