@@ -102,25 +102,17 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
-    # total_amount = fields.Monetary(string='Subtotal Amount', compute='_compute_amount', required=True, store=True)
-
-    # @api.one
-    # @api.depends('task_id','user_id','product_id', 'unit_amount')
-    # def _compute_amount(self):
-    #     task_user = self.env['task.user']
-    #     if self.task_id and self.user_id:
-    #         taskUsers = task_user.search([('task_id', '=', self.task_id.id), ('user_id', '=', self.user_id.id), ('product_id', '=', self.product_id.id)], limit=1)
-    #         self.total_amount = taskUsers.fee_rate * self.unit_amount or 0.0
 
     def _check_state(self):
         """
-        to check if any lines states updates comes from timesheets allow to modify
+        to check if any lines computes method calls allow to modify
         :return: True or super
         """
         context = self.env.context.copy()
-        if 'UpdateState' in context or not 'active_model' in context:
+        if not 'active_model' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
+
 
     '''@api.model
     def create(self, vals):
