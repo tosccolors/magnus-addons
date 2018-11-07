@@ -21,14 +21,18 @@ class AnalyticLineStatus(models.TransientModel):
         context = self.env.context.copy()
         analytic_ids = context.get('active_ids',[])
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
-        status = self.name
+        status = str(self.name)
         entries = analytic_lines.filtered(lambda a: a.invoiced != True and a.state not in ('draft','invoiced'))
         if entries:
-            data = {'state':status,'invoiceable':False}
-            context.update({'UpdateState': True})
-            if status == 'invoiceable':
-                data['invoiceable'] = True
+            cond = '='
+            rec = entries.ids[0]
+            if len(entries) > 1:
+                cond = 'IN'
+                rec = tuple(entries.ids)
+            invoiceable = True if status == 'invoiceable' else False
+            self.env.cr.execute("""
+                    UPDATE account_analytic_line SET state = '%s', invoiceable = %s WHERE id %s %s
+            """ % (status, invoiceable, cond, rec))
 
-            entries.with_context(context).write(data)
         return True
 

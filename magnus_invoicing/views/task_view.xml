@@ -6,6 +6,9 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                    <attribute name="domain">[('is_company','=',True)]</attribute>
+                </field>
                 <page name="description_page" position="before">
                     <page name="users" string="Fee Earners">
                         <group colspan="4" col="2">
@@ -32,6 +35,46 @@
                 <xpath expr="//field[@name='timesheet_ids']/tree/field[@name='unit_amount']" position="after">
                     <field name="state"/>
                 </xpath>
+            </field>
+        </record>
+
+        <!-- Project -->
+        <record id="edit_project_magnus" model="ir.ui.view">
+            <field name="name">project.project.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                    <attribute name="domain">[('is_company','=',True)]</attribute>
+                </field>
+            </field>
+        </record>
+
+        <!--<record id="view_task_user_form" model="ir.ui.view">-->
+            <!--<field name="name">task.user.form</field>-->
+            <!--<field name="model">task.user</field>-->
+            <!--<field name="arch" type="xml">-->
+                <!--<form>-->
+                    <!--<group>-->
+                        <!--<field name="user_id"/>-->
+                        <!--<field name="product_id"/>-->
+                        <!--<field name="fee_rate"/>-->
+                        <!--<field name="task_id"/>-->
+                    <!--</group>-->
+                <!--</form>-->
+            <!--</field>-->
+        <!--</record>-->
+
+        <record id="view_task_user_tree" model="ir.ui.view">
+            <field name="name">task.user.tree</field>
+            <field name="model">task.user</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="fee_rate"/>
+                    <field name="task_id"/>
+                </tree>
             </field>
         </record>
 </odoo>

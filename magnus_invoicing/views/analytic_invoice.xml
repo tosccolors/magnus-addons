@@ -18,44 +18,32 @@
                             <field string="Invoices" name="invoice_count" widget="statinfo" attrs="{'invisible': [('invoice_count','=',0)]}"/>
                         </button>
                     </div>
-                    <group colspan="6" col="6">
-                        <group>
+                    <group colspan="4" col="4">
+                        <!--<group>-->
                             <field name="partner_id" string="Client" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
-                            <field name="account_analytic_ids"
-                                   string="Charge Codes" readonly="0" attrs="{'readonly': [('state','in',('open','invoiced'))]}">
-                                <tree create="true" edit="false" delete="true" copy="false">
-                                    <field name="name" string="Name" readonly="1"/>
-                                </tree>
-                            </field>
+                            <!--<field name="account_analytic_ids"-->
+                                   <!--string="Charge Codes" readonly="0" attrs="{'readonly': [('state','in',('open','invoiced'))]}">-->
+                                <!--<tree create="true" edit="false" delete="true" copy="false">-->
+                                    <!--<field name="name" string="Name" readonly="1"/>-->
+                                <!--</tree>-->
+                            <!--</field>-->
+                            <field name="account_analytic_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
                             <field name="month_id" string="Invoicing Period" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
-                        </group>
+                        <!--</group>
                          <group>
-                            <field name="task_user_ids"
-                                   string="Fee Rates" readonly="0" >
-                                <tree create="false" edit="true" delete="false"
-                                      copy="false">
-                                    <field name="task_id" string="Task"
-                                           readonly="1"/>
-                                    <field name="user_id" string="Fee Earner"
-                                           readonly="1"/>
-                                    <field name="product_id" string="Fee?"
-                                           readonly="0"/>
-                                    <field name="fee_rate" string="Fee Rate"
-                                           readonly="0"/>
-                                </tree>
-                            </field>
-                        </group>
-                         <group>
-                            <!--field name="partner_id" string="Client"/>
+                            <field name="partner_id" string="Client"/>
                             <field name="account_analytic_ids"
                                    string="Charge Codes" readonly="0" >
                                 <tree create="true" edit="false" delete="true" copy="false">
                                     <field name="name" string="Name" readonly="1"/>
                                 </tree>
                             </field>
-                            <field name="month_id" string="Invoicing Period"/-->
-                        </group>
+                            <field name="month_id" string="Invoicing Period"/>
+                        </group>-->
                      </group>
+                    <separator string="Fee Rates"/>
+                    <field name="task_user_ids" string="Fee Rates" readonly="0" context="{'tree_view_ref' : 'magnus_invoicing.view_task_user_tree'}" />
+                    <separator string="Invoice Lines"/>
                     <field name="invoice_line_ids"
                            context="{'type': 'out_invoice'}" attrs="{'readonly': [('state','=','invoiced')]}">
                         <tree string="Bill lines" editable="bottom">
@@ -87,7 +75,7 @@
                         </page-->
                         <page string="Time Lines" name="time_line">
                             <group>
-                                <group>
+                                <group invisible="1">
                                     <field name="time_line_ids" >
                                         <tree string="Time lines" create="true" edit="false" delete="true" copy="false">
                                             <field name="user_id" />

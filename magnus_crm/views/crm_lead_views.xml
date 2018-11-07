@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <!-- Inherited crm.lead (as Opportunity) views -->
+    <record id="crm_case_form_view_oppor_inherited" model="ir.ui.view">
+      <field name="name">crm.lead.form.opportunity</field>
+      <field name="model">crm.lead</field>
+      <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+        <field name="arch" type="xml">
+          <data>
+            <xpath expr="//group[1]" position="before">
+              <group string="Monthly Expected Revenue" attrs="{'invisible': [('planned_revenue', '=', 0)]}">
+                <group>
+                  <field name="start_date" />
+                </group>
+                <group>
+                  <field name="end_date" />
+                </group>
+              </group>
+              <div attrs="{'invisible': [('planned_revenue', '=', 0)]}">
+                <field name="monthly_revenue_ids">
+                  <tree editable="bottom" create="false" >
+                    <field name="month" readonly="1" />
+                    <field name="no_of_days" readonly="1"/>
+                    <field name="company_currency" invisible="1" />
+                    <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                    <field name="percentage" readonly="1" widget="integer"/>
+                  </tree>
+                </field>
+              </div>
+            </xpath>
+          </data>
+      </field>
+    </record>
+
+    <!--Monthly Revenue form view-->
+    <record id="crm_monthly_revenue_form_view" model="ir.ui.view">
+      <field name="name">crm.monthly.revenue.form</field>
+      <field name="model">crm.monthly.revenue</field>
+      <field name="arch" type="xml">
+        <form string="Monthly Revenue">
+          <sheet>
+            <group>
+              <group>
+                <field name="lead_id" readonly="1" />
+                <field name="month" readonly="1" />
+                <field name="no_of_days" readonly="1"/>
+              </group>
+              <group>
+                <field name="expected_revenue" readonly="1" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="percentage" widget="percentpie" readonly="1"/>
+                <field name="company_currency" readonly="1" />
+                <field name="user_id" readonly="1"/>
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!--Monthly Revenue tree view-->
+    <record id="crm_monthly_revenue_tree_view" model="ir.ui.view">
+      <field name="name">crm.monthly.revenue.tree</field>
+      <field name="model">crm.monthly.revenue</field>
+      <field name="arch" type="xml">
+        <tree string="Monthly Revenue">
+          <field name="lead_id" />
+          <field name="month" />
+          <field name="no_of_days" />
+          <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+          <field name="percentage" widget="integer"/>
+          <field name="company_currency" invisible="1" />
+          <field name="user_id" invisible="1" />
+        </tree>
+      </field>
+    </record>
+
+    <!-- Monthly Revenue pivot View -->
+    <record id="crm_monthly_revenue_view_pivot" model="ir.ui.view">
+        <field name="name">crm.monthly.revenue.pivot</field>
+        <field name="model">crm.monthly.revenue</field>
+        <field name="arch" type="xml">
+            <pivot string="Monthly Revenue Analysis">
+                <field name="lead_id" type="row"/>
+                <field name="month" type="col"/>
+                <field name="expected_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Monthly Revenue Graph View -->
+    <record id="crm_monthly_revenue_view_graph" model="ir.ui.view">
+        <field name="name">crm.monthly.revenue.graph</field>
+        <field name="model">crm.monthly.revenue</field>
+        <field name="arch" type="xml">
+            <graph string="Monthly Revenue Analysis" stacked="True">
+                <field name="lead_id" type="row"/>
+                <field name="month" type="col"/>
+                <field name="expected_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Monthly Revenue Search View -->
+    <record id="crm_monthly_revenue_search_view" model="ir.ui.view">
+        <field name="name">crm.monthly.revenue.search</field>
+        <field name="model">crm.monthly.revenue</field>
+        <field name="arch" type="xml">
+            <search string="Monthly Revenue Analysis">
+                <field name="lead_id"/>
+                <field name="month"/>
+                <field name="no_of_days" />
+                <field name="expected_revenue" />
+                <field name="percentage" />
+                <field name="user_id" />
+                <field name="company_currency" />
+                <group expand="1" string="Group By">
+                    <filter string="Salesperson" name='user' context="{'group_by':'user_id'}"/>
+                    <filter string="Opportunity" context="{'group_by':'lead_id'}"/>
+                    <filter string="Month" context="{'group_by':'month'}"/>
+                    <filter string="Currency" context="{'group_by':'company_currency'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!--Monthly Revenue action-->
+    <record id="crm_monthly_revenue_report_action" model="ir.actions.act_window">
+        <field name="name">Monthly Revenue Analysis</field>
+        <field name="res_model">crm.monthly.revenue</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">pivot,graph,tree,form</field>
+    </record>
+  </data>
+</odoo>
