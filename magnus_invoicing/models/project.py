@@ -50,12 +50,6 @@ class Task(models.Model):
     @api.model
     def default_get(self, fields):
         res = super(Task, self).default_get(fields)
-        # --------------- {u'lang': u'en_US', u'tz': False, u'uid': 1, u'active_model': u'project.project',
-        #                  u'search_default_project_id': [2], 'mail_create_nolog': True, u'default_stage_id': False,
-        #                  u'group_by': u'stage_id',
-        #                  u'params': {u'action': 144, u'model': u'project.project', u'_push_me': False, u'id': 2,
-        #                              u'view_type': u'form'}, u'default_project_id': 2,
-        #                  u'search_disable_custom_filters': True, u'active_ids': [2], u'active_id': 2}
         active_model = self.env.context.get('active_model', False)
         if active_model and active_model == 'project.project':
             active_id = self.env.context.get('active_id', False)
