@@ -50,6 +50,7 @@
                             <field name="sequence" widget="handle" />
                             <field name="product_id"
                                 context="{'partner_id': parent.partner_id}"/>
+                            <field name="origin" invisible="False"/>
                             <field name="name"/>
                             <field name="company_id" invisible="1"/>
                             <field name="account_id" groups="account.group_account_user"
@@ -97,7 +98,7 @@
                                             <field name="task_id" />
                                             <field name="gb_month_id" />
                                             <field name="gb_week_id" />
-                                            <field name="children_ids"/>
+                                            <field name="count_analytic_line"/>
                                             <field name="name"/>
                                             <field name="unit_amount"
                                                    sum="Total Hours"/>
