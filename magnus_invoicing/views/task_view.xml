@@ -47,6 +47,42 @@
                 <field name="partner_id" position="attributes">
                     <attribute name="domain">[('is_company','=',True)]</attribute>
                 </field>
+                <xpath expr="//h1" position="replace">
+                    <label for="code" class="oe_edit_only" string="Project Code and Name"/>
+                    <h3>
+                        <group col="3">
+                            <field name="code" class="oe_inline" placeholder="Project Code" nolabel="1"/>
+                            <span class="oe_inline">-</span>
+                            <field name="name" class="oe_inline" placeholder="Project Name" nolabel="1"/>
+                        </group>
+                    </h3>
+                </xpath>
+                <xpath expr="//div[@name='options_active']" position="inside">
+                    <div>
+                        <field name="billable" class="oe_inline"/>
+                        <label for="billable"/>
+                        <field name="chargeable" class="oe_inline"/>
+                        <label for="chargeable"/>
+                    </div>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="tag_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
+                </xpath>
+                <xpath expr="//page" position="after">
+                    <page name="invoice_type" string="Invoicing" attrs="{'invisible':[('billable','=',False)]}">
+                        <group>
+                            <group>
+                                <field name="invoice_type" options="{'no_create_edit': True}"/>
+                                <field name="invoice_period" options="{'no_create_edit': True}"/>
+                                <field name="po_number"/>
+                            </group>
+                            <group>
+                                <field name="expenses"/>
+                                <field name="specs_invoice_report"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
             </field>
         </record>
 
@@ -77,4 +113,70 @@
                 </tree>
             </field>
         </record>
+
+        <!-- Invoicing Type -->
+        <record model="ir.ui.view" id="project_invoicing_type_search_view">
+            <field name="name">Invoicing Type</field>
+            <field name="model">project.invoicing.type</field>
+            <field name="arch" type="xml">
+                <search string="Invoicing Type">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_invoicing_type_form_view">
+            <field name="name">Invoicing Type</field>
+            <field name="model">project.invoicing.type</field>
+            <field name="arch" type="xml">
+                <form string="Invoicing Type">
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="project_invoicing_type_action" model="ir.actions.act_window">
+            <field name="name">Invoicing Type</field>
+            <field name="res_model">project.invoicing.type</field>
+            <field name="view_type">form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to add a new project invoicing type.
+              </p>
+            </field>
+        </record>
+
+        <!-- Invoicing Period -->
+        <record model="ir.ui.view" id="project_invoicing_period_search_view">
+            <field name="name">Invoicing Period</field>
+            <field name="model">project.invoicing.period</field>
+            <field name="arch" type="xml">
+                <search string="Invoicing Period">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_invoicing_Period_form_view">
+            <field name="name">Invoicing Period</field>
+            <field name="model">project.invoicing.period</field>
+            <field name="arch" type="xml">
+                <form string="Invoicing Period">
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="project_invoicing_period_action" model="ir.actions.act_window">
+            <field name="name">Invoicing Period</field>
+            <field name="res_model">project.invoicing.period</field>
+            <field name="view_type">form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to add a new project invoicing period.
+              </p>
+            </field>
+        </record>
+
+
 </odoo>

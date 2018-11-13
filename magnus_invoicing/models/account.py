@@ -64,6 +64,18 @@ class AccountAnalyticLine(models.Model):
         )
         return date_range
 
+    @api.depends('project_id','task_id')
+    def _onchange_project_task(self):
+        for line in self:
+            project = False
+            if line.project_id:
+                project = line.project_id
+            elif line.task_id:
+                project = line.task_id.project_id
+            if project:
+                line.billable = project.billable
+                line.chargeable = project.chargeable
+                line.expenses = project.expenses
 
     invoiced = fields.Boolean(
         'Invoiced'
@@ -102,6 +114,22 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
+    billable = fields.Boolean(
+        compute=_onchange_project_task,
+        string='Billable',
+        store=True,
+    )
+    chargeable = fields.Boolean(
+        compute=_onchange_project_task,
+        string='Chargeable',
+        store=True,
+    )
+    expenses = fields.Boolean(
+        compute=_onchange_project_task,
+        string='Expenses',
+        store=True,
+    )
+
 
     def _check_state(self):
         """
@@ -112,6 +140,30 @@ class AccountAnalyticLine(models.Model):
         if not 'active_model' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
+
+    def get_task_user_product(self, task_id, user_id):
+        taskUserObj = self.env['task.user']
+        product_id = False
+        if task_id and user_id:
+            taskUser = taskUserObj.search([('task_id', '=', task_id), ('user_id', '=', user_id)],
+                                          limit=1)
+            product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+        return product_id
+
+    @api.model
+    def create(self, vals):
+        if 'task_id' in vals and 'user_id' in vals:
+            vals['product_id'] = self.get_task_user_product(vals['task_id'],vals['user_id'])
+        return super(AccountAnalyticLine, self).create(vals)
+
+    @api.multi
+    def write(self, vals):
+        for aal in self:
+            task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id
+            user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id
+            if task_id and user_id:
+                vals['product_id'] = self.get_task_user_product(task_id, user_id)
+        return super(AccountAnalyticLine, self).write(vals)
 
 
     '''@api.model
@@ -172,7 +224,6 @@ class AccountAnalyticLine(models.Model):
                 res2.amount = a
         return res'''
 
-
 class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
@@ -182,5 +233,33 @@ class AccountInvoiceLine(models.Model):
         ondelete='cascade',
         index=True
     )
+    project_id = fields.Many2one(
+        'project.project',
+        string='Project',
+        index=True
+    )
+
+class AccountInvoice(models.Model):
+    _inherit = "account.invoice"
+
+    @api.multi
+    def _get_timesheet_by_group(self):
+        self.ensure_one()
+        aal_ids = []
+        analytic_invoice_ids = self.invoice_line_ids.mapped('analytic_invoice_id')
+        for analytic_invoice in analytic_invoice_ids:
+            for grp_line in analytic_invoice.user_total_ids:
+                aal_ids += grp_line.children_ids
+        userProject = {}
+        for aal in aal_ids:
+            project_id, user_id = aal.project_id if aal.project_id else aal.task_id.project_id , aal.user_id
+            if project_id.billable and project_id.specs_invoice_report:
+                if (project_id, user_id) in userProject:
+                    userProject[(project_id, user_id)] = userProject[(project_id, user_id)] + [aal]
+                else:
+                    userProject[(project_id, user_id)] = [aal]
+        return userProject
+
+        
 
 
