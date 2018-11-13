@@ -35,6 +35,8 @@ class Project(models.Model):
     def onchange_billable(self):
         if self.billable and not self.chargeable:
             self.chargeable = True
+        if not self.billable:
+            self.expenses = False
 
 
 class Task(models.Model):
