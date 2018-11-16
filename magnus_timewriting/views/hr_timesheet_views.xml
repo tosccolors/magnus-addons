@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="hr_timesheet_sheet_form_inherited" model="ir.ui.view">
+      <field name="name">hr.timesheet.sheet.form</field>
+      <field name="model">hr_timesheet_sheet.sheet</field>
+      <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//notebook/page[1]/widget[1]" position="before">
+          <group states="new,draft"/>
+          <button name="duplicate_last_week" type="object" string="Duplicate Last Week" states="new,draft"/>
+          <group states="new,draft"/>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</odoo>

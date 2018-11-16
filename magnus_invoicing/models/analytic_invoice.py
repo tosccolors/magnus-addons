@@ -309,10 +309,16 @@ class AnalyticInvoice(models.Model):
         if fpos:
             account = fpos.map_account(account)
 
+        project = False
+        if line.project_id:
+            project = line.project_id
+        elif line.task_id:
+            project = line.task_id.project_id
+
         res = {
             'name': line.product_id.name or '/',
             # 'sequence': line.sequence,
-            'origin': '/',
+            'origin': project.po_number if project and project.billable else '/',
             'account_id': account.id,
             'price_unit': line.fee_rate,
             'quantity': line.unit_amount,
@@ -323,7 +329,8 @@ class AnalyticInvoice(models.Model):
             # 'invoice_line_tax_ids': [(6, 0, line.tax_id.ids or [])],
             'account_analytic_id': line.account_id and line.account_id.id or False,
             'analytic_tag_ids': [(6, 0, line.tag_ids.ids or [])],
-            'analytic_invoice_id':line.analytic_invoice_id.id
+            'analytic_invoice_id':line.analytic_invoice_id.id,
+            'project_id': project.id if project else False
         }
         return res
 
@@ -393,6 +400,11 @@ class AnalyticUserTotal(models.Model):
             self.fee_rate = fr = task_user.fee_rate
             self.amount = self.unit_amount * fr
 
+    @api.one
+    def _compute_analytic_line(self):
+        for aut in self:
+            aut.count_analytic_line = str(len(aut.children_ids)) + ' (records)'
+
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
     )
@@ -404,12 +416,25 @@ class AnalyticUserTotal(models.Model):
         compute=_compute_fee_rate,
         string='Amount'
     )
-    children_ids = fields.One2many(
+    # children_ids = fields.One2many(
+    #     'account.analytic.line',
+    #     'user_total_id',
+    #     string='Detail Time Lines',
+    #     readonly=True,
+    #     copy=False
+    # )
+    children_ids = fields.Many2many(
         'account.analytic.line',
+        'analytic_invoice_account_line_rel'
         'user_total_id',
+        'analytic_account_id',
         string='Detail Time Lines',
         readonly=True,
         copy=False
+    )
+    count_analytic_line = fields.Char(
+        compute=_compute_analytic_line,
+        string='Detail Time Lines'
     )
     gb_week_id = fields.Many2one(
         'date.range',
