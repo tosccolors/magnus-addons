@@ -20,18 +20,6 @@
       <field name="model">hr.employee</field>
       <field name="inherit_id" ref="hr.view_employee_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//group[@name='active_group']" position="after">
-          <group string='Duration of Service' name="duration_of_service">
-            <field name="official_date_of_employment" />
-            <field name="temporary_contract" />
-            <field name="end_date_of_employment" />
-            <field name="lengt_of_service" />
-          </group>
-          <group string='Leaves' name="leaves">
-            <field name="parttime" />
-            <field name="allocated_leaves" />
-          </group>
-        </xpath>
         <field name="calendar_id" position="after">
           <field name="external"/>
           <field name="supplier" attrs="{'invisible': [('external', '=', False)]}"/>
@@ -47,6 +35,31 @@
         </xpath>
         <xpath expr="//field[@name='user_id']" position="after">
           <field name="pass_number_alarm" />
+        </xpath>
+      </field>
+    </record>
+
+    <record id="hr_employee_view_form_inherited" model="ir.ui.view">
+        <field name="name">hr.employee.form.seniority</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_employee_seniority.hr_employee_view_form_inherit"/>
+        <field name="arch" type="xml">
+          <xpath expr="//field[@name='length_of_service']" position="after">
+            <field name="official_date_of_employment" />
+            <field name="temporary_contract" />
+            <field name="end_date_of_employment" />
+          </xpath>
+        </field>
+    </record>
+
+    <record id="hr_hr_employee_view_form2_inherited" model="ir.ui.view">
+      <field name="name">hr.hr.employee.view.form2</field>
+      <field name="model">hr.employee</field>
+      <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='vehicle_distance']" position="after">
+          <field name="parttime" />
+          <field name="allocated_leaves" />
         </xpath>
       </field>
     </record>
