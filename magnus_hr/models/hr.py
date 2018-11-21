@@ -4,7 +4,6 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 class Department(models.Model):
@@ -18,7 +17,6 @@ class Employee(models.Model):
     official_date_of_employment = fields.Date('Official Date of Employment')
     temporary_contract = fields.Date('Temporary Contract')
     end_date_of_employment = fields.Date('End Date of Employment')
-    lengt_of_service = fields.Char(compute='compute_lengt_of_service', string='Length of Service', store=True)
     external = fields.Boolean('External')
     supplier = fields.Char(string='Supplier')
     mentor_id = fields.Many2one('hr.employee', string='Mentor')
@@ -43,13 +41,39 @@ class Employee(models.Model):
     def _check_closing_date(self):
         self.validate_dates()
 
-    @api.one
-    @api.depends('official_date_of_employment', 'end_date_of_employment')
-    def compute_lengt_of_service(self):
-        start_date = self.official_date_of_employment
-        if start_date:
-            start_date = datetime.strptime(start_date, "%Y-%m-%d")
-            end_date = datetime.strptime(self.end_date_of_employment, "%Y-%m-%d") if self.end_date_of_employment else datetime.now()
-            if start_date <= end_date:
-                r = relativedelta(end_date, start_date)
-                self.lengt_of_service = str(r.years)+" Year(s) "+str(r.months)+" Month(s)"
+    @api.depends('contract_ids', 'initial_employment_date', 'end_date_of_employment')
+    def _compute_months_service(self):
+        date_now = fields.Date.today()
+        Contract = self.env['hr.contract'].sudo()
+        for employee in self:
+            nb_month = 0
+            if employee.end_date_of_employment:
+                date_now = employee.end_date_of_employment
+
+            if employee.initial_employment_date:
+                first_contract = employee._first_contract()
+                if first_contract:
+                    to_dt = fields.Date.from_string(first_contract.date_start)
+                else:
+                    to_dt = fields.Date.from_string(date_now)
+
+                from_dt = fields.Date.from_string(
+                    employee.initial_employment_date)
+
+                nb_month += relativedelta(to_dt, from_dt).years * 12 + \
+                    relativedelta(to_dt, from_dt).months + \
+                    self.check_next_days(to_dt, from_dt)
+
+            contracts = Contract.search([('employee_id', '=', employee.id)],
+                                        order='date_start asc')
+            for contract in contracts:
+                from_dt = fields.Date.from_string(contract.date_start)
+                if contract.date_end and contract.date_end < date_now:
+                    to_dt = fields.Date.from_string(contract.date_end)
+                else:
+                    to_dt = fields.Date.from_string(date_now)
+                nb_month += relativedelta(to_dt, from_dt).years * 12 + \
+                    relativedelta(to_dt, from_dt).months + \
+                    self.check_next_days(to_dt, from_dt)
+
+            employee.length_of_service = nb_month
