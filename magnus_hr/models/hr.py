@@ -25,6 +25,8 @@ class Employee(models.Model):
     emergency_contact = fields.Char('Emergency Contact')
     description = fields.Text('Description')
     pass_number_alarm = fields.Char('Pass Number Alarm')
+    slamid = fields.Char('Slam ID')
+    personnel_number = fields.Char('Personnel Number')
 
     def validate_dates(self):
         start_date = self.official_date_of_employment

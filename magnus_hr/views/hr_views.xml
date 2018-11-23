@@ -33,8 +33,12 @@
             <field name="description" placeholder="Description..." />
           </page>
         </xpath>
-        <xpath expr="//field[@name='user_id']" position="after">
-          <field name="pass_number_alarm" />
+        <xpath expr="//group[@name='active_group']" position="after">
+          <group string="ID Numbers" name="id_numbers">
+            <field name="pass_number_alarm" />
+            <field name="slamid" />
+            <field name="personnel_number" />
+          </group>
         </xpath>
       </field>
     </record>
