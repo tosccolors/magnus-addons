@@ -18,25 +18,13 @@ class Project(models.Model):
         'project_id',
         string='Invoice Schedule')
     code = fields.Char('Project Code')
-    billable = fields.Boolean('Billable')
-    chargeable = fields.Boolean('Chargeable')
     tag_ids = fields.Many2many('project.tags', string='Tags')
-    invoice_type = fields.Many2one('project.invoicing.type','Invoicing Type')
-    invoice_period = fields.Many2one('project.invoicing.period','Invoice Periodicity')
-    expenses = fields.Boolean('Expenses', default=True)
     po_number = fields.Char('PO Number')
-    specs_invoice_report = fields.Boolean('Add specs attachment to invoice')
 
     @api.multi
     def name_get(self):
         return [(value.id, "%s%s" % (value.code + '-' if value.code else '', value.name)) for value in self]
 
-    @api.onchange('billable','chargeable')
-    def onchange_billable(self):
-        if self.billable and not self.chargeable:
-            self.chargeable = True
-        if not self.billable:
-            self.expenses = False
 
 
 class Task(models.Model):
@@ -48,6 +36,19 @@ class Task(models.Model):
         string='Can register time',
         track_visibility='always'
     )
+    billable = fields.Boolean('Correction Chargeability')
+    chargeable = fields.Boolean('Chargeable')
+    invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
+    standby = fields.Boolean('Standby')
+    outof_office_hours_week = fields.Boolean('Out of office hours week')
+    outof_office_hours_weekend = fields.Boolean('Out of office hours weekend')
+
+    @api.onchange('billable', 'chargeable')
+    def onchange_billable(self):
+        if self.billable and not self.chargeable:
+            self.chargeable = True
+        if not self.billable:
+            self.expenses = False
 
     @api.model
     def default_get(self, fields):
@@ -117,4 +118,22 @@ class ProjectInvoicingPeriod(models.Model):
     _description = "Project invoicing periods"
 
     name = fields.Char('Project Invoice Period',required=True)
+
+class ProjectInvoicingProperties(models.Model):
+    _name="project.invoicing.properties"
+    _description = "Project invoicing properties"
+
+
+    name = fields.Char('Project Invoice Period', required=True)
+    invoice_type = fields.Many2one('project.invoicing.type', 'Invoicing Type')
+    invoice_period = fields.Many2one('project.invoicing.period', 'Invoice Periodicity')
+    expenses = fields.Boolean('Expenses', default=True)
+    specs_invoice_report = fields.Boolean('Add specs attachment to invoice')
+    actual_time_spent = fields.Boolean('Invoice Actual Time Spent')
+    actual_expenses = fields.Boolean('Invoice Expenses')
+    actual_costs = fields.Boolean('Invoice Costs')
+    fixed_amount = fields.Boolean('Invoice Fixed Amount')
+    fixed_fee_capped = fields.Boolean('Invoice Fixed Fee Capped')
+    fixed_fee_limit = fields.Monetary('Fixed Fee Limit')
+    currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
 
