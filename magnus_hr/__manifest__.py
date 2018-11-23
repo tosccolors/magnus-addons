@@ -4,13 +4,21 @@
 {
     'name': 'Magnus Employee Directory',
 
-    'summary': "Departments - extended",
+    'summary': "HRM - extended",
 
     'description': """
-Human Resources Management
-==========================
+Human Resources Management - extended
+=====================================
 
-This module adds Operating Unit field in hr.department object.
+This module adds the following fields:\n
+In the object hr.department creates a m2o field Operating Unit(operating_unit_id).\n
+In the object hr.employee on the tab 'HR Settings' under the heading 'Duration of Service' creates three new date fields called: 'Official Date of Employment', 'Temporary Contract' and 'End Date of Employment'. These first two date fields do not affect the 'lengt_of_service' field, the end-date-of-employment stops the counting of the length of service from the 'initial_employment_date'.\n
+In the object hr.employee on the tab 'Public Information' under the heading 'Position' creates a new boolean called 'External'. If the boolean is set to true a new character field called 'Supplier' becomes visible.\n
+In the object hr.employee on the tab 'Public Information' under the heading 'Position' creates a new m2o selection field of hr.employee called 'Mentor' similar to Manager (parent_id) and Coach (coach_id).\n
+In the object hr.employee on the tab 'HR Settings' under the heading 'Leaves' creates two new integer fields called 'Parttime' and 'Allocated Leaves'.\n
+In the object hr.employee on the tab 'Personal Information' under the heading 'Contact Information' creates a new character field called 'Emergency Contact'.\n
+In the object hr.employee creates a new tab called 'Description' and on this tab creates a new text field called 'Description'.\n
+In the object hr. employee on the tab 'HR Settings' under the heading 'Status' creates a new character field called 'Pass Number Alarm'.
 """,
 
     'author': "Magnus",
@@ -23,7 +31,7 @@ This module adds Operating Unit field in hr.department object.
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'hr', 'operating_unit'],
+    'depends': ['base', 'hr', 'operating_unit', 'hr_employee_seniority', 'hr_contract'],
 
     # always loaded
     'data': [

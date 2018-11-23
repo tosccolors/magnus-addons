@@ -24,4 +24,6 @@
 
         <menuitem action="project_invoicing_period_action" id="menu_project_invoicing_period_act" parent="project.menu_project_config" groups="base.group_no_one"/>
 
+        <menuitem action="project_invoicing_properties_action" id="menu_project_invoicing_properties_act" parent="project.menu_project_config" groups="base.group_no_one"/>
+
 </odoo>

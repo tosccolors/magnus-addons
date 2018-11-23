@@ -38,7 +38,7 @@
         'views/templates.xml',
         'views/analytic_invoice.xml',
         'views/menuitem.xml',
-        'report/report_invoice.xml',
+        # 'report/report_invoice.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
