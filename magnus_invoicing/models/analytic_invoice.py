@@ -318,7 +318,7 @@ class AnalyticInvoice(models.Model):
         res = {
             'name': line.product_id.name or '/',
             # 'sequence': line.sequence,
-            'origin': line.task_id.project_id.po_number if line.task_id and line.task_id.project_id and line.task_id.billable else '/',
+            'origin': line.task_id.project_id.po_number if line.task_id and line.task_id.project_id and line.task_id.correction_charge else '/',
             'account_id': account.id,
             'price_unit': line.fee_rate,
             'quantity': line.unit_amount,

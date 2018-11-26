@@ -36,13 +36,13 @@
                     <field name="state"/>
                 </xpath>
                 <xpath expr="//field[@name='planned_hours']" position="after">
-                    <field name="billable"/>
+                    <field name="correction_charge"/>
                 </xpath>
                 <xpath expr="//field[@name='progress']" position="after">
                     <field name="chargeable"/>
                 </xpath>
                 <xpath expr="//page[@name='description_page']" position="after">
-                    <page name="invocing_tab" string="Invoicing Tab" attrs="{'invisible':[('billable','=',False)]}">
+                    <page name="invocing_tab" string="Invoicing Tab">
                         <group col="4">
                             <field name="invoice_properties"/>
                             <field name="standby"/>
@@ -108,71 +108,6 @@
             </field>
         </record>
 
-        <!-- Invoicing Type -->
-        <record model="ir.ui.view" id="project_invoicing_type_tree_view">
-            <field name="name">Invoicing Type</field>
-            <field name="model">project.invoicing.type</field>
-            <field name="arch" type="xml">
-                <tree string="Invoicing Type">
-                    <field name="name"/>
-                </tree>
-            </field>
-        </record>
-        <record model="ir.ui.view" id="project_invoicing_type_form_view">
-            <field name="name">Invoicing Type</field>
-            <field name="model">project.invoicing.type</field>
-            <field name="arch" type="xml">
-                <form string="Invoicing Type">
-                    <group>
-                        <field name="name"/>
-                    </group>
-                </form>
-            </field>
-        </record>
-        <record id="project_invoicing_type_action" model="ir.actions.act_window">
-            <field name="name">Invoicing Type</field>
-            <field name="res_model">project.invoicing.type</field>
-            <field name="view_type">form</field>
-            <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
-                Click to add a new project invoicing type.
-              </p>
-            </field>
-        </record>
-
-        <!-- Invoicing Period -->
-        <record model="ir.ui.view" id="project_invoicing_period_tree_view">
-            <field name="name">Invoicing Period</field>
-            <field name="model">project.invoicing.period</field>
-            <field name="arch" type="xml">
-                <tree string="Invoicing Period">
-                    <field name="name"/>
-                </tree>
-            </field>
-        </record>
-        <record model="ir.ui.view" id="project_invoicing_Period_form_view">
-            <field name="name">Invoicing Period</field>
-            <field name="model">project.invoicing.period</field>
-            <field name="arch" type="xml">
-                <form string="Invoicing Period">
-                    <group>
-                        <field name="name"/>
-                    </group>
-                </form>
-            </field>
-        </record>
-        <record id="project_invoicing_period_action" model="ir.actions.act_window">
-            <field name="name">Invoicing Period</field>
-            <field name="res_model">project.invoicing.period</field>
-            <field name="view_type">form</field>
-            <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
-                Click to add a new project invoicing period.
-              </p>
-            </field>
-        </record>
-
-
         <record model="ir.ui.view" id="project_invoicing_period_tree_view">
             <field name="name">Invoicing Properties</field>
             <field name="model">project.invoicing.properties</field>
@@ -190,8 +125,6 @@
                     <field name="currency_id" invisible="True"/>
                     <group col="4">
                         <field name="name"/>
-                        <field name="invoice_type"/>
-                        <field name="invoice_period"/>
                         <field name="expenses"/>
                         <field name="specs_invoice_report"/>
                         <field name="actual_time_spent"/>

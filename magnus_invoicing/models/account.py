@@ -69,7 +69,7 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             task = line.task_id
             if task:
-                line.billable = task.billable
+                line.correction_charge = task.correction_charge
                 line.chargeable = task.chargeable
                 line.expenses = task.invoice_properties.expenses if task.invoice_properties else False
 
@@ -110,9 +110,9 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
-    billable = fields.Boolean(
+    correction_charge = fields.Boolean(
         compute=_onchange_project_task,
-        string='Billable',
+        string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
@@ -249,7 +249,7 @@ class AccountInvoice(models.Model):
         userProject = {}
         for aal in aal_ids:
             project_id, user_id = aal.project_id if aal.project_id else aal.task_id.project_id , aal.user_id
-            if project_id.billable and project_id.specs_invoice_report:
+            if project_id.correction_charge and project_id.specs_invoice_report:
                 if (project_id, user_id) in userProject:
                     userProject[(project_id, user_id)] = userProject[(project_id, user_id)] + [aal]
                 else:
