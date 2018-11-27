@@ -36,18 +36,18 @@ class Task(models.Model):
         string='Can register time',
         track_visibility='always'
     )
-    billable = fields.Boolean('Correction Chargeability')
+    correction_charge = fields.Boolean('Correction Chargeability')
     chargeable = fields.Boolean('Chargeable')
     invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
     standby = fields.Boolean('Standby')
     outof_office_hours_week = fields.Boolean('Out of office hours week')
     outof_office_hours_weekend = fields.Boolean('Out of office hours weekend')
 
-    @api.onchange('billable', 'chargeable')
-    def onchange_billable(self):
-        if self.billable and not self.chargeable:
+    @api.onchange('correction_charge', 'chargeable')
+    def onchange_correction_charge(self):
+        if self.correction_charge and not self.chargeable:
             self.chargeable = True
-        if not self.billable:
+        if not self.correction_charge:
             self.expenses = False
 
     @api.model
@@ -106,27 +106,12 @@ class InvoiceScheduleLine(models.Model):
         'project.project',
     )
 
-
-class ProjectInvoicingType(models.Model):
-    _name = "project.invoicing.type"
-    _description = "Project invoicing types"
-
-    name = fields.Char('Project Invoice Type',required=True)
-
-class ProjectInvoicingPeriod(models.Model):
-    _name = "project.invoicing.period"
-    _description = "Project invoicing periods"
-
-    name = fields.Char('Project Invoice Period',required=True)
-
 class ProjectInvoicingProperties(models.Model):
     _name="project.invoicing.properties"
     _description = "Project invoicing properties"
 
 
     name = fields.Char('Project Invoice Period', required=True)
-    invoice_type = fields.Many2one('project.invoicing.type', 'Invoicing Type')
-    invoice_period = fields.Many2one('project.invoicing.period', 'Invoice Periodicity')
     expenses = fields.Boolean('Expenses', default=True)
     specs_invoice_report = fields.Boolean('Add specs attachment to invoice')
     actual_time_spent = fields.Boolean('Invoice Actual Time Spent')

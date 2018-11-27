@@ -11,7 +11,7 @@
             </xpath>
             <xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']" position="after">
                 <t t-set="project_ids" t-value="o.invoice_line_ids.mapped('project_id')"/>
-                <t t-set="add_specs_invoice_report" t-value="project_ids.filtered(lambda p: p.billable and p.specs_invoice_report)"/>
+                <t t-set="add_specs_invoice_report" t-value="project_ids.filtered(lambda p: p.correction_charge and p.specs_invoice_report)"/>
 
                     <div class="row" t-if="len(add_specs_invoice_report) > 0">
 
