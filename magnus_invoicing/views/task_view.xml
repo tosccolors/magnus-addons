@@ -80,6 +80,45 @@
             </field>
         </record>
 
+        <record id="view_project_project_filter_magnus" model="ir.ui.view">
+            <field name="name">project.project.search</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_project_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="before">
+                    <field name="code" string="Project Code"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_project_magnus" model="ir.ui.view">
+            <field name="name">project.project.tree</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="before">
+                    <field name="code" string="Project Code"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_project_kanban_magnus" model="ir.ui.view">
+            <field name="name">project.project.Kanban</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="before">
+                    <field name="code" string="Project Code"/>
+                </xpath>
+                <xpath expr="//div[@class='o_primary']" position="replace">
+                    <div class="o_primary">
+                        <span><t t-esc="record.code.value"/><t t-if="record.code.value">-</t><t t-esc="record.name.value"/></span>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+
         <!--<record id="view_task_user_form" model="ir.ui.view">-->
             <!--<field name="name">task.user.form</field>-->
             <!--<field name="model">task.user</field>-->
