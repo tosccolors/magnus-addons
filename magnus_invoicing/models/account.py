@@ -64,18 +64,14 @@ class AccountAnalyticLine(models.Model):
         )
         return date_range
 
-    @api.depends('project_id','task_id')
+    @api.depends('task_id')
     def _onchange_project_task(self):
         for line in self:
-            project = False
-            if line.project_id:
-                project = line.project_id
-            elif line.task_id:
-                project = line.task_id.project_id
-            if project:
-                line.billable = project.billable
-                line.chargeable = project.chargeable
-                line.expenses = project.expenses
+            task = line.task_id
+            if task:
+                line.correction_charge = task.correction_charge
+                line.chargeable = task.chargeable
+                line.expenses = task.invoice_properties.expenses if task.invoice_properties else False
 
     invoiced = fields.Boolean(
         'Invoiced'
@@ -114,9 +110,9 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
-    billable = fields.Boolean(
+    correction_charge = fields.Boolean(
         compute=_onchange_project_task,
-        string='Billable',
+        string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
@@ -233,11 +229,11 @@ class AccountInvoiceLine(models.Model):
         ondelete='cascade',
         index=True
     )
-    project_id = fields.Many2one(
-        'project.project',
-        string='Project',
-        index=True
-    )
+    # project_id = fields.Many2one(
+    #     'project.project',
+    #     string='Project',
+    #     index=True
+    # )
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
@@ -253,7 +249,7 @@ class AccountInvoice(models.Model):
         userProject = {}
         for aal in aal_ids:
             project_id, user_id = aal.project_id if aal.project_id else aal.task_id.project_id , aal.user_id
-            if project_id.billable and project_id.specs_invoice_report:
+            if project_id.correction_charge and project_id.specs_invoice_report:
                 if (project_id, user_id) in userProject:
                     userProject[(project_id, user_id)] = userProject[(project_id, user_id)] + [aal]
                 else:

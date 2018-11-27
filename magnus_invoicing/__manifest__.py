@@ -29,7 +29,8 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/magnus_security.xml',
+        'security/ir.model.access.csv',
         'data/data.xml',
         'wizard/analytic_line_invoice_view.xml',
         'views/hr_view.xml',
@@ -38,7 +39,7 @@
         'views/templates.xml',
         'views/analytic_invoice.xml',
         'views/menuitem.xml',
-        'report/report_invoice.xml',
+        # 'report/report_invoice.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
