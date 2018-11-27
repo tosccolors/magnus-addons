@@ -1,2 +1,1 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_magnus_project_invoicing_properties,project_invoicing_properties,model_project_invoicing_properties,group_magnus_invoicing,1,1,1,1
