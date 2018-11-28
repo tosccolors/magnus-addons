@@ -24,9 +24,12 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/magnus_security.xml',
+        'security/ir.model.access.csv',
         'views/project_views.xml',
         'views/hr_timesheet_views.xml',
+        'views/menuitem.xml',
+        # 'report/report_invoice.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
