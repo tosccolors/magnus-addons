@@ -18,7 +18,7 @@ class Employee(models.Model):
     temporary_contract = fields.Date('Temporary Contract')
     end_date_of_employment = fields.Date('End Date of Employment')
     external = fields.Boolean('External')
-    supplier = fields.Char(string='Supplier')
+    supplier_id = fields.Many2one('res.partner', domain=[('supplier', '=', True), ('company_type', '=', 'company')], string='Supplier')
     mentor_id = fields.Many2one('hr.employee', string='Mentor')
     parttime = fields.Integer('Parttime')
     allocated_leaves = fields.Integer('Allocated Leaves')
