@@ -38,6 +38,7 @@ The extended date range validation process is:
     # always loaded
     'data': [
         'views/hr_timesheet_views.xml',
+        'views/project_timesheet_views.xml'
     ],
     'installable': True,
     # only loaded in demonstration mode
