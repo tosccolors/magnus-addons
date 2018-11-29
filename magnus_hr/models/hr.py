@@ -6,11 +6,6 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
 
-class Department(models.Model):
-    _inherit = "hr.department"
-
-    operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit')
-
 class Employee(models.Model):
     _inherit = "hr.employee"
 
