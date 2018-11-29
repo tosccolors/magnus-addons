@@ -20,6 +20,4 @@
                   action="account_analytic_line_action_entries_magnus"
                   parent="menu_analytic_entries" sequence="1" groups="analytic.group_analytic_accounting"/>
 
-        <menuitem action="project_invoicing_properties_action" id="menu_project_invoicing_properties_act" parent="project.menu_project_config" groups="group_magnus_invoicing"/>
-
 </odoo>

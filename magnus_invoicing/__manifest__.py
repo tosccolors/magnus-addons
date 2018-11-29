@@ -25,12 +25,11 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['date_range','hr_timesheet_sheet','account_fiscal_month','account_fiscal_year'],
+    'depends': ['date_range','hr_timesheet_sheet','account_fiscal_month','account_fiscal_year','magnus_project'],
 
     # always loaded
     'data': [
-        'security/magnus_security.xml',
-        'security/ir.model.access.csv',
+        # 'security/ir.model.access.csv',
         'data/data.xml',
         'wizard/analytic_line_invoice_view.xml',
         'views/hr_view.xml',
@@ -39,7 +38,6 @@
         'views/templates.xml',
         'views/analytic_invoice.xml',
         'views/menuitem.xml',
-        # 'report/report_invoice.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
