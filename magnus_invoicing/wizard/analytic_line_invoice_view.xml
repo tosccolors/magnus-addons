@@ -10,6 +10,11 @@
                         All selected analytic entries will be marked as following.
                     </p>
                     <field name="name" col="4" colspan="6" required="True"/>
+                    <group attrs="{'invisible':[('name','!=','write-off')]}">
+                        <field name="wip"/>
+                        <field name="wip_percentage" attrs="{'invisible':[('wip','=',False)], 'required':[('wip','=',True)]}"/>
+                        <field name="description" attrs="{'invisible':[('wip','=',False)], 'required':[('wip','=',True)]}"/>
+                    </group>
                     <footer>
                         <button name="analytic_invoice_lines" string="Update Entries" type="object" class="oe_highlight"/>
                         <button string="Cancel" class="oe_link" special="cancel" />

@@ -10,4 +10,16 @@
 
 
     </data>
+
+    <data noupdate="1">
+        <!--
+        Resource: account.journal
+        -->
+        <record id="wip_journal" model="account.journal">
+            <field name="name">WIP Invoices</field>
+            <field name="code">WIP</field>
+            <field name="type">wip</field>
+        </record>
+    </data>
+
 </odoo>

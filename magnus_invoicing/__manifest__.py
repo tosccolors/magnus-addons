@@ -30,13 +30,16 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
+        'security/magnus_security.xml',
         'data/data.xml',
         'wizard/analytic_line_invoice_view.xml',
+        'wizard/change_chargecode_view.xml',
         'views/hr_view.xml',
         'views/task_view.xml',
         'views/account_analytic_view.xml',
         'views/templates.xml',
         'views/analytic_invoice.xml',
+        'views/product_view.xml',
         'views/menuitem.xml',
     ],
     # only loaded in demonstration mode
