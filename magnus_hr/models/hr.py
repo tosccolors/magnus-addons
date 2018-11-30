@@ -22,6 +22,7 @@ class Employee(models.Model):
     pass_number_alarm = fields.Char('Pass Number Alarm')
     slamid = fields.Char('Slam ID')
     personnel_number = fields.Char('Personnel Number')
+    employee_numbersid = fields.Char('Employee NMBRs ID')
 
     def validate_dates(self):
         start_date = self.official_date_of_employment
