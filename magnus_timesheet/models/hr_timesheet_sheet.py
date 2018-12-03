@@ -25,7 +25,11 @@ class HrTimesheetSheet(models.Model):
             if week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
-                rec.update({'week_id': False})
+                upcoming_week = self.env['date.range'].search([('id', 'not in', logged_weeks), ('type_id','in',['week','Week','WEEK']), ('date_start', '>', dt-timedelta(days=dt.weekday()))], order='date_start', limit=1)
+                if upcoming_week:
+                    rec.update({'week_id': upcoming_week.id})
+                else:
+                    rec.update({'week_id': False})
         else:
             if self._uid == SUPERUSER_ID:
                 raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
