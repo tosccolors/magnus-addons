@@ -9,7 +9,7 @@
       <field name="arch" type="xml">
         <xpath expr="//group[1]/group[1]" position="before">
           <group>
-            <field name="week_id" attrs="{'readonly': [('state', 'not in', ['new'])]}" options="{'no_create': True}"/>
+            <field name="week_id" attrs="{'readonly': [('state', 'not in', ['new'])]}" options="{'no_create': True, 'limit': 0}"/>
           </group>
         </xpath>
         <xpath expr="//notebook/page[1]/widget[1]" position="before">
@@ -42,6 +42,9 @@
         <field name="name" position="attributes">
           <attribute name="invisible">1</attribute>
         </field>
+        <field name="project_id" position="before">
+          <field name="week_id" string="Timesheet Week"/>
+        </field>
       </field>
     </record>
 
@@ -54,6 +57,11 @@
           <field name="week_id"/>
         </field>
       </field>
+    </record>
+
+    <!--My Timesheets action inherited-->
+    <record id="hr_timesheet_sheet.act_hr_timesheet_sheet_my_timesheets" model="ir.actions.act_window">
+      <field name="context">{'readonly_by_pass': True}</field>
     </record>
 
   </data>
