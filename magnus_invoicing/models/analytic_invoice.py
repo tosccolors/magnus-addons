@@ -243,6 +243,20 @@ class AnalyticInvoice(models.Model):
 
     invoice_count = fields.Integer('Invoices', compute='_compute_invoice_count')
 
+    def analytic_line_status(self, aal, status='progress'):
+        aal = aal.search([('invoiced', '=', False),('id', 'in', aal.ids)]) if aal else aal
+        if not aal:
+            return True
+        cond = '='
+        rec = aal.ids[0]
+        if len(aal) > 1:
+            cond = 'IN'
+            rec = tuple(aal.ids)
+        self.env.cr.execute("""
+                UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
+        """ % (status, cond, rec))
+        return True
+
     def unlink_rec(self):
         user_total_ids = self.env['analytic.user.total'].search(
             [('analytic_invoice_id', '=', False)])
@@ -256,11 +270,21 @@ class AnalyticInvoice(models.Model):
                                 DELETE FROM  analytic_user_total WHERE id %s %s
                         """ % (cond, rec))
 
-
     @api.multi
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
         self.unlink_rec()
+        analytic_lines = self.user_total_ids.mapped('children_ids')
+        if analytic_lines:
+            self.analytic_line_status(analytic_lines, 'progress')
+        return res
+
+    @api.model
+    def create(self, vals):
+        res = super(AnalyticInvoice, self).create(vals)
+        analytic_lines = res.user_total_ids.mapped('children_ids')
+        if analytic_lines:
+            self.analytic_line_status(analytic_lines, 'progress')
         return res
 
     @api.model
@@ -330,6 +354,7 @@ class AnalyticInvoice(models.Model):
             'account_analytic_id': line.account_id and line.account_id.id or False,
             'analytic_tag_ids': [(6, 0, line.tag_ids.ids or [])],
             'analytic_invoice_id':line.analytic_invoice_id.id,
+            'user_id':line.user_id.id,
             # 'project_id': project.id if project else False
         }
         return res
@@ -339,6 +364,7 @@ class AnalyticInvoice(models.Model):
         invoices = {}
         invoices['lines'] = []
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
+
         for line in user_summary_lines:
             inv_line_vals = self._prepare_invoice_line(line)
             invoices['lines'].append((0, 0, inv_line_vals))
@@ -351,9 +377,11 @@ class AnalyticInvoice(models.Model):
                 invoice = self.env['account.invoice'].create(vals)
                 invoice.compute_taxes()
                 self.invoice_ids = [(4, invoice.id)]
+
+        if self.state == 'draft':
+            self.state = 'open'
+
         for line in user_summary_lines:
-            # line.children_ids.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
-            # line.with_context({'UpdateState':True}).write({'invoiced':True,'state':'invoiced'})
             cond = '='
             rec = line.children_ids.ids[0]
             if len(line.children_ids) > 1:
@@ -365,8 +393,7 @@ class AnalyticInvoice(models.Model):
             self.env.cr.execute("""
                         UPDATE analytic_user_total SET state = 'invoiced', invoiced = true WHERE id = %s
                 """ % (line.id))
-        if self.state == 'draft':
-            self.state = 'open'
+
         return True
 
 

@@ -79,12 +79,6 @@ class AccountAnalyticLine(models.Model):
     invoiceable = fields.Boolean(
         'Invoiceable'
     )
-    # user_total_id = fields.Many2one(
-    #     'analytic.user.total',
-    #     string='Summary Reference',
-    #     ondelete='cascade',
-    #     index=True
-    # )
     user_total_id = fields.Many2one(
         'analytic.user.total',
         string='Summary Reference',
@@ -107,7 +101,10 @@ class AccountAnalyticLine(models.Model):
         ('open', 'Confirmed'),
         ('delayed', 'Delayed'),
         ('invoiceable', 'To be Invoiced'),
+        ('progress', 'In Progress'),
         ('invoiced', 'Invoiced'),
+        ('write-off', 'Write-Off'),
+        ('change-chargecode', 'Change-Chargecode'),
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
     correction_charge = fields.Boolean(
@@ -124,6 +121,10 @@ class AccountAnalyticLine(models.Model):
         compute=_onchange_project_task,
         string='Expenses',
         store=True,
+    )
+    write_off_move = fields.Many2one(
+        'account.move',
+        string='Write-off Move',
     )
 
 
@@ -160,6 +161,19 @@ class AccountAnalyticLine(models.Model):
             if task_id and user_id:
                 vals['product_id'] = self.get_task_user_product(task_id, user_id)
         return super(AccountAnalyticLine, self).write(vals)
+    
+    @api.model
+    def get_fee_rate(self):
+        uid = self.user_id.id or False
+        tid = self.task_id.id or False
+        amount = 0.0
+        if uid and tid:
+            task_user = self.env['task.user'].search([
+                ('user_id', '=', uid),
+                ('task_id', '=', tid)])
+            fr = task_user.fee_rate
+            amount = self.unit_amount * fr
+        return amount
 
 
     '''@api.model
@@ -229,6 +243,12 @@ class AccountInvoiceLine(models.Model):
         ondelete='cascade',
         index=True
     )
+    user_id = fields.Many2one(
+        'res.users',
+        'Timesheet User',
+        index = True
+    )
+
     # project_id = fields.Many2one(
     #     'project.project',
     #     string='Project',
@@ -255,6 +275,12 @@ class AccountInvoice(models.Model):
                 else:
                     userProject[(project_id, user_id)] = [aal]
         return userProject
+
+
+class AccountJournal(models.Model):
+    _inherit = 'account.journal'
+
+    type = fields.Selection(selection_add=[('wip', 'WIP')])
 
         
 
