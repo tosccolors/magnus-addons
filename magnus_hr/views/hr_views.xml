@@ -2,18 +2,6 @@
 <odoo>
   <data>
 
-    <!-- hr.department inherited -->
-    <record id="view_department_form_inherited" model="ir.ui.view">
-      <field name="name">hr.department.form</field>
-      <field name="model">hr.department</field>
-      <field name="inherit_id" ref="hr.view_department_form"/>
-      <field name="arch" type="xml">
-        <xpath expr="//field[@name='parent_id']" position="after">
-          <field name="operating_unit_id" widget="selection" required="True" />
-        </xpath>
-      </field>
-    </record>
-
     <!-- Employee inherited-->
     <record id="view_employee_form_inherited" model="ir.ui.view">
       <field name="name">hr.employee.form</field>
@@ -22,7 +10,7 @@
       <field name="arch" type="xml">
         <field name="calendar_id" position="after">
           <field name="external"/>
-          <field name="supplier" attrs="{'invisible': [('external', '=', False)]}"/>
+          <field name="supplier_id" attrs="{'invisible': [('external', '=', False)]}"/>
           <field name="mentor_id"/>
         </field>
         <xpath expr="//field[@name='address_home_id']" position="after">
@@ -38,6 +26,7 @@
             <field name="pass_number_alarm" />
             <field name="slamid" />
             <field name="personnel_number" />
+            <field name="employee_numbersid" />
           </group>
         </xpath>
       </field>

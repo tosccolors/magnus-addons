@@ -6,11 +6,6 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
 
-class Department(models.Model):
-    _inherit = "hr.department"
-
-    operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit')
-
 class Employee(models.Model):
     _inherit = "hr.employee"
 
@@ -18,7 +13,7 @@ class Employee(models.Model):
     temporary_contract = fields.Date('Temporary Contract')
     end_date_of_employment = fields.Date('End Date of Employment')
     external = fields.Boolean('External')
-    supplier = fields.Char(string='Supplier')
+    supplier_id = fields.Many2one('res.partner', domain=[('supplier', '=', True), ('company_type', '=', 'company')], string='Supplier')
     mentor_id = fields.Many2one('hr.employee', string='Mentor')
     parttime = fields.Integer('Parttime')
     allocated_leaves = fields.Integer('Allocated Leaves')
@@ -27,6 +22,7 @@ class Employee(models.Model):
     pass_number_alarm = fields.Char('Pass Number Alarm')
     slamid = fields.Char('Slam ID')
     personnel_number = fields.Char('Personnel Number')
+    employee_numbersid = fields.Char('Employee NMBRs ID')
 
     def validate_dates(self):
         start_date = self.official_date_of_employment
