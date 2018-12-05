@@ -26,6 +26,7 @@
             <field name="pass_number_alarm" />
             <field name="slamid" />
             <field name="personnel_number" />
+            <field name="employee_numbersid" />
           </group>
         </xpath>
       </field>
