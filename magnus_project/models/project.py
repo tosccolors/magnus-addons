@@ -60,7 +60,7 @@ class ProjectInvoicingProperties(models.Model):
 
 
     name = fields.Char('Project Invoice Period', required=True)
-    expenses = fields.Boolean('Expenses')
+    expenses = fields.Boolean('Expenses', default=True)
     specs_invoice_report = fields.Boolean('Add specs attachment to invoice')
     actual_time_spent = fields.Boolean('Invoice Actual Time Spent')
     actual_expenses = fields.Boolean('Invoice Expenses')
