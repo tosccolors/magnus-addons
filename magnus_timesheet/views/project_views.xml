@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="project_invoicing_Period_form_view_inherited">
+            <field name="name">Invoicing Properties</field>
+            <field name="model">project.invoicing.properties</field>
+            <field name="inherit_id" ref="magnus_project.project_invoicing_Period_form_view"/>
+            <field name="arch" type="xml">
+                <field name="fixed_fee_capped" position="after">
+                    <field name="invoice_mileage" />
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

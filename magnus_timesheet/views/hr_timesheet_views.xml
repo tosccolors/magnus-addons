@@ -7,10 +7,18 @@
       <field name="model">hr_timesheet_sheet.sheet</field>
       <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//group[1]/group[1]" position="before">
+        <xpath expr="//group[1]/group[1]" position="after">
           <group>
-            <field name="week_id" attrs="{'readonly': [('state', 'not in', ['new'])]}" options="{'no_create': True, 'limit': 0}"/>
+            <field name="starting_mileage"  attrs="{'invisible': [('vehicle', '=', False)]}"/>
+            <field name="starting_mileage_editable" attrs="{'invisible': [('vehicle', '=', True)]}"/>
+            <field name="vehicle" invisible="1" />
+            <field name="business_mileage" />
+            <field name="private_mileage" />
+            <field name="end_mileage" />
           </group>
+        </xpath>
+        <xpath expr="//label[@for='date_from']" position="before">
+          <field name="week_id" attrs="{'readonly': [('state', 'not in', ['new'])]}" options="{'no_create': True, 'limit': 0}"/>
         </xpath>
         <xpath expr="//notebook/page[1]/widget[1]" position="before">
           <group states="new,draft"/>
@@ -30,6 +38,9 @@
         <xpath expr="//tree/field[@name='name']" position="attributes">
           <attribute name="required">0</attribute>
           <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//tree/field[@name='unit_amount']" position="after">
+          <field name="kilometers" />
         </xpath>
       </field>
     </record>
@@ -55,6 +66,10 @@
       <field name="arch" type="xml">
         <field name="employee_id" position="after">
           <field name="week_id"/>
+        </field>
+        <field name="date_to" position="after">
+          <field name="private_mileage" />
+          <field name="business_mileage" />
         </field>
       </field>
     </record>
