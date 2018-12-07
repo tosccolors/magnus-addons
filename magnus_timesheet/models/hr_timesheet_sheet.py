@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
-
+    _order = "week_id desc"
 
     @api.model
     def default_get(self, fields):
@@ -37,6 +37,10 @@ class HrTimesheetSheet(models.Model):
                 raise UserError(_('Please contact administrator.'))
 
         return rec
+
+    @api.onchange('week_id')
+    def onchange_week_id(self):
+        return {'domain':{'week_id':self._get_week_domain()}}
 
     def _get_week_domain(self):
         emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
@@ -104,7 +108,6 @@ class HrTimesheetSheet(models.Model):
     @api.constrains('starting_mileage', 'business_mileage', 'end_mileage')
     def _check_end_mileage(self):
         total = self.starting_mileage + self.business_mileage
-        print "\n\ntotal>>", self.starting_mileage, self.business_mileage
         if self.end_mileage < total:
             raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
 
