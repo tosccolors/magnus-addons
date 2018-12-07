@@ -4,7 +4,7 @@
 
 from odoo import models, fields, api, _, SUPERUSER_ID
 from datetime import datetime, timedelta
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from dateutil.rrule import (rrule)
 from dateutil.relativedelta import relativedelta
 
@@ -54,8 +54,59 @@ class HrTimesheetSheet(models.Model):
         domain = [('id', '=', emp_id.id)] if emp_id else [('id', '=', False)]
         return domain
 
+    def _get_vehicle(self):
+        vehicle = False
+        if self.employee_id:
+            user = self.employee_id.user_id if self.employee_id.user_id else False
+            if user:
+                vehicle = self.env['fleet.vehicle'].search([('driver_id', '=', user.partner_id.id)], limit=1)
+        return vehicle
+
+    def _get_latest_odometer(self):
+        latest_odometer = self.starting_mileage_editable
+        vehicle = self._get_vehicle()
+        if vehicle:
+            latest_odometer = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
+        if vehicle and self.week_id:
+            latest_odometer = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
+        return latest_odometer
+
+    @api.one
+    @api.depends('employee_id','week_id')
+    def _get_starting_mileage(self):
+        self.starting_mileage = self._get_latest_odometer()
+
+    @api.one
+    @api.depends('timesheet_ids.kilometers')
+    def _get_business_mileage(self):
+        self.business_mileage = sum(self.timesheet_ids.mapped('kilometers')) if self.timesheet_ids else 0
+
+    @api.one
+    @api.depends('end_mileage','business_mileage','starting_mileage')
+    def _get_private_mileage(self):
+        self.private_mileage = self.end_mileage - self.business_mileage - self.starting_mileage
+
+    @api.one
+    @api.depends('employee_id','week_id')
+    def _compute_vehicle(self):
+        self.vehicle = True if self._get_vehicle() else False
+
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
+    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=True)
+    starting_mileage_editable = fields.Integer(string='Starting Mileage')
+    vehicle = fields.Boolean(compute='_compute_vehicle', string='Vehicle', store=True)
+    business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
+    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
+    end_mileage = fields.Integer('End Mileage')
+
+    @api.one
+    @api.constrains('starting_mileage', 'business_mileage', 'end_mileage')
+    def _check_end_mileage(self):
+        total = self.starting_mileage + self.business_mileage
+        print "\n\ntotal>>", self.starting_mileage, self.business_mileage
+        if self.end_mileage < total:
+            raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
@@ -88,11 +139,41 @@ class HrTimesheetSheet(models.Model):
                 raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
+    @api.one
+    def action_timesheet_done(self):
+        res = super(HrTimesheetSheet, self).action_timesheet_done()
+        vehicle = self._get_vehicle()
+        if vehicle:
+            self.env['fleet.vehicle.odometer'].create({
+                'value': self.end_mileage,
+                'date': self.week_id.date_end or fields.Date.context_today(self),
+                'vehicle_id': vehicle.id
+                })
+
+        for aal in self.timesheet_ids.filtered('kilometers'):
+            newaal = aal.copy()
+            non_invoiceable_mileage = False if aal.task_id and aal.task_id.invoice_properties and aal.task_id.invoice_properties.invoice_mileage else True
+            newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False, 'non_invoiceable_mileage': non_invoiceable_mileage})
+            self.env.cr.execute("""
+                    UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s
+            """ % (self.env.ref('product.product_uom_km').id, newaal.id))
+            aal.ref_id = newaal.id
+        return res
+
+    @api.one
+    def action_timesheet_draft(self):
+        res = super(HrTimesheetSheet, self).action_timesheet_draft()
+        if self.timesheet_ids and self.timesheet_ids.mapped('ref_id'):
+            self.timesheet_ids.mapped('ref_id').unlink()
+        return res
 
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
     sheet_id = fields.Many2one('hr_timesheet_sheet.sheet', compute='_compute_sheet', string='Sheet', store=True, ondelete='cascade')
+    kilometers = fields.Integer('Kilometers')
+    non_invoiceable_mileage = fields.Boolean(string='Invoice Mileage', store=True)
+    ref_id = fields.Many2one('account.analytic.line', string='Reference')
 
     @api.onchange('project_id')
     def onchange_project_id(self):

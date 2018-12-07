@@ -65,6 +65,8 @@
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="tag_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
                     <field name="po_number"/>
+                    <field name="slamid"/>
+                    <field name="invoice_address" domain="[('parent_id', '=', partner_id), ('type', '=', 'invoice')]"/>
                 </xpath>
             </field>
         </record>
