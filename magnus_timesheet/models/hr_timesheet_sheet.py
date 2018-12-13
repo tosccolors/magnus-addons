@@ -155,7 +155,7 @@ class HrTimesheetSheet(models.Model):
 
         for aal in self.timesheet_ids.filtered('kilometers'):
             newaal = aal.copy()
-            non_invoiceable_mileage = False if aal.task_id and aal.task_id.invoice_properties and aal.task_id.invoice_properties.invoice_mileage else True
+            non_invoiceable_mileage = False if aal.project_id.invoice_properties and aal.project_id.invoice_properties.invoice_mileage else True
             newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False, 'non_invoiceable_mileage': non_invoiceable_mileage})
             self.env.cr.execute("""
                     UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s

@@ -368,10 +368,7 @@ class AnalyticInvoice(models.Model):
         for line in user_summary_lines:
             inv_line_vals = self._prepare_invoice_line(line)
             invoices['lines'].append((0, 0, inv_line_vals))
-        if invoices['lines']:
-            if self.invoice_ids:
-                invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
-                invoice.write({'lines':invoices['lines']})
+        
             else:
                 vals = self._prepare_invoice(invoices)
                 invoice = self.env['account.invoice'].create(vals)
