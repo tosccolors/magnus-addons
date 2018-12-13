@@ -36,7 +36,27 @@
           <attribute name="readonly">1</attribute>
         </xpath>
         <xpath expr="//tree/field[@name='unit_amount']" position="after">
-          <field name="kilometers" />
+          <field name="kilometers" style="border-color:#7F8C8D;"/>
+        </xpath>
+        <xpath expr="//tree/field[@name='date']" position="attributes">
+          <attribute name="readonly">1</attribute>
+        </xpath>
+        <xpath expr="//tree/field[@name='project_id']" position="attributes">
+          <attribute name="readonly">1</attribute>
+        </xpath>
+        <xpath expr="//tree/field[@name='unit_amount']" position="attributes">
+          <attribute name="readonly">1</attribute>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="hr_timesheet_sheet_form_task_inherited" model="ir.ui.view">
+      <field name="name">hr_timesheet_task_form</field>
+      <field name="model">hr_timesheet_sheet.sheet</field>
+      <field name="inherit_id" ref="hr_timesheet_task.hr_timesheet_sheet_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//tree/field[@name='task_id']" position="attributes">
+          <attribute name="readonly">1</attribute>
         </xpath>
       </field>
     </record>
@@ -70,9 +90,23 @@
       </field>
     </record>
 
+    <record model="ir.ui.view" id="view_hr_timesheet_sheet_pivot">
+        <field name="name">view.hr.timesheet.sheet.pivot</field>
+        <field name="model">hr_timesheet_sheet.sheet</field>
+        <field name="arch" type="xml">
+            <pivot string="My Timesheets" display_quantity="true">
+                <field name="week_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="private_mileage" type="measure"/>
+                <field name="business_mileage" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <!--My Timesheets action inherited-->
     <record id="hr_timesheet_sheet.act_hr_timesheet_sheet_my_timesheets" model="ir.actions.act_window">
       <field name="context">{'readonly_by_pass': True}</field>
+      <field name="view_mode">tree,pivot,form</field>
     </record>
 
   </data>
