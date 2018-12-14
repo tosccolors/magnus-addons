@@ -342,7 +342,7 @@ class AnalyticInvoice(models.Model):
         res = {
             'name': line.product_id.name or '/',
             # 'sequence': line.sequence,
-            'origin': line.task_id.project_id.po_number if line.task_id and line.task_id.project_id and line.task_id.correction_charge else '/',
+            'origin': line.task_id.project_id.po_number if line.task_id and line.task_id.project_id and line.task_id.project_id.correction_charge else '/',
             'account_id': account.id,
             'price_unit': line.fee_rate,
             'quantity': line.unit_amount,
@@ -368,10 +368,11 @@ class AnalyticInvoice(models.Model):
         for line in user_summary_lines:
             inv_line_vals = self._prepare_invoice_line(line)
             invoices['lines'].append((0, 0, inv_line_vals))
-        if invoices['lines']:
-            if self.invoice_ids:
-                invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
-                invoice.write({'lines':invoices['lines']})
+
+            if invoices['lines']:
+                if self.invoice_ids:
+                    invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
+                    invoice.write({'lines': invoices['lines']})
             else:
                 vals = self._prepare_invoice(invoices)
                 invoice = self.env['account.invoice'].create(vals)

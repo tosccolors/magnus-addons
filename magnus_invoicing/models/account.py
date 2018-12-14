@@ -64,14 +64,14 @@ class AccountAnalyticLine(models.Model):
         )
         return date_range
 
-    @api.depends('task_id')
-    def _onchange_project_task(self):
+    @api.depends('project_id')
+    def _onchange_project(self):
         for line in self:
-            task = line.task_id
-            if task:
-                line.correction_charge = task.correction_charge
-                line.chargeable = task.chargeable
-                line.expenses = task.invoice_properties.expenses if task.invoice_properties else False
+            project = line.project_id
+            if project:
+                line.correction_charge = project.correction_charge
+                line.chargeable = project.chargeable
+                line.expenses = project.invoice_properties.expenses if project.invoice_properties else False
 
     invoiced = fields.Boolean(
         'Invoiced'
@@ -108,17 +108,17 @@ class AccountAnalyticLine(models.Model):
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
     correction_charge = fields.Boolean(
-        compute=_onchange_project_task,
+        compute=_onchange_project,
         string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
-        compute=_onchange_project_task,
+        compute=_onchange_project,
         string='Chargeable',
         store=True,
     )
     expenses = fields.Boolean(
-        compute=_onchange_project_task,
+        compute=_onchange_project,
         string='Expenses',
         store=True,
     )
