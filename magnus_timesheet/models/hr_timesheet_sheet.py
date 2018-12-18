@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
-
+    _order = "week_id desc"
 
     @api.model
     def default_get(self, fields):
@@ -37,6 +37,10 @@ class HrTimesheetSheet(models.Model):
                 raise UserError(_('Please contact administrator.'))
 
         return rec
+
+    @api.onchange('week_id')
+    def onchange_week_id(self):
+        return {'domain':{'week_id':self._get_week_domain()}}
 
     def _get_week_domain(self):
         emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
@@ -100,14 +104,6 @@ class HrTimesheetSheet(models.Model):
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
     end_mileage = fields.Integer('End Mileage')
 
-    @api.one
-    @api.constrains('starting_mileage', 'business_mileage', 'end_mileage')
-    def _check_end_mileage(self):
-        total = self.starting_mileage + self.business_mileage
-        print "\n\ntotal>>", self.starting_mileage, self.business_mileage
-        if self.end_mileage < total:
-            raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
-
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
         self.date_from = self.week_id.date_start
@@ -127,8 +123,14 @@ class HrTimesheetSheet(models.Model):
                 else:
                     raise UserError(_("You have no timesheet logged for last week. Duration: %s to %s") %(datetime.strftime(date_start, "%d-%b-%Y"), datetime.strftime(date_end, "%d-%b-%Y")))
 
+    def _check_end_mileage(self):
+        total = self.starting_mileage + self.business_mileage
+        if self.end_mileage < total:
+            raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
+
     @api.one
     def action_timesheet_confirm(self):
+        self._check_end_mileage()
         date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
@@ -152,7 +154,7 @@ class HrTimesheetSheet(models.Model):
 
         for aal in self.timesheet_ids.filtered('kilometers'):
             newaal = aal.copy()
-            non_invoiceable_mileage = False if aal.task_id and aal.task_id.invoice_properties and aal.task_id.invoice_properties.invoice_mileage else True
+            non_invoiceable_mileage = False if aal.project_id.invoice_properties and aal.project_id.invoice_properties.invoice_mileage else True
             newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False, 'non_invoiceable_mileage': non_invoiceable_mileage})
             self.env.cr.execute("""
                     UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s

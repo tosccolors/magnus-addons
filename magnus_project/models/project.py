@@ -15,6 +15,12 @@ class Project(models.Model):
     code = fields.Char('Project Code')
     tag_ids = fields.Many2many('project.tags', string='Tags')
     po_number = fields.Char('PO Number')
+    slamid = fields.Char('Slam ID')
+    invoice_address = fields.Many2one('res.partner', string='Invoice Address')
+    correction_charge = fields.Boolean('Correction Chargeability')
+    chargeable = fields.Boolean('Chargeable')
+    invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
+
 
     @api.multi
     def name_get(self):
@@ -23,20 +29,9 @@ class Project(models.Model):
 class Task(models.Model):
     _inherit = "project.task"
 
-    correction_charge = fields.Boolean('Correction Chargeability')
-    chargeable = fields.Boolean('Chargeable')
-    invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
     standby = fields.Boolean('Standby')
     outof_office_hours_week = fields.Boolean('Out of office hours week')
     outof_office_hours_weekend = fields.Boolean('Out of office hours weekend')
-
-
-    @api.onchange('correction_charge', 'chargeable')
-    def onchange_correction_charge(self):
-        if self.correction_charge and not self.chargeable:
-            self.chargeable = True
-        if not self.correction_charge:
-            self.expenses = False
 
     @api.model
     def default_get(self, fields):
