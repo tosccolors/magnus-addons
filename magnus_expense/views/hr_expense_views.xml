@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <record id="magnus_expense_hr_expense_form_view" model="ir.ui.view">
+            <field name="name">hr.expense.form.magnus.expense</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='description']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='analytic_account_id']" position="attributes">
+                    <attribute name="required">True</attribute>
+                    <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='employee_id']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//field[@name='product_id']" position="attributes">
+                    <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_expenses_tree_magnus" model="ir.ui.view">
+            <field name="name">hr.expense.magnus.tree</field>
+            <field name="model">hr.expense</field>
+            <field name="arch" type="xml">
+                <tree string="Expenses" decoration-bf="message_unread == True" create="false" edit="false" copy="false" delete="false">
+                    <field name="currency_id" invisible="True"/>
+                    <field name="attachment_number" invisible="True"/>
+                    <field name="date"/>
+                    <field name="name"/>
+                    <field name="employee_id"/>
+                    <field name="sheet_id" invisible="not context.get('show_report', False)"/>
+                    <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+                    <field name="total_amount" sum="Total Amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    <field name="state"/>
+                    <field name="message_unread" invisible="1"/>
+                    <button name="action_get_attachment_view" string="View Attached Documents" type="object" icon="fa-paperclip" attrs="{'invisible': [('attachment_number', '=', 0)]}"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="tree_hr_expense_refused_expenses_magnus" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_expenses_tree_magnus"/>
+            <field name="act_window_id" ref="hr_expense.action_hr_expense_refused_expenses"/>
+        </record>
+
+</odoo>
