@@ -118,7 +118,7 @@ class HrTimesheetSheet(models.Model):
             if last_week:
                 last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.employee_id.id), ('week_id', '=', last_week.id)], limit=1)
                 if last_week_timesheet:
-                    self.timesheet_ids.unlink()
+                    # self.timesheet_ids.unlink()
                     self.timesheet_ids = [(0, 0, {'date': datetime.strptime(l.date, "%Y-%m-%d") + timedelta(days=7),'name': '/','project_id': l.project_id.id,'task_id': l.task_id.id}) for l in last_week_timesheet.timesheet_ids]
                 else:
                     raise UserError(_("You have no timesheet logged for last week. Duration: %s to %s") %(datetime.strftime(date_start, "%d-%b-%Y"), datetime.strftime(date_end, "%d-%b-%Y")))
