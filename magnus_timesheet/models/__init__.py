@@ -4,3 +4,5 @@ from . import hr_timesheet_sheet
 from . import project_timesheet
 from . import fleet
 from . import project
+from . import hr
+from . import analytic
