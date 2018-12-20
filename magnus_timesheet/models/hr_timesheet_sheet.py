@@ -169,6 +169,14 @@ class HrTimesheetSheet(models.Model):
             self.timesheet_ids.mapped('ref_id').unlink()
         return res
 
+    @api.one
+    def write(self, vals):
+        result = super(HrTimesheetSheet, self).write(vals)
+        lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(lambda line: line.unit_amount > 24 or line.unit_amount < 0)
+        for l in lines:
+            l.write({'unit_amount': 0})
+        return result
+
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 

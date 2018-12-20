@@ -14,6 +14,17 @@ odoo.define('magnus_timesheet.sheet', function (require) {
                 self.project_m2o.trigger('changed_value');
                 self.onchange_project_id();
             });
+
+            self.$(".oe_timesheet_weekly_input").focusout(function() {
+                var elms = document.getElementsByClassName('oe_timesheet_weekly_input');
+                for (var i = 0; i < elms.length; i++) {
+                    var hour = elms[i].value.slice(0, -3);
+                    if (hour > "24" || hour < 0){
+                        alert('Logged hours should be 0 to 24.');
+                        elms[i].value='0';
+                    }
+                }
+            });
         },
 
         onchange_project_id: function() {
