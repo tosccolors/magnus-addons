@@ -22,7 +22,7 @@
         </xpath>
         <xpath expr="//notebook/page[1]/widget[1]" position="before">
           <group states="new,draft"/>
-          <button name="duplicate_last_week" type="object" string="Duplicate Last Week" states="new,draft"/>
+          <button name="duplicate_last_week" type="object" string="Duplicate Last Week" states="new,draft" class="oe_highlight"/>
           <group states="new,draft"/>
         </xpath>
         <xpath expr="//field[@name='employee_id']" position="attributes">
@@ -47,6 +47,12 @@
         <xpath expr="//tree/field[@name='unit_amount']" position="attributes">
           <attribute name="readonly">1</attribute>
         </xpath>
+        <xpath expr="//field[@name='timesheet_ids']/tree" position="attributes">
+          <attribute name="create">false</attribute>
+        </xpath>
+        <xpath expr="//tree/field[@name='date']" position="replace">
+            <field name="day_name" string="Date"/>
+        </xpath>
       </field>
     </record>
 
@@ -55,9 +61,9 @@
       <field name="model">hr_timesheet_sheet.sheet</field>
       <field name="inherit_id" ref="hr_timesheet_task.hr_timesheet_sheet_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//tree/field[@name='task_id']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
+          <xpath expr="//tree/field[@name='task_id']" position="attributes">
+            <attribute name="readonly">1</attribute>
+          </xpath>
       </field>
     </record>
 
