@@ -8,3 +8,5 @@ class Employee(models.Model):
     _inherit = "hr.employee"
 
     planning_week = fields.Boolean(string="Planning by week")
+    timesheet_optional = fields.Boolean('Timesheet optional')
+    timesheet_no_8_hours_day = fields.Boolean('Timesheet no 8 hours day')
