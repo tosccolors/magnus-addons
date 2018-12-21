@@ -33,7 +33,13 @@ class AccountAnalyticLine(models.Model):
                 line.actual_qty = line.unit_amount
                 line.planned_qty = 0.0
 
+    def _get_day(self):
+        for line in self:
+            line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
+
+
 
     planned = fields.Boolean(string='Planned')
     actual_qty = fields.Float(string='Actual Qty', compute='_get_qty', store=True)
     planned_qty = fields.Float(string='Planned Qty', compute='_get_qty', store=True)
+    day_name = fields.Char(string="Day", compute='_get_day')

@@ -118,7 +118,7 @@ class HrTimesheetSheet(models.Model):
             if last_week:
                 last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.employee_id.id), ('week_id', '=', last_week.id)], limit=1)
                 if last_week_timesheet:
-                    self.timesheet_ids.unlink()
+                    # self.timesheet_ids.unlink()
                     self.timesheet_ids = [(0, 0, {'date': datetime.strptime(l.date, "%Y-%m-%d") + timedelta(days=7),'name': '/','project_id': l.project_id.id,'task_id': l.task_id.id}) for l in last_week_timesheet.timesheet_ids]
                 else:
                     raise UserError(_("You have no timesheet logged for last week. Duration: %s to %s") %(datetime.strftime(date_start, "%d-%b-%Y"), datetime.strftime(date_end, "%d-%b-%Y")))
@@ -137,8 +137,9 @@ class HrTimesheetSheet(models.Model):
             hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id)]).mapped('unit_amount'))
             if hour < 0 or hour > 24:
                 raise UserError(_('Logged hours should be 0 to 24.'))
-            if i < 5 and hour < 8:
-                raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
+            if not self.employee_id.timesheet_no_8_hours_day:
+                if i < 5 and hour < 8:
+                    raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
     @api.one
