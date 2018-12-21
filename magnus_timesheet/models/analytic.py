@@ -22,7 +22,37 @@ class AccountAnalyticLine(models.Model):
             dt = datetime.strptime(self.date, "%Y-%m-%d") if self.date else datetime.now().date()
             self.date = dt-timedelta(days=dt.weekday())
             self.company_id = self.env.user.company_id
-            self.week_id = self.find_daterange_week(self.date)
+            date = self.find_daterange_week(self.date)
+            self.week_id = date.id
+            self.select_week_id = date.id
+
+    @api.onchange('select_week_id')
+    def _onchange_select_week(self):
+        if self.select_week_id and self.select_week_id != self.week_id:
+            self.week_id = self.select_week_id.id
+
+    @api.model
+    def create(self, vals):
+        res = super(AccountAnalyticLine, self).create(vals)
+        if self.env.context.get('default_planned', False) and res.week_id != res.select_week_id:
+            self.env.cr.execute(
+                """UPDATE account_analytic_line SET week_id = %s
+                WHERE id = %s""",
+                (res.select_week_id.id, res.id),
+            )
+        return res
+
+    @api.multi
+    def write(self, vals):
+        res = super(AccountAnalyticLine, self).write(vals)
+        for obj in self:
+            if vals.get('select_week_id', False) and obj.week_id != obj.select_week_id:
+                self.env.cr.execute(
+                    """UPDATE account_analytic_line SET week_id = %s
+                    WHERE id = %s""",
+                    (obj.select_week_id.id, obj.id),
+                )
+        return res
 
     def _get_qty(self):
         for line in self:
@@ -33,7 +63,12 @@ class AccountAnalyticLine(models.Model):
                 line.actual_qty = line.unit_amount
                 line.planned_qty = 0.0
 
+    def _get_day(self):
+        for line in self:
+            line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
 
+    select_week_id = fields.Many2one('date.range', string='Week')
     planned = fields.Boolean(string='Planned')
     actual_qty = fields.Float(string='Actual Qty', compute='_get_qty', store=True)
     planned_qty = fields.Float(string='Planned Qty', compute='_get_qty', store=True)
+    day_name = fields.Char(string="Day", compute='_get_day')
