@@ -137,8 +137,9 @@ class HrTimesheetSheet(models.Model):
             hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id)]).mapped('unit_amount'))
             if hour < 0 or hour > 24:
                 raise UserError(_('Logged hours should be 0 to 24.'))
-            if i < 5 and hour < 8:
-                raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
+            if not self.employee_id.timesheet_no_8_hours_day:
+                if i < 5 and hour < 8:
+                    raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
     @api.one
