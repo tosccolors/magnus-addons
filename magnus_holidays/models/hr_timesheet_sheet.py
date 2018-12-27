@@ -24,13 +24,7 @@ class HrTimesheetSheet(models.Model):
                         raise ValidationError(_('Please create some leave types to apply for leave.\nNote: For one of the selected project the Holiday Consumption is true.'))
                     leave_type = False
                     for lt in leave_types:
-                        if not leave_type and lt.remaining_hours > 0:
-                            if hour > lt.remaining_hours:
-                                splitted_val = hour - lt.remaining_hours
-                                raise ValidationError(_(
-                                    'Please split the number of hours %s into %s + %s '
-                                    'to deduct %s hour(s) from the leave type %s. Date: %s.')
-                                    %(hour, lt.remaining_hours, splitted_val, lt.remaining_hours, lt.name, date ))
+                        if not leave_type and lt.remaining_hours > hour:
                             leave_type = lt.id
                             break
                     if not leave_type:
