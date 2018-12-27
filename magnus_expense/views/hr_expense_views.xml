@@ -26,7 +26,7 @@
             <field name="name">hr.expense.magnus.tree</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
-                <tree string="Expenses" decoration-bf="message_unread == True" create="false" edit="false" copy="false" delete="false">
+                <tree string="Expenses" decoration-bf="message_unread == True">
                     <field name="currency_id" invisible="True"/>
                     <field name="attachment_number" invisible="True"/>
                     <field name="date"/>
