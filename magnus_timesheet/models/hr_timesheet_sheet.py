@@ -95,6 +95,22 @@ class HrTimesheetSheet(models.Model):
     def _compute_vehicle(self):
         self.vehicle = True if self._get_vehicle() else False
 
+    @api.one
+    @api.depends('timesheet_ids')
+    def _get_overtime_hours(self):
+        if self.week_id and self.employee_id:
+            date_from = datetime.strptime(self.week_id.date_start, "%Y-%m-%d").date()
+            overtime_hours = 0
+            for i in range(7):
+                date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
+                hours = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id)]).mapped('unit_amount'))
+                if i < 5 and hours > 8:
+                    overtime_hours += hours - 8
+                elif i > 4 and hours > 0:
+                    overtime_hours += hours
+            overtime_taken = sum(self.env['account.analytic.line'].search([('sheet_id', '=', self.id), ('sheet_id.employee_id', '=', self.employee_id.id), ('project_id.overtime', '=', True)]).mapped('unit_amount'))
+            self.overtime_hours = overtime_hours - overtime_taken
+
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
     starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=True)
@@ -103,6 +119,7 @@ class HrTimesheetSheet(models.Model):
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
     end_mileage = fields.Integer('End Mileage')
+    overtime_hours = fields.Integer(compute="_get_overtime_hours", string='Overtime Hours', store=True)
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
