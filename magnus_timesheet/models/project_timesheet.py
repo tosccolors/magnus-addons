@@ -16,3 +16,8 @@ class Task(models.Model):
             raise ValidationError(_('You can have only one task with the standard as true per project!'))
 
     standard = fields.Boolean(string='Standard')
+
+class Project(models.Model):
+    _inherit = "project.project"
+
+    overtime = fields.Boolean(string='Overtime')

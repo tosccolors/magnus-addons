@@ -19,8 +19,9 @@
             <field name="inherit_id" ref="sale_timesheet.hr_timesheet_employee_extd_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='account_id']" position="after">
-                  <field name="timesheet_optional" />
-                  <field name="timesheet_no_8_hours_day" />
+                    <field name="timesheet_optional" />
+                    <field name="timesheet_no_8_hours_day" />
+                    <field name="overtime_hours" />
                 </xpath>
             </field>
         </record>
