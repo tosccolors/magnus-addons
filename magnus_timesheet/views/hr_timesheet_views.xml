@@ -15,6 +15,7 @@
             <field name="business_mileage" />
             <field name="private_mileage" />
             <field name="end_mileage" />
+            <field name="overtime_hours"/>
           </group>
         </xpath>
         <xpath expr="//label[@for='date_from']" position="before">
@@ -90,8 +91,9 @@
           <field name="week_id"/>
         </field>
         <field name="date_to" position="after">
-          <field name="private_mileage" />
-          <field name="business_mileage" />
+          <field name="private_mileage" sum="Total amount"/>
+          <field name="business_mileage" sum="Total amount"/>
+          <field name="overtime_hours" sum="Total amount"/>
         </field>
       </field>
     </record>
