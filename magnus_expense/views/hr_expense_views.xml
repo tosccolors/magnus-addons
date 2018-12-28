@@ -13,6 +13,9 @@
                     <attribute name="required">True</attribute>
                     <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
                 </xpath>
+                <xpath expr="//field[@name='account_id']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
                 <xpath expr="//field[@name='employee_id']" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </xpath>
@@ -47,6 +50,20 @@
             <field name="view_mode">tree</field>
             <field name="view_id" ref="view_expenses_tree_magnus"/>
             <field name="act_window_id" ref="hr_expense.action_hr_expense_refused_expenses"/>
+        </record>
+
+        <record id="magnus_expense_hr_expense_sheet_form" model="ir.ui.view">
+            <field name="name">hr.expense.form.magnus.expense</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                    <attribute name="readonly">False</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expense_line_ids']/tree/field[@name='name']" position="after">
+                    <field name="account_id"/>
+                </xpath>
+            </field>
         </record>
 
 </odoo>
