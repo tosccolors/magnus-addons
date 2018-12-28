@@ -51,9 +51,10 @@
         <xpath expr="//field[@name='timesheet_ids']/tree" position="attributes">
           <attribute name="create">false</attribute>
         </xpath>
-        <xpath expr="//tree/field[@name='date']" position="replace">
+        <!--Reverted the field day_name for now-->
+        <!--<xpath expr="//tree/field[@name='date']" position="replace">
             <field name="day_name" string="Date"/>
-        </xpath>
+        </xpath>-->
       </field>
     </record>
 
