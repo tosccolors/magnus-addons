@@ -107,6 +107,7 @@
                 <field name="state" type="col"/>
                 <field name="private_mileage" type="measure"/>
                 <field name="business_mileage" type="measure"/>
+                <field name="overtime_hours" type="measure"/>
             </pivot>
         </field>
     </record>
