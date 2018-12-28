@@ -52,9 +52,9 @@
             <field name="act_window_id" ref="hr_expense.action_hr_expense_refused_expenses"/>
         </record>
 
-        <record id="magnus_expense_hr_expense_sheet_form_inherited" model="ir.ui.view">
-            <field name="name">hr.expense.form.magnus.expense</field>
-            <field name="model">hr.expense</field>
+        <record id="magnus_expense_hr_expense_sheet_form2" model="ir.ui.view">
+            <field name="name">hr.expense.form.magnus.expense2</field>
+            <field name="model">hr.expense.sheet</field>
             <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='expense_line_ids']" position="attributes">
