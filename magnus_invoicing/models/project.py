@@ -42,6 +42,11 @@ class TaskUser(models.Model):
         if self.user_id.employee_ids.product_id:
             return self.user_id.employee_ids.product_id.id
 
+    @api.model
+    def _get_category_domain(self):
+        return [('categ_id','=', self.env.ref(
+            'magnus_invoicing.product_category_fee_rate').id)]
+
     task_id = fields.Many2one(
         'project.task',
         string='Task'
@@ -53,12 +58,24 @@ class TaskUser(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Fee rate Product',
-        default=_default_product
+        default=_default_product,
+        domain=_get_category_domain
     )
     fee_rate = fields.Float(
         default=_default_fee_rate,
         string='Fee Rate',
     )
+
+    @api.onchange('user_id')
+    def onchange_user_id(self):
+        self.product_id = False
+        self.fee_rate = 0
+        if self.user_id:
+            emp = self.env['hr.employee'].search([('user_id', '=', self.user_id.id)])
+            if emp:
+                product = emp.product_id
+                self.product_id = product.id
+                self.fee_rate = product.lst_price
 
 class InvoiceScheduleLine(models.Model):
     _name = 'invoice.schedule.lines'
