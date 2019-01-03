@@ -149,18 +149,49 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
+        res = super(AccountAnalyticLine, self).create(vals)
+        fee_rate = 0
         if 'task_id' in vals and 'user_id' in vals:
             vals['product_id'] = self.get_task_user_product(vals['task_id'],vals['user_id'])
-        return super(AccountAnalyticLine, self).create(vals)
+            task = self.env['project.task'].browse(vals['task_id'])
+            if task.task_user_ids:
+                for user in task.task_user_ids:
+                    if user.user_id.id == vals['user_id']:
+                        fee_rate = user.fee_rate or user.product_id.lst_price
+
+            if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
+                amount = vals['unit_amount'] * fee_rate
+                self.env.cr.execute(
+                    """UPDATE account_analytic_line SET amount = %s
+                    WHERE id = %s""",
+                    (amount, res.id),
+                )
+        return res
 
     @api.multi
     def write(self, vals):
+        res = super(AccountAnalyticLine, self).write(vals)
         for aal in self:
             task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id
             user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id
+            unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount
             if task_id and user_id:
-                vals['product_id'] = self.get_task_user_product(task_id, user_id)
-        return super(AccountAnalyticLine, self).write(vals)
+                product_id = self.get_task_user_product(task_id, user_id)
+            fee_rate = 0
+            task = self.env['project.task'].browse(task_id)
+            if task.task_user_ids:
+                for user in task.task_user_ids:
+                    if user.user_id.id == user_id:
+                        fee_rate = user.fee_rate or user.product_id.lst_price
+
+                if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
+                    amount = unit_amount * fee_rate
+                    self.env.cr.execute(
+                        """UPDATE account_analytic_line SET amount = %s , product_id = %s
+                        WHERE id = %s""",
+                        (amount, product_id, aal.id),
+                    )
+        return res
     
     @api.model
     def get_fee_rate(self):
