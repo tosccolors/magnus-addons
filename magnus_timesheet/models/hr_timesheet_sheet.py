@@ -176,21 +176,13 @@ class HrTimesheetSheet(models.Model):
             non_invoiceable_mileage = False if aal.project_id.invoice_properties and \
                             aal.project_id.invoice_properties.invoice_mileage else True
             res = {
-                'state': 'confirmed',
-#                'name': "/",
+                'state': 'confirm',
                 'unit_amount': aal.kilometers,
                 'non_invoiceable_mileage': non_invoiceable_mileage,
                 'product_uom_id': self.env.ref('product.product_uom_km').id
             }
             vals = aal.copy_data(default=res)[0]
             newaal = self.env['account.analytic.line'].create(vals)
-#            newaal = aal.copy()
-
-#            newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False,
-            #            'non_invoiceable_mileage': non_invoiceable_mileage})
-#            self.env.cr.execute("""
-#                    UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s
-#            """ % (self.env.ref('product.product_uom_km').id, newaal.id))
             aal.ref_id = newaal.id
         return res
 
@@ -201,6 +193,7 @@ class HrTimesheetSheet(models.Model):
             self.timesheet_ids.mapped('ref_id').unlink()
         if self.odo_log_id:
             self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
+            self.odo_log_id = False
         return res
 
     @api.one
