@@ -183,11 +183,12 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         for aal in self.timesheet_ids.filtered(lambda line: not line.ref_id and line.kilometers):
-            import pdb; pdb.set_trace()
+#            import pdb; pdb.set_trace()
             non_invoiceable_mileage = False if aal.project_id.invoice_properties and \
                             aal.project_id.invoice_properties.invoice_mileage else True
             res = {
                 'state': 'open',
+                'sheet_id': False
                 'unit_amount': aal.kilometers,
                 'non_invoiceable_mileage': non_invoiceable_mileage,
                 'product_uom_id': self.env.ref('product.product_uom_km').id,
