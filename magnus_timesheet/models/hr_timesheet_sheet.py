@@ -188,13 +188,12 @@ class HrTimesheetSheet(models.Model):
                             aal.project_id.invoice_properties.invoice_mileage else True
             res = {
                 'state': 'open',
-                'sheet_id': False,
                 'unit_amount': aal.kilometers,
                 'non_invoiceable_mileage': non_invoiceable_mileage,
                 'product_uom_id': self.env.ref('product.product_uom_km').id,
                 'kilometers': False
             }
-            newaal = aal.copy(default=res)
+            newaal = aal.sudo().copy(default=res)
             aal.ref_id = newaal.id
         if self.timesheet_ids:
             cond = '='
