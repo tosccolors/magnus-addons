@@ -188,7 +188,7 @@ class HrTimesheetSheet(models.Model):
                             aal.project_id.invoice_properties.invoice_mileage else True
             res = {
                 'state': 'open',
-                'sheet_id': False
+                'sheet_id': False,
                 'unit_amount': aal.kilometers,
                 'non_invoiceable_mileage': non_invoiceable_mileage,
                 'product_uom_id': self.env.ref('product.product_uom_km').id,
