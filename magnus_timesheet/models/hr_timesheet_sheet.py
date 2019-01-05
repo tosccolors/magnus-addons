@@ -181,8 +181,7 @@ class HrTimesheetSheet(models.Model):
                 'non_invoiceable_mileage': non_invoiceable_mileage,
                 'product_uom_id': self.env.ref('product.product_uom_km').id
             }
-            vals = aal.copy_data(default=res)[0]
-            newaal = self.env['account.analytic.line'].create(vals)
+            newaal = aal.copy_data(default=res)
             aal.ref_id = newaal.id
         return res
 
