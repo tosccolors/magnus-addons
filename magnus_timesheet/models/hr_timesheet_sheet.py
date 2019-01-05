@@ -120,6 +120,7 @@ class HrTimesheetSheet(models.Model):
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
     end_mileage = fields.Integer('End Mileage')
     overtime_hours = fields.Integer(compute="_get_overtime_hours", string='Overtime Hours', store=True)
+    odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
@@ -150,6 +151,13 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_confirm(self):
         self._check_end_mileage()
+        vehicle = self._get_vehicle()
+        if vehicle:
+            self.odo_log_id = self.env['fleet.vehicle.odometer'].create({
+                'value': self.end_mileage,
+                'date': self.week_id.date_end or fields.Date.context_today(self),
+                'vehicle_id': vehicle.id
+            })
         date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
@@ -191,18 +199,13 @@ class HrTimesheetSheet(models.Model):
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.timesheet_ids and self.timesheet_ids.mapped('ref_id'):
             self.timesheet_ids.mapped('ref_id').unlink()
+        if self.odo_log_id:
+            self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
         return res
 
     @api.one
     def write(self, vals):
         result = super(HrTimesheetSheet, self).write(vals)
-        vehicle = self._get_vehicle()
-        if vehicle:
-            self.env['fleet.vehicle.odometer'].create({
-                'value': self.end_mileage,
-                'date': self.week_id.date_end or fields.Date.context_today(self),
-                'vehicle_id': vehicle.id
-            })
         lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(lambda line: line.unit_amount > 24 or line.unit_amount < 0)
         for l in lines:
             l.write({'unit_amount': 0})
