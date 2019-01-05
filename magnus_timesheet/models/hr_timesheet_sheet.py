@@ -176,7 +176,7 @@ class HrTimesheetSheet(models.Model):
             non_invoiceable_mileage = False if aal.project_id.invoice_properties and \
                             aal.project_id.invoice_properties.invoice_mileage else True
             res = {
-                'state': 'confirm',
+                'state': 'open',
                 'unit_amount': aal.kilometers,
                 'non_invoiceable_mileage': non_invoiceable_mileage,
                 'product_uom_id': self.env.ref('product.product_uom_km').id
