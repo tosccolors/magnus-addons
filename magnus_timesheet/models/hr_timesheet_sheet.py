@@ -172,7 +172,17 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_done(self):
         res = super(HrTimesheetSheet, self).action_timesheet_done()
-        for aal in self.timesheet_ids.filtered('kilometers'):
+
+        return res
+
+    @api.multi
+    def action_timesheet_done(self):
+        """
+        On timesheet confirmed update analytic state to confirmed
+        :return: Super
+        """
+        res = super(HrTimesheetSheet, self).action_timesheet_done()
+        for aal in self.timesheet_ids.filtered(lambda line: not line.ref_id and line.kilometers):
             non_invoiceable_mileage = False if aal.project_id.invoice_properties and \
                             aal.project_id.invoice_properties.invoice_mileage else True
             res = {
@@ -184,16 +194,40 @@ class HrTimesheetSheet(models.Model):
             }
             newaal = aal.copy(default=res)
             aal.ref_id = newaal.id
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                        UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+                """ % (cond, rec))
         return res
 
     @api.one
     def action_timesheet_draft(self):
+        """
+        On timesheet reset draft check analytic shouldn't be in invoiced
+        :return: Super
+        """
+        if self.timesheet_ids.filtered('invoiced'):
+            raise UserError(_('You cannot modify an entry in a invoiced timesheet'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        if self.timesheet_ids and self.timesheet_ids.mapped('ref_id'):
-            self.timesheet_ids.mapped('ref_id').unlink()
         if self.odo_log_id:
             self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
             self.odo_log_id = False
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                        UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s
+                """ % (cond, rec))
+            if self.timesheet_ids.mapped('ref_id'):
+                self.timesheet_ids.mapped('ref_id').unlink()
         return res
 
     @api.one
