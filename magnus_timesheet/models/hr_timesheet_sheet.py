@@ -164,21 +164,25 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_done(self):
         res = super(HrTimesheetSheet, self).action_timesheet_done()
-        vehicle = self._get_vehicle()
-        if vehicle:
-            self.env['fleet.vehicle.odometer'].create({
-                'value': self.end_mileage,
-                'date': self.week_id.date_end or fields.Date.context_today(self),
-                'vehicle_id': vehicle.id
-                })
-
         for aal in self.timesheet_ids.filtered('kilometers'):
-            newaal = aal.copy()
-            non_invoiceable_mileage = False if aal.project_id.invoice_properties and aal.project_id.invoice_properties.invoice_mileage else True
-            newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False, 'non_invoiceable_mileage': non_invoiceable_mileage})
-            self.env.cr.execute("""
-                    UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s
-            """ % (self.env.ref('product.product_uom_km').id, newaal.id))
+            non_invoiceable_mileage = False if aal.project_id.invoice_properties and \
+                            aal.project_id.invoice_properties.invoice_mileage else True
+            res = {
+                'state': 'confirmed',
+#                'name': "/",
+                'unit_amount': aal.kilometers,
+                'non_invoiceable_mileage': non_invoiceable_mileage,
+                'product_uom_id': self.env.ref('product.product_uom_km').id
+            }
+            vals = aal.copy_data(default=res)[0]
+            newaal = self.env['account.analytic.line'].create(vals)
+#            newaal = aal.copy()
+
+#            newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False,
+            #            'non_invoiceable_mileage': non_invoiceable_mileage})
+#            self.env.cr.execute("""
+#                    UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s
+#            """ % (self.env.ref('product.product_uom_km').id, newaal.id))
             aal.ref_id = newaal.id
         return res
 
@@ -192,6 +196,13 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def write(self, vals):
         result = super(HrTimesheetSheet, self).write(vals)
+        vehicle = self._get_vehicle()
+        if vehicle:
+            self.env['fleet.vehicle.odometer'].create({
+                'value': self.end_mileage,
+                'date': self.week_id.date_end or fields.Date.context_today(self),
+                'vehicle_id': vehicle.id
+            })
         lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(lambda line: line.unit_amount > 24 or line.unit_amount < 0)
         for l in lines:
             l.write({'unit_amount': 0})
