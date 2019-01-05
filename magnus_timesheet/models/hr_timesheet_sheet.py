@@ -179,9 +179,10 @@ class HrTimesheetSheet(models.Model):
                 'state': 'open',
                 'unit_amount': aal.kilometers,
                 'non_invoiceable_mileage': non_invoiceable_mileage,
-                'product_uom_id': self.env.ref('product.product_uom_km').id
+                'product_uom_id': self.env.ref('product.product_uom_km').id,
+                'kilometers': False
             }
-            newaal = aal.copy_data(default=res)
+            newaal = aal.copy(default=res)
             aal.ref_id = newaal.id
         return res
 
@@ -206,7 +207,7 @@ class HrTimesheetSheet(models.Model):
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
-    sheet_id = fields.Many2one('hr_timesheet_sheet.sheet', compute='_compute_sheet', string='Sheet', store=True, ondelete='cascade')
+    sheet_id = fields.Many2one(ondelete='cascade')
     kilometers = fields.Integer('Kilometers')
     non_invoiceable_mileage = fields.Boolean(string='Invoice Mileage', store=True)
     ref_id = fields.Many2one('account.analytic.line', string='Reference')
@@ -222,6 +223,7 @@ class AccountAnalyticLine(models.Model):
         else:
             self.task_id = False
         return res
+
 
 class DateRangeGenerator(models.TransientModel):
     _inherit = 'date.range.generator'
