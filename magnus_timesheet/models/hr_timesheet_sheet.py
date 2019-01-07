@@ -120,6 +120,7 @@ class HrTimesheetSheet(models.Model):
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
     end_mileage = fields.Integer('End Mileage')
     overtime_hours = fields.Integer(compute="_get_overtime_hours", string='Overtime Hours', store=True)
+    odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
@@ -150,6 +151,13 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_confirm(self):
         self._check_end_mileage()
+        vehicle = self._get_vehicle()
+        if vehicle:
+            self.odo_log_id = self.env['fleet.vehicle.odometer'].create({
+                'value': self.end_mileage,
+                'date': self.week_id.date_end or fields.Date.context_today(self),
+                'vehicle_id': vehicle.id
+            })
         date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
@@ -164,29 +172,168 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_done(self):
         res = super(HrTimesheetSheet, self).action_timesheet_done()
-        vehicle = self._get_vehicle()
-        if vehicle:
-            self.env['fleet.vehicle.odometer'].create({
-                'value': self.end_mileage,
-                'date': self.week_id.date_end or fields.Date.context_today(self),
-                'vehicle_id': vehicle.id
-                })
 
-        for aal in self.timesheet_ids.filtered('kilometers'):
-            newaal = aal.copy()
-            non_invoiceable_mileage = False if aal.project_id.invoice_properties and aal.project_id.invoice_properties.invoice_mileage else True
-            newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False, 'non_invoiceable_mileage': non_invoiceable_mileage})
-            self.env.cr.execute("""
-                    UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s
-            """ % (self.env.ref('product.product_uom_km').id, newaal.id))
-            aal.ref_id = newaal.id
         return res
+
+    @api.multi
+    def action_timesheet_done(self):
+        """
+        On timesheet confirmed update analytic state to confirmed
+        :return: Super
+        """
+        res = super(HrTimesheetSheet, self).action_timesheet_done()
+        self.copy_wih_query()
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                        UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+                """ % (cond, rec))
+        return res
+
+    def copy_wih_query(self):
+        query = """
+        INSERT INTO
+        account_analytic_line
+        (       create_uid,
+                user_id,
+                account_id,
+                company_id,
+                write_uid,
+                amount,
+                unit_amount,
+                date,
+                create_date,
+                write_date,
+                partner_id,
+                name,
+                code,
+                currency_id,
+                ref,
+                general_account_id,
+                move_id,
+                product_id,
+                amount_currency,
+                project_id,
+                department_id,
+                task_id,
+                sheet_id,
+                so_line,
+                user_total_id,
+                invoiced,
+                invoiceable,
+                month_id,
+                week_id,
+                account_department_id,               
+                leave_id,
+                expenses,
+                billable,
+                chargeable,
+                operating_unit_id,
+                correction_charge,
+                write_off_move,
+                ref_id,
+                actual_qty,
+                planned_qty,
+                planned,
+                select_week_id,
+                kilometers,
+                state,
+                non_invoiceable_mileage,
+                product_uom_id )
+        SELECT  aal.create_uid as create_uid,
+                aal.user_id as user_id,
+                aal.account_id as account_id,
+                aal.company_id as company_id,
+                aal.write_uid as write_uid,
+                aal.amount as amount,
+                aal.kilometers as unit_amount,
+                aal.date as date,
+                %(create)s as create_date,
+                %(create)s as write_date,
+                aal.partner_id as partner_id,
+                aal.name as name,
+                aal.code as code,
+                aal.currency_id as currency_id,
+                aal.ref as ref,
+                aal.general_account_id as general_account_id,
+                aal.move_id as move_id,
+                aal.product_id as product_id,
+                aal.amount_currency as amount_currency,
+                aal.project_id as project_id,
+                aal.department_id as department_id,
+                aal.task_id as task_id,
+                NULL as sheet_id,
+                aal.so_line as so_line,
+                aal.user_total_id as user_total_id,
+                aal.invoiced as invoiced,
+                aal.invoiceable as invoiceable,
+                aal.month_id as month_id,
+                aal.week_id as week_id,
+                aal.account_department_id as account_department_id,
+                aal.leave_id as leave_id,
+                aal.expenses as expenses,
+                aal.billable as billable,
+                aal.chargeable as chargeable,
+                aal.operating_unit_id as operating_unit_id,
+                aal.correction_charge as correction_charge,
+                aal.write_off_move as write_off_move,              
+                aal.id as ref_id,
+                aal.actual_qty as actual_qty,
+                aal.planned_qty as planned_qty,
+                aal.planned as planned,
+                aal.select_week_id as select_week_id,
+                0 as kilometers,
+                'open' as state,
+                CASE
+                  WHEN ip.invoice_mileage IS NULL THEN true
+                  ELSE ip.invoice_mileage
+                END AS non_invoiceable_mileage,
+                %(km)s as product_uom_id      
+        FROM
+         account_analytic_line aal
+         LEFT JOIN project_project pp 
+         ON pp.id = aal.project_id
+         LEFT JOIN project_invoicing_properties ip
+         ON ip.id = pp.invoice_properties
+         RIGHT JOIN hr_timesheet_sheet_sheet hss
+         ON hss.id = aal.sheet_id
+        WHERE hss.id = %(sheet)s
+        AND aal.ref_id IS NULL
+        AND aal.kilometers > 0       
+        ;"""
+        km_id = self.env.ref('product.product_uom_km').id
+        heden = str(fields.Datetime.to_string(fields.datetime.now()))
+        self.env.cr.execute(query, {'create': heden,'km': km_id, 'sheet':self.id})
+        self.env.invalidate_all()
+        return True
 
     @api.one
     def action_timesheet_draft(self):
+        """
+        On timesheet reset draft check analytic shouldn't be in invoiced
+        :return: Super
+        """
+        if self.timesheet_ids.filtered('invoiced'):
+            raise UserError(_('You cannot modify an entry in a invoiced timesheet'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        if self.timesheet_ids and self.timesheet_ids.mapped('ref_id'):
-            self.timesheet_ids.mapped('ref_id').unlink()
+        if self.odo_log_id:
+            self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
+            self.odo_log_id = False
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                        UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s;
+                        DELETE FROM account_analytic_line WHERE ref_id %s %s;
+                """ % (cond, rec, cond, rec))
+            self.env.invalidate_all()
         return res
 
     @api.one
@@ -200,7 +347,7 @@ class HrTimesheetSheet(models.Model):
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
-    sheet_id = fields.Many2one('hr_timesheet_sheet.sheet', compute='_compute_sheet', string='Sheet', store=True, ondelete='cascade')
+    sheet_id = fields.Many2one(ondelete='cascade')
     kilometers = fields.Integer('Kilometers')
     non_invoiceable_mileage = fields.Boolean(string='Invoice Mileage', store=True)
     ref_id = fields.Many2one('account.analytic.line', string='Reference')
@@ -216,6 +363,7 @@ class AccountAnalyticLine(models.Model):
         else:
             self.task_id = False
         return res
+
 
 class DateRangeGenerator(models.TransientModel):
     _inherit = 'date.range.generator'
