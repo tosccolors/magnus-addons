@@ -177,21 +177,21 @@ class AccountAnalyticLine(models.Model):
             unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount
             if task_id and user_id:
                 product_id = self.get_task_user_product(task_id, user_id)
-            if product_id:
-                fee_rate = 0
-                task = self.env['project.task'].browse(task_id)
-                if task.task_user_ids:
-                    for user in task.task_user_ids:
-                        if user.user_id.id == user_id:
-                            fee_rate = user.fee_rate or user.product_id.lst_price
+                if product_id:
+                    fee_rate = 0
+                    task = self.env['project.task'].browse(task_id)
+                    if task.task_user_ids:
+                        for user in task.task_user_ids:
+                            if user.user_id.id == user_id:
+                                fee_rate = user.fee_rate or user.product_id.lst_price
 
-                    if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                        amount = unit_amount * fee_rate
-                        self.env.cr.execute(
-                            """UPDATE account_analytic_line SET amount = %s , product_id = %s
-                            WHERE id = %s""",
-                            (amount, product_id, aal.id),
-                        )
+                        if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
+                            amount = unit_amount * fee_rate
+                            self.env.cr.execute(
+                                """UPDATE account_analytic_line SET amount = %s , product_id = %s
+                                WHERE id = %s""",
+                                (amount, product_id, aal.id),
+                            )
         return res
     
     @api.model
