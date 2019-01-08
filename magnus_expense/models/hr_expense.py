@@ -6,6 +6,27 @@ from odoo.exceptions import UserError, ValidationError
 class HrExpense(models.Model):
     _inherit = "hr.expense"
 
+    @api.depends('sheet_id.state')
+    def _get_sheet_state(self):
+        for exp in self:
+            if exp.sheet_id:
+                exp.sheet_state = exp.sheet_id.state
+
+    sheet_state = fields.Char(compute='_get_sheet_state', string='Sheet Status', help='Expense Report State', store=True)
+
+    @api.multi
+    def action_move_create(self):
+        '''
+        inherited function that is called when trying to create the accounting entries related to an expense
+        '''
+        res = super(HrExpense, self).action_move_create()
+        for expense in self:
+            if expense.analytic_account_id and expense.analytic_account_id.operating_unit_ids:
+                ou = expense.analytic_account_id.operating_unit_ids[0]
+                if ou and expense.sheet_id.account_move_id:
+                    expense.sheet_id.account_move_id.operating_unit_id = ou.id
+        return res
+
     @api.multi
     def submit_expenses(self):
         if any(expense.state != 'draft' for expense in self):
