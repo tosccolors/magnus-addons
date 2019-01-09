@@ -169,13 +169,8 @@ class HrTimesheetSheet(models.Model):
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
+
     @api.one
-    def action_timesheet_done(self):
-        res = super(HrTimesheetSheet, self).action_timesheet_done()
-
-        return res
-
-    @api.multi
     def action_timesheet_done(self):
         """
         On timesheet confirmed update analytic state to confirmed
