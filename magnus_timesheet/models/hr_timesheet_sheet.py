@@ -169,13 +169,8 @@ class HrTimesheetSheet(models.Model):
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
+
     @api.one
-    def action_timesheet_done(self):
-        res = super(HrTimesheetSheet, self).action_timesheet_done()
-
-        return res
-
-    @api.multi
     def action_timesheet_done(self):
         """
         On timesheet confirmed update analytic state to confirmed
@@ -228,7 +223,6 @@ class HrTimesheetSheet(models.Model):
                 month_id,
                 week_id,
                 account_department_id,               
-                leave_id,
                 expenses,
                 billable,
                 chargeable,
@@ -274,7 +268,6 @@ class HrTimesheetSheet(models.Model):
                 aal.month_id as month_id,
                 aal.week_id as week_id,
                 aal.account_department_id as account_department_id,
-                aal.leave_id as leave_id,
                 aal.expenses as expenses,
                 aal.billable as billable,
                 aal.chargeable as chargeable,
