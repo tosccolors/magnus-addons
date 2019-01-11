@@ -12,5 +12,19 @@
                 </xpath>
             </field>
         </record>
+
+        <record id="hr_timesheet_employee_extd_form_inherited" model="ir.ui.view">
+            <field name="name">hr.timesheet.employee.extd_form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="sale_timesheet.hr_timesheet_employee_extd_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='account_id']" position="after">
+                    <field name="timesheet_optional" />
+                    <field name="timesheet_no_8_hours_day" />
+                    <field name="overtime_hours" />
+                </xpath>
+            </field>
+        </record>
+
     </data>
 </odoo>

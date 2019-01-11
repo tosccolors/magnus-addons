@@ -15,6 +15,7 @@
             <field name="business_mileage" />
             <field name="private_mileage" />
             <field name="end_mileage" />
+            <field name="overtime_hours"/>
           </group>
         </xpath>
         <xpath expr="//label[@for='date_from']" position="before">
@@ -50,9 +51,10 @@
         <xpath expr="//field[@name='timesheet_ids']/tree" position="attributes">
           <attribute name="create">false</attribute>
         </xpath>
-        <xpath expr="//tree/field[@name='date']" position="replace">
+        <!--Reverted the field day_name for now-->
+        <!--<xpath expr="//tree/field[@name='date']" position="replace">
             <field name="day_name" string="Date"/>
-        </xpath>
+        </xpath>-->
       </field>
     </record>
 
@@ -90,8 +92,9 @@
           <field name="week_id"/>
         </field>
         <field name="date_to" position="after">
-          <field name="private_mileage" />
-          <field name="business_mileage" />
+          <field name="private_mileage" sum="Total amount"/>
+          <field name="business_mileage" sum="Total amount"/>
+          <field name="overtime_hours" sum="Total amount"/>
         </field>
       </field>
     </record>
@@ -105,6 +108,7 @@
                 <field name="state" type="col"/>
                 <field name="private_mileage" type="measure"/>
                 <field name="business_mileage" type="measure"/>
+                <field name="overtime_hours" type="measure"/>
             </pivot>
         </field>
     </record>

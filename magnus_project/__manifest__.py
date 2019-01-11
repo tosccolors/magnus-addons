@@ -7,7 +7,8 @@
     'summary': "Projects - extended",
 
     'description': """
-        This module creates a many2one field operating_unit_id in project.project and account.analytic.line. \nThe operating unit defined in the project.project is copied to each timesheet_ids(account.analytic.line) created for this project.
+        This module creates a many2one field operating_unit_id in project.project and account.analytic.line. \n
+        The operating unit defined in the project.project is copied to each timesheet_ids(account.analytic.line) created for this project.
     """,
 
     'author': "Magnus",
@@ -20,7 +21,10 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'operating_unit', 'analytic', 'hr_timesheet_sheet'],
+    'depends': ['project',
+                'operating_unit',
+                'analytic',
+                'hr_timesheet_sheet'],
 
     # always loaded
     'data': [

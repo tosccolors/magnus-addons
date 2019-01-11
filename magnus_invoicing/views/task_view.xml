@@ -12,7 +12,7 @@
                 <page name="description_page" position="before">
                     <page name="users" string="Fee Earners">
                         <group colspan="4" col="2">
-                            <field name="task_user_ids" >
+                            <field name="task_user_ids" context="{'default_task_id':active_id}">
                                     <tree string="Fee Earners" create="true"
                                           edit="true" delete="true" copy="false">
                                         <field name="user_id" />

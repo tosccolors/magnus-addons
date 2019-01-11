@@ -13,11 +13,20 @@
                     <attribute name="required">True</attribute>
                     <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
                 </xpath>
+                <xpath expr="//field[@name='account_id']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('sheet_state', '=', 'submit')]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='tax_ids']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('sheet_state', 'not in', ['approve'])]}</attribute>
+                </xpath>
                 <xpath expr="//field[@name='employee_id']" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </xpath>
                 <xpath expr="//field[@name='product_id']" position="attributes">
                     <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='analytic_account_id']" position="after">
+                    <field name="sheet_state" invisible="1"/>
                 </xpath>
             </field>
         </record>
@@ -26,7 +35,7 @@
             <field name="name">hr.expense.magnus.tree</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
-                <tree string="Expenses" decoration-bf="message_unread == True" create="false" edit="false" copy="false" delete="false">
+                <tree string="Expenses" decoration-bf="message_unread == True">
                     <field name="currency_id" invisible="True"/>
                     <field name="attachment_number" invisible="True"/>
                     <field name="date"/>
@@ -47,6 +56,42 @@
             <field name="view_mode">tree</field>
             <field name="view_id" ref="view_expenses_tree_magnus"/>
             <field name="act_window_id" ref="hr_expense.action_hr_expense_refused_expenses"/>
+        </record>
+
+        <record id="magnus_expense_hr_expense_sheet_form2" model="ir.ui.view">
+            <field name="name">hr.expense.form.magnus.expense2</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                    <attribute name="readonly">False</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expense_line_ids']/tree/field[@name='name']" position="after">
+                    <field name="account_id"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_expenses_form_magnus_inherited" model="ir.ui.view">
+            <field name="name">hr.expense.form</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense_operating_unit.view_expenses_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='operating_unit_id']" position="attributes">
+                    <attribute name="readonly">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_hr_expense_sheet_form_magnus_inherited" model="ir.ui.view">
+            <field name="name">hr.expense.sheet.form</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense_operating_unit.view_hr_expense_sheet_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='operating_unit_id']" position="attributes">
+                    <attribute name="readonly">True</attribute>
+                </xpath>
+            </field>
         </record>
 
 </odoo>
