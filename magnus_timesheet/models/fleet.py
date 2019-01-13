@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api, _, SUPERUSER_ID
+from odoo.exceptions import UserError, ValidationError
 
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
@@ -13,32 +14,73 @@ class FleetVehicle(models.Model):
         for record in self:
             if record.odometer:
                 date = fields.Date.context_today(record)
-                data = {'value': record.odometer, 'date': date, 'vehicle_id': record.id}
+                data = {'value_update': record.odometer, 'date': date, 'vehicle_id': record.id}
                 self.env['fleet.vehicle.odometer'].create(data)
 
 class FleetVehicleOdometer(models.Model):
     _inherit = 'fleet.vehicle.odometer'
 
-    value_period = fields.Float('Odometer Period Value', group_operator="sum")
+    @api.depends('value_period_update', 'value_update')
+    @api.multi
+    def _compute_odometer_value(self):
+        for odom in self:
+            if odom.value_period_update > 0.0 and odom.value_update > 0.0:
+                raise UserError(_("You cannot enter both period value and "
+                                  "ultimo value for %s!") % (odom.vehicle_id.name))
+            older = self.search([
+                    ('vehicle_id', '=', odom.vehicle_id.id),
+                    ('date', '<', odom.date)
+                    ], limit=1, order='date desc')
+            if older:
+                if odom.value_period_update == 0.0:
+                    odom.value_period = odom.value_update - older.value
+                    odom.value = odom.value_update
+                if odom.value_update == 0.0:
+                    odom.value = older.value + odom.value_period_update
+                    odom.value_period = odom.value_period_update
+            else:
+                odom.value = odom.value_period = odom.value_period_update
+            odo_latest = self.search([('vehicle_id', '=', odom.vehicle_id.id)], limit=1, order='date desc')
+            if odom.date < odo_latest.date:
+                odom.odo_newer()
+
+
+    value_period = fields.Float(
+        compute=_compute_odometer_value,
+        string='Odometer Period Value',
+        group_operator="sum",
+        store = True
+    )
+    value = fields.Float(
+        compute=_compute_odometer_value,
+        string='Odometer Value',
+        group_operator="max",
+        store=True
+    )
+    value_update = fields.Float(
+        string='Odometer Value',
+        group_operator="max",
+        store=True
+    )
+    value_period_update = fields.Float(
+        string='Odometer Period Value',
+        group_operator="sum",
+        store=True
+    )
+    timestamp = fields.Dateime(
+
+    )
 
     def odo_newer(self):
-        newer = self.search([(
-            'vehicle_id', '=', self.vehicle_id.id),('date','>', self.date)], limit=1, order='date asc')
+        self.ensure_one()
+        newer = self.search([
+            ('vehicle_id', '=', self.vehicle_id.id),
+            ('date','>', self.date)
+        ], limit=1, order='date asc')
+        newer.value_update = 0.0
+        newer.value_period_update = newer.value_period
         newer._compute_odometer_value()
 
-    @api.depends('value_period', 'value')
-    def _compute_odometer_value(self):
-        older = self.search([(
-            'vehicle_id', '=', self.vehicle_id.id),('date','<', self.date)], limit=1, order='date desc')
-        if older:
-            if not self.value_period:
-                self.value_period = self.value - older.value
-            if not self.value:
-                self.value = older.value + self.value_period
-        else:
-            self.value = self.value_period
-        if self.date < self.search([('vehicle_id', '=', self.vehicle_id.id)], limit=1, order='date desc'):
-            self.odo_newer()
 
     '''@api.model
     def create(self, data):
@@ -47,12 +89,23 @@ class FleetVehicleOdometer(models.Model):
             res._compute_odometer_value()'''
 
 
-    @api.model
+    @api.multi
     def unlink(self):
+        res = {}
         for odom in self:
-            gone_date = odom.date
-            gone_vehicle = odom.vehicle_id.id
-            super(FleetVehicleOdometer, odom).unlink()
-            if gone_date < odom.search([('vehicle_id', '=', gone_vehicle)], limit=1, order='date desc'):
-                older = odom.search([('vehicle_id', '=', gone_vehicle), ('date', '<', gone_date)], limit=1, order='date desc')
-                older.odo_newer()
+            vals = {
+                'gone_date': odom.date,
+                'gone_vehicle': odom.vehicle_id.id
+            }
+            res[odom.id] = vals
+        super(FleetVehicleOdometer, self).unlink()
+        for key, value in res.items():
+            if value['gone_date'] < self.search([
+                ('vehicle_id', '=', value['gone_vehicle'])
+                ], limit=1, order='date desc').date:
+                older = self.search([
+                    ('vehicle_id', '=', value['gone_vehicle']),
+                    ('date', '<', value['gone_date'])
+                ], limit=1, order='date desc')
+                if len(older) == 1:
+                    older.odo_newer()

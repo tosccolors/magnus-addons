@@ -113,7 +113,7 @@ class HrTimesheetSheet(models.Model):
 
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
-    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=True)
+    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=False)
     starting_mileage_editable = fields.Integer(string='Starting Mileage')
     vehicle = fields.Boolean(compute='_compute_vehicle', string='Vehicle', store=True)
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
@@ -154,7 +154,7 @@ class HrTimesheetSheet(models.Model):
         vehicle = self._get_vehicle()
         if vehicle:
             self.odo_log_id = self.env['fleet.vehicle.odometer'].create({
-                'value': self.end_mileage,
+                'value_period_update': self.business_mileage + self.private_mileage,
                 'date': self.week_id.date_end or fields.Date.context_today(self),
                 'vehicle_id': vehicle.id
             })
