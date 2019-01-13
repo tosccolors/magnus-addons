@@ -67,9 +67,9 @@ class FleetVehicleOdometer(models.Model):
         group_operator="sum",
         store=True
     )
-    timestamp = fields.Dateime(
+#    timestamp = fields.Dateime(
 
-    )
+#    )
 
     def odo_newer(self):
         self.ensure_one()
