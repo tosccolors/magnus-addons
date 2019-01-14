@@ -28,9 +28,9 @@ class FleetVehicleOdometer(models.Model):
                 raise UserError(_("You cannot enter both period value and "
                                   "ultimo value for %s!") % (odom.vehicle_id.name))
             older = self.search([
-                    ('vehicle_id', '=', odom.vehicle_id.id),
-                    ('date', '<', odom.date)
-                    ], limit=1, order='date desc')
+                ('vehicle_id', '=', odom.vehicle_id.id),
+                ('date', '<', odom.date)
+            ], limit=1, order='date desc')
             if older:
                 if odom.value_period_update == 0.0:
                     odom.value_period = odom.value_update - older.value
@@ -39,10 +39,12 @@ class FleetVehicleOdometer(models.Model):
                     odom.value = older.value + odom.value_period_update
                     odom.value_period = odom.value_period_update
             else:
-                odom.value = odom.value_period = odom.value_period_update
-            odo_latest = self.search([('vehicle_id', '=', odom.vehicle_id.id)], limit=1, order='date desc')
-            if odom.date < odo_latest.date:
-                odom.odo_newer()
+                if odom.value_period_update == 0.0:
+                    odom.value_period = odom.value_update
+                    odom.value = odom.value_update
+                if odom.value_update == 0.0:
+                    odom.value = odom.value_period_update
+                    odom.value_period = odom.value_period_update
 
 
     value_period = fields.Float(
@@ -67,26 +69,37 @@ class FleetVehicleOdometer(models.Model):
         group_operator="sum",
         store=True
     )
-#    timestamp = fields.Dateime(
-
+#    timestamp = fields.Datetime(
 #    )
 
+    @api.model
     def odo_newer(self):
         self.ensure_one()
         newer = self.search([
             ('vehicle_id', '=', self.vehicle_id.id),
             ('date','>', self.date)
-        ], limit=1, order='date asc')
-        newer.value_update = 0.0
-        newer.value_period_update = newer.value_period
-        newer._compute_odometer_value()
+            ], order='date asc')
+        former_value = self.value
+        for one in newer:
+            one.value_update = one.value_period + former_value
+            former_value = one.value_update
 
 
-    '''@api.model
+
+    @api.model
     def create(self, data):
         res = super(FleetVehicleOdometer, self).create(data)
-        if res.date < self.search([('vehicle_id', '=', res.vehicle_id)], limit=1, order='date desc'):
-            res._compute_odometer_value()'''
+        if res.date < self.search([('vehicle_id', '=', res.vehicle_id.id)], limit=1, order='date desc').date:
+            res.odo_newer()
+        return res
+
+    @api.multi
+    def write(self, data):
+        res = super(FleetVehicleOdometer, self).write(data)
+        for record in self:
+            if record.date < self.search([('vehicle_id', '=', record.vehicle_id.id)], limit=1, order='date desc').date:
+                record.odo_newer()
+        return res
 
 
     @api.multi
