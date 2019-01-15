@@ -67,6 +67,7 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
 
+    task_id = fields.Many2one(ondelete='restrict')
     select_week_id = fields.Many2one('date.range', string='Week')
     planned = fields.Boolean(string='Planned')
     actual_qty = fields.Float(string='Actual Qty', compute='_get_qty', store=True)
