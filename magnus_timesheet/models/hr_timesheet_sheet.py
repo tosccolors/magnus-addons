@@ -20,12 +20,19 @@ class HrTimesheetSheet(models.Model):
         emp_id = emp_id.id if emp_id else False
         timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
-        week = self.env['date.range'].search([('type_id','in',['week','Week','WEEK']), ('date_start', '=', dt-timedelta(days=dt.weekday()))], limit=1)
+        date_range_type_cw_id = self.env.ref(
+            'magnus_date_range_week.date_range_calender_week').id
+        week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
+                                                                                      dt-timedelta(days=dt.weekday()))], limit=1)
         if week:
             if week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
-                upcoming_week = self.env['date.range'].search([('id', 'not in', logged_weeks), ('type_id','in',['week','Week','WEEK']), ('date_start', '>', dt-timedelta(days=dt.weekday()))], order='date_start', limit=1)
+                upcoming_week = self.env['date.range'].search([
+                    ('id', 'not in', logged_weeks),
+                    ('type_id','=',date_range_type_cw_id),
+                    ('date_start', '>', dt-timedelta(days=dt.weekday()))
+                ], order='date_start', limit=1)
                 if upcoming_week:
                     rec.update({'week_id': upcoming_week.id})
                 else:
@@ -47,7 +54,9 @@ class HrTimesheetSheet(models.Model):
         emp_id = emp_id.id if emp_id else False
         timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
-        return [('type_id','in',['week','Week','WEEK']), ('active','=',True), ('id', 'not in', logged_weeks)]
+        date_range_type_cw_id = self.env.ref(
+            'magnus_date_range_week.date_range_calender_week').id
+        return [('type_id','=', date_range_type_cw_id), ('active','=',True), ('id', 'not in', logged_weeks)]
 
     def _default_employee(self):
         emp_ids = self.env['hr.employee'].search([('user_id', '=', self.env.uid)])
@@ -61,63 +70,72 @@ class HrTimesheetSheet(models.Model):
     def _get_vehicle(self):
         vehicle = False
         if self.employee_id:
-            user = self.employee_id.user_id if self.employee_id.user_id else False
+            user = self.employee_id.user_id or False
             if user:
                 vehicle = self.env['fleet.vehicle'].search([('driver_id', '=', user.partner_id.id)], limit=1)
         return vehicle
 
-    def _get_latest_odometer(self):
-        latest_odometer = self.starting_mileage_editable
+    def _get_latest_mileage(self):
         vehicle = self._get_vehicle()
-        if vehicle:
-            latest_odometer = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
         if vehicle and self.week_id:
-            latest_odometer = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
-        return latest_odometer
+            latest_mileage = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
+        elif vehicle:
+            latest_mileage = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
+        else:
+            latest_mileage = self.starting_mileage_editable
+        return latest_mileage
 
-    @api.one
+    @api.multi
     @api.depends('employee_id','week_id')
     def _get_starting_mileage(self):
-        self.starting_mileage = self._get_latest_odometer()
+        for sheet in self:
+            sheet.vehicle = True if sheet._get_vehicle() else False
+            sheet.starting_mileage = sheet._get_latest_mileage()
 
-    @api.one
+    @api.multi
     @api.depends('timesheet_ids.kilometers')
     def _get_business_mileage(self):
-        self.business_mileage = sum(self.timesheet_ids.mapped('kilometers')) if self.timesheet_ids else 0
+        for sheet in self:
+            sheet.business_mileage = sum(sheet.timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
 
-    @api.one
+    @api.multi
     @api.depends('end_mileage','business_mileage','starting_mileage')
     def _get_private_mileage(self):
-        self.private_mileage = self.end_mileage - self.business_mileage - self.starting_mileage
+        for sheet in self:
+            m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
+            sheet.private_mileage = m if m > 0 else 0
 
-    @api.one
-    @api.depends('employee_id','week_id')
-    def _compute_vehicle(self):
-        self.vehicle = True if self._get_vehicle() else False
-
-    @api.one
+    @api.multi
     @api.depends('timesheet_ids')
     def _get_overtime_hours(self):
-        if self.week_id and self.employee_id:
-            date_from = datetime.strptime(self.week_id.date_start, "%Y-%m-%d").date()
-            overtime_hours = 0
-            for i in range(7):
-                date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
-                hours = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id)]).mapped('unit_amount'))
-                if i < 5 and hours > 8:
-                    overtime_hours += hours - 8
-                elif i > 4 and hours > 0:
-                    overtime_hours += hours
-            overtime_taken = sum(self.env['account.analytic.line'].search([('sheet_id', '=', self.id), ('sheet_id.employee_id', '=', self.employee_id.id), ('project_id.overtime', '=', True)]).mapped('unit_amount'))
-            self.overtime_hours = overtime_hours - overtime_taken
+        for sheet in self:
+            if sheet.week_id and sheet.employee_id:
+                date_from = datetime.strptime(sheet.week_id.date_start, "%Y-%m-%d").date()
+                overtime_hours = 0
+                for i in range(7):
+                    date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
+                    hours = sum(sheet.env['account.analytic.line'].search([
+                        ('date', '=', date),
+                        ('sheet_id', '=', sheet.id)
+                    ]).mapped('unit_amount'))
+                    if i < 5 and hours > 8:
+                        overtime_hours += hours - 8
+                    elif i > 4 and hours > 0:
+                        overtime_hours += hours
+                overtime_taken = sum(self.env['account.analytic.line'].search([
+                    ('sheet_id', '=', sheet.id),
+                    ('sheet_id.employee_id', '=', sheet.employee_id.id),
+                    ('project_id.overtime', '=', True)
+                ]).mapped('unit_amount'))
+                sheet.overtime_hours = overtime_hours - overtime_taken
 
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
     starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=False)
     starting_mileage_editable = fields.Integer(string='Starting Mileage')
-    vehicle = fields.Boolean(compute='_compute_vehicle', string='Vehicle', store=True)
+    vehicle = fields.Boolean(compute='_get_starting_mileage', string='Vehicle', store=False)
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
-    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
+    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
     end_mileage = fields.Integer('End Mileage')
     overtime_hours = fields.Integer(compute="_get_overtime_hours", string='Overtime Hours', store=True)
     odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
@@ -127,12 +145,21 @@ class HrTimesheetSheet(models.Model):
         self.date_from = self.week_id.date_start
         self.date_to = self.week_id.date_end
 
+  #  @api.onchange('starting_mileage', 'business_mileage')
+  #  def onchange_private_mileage(self):
+  #      if self.private_mileage == 0:
+  #          self.end_mileage = self.starting_mileage + self.business_mileage
+
+
     def duplicate_last_week(self):
         if self.week_id and self.employee_id:
             ds = self.week_id.date_start
             date_start = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=7)
             date_end = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=1)
-            last_week = self.env['date.range'].search([('type_id','in',['week','Week','WEEK']), ('date_start', '=', date_start), ('date_end', '=', date_end)], limit=1)
+            date_range_type_cw_id = self.env.ref(
+                'magnus_date_range_week.date_range_calender_week').id
+            last_week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
+                                                                                               date_start), ('date_end', '=', date_end)], limit=1)
             if last_week:
                 last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.employee_id.id), ('week_id', '=', last_week.id)], limit=1)
                 current_week_lines = [(0, 0, {'date': l.date,'name': l.name,'project_id': l.project_id.id,'task_id': l.task_id.id, 'unit_amount': l.unit_amount}) for l in self.timesheet_ids] if self.timesheet_ids else []
@@ -224,7 +251,6 @@ class HrTimesheetSheet(models.Model):
                 week_id,
                 account_department_id,               
                 expenses,
-                billable,
                 chargeable,
                 operating_unit_id,
                 correction_charge,
@@ -269,7 +295,6 @@ class HrTimesheetSheet(models.Model):
                 aal.week_id as week_id,
                 aal.account_department_id as account_department_id,
                 aal.expenses as expenses,
-                aal.billable as billable,
                 aal.chargeable as chargeable,
                 aal.operating_unit_id as operating_unit_id,
                 aal.correction_charge as correction_charge,
