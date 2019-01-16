@@ -20,13 +20,16 @@ class FleetVehicle(models.Model):
 class FleetVehicleOdometer(models.Model):
     _inherit = 'fleet.vehicle.odometer'
 
+    _sql_constraints = [('date_uniq', 'unique (date, vehicle_id)', 'Odometer records have to have '
+                                        'a unique date.')]
+
     @api.depends('value_period_update', 'value_update')
     @api.multi
     def _compute_odometer_value(self):
         for odom in self:
             if odom.value_period_update > 0.0 and odom.value_update > 0.0:
                 raise UserError(_("You cannot enter both period value and "
-                                  "ultimo value for %s!") % (odom.vehicle_id.name))
+                                  "ultimo value for %s!") % (odom.date))
             older = self.search([
                 ('vehicle_id', '=', odom.vehicle_id.id),
                 ('date', '<', odom.date)
@@ -81,7 +84,9 @@ class FleetVehicleOdometer(models.Model):
             ], order='date asc')
         former_value = self.value
         for one in newer:
-            one.value_update = one.value_period + former_value
+            period = one.value_period
+            one.value_period_update = 0
+            one.value_update = period + former_value
             former_value = one.value_update
 
 
