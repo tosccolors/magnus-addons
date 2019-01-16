@@ -20,6 +20,11 @@ class Project(models.Model):
     correction_charge = fields.Boolean('Correction Chargeability')
     chargeable = fields.Boolean('Chargeable')
     invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
+    operating_unit_ids = fields.Many2many(
+        comodel_name='operating.unit', string='Operating Units',
+        relation='project_operating_unit_rel',
+        column1='project_id',
+        column2='operating_unit_id')
 
 
     @api.multi
