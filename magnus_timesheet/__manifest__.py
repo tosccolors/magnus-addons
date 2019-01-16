@@ -36,7 +36,7 @@ The extended date range validation process is:
     'depends': ['hr_timesheet_task',
                 'magnus_invoicing',
                 'fleet',
-                'date_range',
+                'magnus_date_range_week',
                 'product_uom_unece',
                 'magnus_project',
                 'web_m2x_options',
