@@ -15,6 +15,7 @@
                 </xpath>
                 <xpath expr="//field[@name='account_id']" position="attributes">
                     <attribute name="attrs">{'invisible': [('sheet_state', '=', 'submit')]}</attribute>
+                    <attribute name="groups">hr_expense.group_hr_expense_manager</attribute>
                 </xpath>
                 <xpath expr="//field[@name='tax_ids']" position="attributes">
                     <attribute name="attrs">{'invisible': [('sheet_state', 'not in', ['approve','revise'])]}</attribute>
