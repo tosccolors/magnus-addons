@@ -119,5 +119,9 @@
       <field name="view_mode">tree,pivot,form</field>
     </record>
 
+    <record id="hr_timesheet.act_hr_timesheet_report" model="ir.actions.act_window">
+      <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)')]</field>
+    </record>
+
   </data>
 </odoo>
