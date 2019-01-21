@@ -11,13 +11,16 @@ class AccountAnalyticLine(models.Model):
     _order = 'date desc'
 
     @api.multi
-    @api.depends('date','product_uom_id')
+    @api.depends('date','product_uom_id','sheet_id')
     def _compute_week_month(self):
         for line in self:
             if line.product_uom_id != self.env.ref('product.'
                                                        'product_uom_hour'):
                 continue
-            if line.date:
+            if line.sheet_id.week_id and line.date:
+                line.week_id = line.sheet_id.week_id
+                line.month_id = line.find_daterange_month(line.date)
+            elif line.date:
                 line.week_id = line.find_daterange_week(line.date)
                 line.month_id = line.find_daterange_month(line.date)
             elif not line.child_ids == []:
@@ -29,9 +32,10 @@ class AccountAnalyticLine(models.Model):
         try to find a date range with type 'week'
         with @param:date contained in its date_start/date_end interval
         """
-#        date_str = fields.Date.to_string(date)
+        date_range_type_cw_id = self.env.ref(
+            'magnus_date_range_week.date_range_calender_week').id
         s_args = [
-            ('type_name', '=', 'Week'),
+            ('type_id', '=', date_range_type_cw_id),
             ('date_start', '<=', date),
             ('date_end', '>=', date),
             '|',
@@ -48,9 +52,11 @@ class AccountAnalyticLine(models.Model):
         try to find a date range with type 'month'
         with @param:date contained in its date_start/date_end interval
         """
-#        date_str = fields.Date.to_string(date)
+        date_range_type_fm_id = self.env.ref(
+            'account_fiscal_month.date_range_fiscal_month').id
+
         s_args = [
-            ('type_name', '=', 'Fiscal month'),
+            ('type_id', '=', date_range_type_fm_id),
             ('date_start', '<=', date),
             ('date_end', '>=', date),
             '|',
