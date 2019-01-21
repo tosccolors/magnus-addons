@@ -40,6 +40,11 @@ class AccountAnalyticLine(models.Model):
                 WHERE id = %s""",
                 (res.select_week_id.id, res.id),
             )
+
+        if self.env.context.get('default_planned', True) and res.project_id != False:
+            self.env.cr.execute(
+                """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(res.id)
+            )
         return res
 
     @api.multi
@@ -51,6 +56,11 @@ class AccountAnalyticLine(models.Model):
                     """UPDATE account_analytic_line SET week_id = %s
                     WHERE id = %s""",
                     (obj.select_week_id.id, obj.id),
+                )
+
+            if self.env.context.get('default_planned', True) and obj.project_id != False:
+                self.env.cr.execute(
+                    """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(obj.id)
                 )
         return res
 
