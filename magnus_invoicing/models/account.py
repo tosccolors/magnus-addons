@@ -30,8 +30,9 @@ class AccountAnalyticLine(models.Model):
         with @param:date contained in its date_start/date_end interval
         """
 #        date_str = fields.Date.to_string(date)
+        date_range_type_cw_id = self.env.ref('magnus_date_range_week.date_range_calender_week')
         s_args = [
-            ('type_name', '=', 'Week'),
+            ('type_name', '=', date_range_type_cw_id.name),
             ('date_start', '<=', date),
             ('date_end', '>=', date),
             '|',

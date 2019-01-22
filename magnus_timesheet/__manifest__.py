@@ -46,6 +46,7 @@ The extended date range validation process is:
     # always loaded
     'data': [
         'security/magnus_security.xml',
+        'report/hr_chargeability_report.xml',
         'views/hr_timesheet_view.xml',
         'views/project_timesheet_view.xml',
         'views/project_view.xml',
