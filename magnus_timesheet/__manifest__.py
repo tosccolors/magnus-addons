@@ -41,7 +41,8 @@ The extended date range validation process is:
                 'magnus_project',
                 'web_m2x_options',
                 'web_readonly_bypass',
-                'sale_timesheet'],
+                'sale_timesheet',
+                'analytic_base_department'],
 
     # always loaded
     'data': [

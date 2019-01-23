@@ -14,11 +14,16 @@ class AccountAnalyticLine(models.Model):
     #  and change dependency such, that magnus_timesheet is dependency of invoicing.
 
     @api.depends('date', 'user_id', 'project_id', 'sheet_id_computed.date_to', 'sheet_id_computed.date_from',
-                 'sheet_id_computed.employee_id')
+                 'sheet_id_computed.employee_id', 'task_id', 'product_uom_id', 'planned')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         """
+        UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
+            # if not line.project_id:
+            #     super(AccountAnalyticLine, line)._compute_sheet()
+            if line.project_id and line.task_id and line.user_id and not line.planned and line.product_uom_id.id == UomHrs:
+                line.ts_line = True
             if not line.ts_line or line.planned:
                 continue
             if line.sheet_id.week_id and line.date:
@@ -165,7 +170,9 @@ class AccountAnalyticLine(models.Model):
         'account.move',
         string='Write-off Move',
     )
+
     task_id = fields.Many2one(
+        'project.task', 'Task',
         ondelete='restrict'
     )
     select_week_id = fields.Many2one(
@@ -188,6 +195,11 @@ class AccountAnalyticLine(models.Model):
     day_name = fields.Char(
         string="Day",
         compute='_get_day'
+    )
+    ts_line = fields.Boolean(
+        compute=_compute_sheet,
+        string='Timesheet line',
+        store=True,
     )
 
     def _check_state(self):
@@ -266,7 +278,7 @@ class AccountAnalyticLine(models.Model):
                     'product_id': res.product_id.id,
                     'user_id': res.user_id.id,
                     'company_id': res.company_id.id,
-                    'task_id': res.task_id.id,
+                    'task_id': res.task_id.id,_compute_sheet
                     'account_id': res.account_id.id,
                     'partner_id': res.partner_id.id,
                     'product_uom_id': res.product_uom_id.id,
@@ -312,6 +324,7 @@ class AccountAnalyticLine(models.Model):
     def create(self, vals):
         res = super(AccountAnalyticLine, self).create(vals)
         fee_rate = 0
+        UpdateCols = []
         if 'task_id' in vals and 'user_id' in vals:
             vals['product_id'] = self.get_task_user_product(vals['task_id'], vals['user_id'])
             task = self.env['project.task'].browse(vals['task_id'])
@@ -320,31 +333,51 @@ class AccountAnalyticLine(models.Model):
                     if user.user_id.id == vals['user_id']:
                         fee_rate = user.fee_rate or user.product_id.lst_price
 
-            if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
+            if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                 amount = vals['unit_amount'] * fee_rate
-                self.env.cr.execute(
-                    """UPDATE account_analytic_line SET amount = %s
-                    WHERE id = %s""",
-                    (amount, res.id),
-                )
+                UpdateCols.append("amount = %s"%amount)
+                # self.env.cr.execute(
+                #     """UPDATE account_analytic_line SET amount = %s
+                #     WHERE id = %s""",
+                #     (amount, res.id),
+                # )
+        if self.env.context.get('default_planned', False):
+            if res.week_id != res.select_week_id:
+                UpdateCols.append("week_id = %s" % res.select_week_id.id)
+                # self.env.cr.execute(
+                #     """UPDATE account_analytic_line SET week_id = %s
+                #     WHERE id = %s""",
+                #     (res.select_week_id.id, res.id),
+                # )
+
+            if res.project_id != False:
+                UpdateCols.append("planned = True")
+                # self.env.cr.execute(
+                #     """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(res.id)
+                # )
+        if UpdateCols:
+            col_up = ', '.join(UpdateCols)
+            self.env.cr.execute(
+                """UPDATE account_analytic_line SET %s WHERE id = %s""" % (col_up, res.id)
+            )
         return res
 
 
-    @api.model
-    def create(self, vals):
-        res = super(AccountAnalyticLine, self).create(vals)
-        if self.env.context.get('default_planned', False) and res.week_id != res.select_week_id:
-            self.env.cr.execute(
-                """UPDATE account_analytic_line SET week_id = %s
-                WHERE id = %s""",
-                (res.select_week_id.id, res.id),
-            )
-
-        if self.env.context.get('default_planned', True) and res.project_id != False:
-            self.env.cr.execute(
-                """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(res.id)
-            )
-        return res
+    # @api.model
+    # def create(self, vals):
+    #     res = super(AccountAnalyticLine, self).create(vals)
+    #     if self.env.context.get('default_planned', False) and res.week_id != res.select_week_id:
+    #         self.env.cr.execute(
+    #             """UPDATE account_analytic_line SET week_id = %s
+    #             WHERE id = %s""",
+    #             (res.select_week_id.id, res.id),
+    #         )
+    #
+    #     if self.env.context.get('default_planned', True) and res.project_id != False:
+    #         self.env.cr.execute(
+    #             """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(res.id)
+    #         )
+    #     return res
 
     @api.multi
     def write(self, vals):
@@ -353,6 +386,7 @@ class AccountAnalyticLine(models.Model):
             task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id
             user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id
             unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount
+            UpdateCols = []
             if task_id and user_id:
                 product_id = self.get_task_user_product(task_id, user_id)
                 if product_id:
@@ -365,28 +399,51 @@ class AccountAnalyticLine(models.Model):
 
                         if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                             amount = unit_amount * fee_rate
-                            self.env.cr.execute(
-                                """UPDATE account_analytic_line SET amount = %s , product_id = %s
-                                WHERE id = %s""",
-                                (amount, product_id, aal.id),
-                            )
-        return res
-    @api.multi
-    def write(self, vals):
-        res = super(AccountAnalyticLine, self).write(vals)
-        for obj in self:
-            if vals.get('select_week_id', False) and obj.week_id != obj.select_week_id:
-                self.env.cr.execute(
-                    """UPDATE account_analytic_line SET week_id = %s
-                    WHERE id = %s""",
-                    (obj.select_week_id.id, obj.id),
-                )
+                            UpdateCols.append("amount = %s, product_id = %s" % (amount, product_id))
+                            # self.env.cr.execute(
+                            #     """UPDATE account_analytic_line SET amount = %s , product_id = %s
+                            #     WHERE id = %s""",
+                            #     (amount, product_id, aal.id),
+                            # )
 
-            if self.env.context.get('default_planned', True) and obj.project_id != False:
+            if vals.get('select_week_id', False) and aal.week_id != aal.select_week_id:
+                UpdateCols.append("week_id = %s"%aal.select_week_id.id)
+                # self.env.cr.execute(
+                #     """UPDATE account_analytic_line SET week_id = %s
+                #     WHERE id = %s""",
+                #     (aal.select_week_id.id, aal.id),
+                # )
+
+            if self.env.context.get('default_planned', False) and aal.project_id != False:
+                UpdateCols.append("planned = True")
+                # self.env.cr.execute(
+                #     """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(aal.id)
+                # )
+            if UpdateCols:
+                col_up = ', '.join(UpdateCols)
                 self.env.cr.execute(
-                    """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(obj.id)
+                    """UPDATE account_analytic_line SET %s WHERE id = %s""" % (col_up, aal.id)
                 )
+            return res
         return res
+
+
+    # @api.multi
+    # def write(self, vals):
+    #     res = super(AccountAnalyticLine, self).write(vals)
+    #     for obj in self:
+    #         if vals.get('select_week_id', False) and obj.week_id != obj.select_week_id:
+    #             self.env.cr.execute(
+    #                 """UPDATE account_analytic_line SET week_id = %s
+    #                 WHERE id = %s""",
+    #                 (obj.select_week_id.id, obj.id),
+    #             )
+    #
+    #         if self.env.context.get('default_planned', True) and obj.project_id != False:
+    #             self.env.cr.execute(
+    #                 """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(obj.id)
+    #             )
+    #     return res
 
     def _get_qty(self):
         for line in self:
