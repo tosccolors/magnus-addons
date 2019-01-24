@@ -110,12 +110,12 @@ class AccountAnalyticLine(models.Model):
         return date_range
 
 
-    invoiced = fields.Boolean(
-        'Invoiced'
-    )
-    invoiceable = fields.Boolean(
-        'Invoiceable'
-    )
+    # invoiced = fields.Boolean(
+    #     'Invoiced'
+    # )
+    # invoiceable = fields.Boolean(
+    #     'Invoiceable'
+    # )
     user_total_id = fields.Many2one(
         'analytic.user.total',
         string='Summary Reference',
@@ -133,23 +133,23 @@ class AccountAnalyticLine(models.Model):
         string='Month',
         store=True,
     )
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('open', 'Confirmed'),
-        ('delayed', 'Delayed'),
-        ('invoiceable', 'To be Invoiced'),
-        ('progress', 'In Progress'),
-        ('invoiced', 'Invoiced'),
-        ('write-off', 'Write-Off'),
-        ('change-chargecode', 'Change-Chargecode'),
-    ],
-        string='Status',
-        readonly=True,
-        copy=False,
-        index=True,
-        track_visibility='onchange',
-        default='draft'
-    )
+    # state = fields.Selection([
+    #     ('draft', 'Draft'),
+    #     ('open', 'Confirmed'),
+    #     ('delayed', 'Delayed'),
+    #     ('invoiceable', 'To be Invoiced'),
+    #     ('progress', 'In Progress'),
+    #     ('invoiced', 'Invoiced'),
+    #     ('write-off', 'Write-Off'),
+    #     ('change-chargecode', 'Change-Chargecode'),
+    # ],
+    #     string='Status',
+    #     readonly=True,
+    #     copy=False,
+    #     index=True,
+    #     track_visibility='onchange',
+    #     default='draft'
+    # )
 
     correction_charge = fields.Boolean(
         compute=_compute_sheet,
@@ -202,15 +202,15 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
 
-    def _check_state(self):
-        """
-        to check if any lines computes method calls allow to modify
-        :return: True or super
-        """
-        context = self.env.context.copy()
-        if not 'active_model' in context:
-            return True
-        return super(AccountAnalyticLine, self)._check_state()
+    # def _check_state(self):
+    #     """
+    #     to check if any lines computes method calls allow to modify
+    #     :return: True or super
+    #     """
+    #     context = self.env.context.copy()
+    #     if not 'active_model' in context:
+    #         return True
+    #     return super(AccountAnalyticLine, self)._check_state()
 
     def get_task_user_product(self, task_id, user_id):
         taskUserObj = self.env['task.user']
@@ -397,7 +397,7 @@ class AccountAnalyticLine(models.Model):
                             if user.user_id.id == user_id:
                                 fee_rate = user.fee_rate or user.product_id.lst_price
 
-                        if vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
+                        if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                             amount = unit_amount * fee_rate
                             UpdateCols.append("amount = %s, product_id = %s" % (amount, product_id))
                             # self.env.cr.execute(

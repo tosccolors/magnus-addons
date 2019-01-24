@@ -34,7 +34,6 @@ The extended date range validation process is:
 
     # any module necessary for this one to work correctly
     'depends': ['hr_timesheet_task',
-                'magnus_invoicing',
                 'fleet',
                 'magnus_date_range_week',
                 'product_uom_unece',
@@ -42,7 +41,9 @@ The extended date range validation process is:
                 'web_m2x_options',
                 'web_readonly_bypass',
                 'sale_timesheet',
-                'analytic_base_department'],
+                'analytic_base_department',
+                'account_fiscal_month',
+                'account_fiscal_year'],
 
     # always loaded
     'data': [
