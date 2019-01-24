@@ -62,8 +62,8 @@ class AnalyticInvoice(models.Model):
                 domain = [('account_id', 'in', account_analytic_ids)]
 
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'invoiced']),
-                                    '|',('invoiceable', '=', True),('invoiced', '=', True)]
+            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'progress']),
+                                    '|',('invoiceable', '=', True),('invoiced', '=', False)]
 
             fields_grouped = [
                 'id',
@@ -332,6 +332,8 @@ class AnalyticInvoice(models.Model):
         fpos = self.partner_id.property_account_position_id
         if fpos:
             account = fpos.map_account(account)
+        else:
+            account = self.partner_id.property_account_receivable_id
 
         # project = False
         # if line.project_id:
@@ -357,6 +359,7 @@ class AnalyticInvoice(models.Model):
             'user_id':line.user_id.id,
             # 'project_id': project.id if project else False
         }
+
         return res
 
     @api.one
@@ -364,25 +367,27 @@ class AnalyticInvoice(models.Model):
         invoices = {}
         invoices['lines'] = []
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
-
+        inv_from_summary = []
+        # raise UserError(_('Please define an accounting sale journal for this company.'))
         for line in user_summary_lines:
+
             inv_line_vals = self._prepare_invoice_line(line)
             invoices['lines'].append((0, 0, inv_line_vals))
 
-            if invoices['lines']:
-                if self.invoice_ids:
-                    invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
-                    invoice.write({'lines': invoices['lines']})
-            else:
+            if self.invoice_ids and invoices['lines']:
+                invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
+                invoice.write({'lines': invoices['lines']})
+            elif not self.invoice_ids:
                 vals = self._prepare_invoice(invoices)
                 invoice = self.env['account.invoice'].create(vals)
                 invoice.compute_taxes()
                 self.invoice_ids = [(4, invoice.id)]
+            inv_from_summary.append(line)
 
-        if self.state == 'draft':
+        if self.state == 'draft' and inv_from_summary:
             self.state = 'open'
 
-        for line in user_summary_lines:
+        for line in inv_from_summary:
             cond = '='
             rec = line.children_ids.ids[0]
             if len(line.children_ids) > 1:

@@ -205,15 +205,15 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         self.copy_wih_query()
-        if self.timesheet_ids:
-            cond = '='
-            rec = self.timesheet_ids.ids[0]
-            if len(self.timesheet_ids) > 1:
-                cond = 'IN'
-                rec = tuple(self.timesheet_ids.ids)
-            self.env.cr.execute("""
-                        UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
-                """ % (cond, rec))
+        # if self.timesheet_ids:
+        #     cond = '='
+        #     rec = self.timesheet_ids.ids[0]
+        #     if len(self.timesheet_ids) > 1:
+        #         cond = 'IN'
+        #         rec = tuple(self.timesheet_ids.ids)
+        #     self.env.cr.execute("""
+        #                 UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+        #         """ % (cond, rec))
         return res
 
     def copy_wih_query(self):
@@ -245,8 +245,6 @@ class HrTimesheetSheet(models.Model):
                 sheet_id,
                 so_line,
                 user_total_id,
-                invoiced,
-                invoiceable,
                 month_id,
                 week_id,
                 account_department_id,               
@@ -289,8 +287,6 @@ class HrTimesheetSheet(models.Model):
                 NULL as sheet_id,
                 aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
-                aal.invoiced as invoiced,
-                aal.invoiceable as invoiceable,
                 aal.month_id as month_id,
                 aal.week_id as week_id,
                 aal.account_department_id as account_department_id,
@@ -305,7 +301,6 @@ class HrTimesheetSheet(models.Model):
                 aal.planned as planned,
                 aal.select_week_id as select_week_id,
                 0 as kilometers,
-                'open' as state,
                 CASE
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
@@ -335,23 +330,23 @@ class HrTimesheetSheet(models.Model):
         On timesheet reset draft check analytic shouldn't be in invoiced
         :return: Super
         """
-        if self.timesheet_ids.filtered('invoiced'):
-            raise UserError(_('You cannot modify an entry in a invoiced timesheet'))
+        # if self.timesheet_ids.filtered('invoiced'):
+        #     raise UserError(_('You cannot modify an entry in a invoiced timesheet'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.odo_log_id:
             self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
             self.odo_log_id = False
-        if self.timesheet_ids:
-            cond = '='
-            rec = self.timesheet_ids.ids[0]
-            if len(self.timesheet_ids) > 1:
-                cond = 'IN'
-                rec = tuple(self.timesheet_ids.ids)
-            self.env.cr.execute("""
-                        UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s;
-                        DELETE FROM account_analytic_line WHERE ref_id %s %s;
-                """ % (cond, rec, cond, rec))
-            self.env.invalidate_all()
+        # if self.timesheet_ids:
+        #     cond = '='
+        #     rec = self.timesheet_ids.ids[0]
+        #     if len(self.timesheet_ids) > 1:
+        #         cond = 'IN'
+        #         rec = tuple(self.timesheet_ids.ids)
+        #     self.env.cr.execute("""
+        #                 UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s;
+        #                 DELETE FROM account_analytic_line WHERE ref_id %s %s;
+        #         """ % (cond, rec, cond, rec))
+        #     self.env.invalidate_all()
         return res
 
     @api.one

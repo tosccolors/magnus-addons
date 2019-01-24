@@ -25,7 +25,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['date_range','hr_timesheet_sheet','account_fiscal_month','account_fiscal_year','magnus_project'],
+    'depends': ['magnus_timesheet'],
 
     # always loaded
     'data': [
