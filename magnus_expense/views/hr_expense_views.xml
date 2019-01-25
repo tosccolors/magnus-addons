@@ -134,7 +134,7 @@
     </record>
 
     <record id="hr_expense.action_hr_expense_sheet_all_to_pay" model="ir.actions.act_window">
-        <field name="context">{'search_default_to_post': 1, 'readonly_by_pass': True}</field>
+        <field name="context">{'search_default_approved': 1, 'readonly_by_pass': True}</field>
     </record>
 
     <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
