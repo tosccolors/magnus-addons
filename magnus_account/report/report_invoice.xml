@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+
+<template id="report_invoice_document_magnus_account">
+    <t t-call="report_qweb_operating_unit.external_layout_ou">
+
+        <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
+        <div class="page" style="font-family: 'Titillium Web', sans-serif;page-break-after:always;">
+            <div class="row mt32 mb32" style="padding-left:85px;">
+                 <div class="col-xs-7" style="padding:0px;">
+                    <strong>
+                        <t t-if="o.partner_id.is_company">
+                            <div t-field="o.partner_id.name"/>
+                        </t>
+                        <t t-if="not o.partner_id.is_company">
+                            <div t-if="o.partner_id and o.partner_id.parent_id">
+                                <span t-field="o.partner_id.parent_id.name"/>
+                            </div>
+                        </t>
+                        <t t-if="o.partner_id">
+                            <div t-field="o.partner_id.street"/>
+                            <div t-field="o.partner_id.street2"/>
+                            <div><span t-field="o.partner_id.zip"/> <span t-field="o.partner_id.city"/></div>
+                            <div t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
+                        </t>
+                    </strong>
+                 </div>
+            </div>
+
+            <br/>
+            <br/>
+            <br/>
+
+            <div style="padding-left:85px;padding-right:15px;">
+                <div class="row" style="padding:0px;padding-right:15px;border-bottom:1px solid black;">
+                    <div class="col-xs-6" style="padding:0px;">
+                         <div class="col-xs-3" style="padding:0px;">
+                             <span>Datum</span>
+                             <br/>
+                             <span>Factuur</span>
+                             <br/>
+                             <span>Referentie</span>
+                             <br/>
+                             <span>Ons BTW nr.</span>
+                             <br/>
+                             <br/>
+                         </div>
+                         <div class="col-xs-1" style="padding:0px;">
+                             <span><strong> </strong></span>
+                             <br/>
+                             <span><strong> </strong></span>
+                             <br/>
+                             <span><strong> </strong></span>
+                             <br/>
+                             <br/>
+                         </div>
+                         <div class="col-xs-8" style="padding:0px;">
+                             <span t-field="o.date_invoice"/>
+                             <br/>
+                             <span t-field="o.number"/>
+                             <br/>
+                             <span t-field="o.name"/>
+                             <br/>
+                             <span t-if="o.company_id and o.company_id.vat" t-field="o.company_id.vat"/>
+                             <br/>
+                             <br/>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <br/>
+            <br/>
+            <div style="padding-left:85px;padding-right:15px;" t-if="o.invoice_description">
+                <strong><span t-field="o.invoice_description"/></strong>
+                <br/>
+                <br/>
+            </div>
+
+            <div style="padding-left:85px;padding-right:15px;" t-if="not o.invoice_description">
+                <table class="table table-condensed table-padding">
+                    <tr t-foreach="o.invoice_line_ids" t-as="l">
+                        <td width="20%"><span t-field="l.name"/></td>
+                        <td width="20%"> </td>
+                        <td width="20%"> </td>
+                        <td width="20%"> </td>
+                        <td class="text-right">
+                            <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="row" style="padding-left:85px;padding-right:15px;page-break-inside:avoid;">
+                <div class="col-xs-6 pull-right">
+                <table class="table table-condensed">
+                    <tr class="border-black">
+                        <td><strong>Subtotaal</strong></td>
+                        <td class="text-right">
+                            <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                        </td>
+                    </tr>
+                    <tr t-foreach="o.tax_line_ids" t-as="t">
+                        <td><span t-field="t.tax_id.description"/></td>
+                        <td class="text-right">
+                            <span t-field="t.amount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                        </td>
+                    </tr>
+                    <tr class="border-black">
+                        <td><strong>Totaal te voldoen</strong></td>
+                        <td class="text-right">
+                             <span t-if="o.type == 'out_refund'">-</span><span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+            <p t-if="o.payment_term_id" style="padding-left:85px;padding-right:15px;padding-top:30px;">
+                <strong>Betaaltermijn:</strong> Binnen <span t-field="o.payment_term_id.name"/> <strong> <span t-if="o.partner_id.company_id" t-field="o.partner_id.company_id.name"/></strong>
+            </p>
+
+            <t t-set="bank_acc" t-value="any([b.acc_number for b in o.company_id.partner_id.bank_ids])"/>
+            <p t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
+                <strong>Bankrekening:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.company_id.partner_id.bank_ids))"/>
+                <strong>IBAN</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.company_id.partner_id.bank_ids))"/>
+                <strong>BIC</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.company_id.partner_id.bank_ids))"/>
+            </p>
+        </div>
+    </t>
+</template>
+
+
+
+<template id="report_invoice_magnus_account">
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="magnus_account.report_invoice_document_magnus_account" t-lang="o.partner_id.lang"/>
+        </t>
+    </t>
+</template>
+
+
+
+
+
+</data>
+</odoo>
