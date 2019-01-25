@@ -42,7 +42,7 @@ voor de interface naar slam.
     """,
     'author'  : 'Magnus - Willem Hulshof',
     'website' : 'http://www.magnus.nl',
-    'depends' : ['account', 'account_invoice_supplier_ref_unique','report_qweb_operating_unit','account_operating_unit'
+    'depends' : ['account', 'account_invoice_supplier_ref_unique','report_qweb_operating_unit','account_operating_unit','operating_unit_report_layout'
     ],
     'data' : [
         "report/report_layout.xml",
