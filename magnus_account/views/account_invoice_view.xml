@@ -32,7 +32,7 @@
                             domain="[('company_id', '=', parent.company_id)]" required="1"/>
                     </xpath>
 
-                    <xpath expr="//page[@string='Other Info']/group/group/field[@name='name']" position="replace"/>
+                    <!--<xpath expr="//page[@string='Other Info']/group/group/field[@name='name']" position="replace"/>-->
                 </data>
             </field>
         </record>
