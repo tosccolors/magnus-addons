@@ -332,8 +332,6 @@ class AnalyticInvoice(models.Model):
         fpos = self.partner_id.property_account_position_id
         if fpos:
             account = fpos.map_account(account)
-        else:
-            account = self.partner_id.property_account_receivable_id
 
         # project = False
         # if line.project_id:
