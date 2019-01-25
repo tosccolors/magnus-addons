@@ -121,4 +121,24 @@
             </field>
         </record>
 
+    <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
+        <field name="context">{'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
+        <field name="context">{'search_default_submitted': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_to_post" model="ir.actions.act_window">
+        <field name="context">{'search_default_to_post': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_to_pay" model="ir.actions.act_window">
+        <field name="context">{'search_default_approved': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
+        <field name="context">{'readonly_by_pass': True}</field>
+    </record>
+
 </odoo>

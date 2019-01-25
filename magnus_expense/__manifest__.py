@@ -19,7 +19,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['hr_expense', 'hr_expense_operating_unit', 'invoice_line_revenue_distribution_operating_unit'],
+    'depends': ['hr_expense', 'hr_expense_operating_unit', 'invoice_line_revenue_distribution_operating_unit', 'web_readonly_bypass'],
 
     # always loaded
     'data': [
