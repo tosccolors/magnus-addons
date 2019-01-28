@@ -15,7 +15,7 @@
             <field name="business_mileage" />
             <field name="private_mileage" />
             <field name="end_mileage" />
-            <field name="overtime_hours"/>
+            <field name="overtime_hours" widget="float_time"/>
           </group>
         </xpath>
         <xpath expr="//label[@for='date_from']" position="before">
@@ -94,7 +94,7 @@
         <field name="date_to" position="after">
           <field name="private_mileage" sum="Total amount"/>
           <field name="business_mileage" sum="Total amount"/>
-          <field name="overtime_hours" sum="Total amount"/>
+          <field name="overtime_hours" widget="float_time" sum="Total amount"/>
         </field>
       </field>
     </record>
@@ -108,7 +108,7 @@
                 <field name="state" type="col"/>
                 <field name="private_mileage" type="measure"/>
                 <field name="business_mileage" type="measure"/>
-                <field name="overtime_hours" type="measure"/>
+                <field name="overtime_hours" widget="float_time" type="measure"/>
             </pivot>
         </field>
     </record>
