@@ -15,9 +15,9 @@ class ProjectInvoicingProperties(models.Model):
             id = self._origin.id
         except:
             id = self.id
-        tasks = self.env['project.task'].search([('invoice_properties', '=', id)])
-        if tasks:
-            analytic_lines = self.env['account.analytic.line'].search([('task_id', 'in', tasks.ids), ('product_uom_id', '=', self.env.ref('product.product_uom_km').id)])
+        project = self.env['project.project'].search([('invoice_properties', '=', id)])
+        if project:
+            analytic_lines = self.env['account.analytic.line'].search([('project_id', 'in', project.ids), ('product_uom_id', '=', self.env.ref('product.product_uom_km').id)])
             if analytic_lines:
                 non_invoiceable_mileage = False if self.invoice_mileage else True
                 cond = '='
