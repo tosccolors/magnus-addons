@@ -21,7 +21,7 @@
                 <xpath expr="//field[@name='account_id']" position="after">
                     <field name="timesheet_optional" />
                     <field name="timesheet_no_8_hours_day" />
-                    <field name="overtime_hours" />
+                    <field name="overtime_hours" widget="float_time" />
                 </xpath>
             </field>
         </record>

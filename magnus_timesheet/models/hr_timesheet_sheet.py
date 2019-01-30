@@ -137,7 +137,7 @@ class HrTimesheetSheet(models.Model):
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
     end_mileage = fields.Integer('End Mileage')
-    overtime_hours = fields.Integer(compute="_get_overtime_hours", string='Overtime Hours', store=True)
+    overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
     odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
 
     @api.onchange('week_id', 'date_from', 'date_to')
