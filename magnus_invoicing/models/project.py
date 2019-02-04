@@ -83,3 +83,8 @@ class InvoiceScheduleLine(models.Model):
     project_id = fields.Many2one(
         'project.project',
     )
+
+class ProjectInvoicingProperties(models.Model):
+    _inherit = "project.invoicing.properties"
+
+    group_invoice = fields.Boolean('Group Invoice')

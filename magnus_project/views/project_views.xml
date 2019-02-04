@@ -11,7 +11,7 @@
             <xpath expr="//div[@class='oe_title']" position="after">
               <group>
                 <group>
-                  <field name="operating_unit_id" invisible="1"/>
+                  <!--<field name="operating_unit_id" invisible="1"/>-->
                   <field name="operating_unit_ids" widget="many2many_tags" readonly="1"/>
                 </group>
               </group>

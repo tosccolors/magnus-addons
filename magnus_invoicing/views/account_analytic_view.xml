@@ -96,7 +96,7 @@
             <field name="view_id" ref="analytic.view_account_analytic_line_tree"/>
             <field name="view_type">form</field>
             <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
-            <field name="domain">[('state', 'not in', ['draft', 'invoiced']),('invoiced','=',False),('non_invoiceable_mileage', '=', False)]</field>
+            <field name="domain">[('state', 'not in', ['draft', 'invoiced']),('invoiced','=',False),('non_invoiceable_mileage', '=', False),('chargeable', '=', True)]</field>
             <field name="help" type="html">
               <p>
                 No activity yet.

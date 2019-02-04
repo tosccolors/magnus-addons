@@ -37,8 +37,35 @@ class AnalyticLineStatus(models.TransientModel):
                 """ % (status, invoiceable, cond, rec))
             if status == 'write-off':
                 self.prepare_account_move()
+            if status == 'invoiceable':
+                self._prepare_analytic_invoice(cond, rec)
 
         return True
+
+
+    def _prepare_analytic_invoice(self, cond, rec):
+        analytic_invoice = self.env['analytic.invoice']
+        self.env.cr.execute("""
+            SELECT array_agg(account_id), partner_id, month_id
+            FROM account_analytic_line
+            WHERE id %s %s
+            GROUP BY partner_id, month_id"""
+            % (cond, rec))
+
+        result = self.env.cr.fetchall()
+        for res in result:
+            analytic_account_ids = res[0]
+            partner_id = res[1]
+            month_id = res[2]
+            search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('state', '!=', 'invoiced')]
+            analytic_invobj = analytic_invoice.search(search_domain)
+            if analytic_invobj:
+                if len(analytic_invobj) > 1:
+                    analytic_invobj = analytic_invobj.search([('month_id', '=', month_id)], limit=1)
+                analytic_invobj.partner_id = partner_id
+            else:
+                analytic_invoice.create({'partner_id':partner_id})
+
 
     @api.onchange('wip_percentage')
     def onchange_wip_percentage(self):

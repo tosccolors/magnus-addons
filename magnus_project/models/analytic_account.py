@@ -4,14 +4,6 @@
 
 from odoo import models, fields, api
 
-class AccountAnalyticLine(models.Model):
-    _inherit = 'account.analytic.line'
-
-    operating_unit_id = fields.Many2one('operating.unit',
-                                        related='project_id.operating_unit_id',
-                                        string='Operating Unit', store=True,
-                                        readonly=True)
-
 class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
 
