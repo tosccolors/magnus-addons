@@ -128,9 +128,9 @@
                     <field name="project_id" position="before">
                     <field name="week_id" string="Timesheet Week"/>
                 </field>
-                <field name="user_id" position="after">
+                <!--field name="user_id" position="after">
                     <field name="operating_unit_id"/>
-                </field>
+                </field-->
             </field>
         </record>
 
