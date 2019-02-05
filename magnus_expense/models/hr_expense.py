@@ -96,5 +96,13 @@ class HrExpenseSheet(models.Model):
         else:
             self.operating_unit_id = False
 
+class HrExpense(models.Model):
+    _inherit = "hr.expense"
 
-
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        # Inherited this onchange function to reload the same value to the field 'name'.
+        name = self.name
+        res = super(HrExpense, self)._onchange_product_id()
+        self.name = name
+        return res
