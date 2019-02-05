@@ -33,7 +33,7 @@ The extended date range validation process is:
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['hr_timesheet_task',
+    'depends': ['hr_timesheet_task_required',
                 'fleet',
                 'magnus_date_range_week',
                 'product_uom_unece',
