@@ -55,6 +55,9 @@
         <!--<xpath expr="//tree/field[@name='date']" position="replace">
             <field name="day_name" string="Date"/>
         </xpath>-->
+        <xpath expr="//form/group/field[@name='user_id']" position="after">
+            <field name="operating_unit_id" attrs="{'invisible':[('operating_unit_id', '=', False)]}"/>
+        </xpath>
       </field>
     </record>
 
@@ -66,20 +69,6 @@
           <xpath expr="//tree/field[@name='task_id']" position="attributes">
             <attribute name="readonly">1</attribute>
           </xpath>
-      </field>
-    </record>
-
-    <record id="hr_timesheet_line_tree_inherited" model="ir.ui.view">
-      <field name="name">account.analytic.line.tree.hr_timesheet</field>
-      <field name="model">account.analytic.line</field>
-      <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
-      <field name="arch" type="xml">
-        <field name="name" position="attributes">
-          <attribute name="invisible">1</attribute>
-        </field>
-        <field name="project_id" position="before">
-          <field name="week_id" string="Timesheet Week"/>
-        </field>
       </field>
     </record>
 
@@ -122,6 +111,7 @@
     <record id="hr_timesheet.act_hr_timesheet_report" model="ir.actions.act_window">
       <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)')]</field>
     </record>
+
 
   </data>
 </odoo>
