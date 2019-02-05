@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2013 Megis - Willem Hulshof - www.megis.nl
+# Copyright (c) 2009 Veritos - Jan Verlaan - www.veritos.nl
 #
 # WARNING: This program as such is intended to be used by professional
 # programmers who take the whole responsability of assessing all potential
@@ -26,33 +26,4 @@
 #
 ##############################################################################
 
-{
-    'name' : 'magnus_account',
-    'version' : '1.0',
-    'category': 'accounts',
-    'description': """
-This module echances accounts & Invoice in OpenERP.
-=============================================================================
-
-* Adds two fields to account.analytic.line and one to account.journal
-voor de interface naar slam.
-* Report: Invoice Layout enhancements
-
-
-    """,
-    'author'  : 'Magnus - Willem Hulshof',
-    'website' : 'http://www.magnus.nl',
-    'depends' : ['account', 'account_invoice_supplier_ref_unique','report_qweb_operating_unit','account_operating_unit','operating_unit_report_layout'
-    ],
-    'data' : [
-        "report/report_layout.xml",
-        "report/report_invoice.xml",
-        "views/account_view.xml",
-        "views/account_invoice_view.xml",
-        "views/account_invoice_report.xml",
-    ],
-    'demo' : [],
-    'installable': True
-}
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-
+import account_invoice

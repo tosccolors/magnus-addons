@@ -22,20 +22,20 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             # if not line.project_id:
             #     super(AccountAnalyticLine, line)._compute_sheet()
-            if line.project_id and line.task_id and line.user_id and not line.planned and line.product_uom_id.id == UomHrs:
-                line.ts_line = True
+            if line.project_id and line.task_id and line.user_id and not line.planned:
+                if line.sheet_id.week_id and line.date:
+                    line.week_id = line.sheet_id.week_id
+                    line.month_id = line.find_daterange_month(line.date)
+                elif line.date:
+                    line.week_id = line.find_daterange_week(line.date)
+                    line.month_id = line.find_daterange_month(line.date)
+                elif not line.child_ids == []:
+                    line.week_id = line.find_daterange_week(line.child_ids.date)
+                    line.month_id = line.find_daterange_month(line.child_ids.date)
+                if line.product_uom_id.id == UomHrs:
+                    line.ts_line = True
             if not line.ts_line or line.planned:
                 continue
-            if line.sheet_id.week_id and line.date:
-                line.week_id = line.sheet_id.week_id
-                line.month_id = line.find_daterange_month(line.date)
-            elif line.date:
-                line.week_id = line.find_daterange_week(line.date)
-                line.month_id = line.find_daterange_month(line.date)
-            elif not line.child_ids == []:
-                line.week_id = line.find_daterange_week(line.child_ids.date)
-                line.month_id = line.find_daterange_month(line.child_ids.date)
-
             project = line.project_id
             line.correction_charge = project.correction_charge
             line.chargeable = project.chargeable
