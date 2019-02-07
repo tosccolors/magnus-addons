@@ -7,7 +7,7 @@
     <t t-call="report_qweb_operating_unit.external_layout_ou">
 
         <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
-        <div class="page" style="font-family: 'Titillium Web', sans-serif;page-break-after:always;">
+        <div class="page" style="page-break-after:always;">
             <div class="row mt32 mb32" style="padding-left:85px;">
                  <div class="col-xs-7" style="padding:0px;">
                     <strong>
@@ -43,7 +43,8 @@
                              <br/>
                              <span>Referentie</span>
                              <br/>
-                             <span>Ons BTW nr.</span>
+                             <!--<span>Ons BTW nr.</span>-->
+                             <span>Out Vat</span>
                              <br/>
                              <br/>
                          </div>
@@ -63,7 +64,8 @@
                              <br/>
                              <span t-field="o.name"/>
                              <br/>
-                             <span t-if="o.company_id and o.company_id.vat" t-field="o.company_id.vat"/>
+                             <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
+                                   t-field="o.operating_unit_id.partner_id.vat"/>
                              <br/>
                              <br/>
                          </div>
@@ -82,11 +84,11 @@
             <div style="padding-left:85px;padding-right:15px;" t-if="not o.invoice_description">
                 <table class="table table-condensed table-padding">
                     <tr t-foreach="o.invoice_line_ids" t-as="l">
-                        <td width="20%"><span t-field="l.name"/></td>
-                        <td width="20%"> </td>
-                        <td width="20%"> </td>
-                        <td width="20%"> </td>
-                        <td class="text-right">
+                        <td style='border-top:none' width="20%"><span t-field="l.name"/></td>
+                        <td style='border-top:none' width="20%"> </td>
+                        <td style='border-top:none' width="20%"> </td>
+                        <td style='border-top:none' width="20%"> </td>
+                        <td style='border-top:none' class="text-right">
                             <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
                                 t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                         </td>
@@ -119,15 +121,17 @@
                 </div>
             </div>
             <p t-if="o.payment_term_id" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                <strong>Betaaltermijn:</strong> Binnen <span t-field="o.payment_term_id.name"/> <strong> <span t-if="o.partner_id.company_id" t-field="o.partner_id.company_id.name"/></strong>
+                <strong>Betaaltermijn:</strong> Binnen <span t-field="o.payment_term_id.name"/> <strong> <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
             </p>
 
-            <t t-set="bank_acc" t-value="any([b.acc_number for b in o.company_id.partner_id.bank_ids])"/>
-            <p t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                <strong>Bankrekening:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.company_id.partner_id.bank_ids))"/>
-                <strong>IBAN</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.company_id.partner_id.bank_ids))"/>
-                <strong>BIC</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.company_id.partner_id.bank_ids))"/>
-            </p>
+            <t t-if="o.operating_unit_id and o.operating_unit_id.partner_id">
+                <t t-set="bank_acc" t-value="any([b.acc_number for b in o.operating_unit_id.partner_id.bank_ids])"/>
+                <p t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
+                    <strong>Bankrekening:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                    <strong>IBAN</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                    <strong>BIC</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                </p>
+            </t>
         </div>
     </t>
 </template>
