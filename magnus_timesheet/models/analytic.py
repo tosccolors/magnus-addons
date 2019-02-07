@@ -22,20 +22,20 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             # if not line.project_id:
             #     super(AccountAnalyticLine, line)._compute_sheet()
-            if line.project_id and line.task_id and line.user_id and not line.planned and line.product_uom_id.id == UomHrs:
-                line.ts_line = True
+            if line.project_id and line.task_id and line.user_id and not line.planned:
+                if line.sheet_id.week_id and line.date:
+                    line.week_id = line.sheet_id.week_id
+                    line.month_id = line.find_daterange_month(line.date)
+                elif line.date:
+                    line.week_id = line.find_daterange_week(line.date)
+                    line.month_id = line.find_daterange_month(line.date)
+                elif not line.child_ids == []:
+                    line.week_id = line.find_daterange_week(line.child_ids.date)
+                    line.month_id = line.find_daterange_month(line.child_ids.date)
+                if line.product_uom_id.id == UomHrs:
+                    line.ts_line = True
             if not line.ts_line or line.planned:
                 continue
-            if line.sheet_id.week_id and line.date:
-                line.week_id = line.sheet_id.week_id
-                line.month_id = line.find_daterange_month(line.date)
-            elif line.date:
-                line.week_id = line.find_daterange_week(line.date)
-                line.month_id = line.find_daterange_month(line.date)
-            elif not line.child_ids == []:
-                line.week_id = line.find_daterange_week(line.child_ids.date)
-                line.month_id = line.find_daterange_month(line.child_ids.date)
-
             project = line.project_id
             line.correction_charge = project.correction_charge
             line.chargeable = project.chargeable
@@ -49,6 +49,11 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
+            if line.project_id and line.chargeable and line.project_id.operating_unit_ids:
+                line.operating_unit_id = line.project_id.operating_unit_ids[0]
+            else:
+                line.operating_unit_id = False
+
 
     def _search_sheet(self, operator, value):
         assert operator == 'in'
@@ -110,12 +115,6 @@ class AccountAnalyticLine(models.Model):
         return date_range
 
 
-    # invoiced = fields.Boolean(
-    #     'Invoiced'
-    # )
-    # invoiceable = fields.Boolean(
-    #     'Invoiceable'
-    # )
     user_total_id = fields.Many2one(
         'analytic.user.total',
         string='Summary Reference',
@@ -133,24 +132,6 @@ class AccountAnalyticLine(models.Model):
         string='Month',
         store=True,
     )
-    # state = fields.Selection([
-    #     ('draft', 'Draft'),
-    #     ('open', 'Confirmed'),
-    #     ('delayed', 'Delayed'),
-    #     ('invoiceable', 'To be Invoiced'),
-    #     ('progress', 'In Progress'),
-    #     ('invoiced', 'Invoiced'),
-    #     ('write-off', 'Write-Off'),
-    #     ('change-chargecode', 'Change-Chargecode'),
-    # ],
-    #     string='Status',
-    #     readonly=True,
-    #     copy=False,
-    #     index=True,
-    #     track_visibility='onchange',
-    #     default='draft'
-    # )
-
     correction_charge = fields.Boolean(
         compute=_compute_sheet,
         string='Correction Chargeability',
@@ -165,6 +146,12 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_sheet,
         string='Expenses',
         store=True,
+    )
+    operating_unit_id = fields.Many2one(
+        'operating.unit',
+        compute=_compute_sheet,
+        string='Operating Unit',
+        store=True
     )
     write_off_move = fields.Many2one(
         'account.move',
@@ -202,25 +189,6 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
 
-    @api.depends('project_id')
-    def _get_operating_unit(self):
-        for line in self:
-            if line.project_id and line.chargeable and line.project_id.operating_unit_ids:
-                line.operating_unit_id = line.project_id.operating_unit_ids[0]
-            else:
-                line.operating_unit_id = False
-
-    operating_unit_id = fields.Many2one('operating.unit', compute='_get_operating_unit', string='Operating Unit', store=True)
-
-    # def _check_state(self):
-    #     """
-    #     to check if any lines computes method calls allow to modify
-    #     :return: True or super
-    #     """
-    #     context = self.env.context.copy()
-    #     if not 'active_model' in context:
-    #         return True
-    #     return super(AccountAnalyticLine, self)._check_state()
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
