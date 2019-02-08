@@ -40,3 +40,11 @@ class HrChargeabilityReport(models.Model):
                     GROUP BY aa.user_id, aa.date
                 )""" % (uom))
 
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        res = super(HrChargeabilityReport, self).read_group(domain, fields, groupby, offset, limit=limit, orderby=orderby, lazy=lazy)
+        for index, val in enumerate(res):
+            count = val.get('__count', False)
+            if count and int(count) > 1:
+                res[index]['chargeability'] = val['chargeability'] / int(count)
+        return res
