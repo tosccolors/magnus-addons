@@ -7,11 +7,6 @@ from odoo import models, fields, api
 class Project(models.Model):
     _inherit = "project.project"
 
-    operating_unit_id = fields.Many2one('operating.unit', 'Operating Unit', required=True,
-                                        default=lambda self:
-                                        self.env['res.users'].
-                                        operating_unit_default_get(self._uid))
-
     code = fields.Char('Project Code')
     tag_ids = fields.Many2many('project.tags', string='Tags')
     po_number = fields.Char('PO Number')
@@ -20,11 +15,6 @@ class Project(models.Model):
     correction_charge = fields.Boolean('Correction Chargeability')
     chargeable = fields.Boolean('Chargeable')
     invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
-    operating_unit_ids = fields.Many2many(
-        comodel_name='operating.unit', string='Operating Units',
-        relation='project_operating_unit_rel',
-        column1='project_id',
-        column2='operating_unit_id')
 
 
     @api.multi

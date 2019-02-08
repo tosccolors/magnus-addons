@@ -205,15 +205,6 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         self.copy_wih_query()
-        # if self.timesheet_ids:
-        #     cond = '='
-        #     rec = self.timesheet_ids.ids[0]
-        #     if len(self.timesheet_ids) > 1:
-        #         cond = 'IN'
-        #         rec = tuple(self.timesheet_ids.ids)
-        #     self.env.cr.execute("""
-        #                 UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
-        #         """ % (cond, rec))
         return res
 
     def copy_wih_query(self):
@@ -330,23 +321,10 @@ class HrTimesheetSheet(models.Model):
         On timesheet reset draft check analytic shouldn't be in invoiced
         :return: Super
         """
-        # if self.timesheet_ids.filtered('invoiced'):
-        #     raise UserError(_('You cannot modify an entry in a invoiced timesheet'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.odo_log_id:
             self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
             self.odo_log_id = False
-        # if self.timesheet_ids:
-        #     cond = '='
-        #     rec = self.timesheet_ids.ids[0]
-        #     if len(self.timesheet_ids) > 1:
-        #         cond = 'IN'
-        #         rec = tuple(self.timesheet_ids.ids)
-        #     self.env.cr.execute("""
-        #                 UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s;
-        #                 DELETE FROM account_analytic_line WHERE ref_id %s %s;
-        #         """ % (cond, rec, cond, rec))
-        #     self.env.invalidate_all()
         return res
 
     @api.one

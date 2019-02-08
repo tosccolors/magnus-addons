@@ -2,18 +2,7 @@
 <odoo>
     <data>
 
-        <record id="hr_timesheet_line_tree_inherited" model="ir.ui.view">
-            <field name="name">account.analytic.line.tree.magnus_project</field>
-            <field name="model">account.analytic.line</field>
-            <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
-            <field name="arch" type="xml">
-                <field name="user_id" position="after">
-                    <field name="operating_unit_id"/>
-                </field>
-            </field>
-        </record>
-
-        <record id="hr_timesheet_sheet_form_inherited" model="ir.ui.view">
+        <!--<record id="hr_timesheet_sheet_form_inherited" model="ir.ui.view">
             <field name="name">hr.timesheet.sheet.form</field>
             <field name="model">hr_timesheet_sheet.sheet</field>
             <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
@@ -23,6 +12,6 @@
                 </xpath>
             </field>
         </record>
-
+-->
     </data>
 </odoo>

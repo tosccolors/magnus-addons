@@ -66,4 +66,15 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="project_invoicing_period_form_inherited">
+            <field name="name">Invoicing Properties</field>
+            <field name="model">project.invoicing.properties</field>
+            <field name="inherit_id" ref="magnus_project.project_invoicing_Period_form_view"/>
+            <field name="arch" type="xml">
+                <field name="invoice_mileage" position="after">
+                    <field name="group_invoice" />
+                </field>
+            </field>
+        </record>
+
 </odoo>

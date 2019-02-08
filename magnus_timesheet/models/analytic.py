@@ -49,6 +49,11 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
+            if line.project_id and line.chargeable and line.project_id.operating_unit_ids:
+                line.operating_unit_id = line.project_id.operating_unit_ids[0]
+            else:
+                line.operating_unit_id = False
+
 
     def _search_sheet(self, operator, value):
         assert operator == 'in'
@@ -110,12 +115,6 @@ class AccountAnalyticLine(models.Model):
         return date_range
 
 
-    # invoiced = fields.Boolean(
-    #     'Invoiced'
-    # )
-    # invoiceable = fields.Boolean(
-    #     'Invoiceable'
-    # )
     user_total_id = fields.Many2one(
         'analytic.user.total',
         string='Summary Reference',
@@ -133,24 +132,6 @@ class AccountAnalyticLine(models.Model):
         string='Month',
         store=True,
     )
-    # state = fields.Selection([
-    #     ('draft', 'Draft'),
-    #     ('open', 'Confirmed'),
-    #     ('delayed', 'Delayed'),
-    #     ('invoiceable', 'To be Invoiced'),
-    #     ('progress', 'In Progress'),
-    #     ('invoiced', 'Invoiced'),
-    #     ('write-off', 'Write-Off'),
-    #     ('change-chargecode', 'Change-Chargecode'),
-    # ],
-    #     string='Status',
-    #     readonly=True,
-    #     copy=False,
-    #     index=True,
-    #     track_visibility='onchange',
-    #     default='draft'
-    # )
-
     correction_charge = fields.Boolean(
         compute=_compute_sheet,
         string='Correction Chargeability',
@@ -165,6 +146,12 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_sheet,
         string='Expenses',
         store=True,
+    )
+    operating_unit_id = fields.Many2one(
+        'operating.unit',
+        compute=_compute_sheet,
+        string='Operating Unit',
+        store=True
     )
     write_off_move = fields.Many2one(
         'account.move',
@@ -202,16 +189,8 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
 
-    # def _check_state(self):
-    #     """
-    #     to check if any lines computes method calls allow to modify
-    #     :return: True or super
-    #     """
-    #     context = self.env.context.copy()
-    #     if not 'active_model' in context:
-    #         return True
-    #     return super(AccountAnalyticLine, self)._check_state()
 
+    @api.model
     def get_task_user_product(self, task_id, user_id):
         taskUserObj = self.env['task.user']
         product_id = False
@@ -219,21 +198,27 @@ class AccountAnalyticLine(models.Model):
             taskUser = taskUserObj.search([('task_id', '=', task_id), ('user_id', '=', user_id)],
                                           limit=1)
             product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+        if not product_id:
+            employee = self.env['hr.employee'].search([('user_id', '=', user_id)])
+            product_id = employee.product_id and employee.product_id.id or False
         return product_id
-
-
 
     @api.model
     def get_fee_rate(self):
         uid = self.user_id.id or False
         tid = self.task_id.id or False
-        amount = 0.0
+        amount, fr = 0.0, 0.0
         if uid and tid:
             task_user = self.env['task.user'].search([
                 ('user_id', '=', uid),
                 ('task_id', '=', tid)])
             fr = task_user.fee_rate
-            amount = self.unit_amount * fr
+        if not fr :
+            employee = self.env['hr.employee'].search([('user_id', '=', uid)])
+            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
+            if self.product_id and self.product_id != employee.product_id:
+                fr = self.product_id.lst_price
+        amount = self.unit_amount * fr
         return amount
 
     '''@api.model
@@ -326,12 +311,14 @@ class AccountAnalyticLine(models.Model):
         fee_rate = 0
         UpdateCols = []
         if 'task_id' in vals and 'user_id' in vals:
-            vals['product_id'] = self.get_task_user_product(vals['task_id'], vals['user_id'])
+            vals['product_id'] = res.get_task_user_product(vals['task_id'], vals['user_id'])
             task = self.env['project.task'].browse(vals['task_id'])
             if task.task_user_ids:
                 for user in task.task_user_ids:
                     if user.user_id.id == vals['user_id']:
                         fee_rate = user.fee_rate or user.product_id.lst_price
+            else:
+                fee_rate = res.sheet_id.employee_id.fee_rate or res.sheet_id.employee_id.product_id.lst_price
 
             if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                 amount = vals['unit_amount'] * fee_rate
@@ -388,7 +375,7 @@ class AccountAnalyticLine(models.Model):
             unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount
             UpdateCols = []
             if task_id and user_id:
-                product_id = self.get_task_user_product(task_id, user_id)
+                product_id = aal.get_task_user_product(task_id, user_id)
                 if product_id:
                     fee_rate = 0
                     task = self.env['project.task'].browse(task_id)
