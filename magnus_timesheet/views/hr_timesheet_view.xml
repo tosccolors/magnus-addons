@@ -39,22 +39,6 @@
         <xpath expr="//tree/field[@name='unit_amount']" position="after">
           <field name="kilometers" style="border-color:#7F8C8D;"/>
         </xpath>
-        <xpath expr="//tree/field[@name='date']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
-        <xpath expr="//tree/field[@name='project_id']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
-        <xpath expr="//tree/field[@name='unit_amount']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
-        <!--xpath expr="//field[@name='timesheet_ids']/tree" position="attributes">
-          <attribute name="create">false</attribute>
-        </xpath-->
-        <!--Reverted the field day_name for now-->
-        <!--<xpath expr="//tree/field[@name='date']" position="replace">
-            <field name="day_name" string="Date"/>
-        </xpath>-->
         <xpath expr="//form/group/field[@name='user_id']" position="after">
             <field name="operating_unit_id" attrs="{'invisible':[('operating_unit_id', '=', False)]}"/>
         </xpath>
@@ -67,7 +51,7 @@
       <field name="inherit_id" ref="hr_timesheet_task.hr_timesheet_sheet_form"/>
       <field name="arch" type="xml">
           <xpath expr="//tree/field[@name='task_id']" position="attributes">
-            <attribute name="readonly">1</attribute>
+            <attribute name="domain">[('project_id','=',project_id)]</attribute>
           </xpath>
       </field>
     </record>
