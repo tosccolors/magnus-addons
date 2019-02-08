@@ -26,12 +26,12 @@ class HrChargeabilityReport(models.Model):
                         aa.user_id as user_id,
                         SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END) as chargeable_hours,
                         ((COUNT(project_id)*8) - SUM(CASE WHEN aa.correction_charge = 'true' THEN unit_amount ELSE 0 END)) as norm_hours,
-                        (SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END))/
+                        ((SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END))/
                          (CASE WHEN
                             ((COUNT(project_id)*8) - SUM(CASE WHEN aa.correction_charge = 'true' THEN unit_amount ELSE 0 END)) = 0  
                             THEN 1
                             ELSE ((COUNT(project_id)*8) - SUM(CASE WHEN aa.correction_charge = 'true' THEN unit_amount ELSE 0 END)) END
-                         ) as chargeability
+                         ))*100 as chargeability
                     FROM
                         account_analytic_line as aa 
                     WHERE aa.product_uom_id = %s AND aa.project_id IS NOT NULL 
