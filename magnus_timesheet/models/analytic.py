@@ -49,8 +49,8 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
-            if line.project_id and line.chargeable and line.project_id.operating_unit_ids:
-                line.operating_unit_id = line.project_id.operating_unit_ids[0]
+            if line.project_id and line.chargeable and line.project_id.analytic_account_id.operating_unit_ids:
+                line.operating_unit_id = line.project_id.analytic_account_id.operating_unit_ids[0]
             else:
                 line.operating_unit_id = False
 
