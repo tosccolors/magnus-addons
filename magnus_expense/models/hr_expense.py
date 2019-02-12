@@ -16,6 +16,14 @@ class HrExpense(models.Model):
     customer_charge_expense = fields.Boolean('Charge Expense To Customer', index=True)
     state = fields.Selection(selection_add=[('revise', 'To Be Revise')])
 
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        # Inherited this onchange function to reload the same value to the field 'name'.
+        name = self.name
+        res = super(HrExpense, self)._onchange_product_id()
+        self.name = name
+        return res
+
     @api.multi
     def action_move_create(self):
         '''
@@ -95,6 +103,3 @@ class HrExpenseSheet(models.Model):
                 self.operating_unit_id = self.expense_line_ids[0].operating_unit_id.id
         else:
             self.operating_unit_id = False
-
-
-

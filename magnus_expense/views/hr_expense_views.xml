@@ -121,8 +121,20 @@
             </field>
         </record>
 
+    <record id="view_hr_expense_sheet_filter_inherited" model="ir.ui.view">
+        <field name="name">hr.expense.sheet.filter</field>
+        <field name="model">hr.expense.sheet</field>
+        <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='submitted']" position="before">
+                <filter domain="[('employee_id.user_id.id', '=', uid)]" string="My Expenses" name="my_expenses" help="My Expenses"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
-        <field name="context">{'readonly_by_pass': True}</field>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_my_expenses': 1, 'readonly_by_pass': True}</field>
     </record>
 
     <record id="hr_expense.action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
