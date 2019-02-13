@@ -34,7 +34,7 @@ class HrChargeabilityReport(models.Model):
                          ))*100 as chargeability
                     FROM
                         account_analytic_line as aa 
-                    WHERE aa.product_uom_id = %s AND aa.project_id IS NOT NULL 
+                    WHERE aa.product_uom_id = %s AND aa.planned = FALSE AND aa.project_id IS NOT NULL 
                     AND (aa.correction_charge = true OR aa.chargeable = true)
 
                     GROUP BY aa.user_id, aa.date
