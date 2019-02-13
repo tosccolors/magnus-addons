@@ -35,6 +35,10 @@ class AccountAnalyticLine(models.Model):
                 if line.product_uom_id.id == UomHrs:
                     line.ts_line = True
             if not line.ts_line or line.planned:
+                # for planned update correction_charge & chargeable
+                if line.planned:
+                    line.correction_charge = line.project_id.correction_charge
+                    line.chargeable = line.project_id.chargeable
                 continue
             project = line.project_id
             line.correction_charge = project.correction_charge
@@ -432,6 +436,7 @@ class AccountAnalyticLine(models.Model):
     #             )
     #     return res
 
+    @api.depends('unit_amount')
     def _get_qty(self):
         for line in self:
             if line.planned:
