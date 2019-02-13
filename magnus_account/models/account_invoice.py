@@ -35,6 +35,17 @@ class AccountInvoice(models.Model):
         self.sent = True
         return self.env['report'].get_action(self, 'account.invoice.custom')
 
+    @api.multi
+    def group_by_analytic_acc(self):
+        self.ensure_one()
+        result = {}
+        for line in self.invoice_line_ids:
+            if line.account_analytic_id in result:
+                result[line.account_analytic_id].append(line)
+            else:
+                result[line.account_analytic_id] = [line]
+        return result
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
