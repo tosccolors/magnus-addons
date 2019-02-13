@@ -13,11 +13,32 @@
                     <attribute name="required">True</attribute>
                     <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
                 </xpath>
+                <xpath expr="//field[@name='account_id']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('sheet_state', '=', 'submit')]}</attribute>
+                    <attribute name="groups">hr_expense.group_hr_expense_manager</attribute>
+                </xpath>
+                <xpath expr="//field[@name='tax_ids']" position="attributes">
+                    <attribute name="attrs">{'invisible': [('sheet_state', 'not in', ['approve','revise'])]}</attribute>
+                    <attribute name="groups">base.group_no_one,hr_expense.group_hr_expense_manager</attribute>
+                </xpath>
                 <xpath expr="//field[@name='employee_id']" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </xpath>
                 <xpath expr="//field[@name='product_id']" position="attributes">
                     <attribute name="options">{'no_create': True, 'no_create_edit':True}</attribute>
+                    <attribute name="attrs">{'readonly':[('state','not in',('draft','refused','revise'))]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='analytic_account_id']" position="after">
+                    <field name="sheet_state" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='unit_amount']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('state','not in',('draft','refused','revise'))]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='quantity']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('state','not in',('draft','refused','revise'))]}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('state','not in',('draft','refused','revise'))]}</attribute>
                 </xpath>
             </field>
         </record>
@@ -26,7 +47,7 @@
             <field name="name">hr.expense.magnus.tree</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
-                <tree string="Expenses" decoration-bf="message_unread == True" create="false" edit="false" copy="false" delete="false">
+                <tree string="Expenses" decoration-bf="message_unread == True">
                     <field name="currency_id" invisible="True"/>
                     <field name="attachment_number" invisible="True"/>
                     <field name="date"/>
@@ -48,5 +69,88 @@
             <field name="view_id" ref="view_expenses_tree_magnus"/>
             <field name="act_window_id" ref="hr_expense.action_hr_expense_refused_expenses"/>
         </record>
+
+        <record id="magnus_expense_hr_expense_sheet_form2" model="ir.ui.view">
+            <field name="name">hr.expense.form.magnus.expense2</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                    <attribute name="readonly">False</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expense_line_ids']/tree/field[@name='name']" position="after">
+                    <field name="account_id"/>
+                </xpath>
+
+                <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
+                    <button name="action_sheet_move_create" states="approve,revise" string="Post Journal Entries" type="object" groups="account.group_account_user" class="oe_highlight o_expense_sheet_post"/>
+                </xpath>
+
+                <xpath expr="//button[@name='action_sheet_move_create']" position="after">
+                    <button name="revise_expense" type="object" string="Revise Expense" class="oe_highlight" states="approve" groups="hr_expense.group_hr_expense_manager"/>
+                    <button name="expense_revised" type="object" string="Re-Submit" class="oe_highlight" states="revise" groups="hr_expense.group_hr_expense_manager"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_expenses_form_magnus_inherited" model="ir.ui.view">
+            <field name="name">hr.expense.form</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense_operating_unit.view_expenses_form"/>
+            <field name="arch" type="xml">
+               <!-- <xpath expr="//field[@name='operating_unit_id']" position="attributes">
+                    <attribute name="readonly">True</attribute>
+                </xpath>-->
+                <xpath expr="//field[@name='analytic_account_id']" position="attributes">
+                    <attribute name="domain">[('linked_operating_unit','=',True)]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='analytic_account_id']" position="after">
+                    <field name="customer_charge_expense"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_hr_expense_sheet_form_magnus_inherited" model="ir.ui.view">
+            <field name="name">hr.expense.sheet.form</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense_operating_unit.view_hr_expense_sheet_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='operating_unit_id']" position="attributes">
+                    <attribute name="readonly">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+    <record id="view_hr_expense_sheet_filter_inherited" model="ir.ui.view">
+        <field name="name">hr.expense.sheet.filter</field>
+        <field name="model">hr.expense.sheet</field>
+        <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='submitted']" position="before">
+                <filter domain="[('employee_id.user_id.id', '=', uid)]" string="My Expenses" name="my_expenses" help="My Expenses"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_my_expenses': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
+        <field name="context">{'search_default_submitted': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_to_post" model="ir.actions.act_window">
+        <field name="context">{'search_default_to_post': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_to_pay" model="ir.actions.act_window">
+        <field name="context">{'search_default_approved': 1, 'readonly_by_pass': True}</field>
+    </record>
+
+    <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
+        <field name="context">{'readonly_by_pass': True}</field>
+    </record>
 
 </odoo>

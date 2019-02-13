@@ -33,29 +33,30 @@ The extended date range validation process is:
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base',
-                'hr_timesheet',
-                'hr_timesheet_sheet',
-                'hr_timesheet_task',
-                'date_range',
-                'magnus_invoicing',
+    'depends': ['hr_timesheet_task_required',
                 'fleet',
+                'magnus_date_range_week',
                 'product_uom_unece',
                 'magnus_project',
                 'web_m2x_options',
                 'web_readonly_bypass',
-                'sale_timesheet'],
+                'sale_timesheet',
+                'analytic_base_department',
+                'account_fiscal_month',
+                'account_fiscal_year'],
 
     # always loaded
     'data': [
         'security/magnus_security.xml',
-        'views/hr_timesheet_views.xml',
-        'views/project_timesheet_views.xml',
-        'views/project_views.xml',
-        'views/analytic_account_views.xml',
+        'report/hr_chargeability_report.xml',
+        'views/hr_timesheet_view.xml',
+        'views/project_timesheet_view.xml',
+        'views/project_view.xml',
+        'views/analytic_account_view.xml',
         'views/hr_timesheet_assets.xml',
-        'views/hr_views.xml',
-        'views/analytic_views.xml'
+        'views/hr_view.xml',
+        'views/analytic_view.xml',
+        'views/fleet_view.xml',
     ],
     'installable': True,
     # only loaded in demonstration mode

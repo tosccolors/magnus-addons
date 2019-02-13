@@ -53,6 +53,11 @@ class AnalyticInvoice(models.Model):
                 self.account_analytic_ids = \
                     [(6, 0, account_analytic.ids)]
 
+        operating_units = self.env['operating.unit']
+        for aa in self.account_analytic_ids:
+            operating_units |= aa.operating_unit_ids
+        self.operating_unit_ids = [(6, 0, operating_units.ids)]
+
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
             if self.month_id:
@@ -62,8 +67,8 @@ class AnalyticInvoice(models.Model):
                 domain = [('account_id', 'in', account_analytic_ids)]
 
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'invoiced']),
-                                    '|',('invoiceable', '=', True),('invoiced', '=', True)]
+            time_domain = domain + [('chargeable', '=', True),('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'progress']),
+                                    '|',('invoiceable', '=', True),('invoiced', '=', False)]
 
             fields_grouped = [
                 'id',
@@ -73,7 +78,8 @@ class AnalyticInvoice(models.Model):
                 'product_id',
                 'month_id',
                 'week_id',
-                'unit_amount'
+                'unit_amount',
+                'operating_unit_id'
             ]
             grouped_by = [
                 'user_id',
@@ -81,9 +87,11 @@ class AnalyticInvoice(models.Model):
                 'account_id',
                 'product_id',
                 'month_id',
+                'operating_unit_id'
             ]
             if self.gb_week:
                 grouped_by.append('week_id')
+
             result = self.env['account.analytic.line'].read_group(
                 time_domain,
                 fields_grouped,
@@ -93,19 +101,24 @@ class AnalyticInvoice(models.Model):
                 orderby=False,
                 lazy=False
             )
+
             taskUserObj = self.env['task.user']
             taskUserIds = []
 
-            if len(result) > 0:               
+            if len(result) > 0:
                 userTotData = []
                 for item in result:
+                    task_id = item.get('task_id')[0] if item.get('task_id') != False else False
+                    project_id = False
+                    if task_id:
+                        project_id = self.env['project.task'].browse(task_id).project_id.id or False
                     vals = {
                         'analytic_invoice_id': self.id,
                         'name': '/',
                         'user_id': item.get('user_id')[0] if item.get(
                             'user_id') != False else False,
-                        'task_id': item.get('task_id')[0] if item.get(
-                            'task_id') != False else False,
+                        'task_id': item.get('task_id')[0] if item.get('task_id') != False else False,
+                        'project_id':project_id,
                         'account_id': item.get('account_id')[0] if item.get(
                             'account_id') != False else False,
                         'gb_month_id': item.get('month_id')[0] if item.get(
@@ -113,6 +126,7 @@ class AnalyticInvoice(models.Model):
                         'gb_week_id': item.get('week_id')[0] if self.gb_week and item.get('week_id') != False else False,
                         'unit_amount': item.get('unit_amount'),
                         'product_id': item.get('product_id'),
+                        'operating_unit_id': item.get('operating_unit_id'),
                     }
 
                     # aut_id = self.env['analytic.user.total'].create(vals)
@@ -243,6 +257,13 @@ class AnalyticInvoice(models.Model):
 
     invoice_count = fields.Integer('Invoices', compute='_compute_invoice_count')
 
+    operating_unit_ids = fields.Many2many(
+        'operating.unit',
+        compute='_compute_objects',
+        string='Operating Unit',
+        store=True
+    )
+
     def analytic_line_status(self, aal, status='progress'):
         aal = aal.search([('invoiced', '=', False),('id', 'in', aal.ids)]) if aal else aal
         if not aal:
@@ -357,32 +378,59 @@ class AnalyticInvoice(models.Model):
             'user_id':line.user_id.id,
             # 'project_id': project.id if project else False
         }
+
         return res
 
     @api.one
     def generate_invoice(self):
-        invoices = {}
-        invoices['lines'] = []
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
+        inv_from_summary, separate_invs = [], []
+        grp_invs = {}
 
         for line in user_summary_lines:
+            project = line.task_id.project_id if not line.project_id else line.project_id
+            operating_unit = project.analytic_account_id.operating_unit_ids[0] if not line.operating_unit_id else line.operating_unit_id
+            if project.invoice_properties and not project.invoice_properties.group_invoice:
+                separate_invs.append(line)
+            else:
+                if operating_unit in grp_invs:
+                    grp_invs[operating_unit].append(line)
+                else:
+                    grp_invs[operating_unit] = []
+                    grp_invs[operating_unit].append(line)
+
+        for op, lines in grp_invs.iteritems():
+            invoices = {}
+            invoices['lines'] = []
+            for line in lines:
+                inv_line_vals = self._prepare_invoice_line(line)
+                invoices['lines'].append((0, 0, inv_line_vals))
+                inv_from_summary.append(line)
+
+            vals = self._prepare_invoice(invoices)
+            vals['operating_unit_id'] = op.id
+            invoice = self.env['account.invoice'].create(vals)
+            invoice.compute_taxes()
+            self.invoice_ids = [(4, invoice.id)]
+
+        for line in separate_invs:
+            invoices = {}
+            invoices['lines'] = []
+
             inv_line_vals = self._prepare_invoice_line(line)
             invoices['lines'].append((0, 0, inv_line_vals))
+            inv_from_summary.append(line)
 
-            if invoices['lines']:
-                if self.invoice_ids:
-                    invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
-                    invoice.write({'lines': invoices['lines']})
-            else:
-                vals = self._prepare_invoice(invoices)
-                invoice = self.env['account.invoice'].create(vals)
-                invoice.compute_taxes()
-                self.invoice_ids = [(4, invoice.id)]
+            vals = self._prepare_invoice(invoices)
+            vals['operating_unit_id'] = line.operating_unit_id.id
+            invoice = self.env['account.invoice'].create(vals)
+            invoice.compute_taxes()
+            self.invoice_ids = [(4, invoice.id)]
 
-        if self.state == 'draft':
+        if self.state == 'draft' and inv_from_summary:
             self.state = 'open'
 
-        for line in user_summary_lines:
+        for line in inv_from_summary:
             cond = '='
             rec = line.children_ids.ids[0]
             if len(line.children_ids) > 1:
@@ -419,14 +467,17 @@ class AnalyticUserTotal(models.Model):
     @api.one
     @api.depends('unit_amount', 'user_id', 'task_id')
     def _compute_fee_rate(self):
-        uid = self.user_id.id or False
-        tid = self.task_id.id or False
-        if uid and tid:
-            task_user = self.env['task.user'].search([
-                ('user_id','=', uid),
-                ('task_id','=', tid)])
-            self.fee_rate = fr = task_user.fee_rate
-            self.amount = self.unit_amount * fr
+        unit_amt = self.unit_amount or 1
+        self.fee_rate = fr = self.get_fee_rate() / unit_amt
+        self.amount = self.unit_amount * fr
+        # uid = self.user_id.id or False
+        # tid = self.task_id.id or False
+        # if uid and tid:
+        #     # task_user = self.env['task.user'].search([
+        #     #     ('user_id','=', uid),
+        #     #     ('task_id','=', tid)])
+        #     # self.fee_rate = fr = task_user.fee_rate
+        #     self.amount = self.unit_amount * fr
 
     @api.one
     def _compute_analytic_line(self):
@@ -472,9 +523,6 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
-
-
-
 
     '''
     uom_id = fields.Many2one('product.uom', string='Unit of Measure',

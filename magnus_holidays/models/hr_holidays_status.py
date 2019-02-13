@@ -8,6 +8,8 @@ from odoo import api, fields, models
 class HrHolidaysStatus(models.Model):
     _inherit = "hr.holidays.status"
 
+    date_end = fields.Datetime(string="Expiry Date", default='2080-12-31 00:00:00')
+
     @api.multi
     def get_hours(self, employee):
         self.ensure_one()

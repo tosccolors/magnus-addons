@@ -81,3 +81,13 @@ msgstr "Stel achtergrond afbeelding in voor factuur"
 msgid "Slam Export"
 msgstr ""
 
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "<span>Out Vat</span>\n"
+"                             <br/>\n"
+"                             <br/>"
+msgstr "<span>Uit BTW</span>\n"
+"                             <br/>\n"
+"                             <br/>"
+

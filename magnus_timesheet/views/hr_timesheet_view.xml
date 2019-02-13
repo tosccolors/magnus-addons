@@ -15,6 +15,7 @@
             <field name="business_mileage" />
             <field name="private_mileage" />
             <field name="end_mileage" />
+            <field name="overtime_hours" widget="float_time"/>
           </group>
         </xpath>
         <xpath expr="//label[@for='date_from']" position="before">
@@ -38,20 +39,8 @@
         <xpath expr="//tree/field[@name='unit_amount']" position="after">
           <field name="kilometers" style="border-color:#7F8C8D;"/>
         </xpath>
-        <xpath expr="//tree/field[@name='date']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
-        <xpath expr="//tree/field[@name='project_id']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
-        <xpath expr="//tree/field[@name='unit_amount']" position="attributes">
-          <attribute name="readonly">1</attribute>
-        </xpath>
-        <xpath expr="//field[@name='timesheet_ids']/tree" position="attributes">
-          <attribute name="create">false</attribute>
-        </xpath>
-        <xpath expr="//tree/field[@name='date']" position="replace">
-            <field name="day_name" string="Date"/>
+        <xpath expr="//form/group/field[@name='user_id']" position="after">
+            <field name="operating_unit_id" attrs="{'invisible':[('operating_unit_id', '=', False)]}"/>
         </xpath>
       </field>
     </record>
@@ -62,22 +51,8 @@
       <field name="inherit_id" ref="hr_timesheet_task.hr_timesheet_sheet_form"/>
       <field name="arch" type="xml">
           <xpath expr="//tree/field[@name='task_id']" position="attributes">
-            <attribute name="readonly">1</attribute>
+            <attribute name="domain">[('project_id','=',project_id)]</attribute>
           </xpath>
-      </field>
-    </record>
-
-    <record id="hr_timesheet_line_tree_inherited" model="ir.ui.view">
-      <field name="name">account.analytic.line.tree.hr_timesheet</field>
-      <field name="model">account.analytic.line</field>
-      <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
-      <field name="arch" type="xml">
-        <field name="name" position="attributes">
-          <attribute name="invisible">1</attribute>
-        </field>
-        <field name="project_id" position="before">
-          <field name="week_id" string="Timesheet Week"/>
-        </field>
       </field>
     </record>
 
@@ -90,8 +65,9 @@
           <field name="week_id"/>
         </field>
         <field name="date_to" position="after">
-          <field name="private_mileage" />
-          <field name="business_mileage" />
+          <field name="private_mileage" sum="Total amount"/>
+          <field name="business_mileage" sum="Total amount"/>
+          <field name="overtime_hours" widget="float_time" sum="Total amount"/>
         </field>
       </field>
     </record>
@@ -105,6 +81,7 @@
                 <field name="state" type="col"/>
                 <field name="private_mileage" type="measure"/>
                 <field name="business_mileage" type="measure"/>
+                <field name="overtime_hours" widget="float_time" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -114,6 +91,11 @@
       <field name="context">{'readonly_by_pass': True}</field>
       <field name="view_mode">tree,pivot,form</field>
     </record>
+
+    <record id="hr_timesheet.act_hr_timesheet_report" model="ir.actions.act_window">
+      <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)')]</field>
+    </record>
+
 
   </data>
 </odoo>

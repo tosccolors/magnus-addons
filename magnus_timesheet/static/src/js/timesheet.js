@@ -61,15 +61,15 @@ odoo.define('magnus_timesheet.sheet', function (require) {
                 var elms = document.getElementsByClassName('oe_timesheet_weekly_input');
                 for (var i = 0; i < elms.length; i++) {
                     var hour = elms[i].value.slice(0, -3);
-                    if (hour > "24" || hour < 0){
+                    if (hour > "24" || hour < 0) {
                         alert('Logged hours should be 0 to 24.');
-                        elms[i].value='0';
+                        elms[i].value = '0';
                     }
                 }
+            });
 
             self.$(".oe_timesheet_button_add").click(function() {
                 self.onclick_add_row_button();
-
             });
         },
 
@@ -138,6 +138,29 @@ odoo.define('magnus_timesheet.sheet', function (require) {
             if(!this.get('effective_readonly')) {
                 this.init_add_project();
             }
+        },
+
+        update_sheets: function() {
+            if(this.querying) {
+                return;
+            }
+            this.updating = true;
+
+            var commands = [form_common.commands.delete_all()];
+            _.each(_.sortBy(this.get("sheets"), 'date'), function (_data) {
+                var data = _.clone(_data);
+                if(data.id) {
+                    commands.push(form_common.commands.link_to(data.id));
+                    commands.push(form_common.commands.update(data.id, data));
+                } else {
+                    commands.push(form_common.commands.create(data));
+                }
+            });
+
+            var self = this;
+            this.field_manager.set_values({'timesheet_ids': commands}).done(function() {
+                self.updating = false;
+            });
         },
 
     });

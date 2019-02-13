@@ -12,7 +12,7 @@
                 <page name="description_page" position="before">
                     <page name="users" string="Fee Earners">
                         <group colspan="4" col="2">
-                            <field name="task_user_ids" >
+                            <field name="task_user_ids" context="{'default_task_id':active_id}">
                                     <tree string="Fee Earners" create="true"
                                           edit="true" delete="true" copy="false">
                                         <field name="user_id" />
@@ -27,7 +27,7 @@
         </record>
 
 
-        <record id="view_task_form2_inherited_invoice" model="ir.ui.view">
+        <!--<record id="view_task_form2_inherited_invoice" model="ir.ui.view">
             <field name="name">project.task.form</field>
             <field name="model">project.task</field>
             <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
@@ -36,7 +36,7 @@
                     <field name="state"/>
                 </xpath>
             </field>
-        </record>
+        </record>-->
 
         <!--<record id="view_task_user_form" model="ir.ui.view">-->
             <!--<field name="name">task.user.form</field>-->
@@ -63,6 +63,17 @@
                     <field name="fee_rate"/>
                     <field name="task_id"/>
                 </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="project_invoicing_period_form_inherited">
+            <field name="name">Invoicing Properties</field>
+            <field name="model">project.invoicing.properties</field>
+            <field name="inherit_id" ref="magnus_project.project_invoicing_Period_form_view"/>
+            <field name="arch" type="xml">
+                <field name="invoice_mileage" position="after">
+                    <field name="group_invoice" />
+                </field>
             </field>
         </record>
 

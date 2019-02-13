@@ -20,12 +20,19 @@ class HrTimesheetSheet(models.Model):
         emp_id = emp_id.id if emp_id else False
         timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
-        week = self.env['date.range'].search([('type_id','in',['week','Week','WEEK']), ('date_start', '=', dt-timedelta(days=dt.weekday()))], limit=1)
+        date_range_type_cw_id = self.env.ref(
+            'magnus_date_range_week.date_range_calender_week').id
+        week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
+                                                                                      dt-timedelta(days=dt.weekday()))], limit=1)
         if week:
             if week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
-                upcoming_week = self.env['date.range'].search([('id', 'not in', logged_weeks), ('type_id','in',['week','Week','WEEK']), ('date_start', '>', dt-timedelta(days=dt.weekday()))], order='date_start', limit=1)
+                upcoming_week = self.env['date.range'].search([
+                    ('id', 'not in', logged_weeks),
+                    ('type_id','=',date_range_type_cw_id),
+                    ('date_start', '>', dt-timedelta(days=dt.weekday()))
+                ], order='date_start', limit=1)
                 if upcoming_week:
                     rec.update({'week_id': upcoming_week.id})
                 else:
@@ -47,7 +54,9 @@ class HrTimesheetSheet(models.Model):
         emp_id = emp_id.id if emp_id else False
         timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
-        return [('type_id','in',['week','Week','WEEK']), ('active','=',True), ('id', 'not in', logged_weeks)]
+        date_range_type_cw_id = self.env.ref(
+            'magnus_date_range_week.date_range_calender_week').id
+        return [('type_id','=', date_range_type_cw_id), ('active','=',True), ('id', 'not in', logged_weeks)]
 
     def _default_employee(self):
         emp_ids = self.env['hr.employee'].search([('user_id', '=', self.env.uid)])
@@ -61,65 +70,103 @@ class HrTimesheetSheet(models.Model):
     def _get_vehicle(self):
         vehicle = False
         if self.employee_id:
-            user = self.employee_id.user_id if self.employee_id.user_id else False
+            user = self.employee_id.user_id or False
             if user:
                 vehicle = self.env['fleet.vehicle'].search([('driver_id', '=', user.partner_id.id)], limit=1)
         return vehicle
 
-    def _get_latest_odometer(self):
-        latest_odometer = self.starting_mileage_editable
+    def _get_latest_mileage(self):
         vehicle = self._get_vehicle()
-        if vehicle:
-            latest_odometer = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
         if vehicle and self.week_id:
-            latest_odometer = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
-        return latest_odometer
+            latest_mileage = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
+        elif vehicle:
+            latest_mileage = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
+        else:
+            latest_mileage = self.starting_mileage_editable
+        return latest_mileage
 
-    @api.one
+    @api.multi
     @api.depends('employee_id','week_id')
     def _get_starting_mileage(self):
-        self.starting_mileage = self._get_latest_odometer()
+        for sheet in self:
+            sheet.vehicle = True if sheet._get_vehicle() else False
+            sheet.starting_mileage = sheet._get_latest_mileage()
 
-    @api.one
+    @api.multi
     @api.depends('timesheet_ids.kilometers')
     def _get_business_mileage(self):
-        self.business_mileage = sum(self.timesheet_ids.mapped('kilometers')) if self.timesheet_ids else 0
+        for sheet in self:
+            sheet.business_mileage = sum(sheet.timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
 
-    @api.one
+    @api.multi
     @api.depends('end_mileage','business_mileage','starting_mileage')
     def _get_private_mileage(self):
-        self.private_mileage = self.end_mileage - self.business_mileage - self.starting_mileage
+        for sheet in self:
+            m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
+            sheet.private_mileage = m if m > 0 else 0
 
-    @api.one
-    @api.depends('employee_id','week_id')
-    def _compute_vehicle(self):
-        self.vehicle = True if self._get_vehicle() else False
+    @api.multi
+    @api.depends('timesheet_ids')
+    def _get_overtime_hours(self):
+        for sheet in self:
+            if sheet.week_id and sheet.employee_id:
+                date_from = datetime.strptime(sheet.week_id.date_start, "%Y-%m-%d").date()
+                overtime_hours = 0
+                for i in range(7):
+                    date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
+                    hours = sum(sheet.env['account.analytic.line'].search([
+                        ('date', '=', date),
+                        ('sheet_id', '=', sheet.id)
+                    ]).mapped('unit_amount'))
+                    if i < 5 and hours > 8:
+                        overtime_hours += hours - 8
+                    elif i > 4 and hours > 0:
+                        overtime_hours += hours
+                overtime_taken = sum(self.env['account.analytic.line'].search([
+                    ('sheet_id', '=', sheet.id),
+                    ('sheet_id.employee_id', '=', sheet.employee_id.id),
+                    ('project_id.overtime', '=', True)
+                ]).mapped('unit_amount'))
+                sheet.overtime_hours = overtime_hours - overtime_taken
 
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
-    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=True)
+    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=False)
     starting_mileage_editable = fields.Integer(string='Starting Mileage')
-    vehicle = fields.Boolean(compute='_compute_vehicle', string='Vehicle', store=True)
+    vehicle = fields.Boolean(compute='_get_starting_mileage', string='Vehicle', store=False)
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
-    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
+    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
     end_mileage = fields.Integer('End Mileage')
+    overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
+    odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
         self.date_from = self.week_id.date_start
         self.date_to = self.week_id.date_end
 
+  #  @api.onchange('starting_mileage', 'business_mileage')
+  #  def onchange_private_mileage(self):
+  #      if self.private_mileage == 0:
+  #          self.end_mileage = self.starting_mileage + self.business_mileage
+
+
     def duplicate_last_week(self):
         if self.week_id and self.employee_id:
             ds = self.week_id.date_start
             date_start = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=7)
             date_end = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=1)
-            last_week = self.env['date.range'].search([('type_id','in',['week','Week','WEEK']), ('date_start', '=', date_start), ('date_end', '=', date_end)], limit=1)
+            date_range_type_cw_id = self.env.ref(
+                'magnus_date_range_week.date_range_calender_week').id
+            last_week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
+                                                                                               date_start), ('date_end', '=', date_end)], limit=1)
             if last_week:
                 last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.employee_id.id), ('week_id', '=', last_week.id)], limit=1)
+                current_week_lines = [(0, 0, {'date': l.date,'name': l.name,'project_id': l.project_id.id,'task_id': l.task_id.id, 'unit_amount': l.unit_amount}) for l in self.timesheet_ids] if self.timesheet_ids else []
                 if last_week_timesheet:
-                    # self.timesheet_ids.unlink()
-                    self.timesheet_ids = [(0, 0, {'date': datetime.strptime(l.date, "%Y-%m-%d") + timedelta(days=7),'name': '/','project_id': l.project_id.id,'task_id': l.task_id.id}) for l in last_week_timesheet.timesheet_ids]
+                    self.timesheet_ids.unlink()
+                    last_week_lines = [(0, 0, {'date': datetime.strptime(l.date, "%Y-%m-%d") + timedelta(days=7),'name': '/','project_id': l.project_id.id,'task_id': l.task_id.id}) for l in last_week_timesheet.timesheet_ids]
+                    self.timesheet_ids = current_week_lines + last_week_lines
                 else:
                     raise UserError(_("You have no timesheet logged for last week. Duration: %s to %s") %(datetime.strftime(date_start, "%d-%b-%Y"), datetime.strftime(date_end, "%d-%b-%Y")))
 
@@ -131,6 +178,13 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_confirm(self):
         self._check_end_mileage()
+        vehicle = self._get_vehicle()
+        if vehicle:
+            self.odo_log_id = self.env['fleet.vehicle.odometer'].create({
+                'value_period_update': self.business_mileage + self.private_mileage,
+                'date': self.week_id.date_end or fields.Date.context_today(self),
+                'vehicle_id': vehicle.id
+            })
         date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
@@ -142,32 +196,135 @@ class HrTimesheetSheet(models.Model):
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
+
     @api.one
     def action_timesheet_done(self):
+        """
+        On timesheet confirmed update analytic state to confirmed
+        :return: Super
+        """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
-        vehicle = self._get_vehicle()
-        if vehicle:
-            self.env['fleet.vehicle.odometer'].create({
-                'value': self.end_mileage,
-                'date': self.week_id.date_end or fields.Date.context_today(self),
-                'vehicle_id': vehicle.id
-                })
-
-        for aal in self.timesheet_ids.filtered('kilometers'):
-            newaal = aal.copy()
-            non_invoiceable_mileage = False if aal.project_id.invoice_properties and aal.project_id.invoice_properties.invoice_mileage else True
-            newaal.write({'state': 'open', 'name': "/", 'unit_amount': aal.kilometers, 'sheet_id': False, 'non_invoiceable_mileage': non_invoiceable_mileage})
-            self.env.cr.execute("""
-                    UPDATE account_analytic_line SET product_uom_id = %s WHERE id = %s
-            """ % (self.env.ref('product.product_uom_km').id, newaal.id))
-            aal.ref_id = newaal.id
+        self.copy_wih_query()
         return res
+
+    def copy_wih_query(self):
+        query = """
+        INSERT INTO
+        account_analytic_line
+        (       create_uid,
+                user_id,
+                account_id,
+                company_id,
+                write_uid,
+                amount,
+                unit_amount,
+                date,
+                create_date,
+                write_date,
+                partner_id,
+                name,
+                code,
+                currency_id,
+                ref,
+                general_account_id,
+                move_id,
+                product_id,
+                amount_currency,
+                project_id,
+                department_id,
+                task_id,
+                sheet_id,
+                so_line,
+                user_total_id,
+                month_id,
+                week_id,
+                account_department_id,               
+                expenses,
+                chargeable,
+                operating_unit_id,
+                correction_charge,
+                write_off_move,
+                ref_id,
+                actual_qty,
+                planned_qty,
+                planned,
+                select_week_id,
+                kilometers,
+                state,
+                non_invoiceable_mileage,
+                product_uom_id )
+        SELECT  aal.create_uid as create_uid,
+                aal.user_id as user_id,
+                aal.account_id as account_id,
+                aal.company_id as company_id,
+                aal.write_uid as write_uid,
+                aal.amount as amount,
+                aal.kilometers as unit_amount,
+                aal.date as date,
+                %(create)s as create_date,
+                %(create)s as write_date,
+                aal.partner_id as partner_id,
+                aal.name as name,
+                aal.code as code,
+                aal.currency_id as currency_id,
+                aal.ref as ref,
+                aal.general_account_id as general_account_id,
+                aal.move_id as move_id,
+                aal.product_id as product_id,
+                aal.amount_currency as amount_currency,
+                aal.project_id as project_id,
+                aal.department_id as department_id,
+                aal.task_id as task_id,
+                NULL as sheet_id,
+                aal.so_line as so_line,
+                aal.user_total_id as user_total_id,
+                aal.month_id as month_id,
+                aal.week_id as week_id,
+                aal.account_department_id as account_department_id,
+                aal.expenses as expenses,
+                aal.chargeable as chargeable,
+                aal.operating_unit_id as operating_unit_id,
+                aal.correction_charge as correction_charge,
+                aal.write_off_move as write_off_move,              
+                aal.id as ref_id,
+                aal.actual_qty as actual_qty,
+                aal.planned_qty as planned_qty,
+                aal.planned as planned,
+                aal.select_week_id as select_week_id,
+                0 as kilometers,
+                CASE
+                  WHEN ip.invoice_mileage IS NULL THEN true
+                  ELSE ip.invoice_mileage
+                END AS non_invoiceable_mileage,
+                %(km)s as product_uom_id      
+        FROM
+         account_analytic_line aal
+         LEFT JOIN project_project pp 
+         ON pp.id = aal.project_id
+         LEFT JOIN project_invoicing_properties ip
+         ON ip.id = pp.invoice_properties
+         RIGHT JOIN hr_timesheet_sheet_sheet hss
+         ON hss.id = aal.sheet_id
+        WHERE hss.id = %(sheet)s
+        AND aal.ref_id IS NULL
+        AND aal.kilometers > 0       
+        ;"""
+        km_id = self.env.ref('product.product_uom_km').id
+        heden = str(fields.Datetime.to_string(fields.datetime.now()))
+        self.env.cr.execute(query, {'create': heden,'km': km_id, 'sheet':self.id})
+        self.env.invalidate_all()
+        return True
 
     @api.one
     def action_timesheet_draft(self):
+        """
+        On timesheet reset draft check analytic shouldn't be in invoiced
+        :return: Super
+        """
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        if self.timesheet_ids and self.timesheet_ids.mapped('ref_id'):
-            self.timesheet_ids.mapped('ref_id').unlink()
+        if self.odo_log_id:
+            self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
+            self.odo_log_id = False
         return res
 
     @api.one
@@ -181,7 +338,7 @@ class HrTimesheetSheet(models.Model):
 class AccountAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
-    sheet_id = fields.Many2one('hr_timesheet_sheet.sheet', compute='_compute_sheet', string='Sheet', store=True, ondelete='cascade')
+    sheet_id = fields.Many2one(ondelete='cascade')
     kilometers = fields.Integer('Kilometers')
     non_invoiceable_mileage = fields.Boolean(string='Invoice Mileage', store=True)
     ref_id = fields.Many2one('account.analytic.line', string='Reference')
@@ -197,6 +354,7 @@ class AccountAnalyticLine(models.Model):
         else:
             self.task_id = False
         return res
+
 
 class DateRangeGenerator(models.TransientModel):
     _inherit = 'date.range.generator'
