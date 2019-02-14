@@ -34,7 +34,7 @@ class HrChargeabilityReport(models.Model):
                          ))*100 as chargeability
                     FROM
                         account_analytic_line as aa 
-                    WHERE aa.product_uom_id = %s AND aa.project_id IS NOT NULL 
+                    WHERE aa.product_uom_id = %s AND aa.planned = FALSE AND aa.project_id IS NOT NULL 
                     AND (aa.correction_charge = true OR aa.chargeable = true)
 
                     GROUP BY aa.user_id, aa.date
@@ -44,7 +44,40 @@ class HrChargeabilityReport(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super(HrChargeabilityReport, self).read_group(domain, fields, groupby, offset, limit=limit, orderby=orderby, lazy=lazy)
         for index, val in enumerate(res):
-            count = val.get('__count', False)
-            if count and int(count) > 1:
-                res[index]['chargeability'] = val['chargeability'] / int(count)
+            domain = val.get('__domain', False)
+
+            if domain:
+                where_query = self._where_calc(domain)
+                from_clause, where_clause, where_clause_params = where_query.get_sql()
+
+                list_query = ("""
+                        SELECT
+                            chargeable_hours, norm_hours
+                          FROM
+                            {0}
+                          WHERE {1}
+                     """.format(
+                    from_clause,
+                    where_clause
+                ))
+
+                self.env.cr.execute(list_query, where_clause_params)
+            else:
+                list_query = ("""
+                        SELECT
+                            chargeable_hours, norm_hours
+                          FROM
+                            hr_chargeability_report
+                     """
+                )
+                self.env.cr.execute(list_query)
+            result = self._cr.fetchall()
+            chargeable_hours, norm_hours = 0, 0
+            for r in result:
+                chargeable_hours += r[0]
+                norm_hours += r[1]
+            if chargeable_hours or norm_hours:
+                norm_hours = norm_hours if norm_hours else chargeable_hours #if norm_hrs zero chargeability would be 100%
+                res[index]['chargeability'] = (chargeable_hours / norm_hours) * 100
+
         return res
