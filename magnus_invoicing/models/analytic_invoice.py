@@ -389,7 +389,7 @@ class AnalyticInvoice(models.Model):
 
         for line in user_summary_lines:
             project = line.task_id.project_id if not line.project_id else line.project_id
-            operating_unit = project.operating_unit_ids[0] if not line.operating_unit_id else line.operating_unit_id
+            operating_unit = project.analytic_account_id.operating_unit_ids[0] if not line.operating_unit_id else line.operating_unit_id
             if project.invoice_properties and not project.invoice_properties.group_invoice:
                 separate_invs.append(line)
             else:

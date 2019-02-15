@@ -35,6 +35,10 @@ class AccountAnalyticLine(models.Model):
                 if line.product_uom_id.id == UomHrs:
                     line.ts_line = True
             if not line.ts_line or line.planned:
+                # for planned update correction_charge & chargeable
+                if line.planned:
+                    line.correction_charge = line.project_id.correction_charge
+                    line.chargeable = line.project_id.chargeable
                 continue
             project = line.project_id
             line.correction_charge = project.correction_charge
@@ -49,8 +53,8 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
-            if line.project_id and line.chargeable and line.project_id.operating_unit_ids:
-                line.operating_unit_id = line.project_id.operating_unit_ids[0]
+            if line.project_id and line.chargeable and line.project_id.analytic_account_id.operating_unit_ids:
+                line.operating_unit_id = line.project_id.analytic_account_id.operating_unit_ids[0]
             else:
                 line.operating_unit_id = False
 
@@ -432,6 +436,7 @@ class AccountAnalyticLine(models.Model):
     #             )
     #     return res
 
+    @api.depends('unit_amount')
     def _get_qty(self):
         for line in self:
             if line.planned:

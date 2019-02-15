@@ -116,7 +116,8 @@ class HrTimesheetSheet(models.Model):
                     date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
                     hours = sum(sheet.env['account.analytic.line'].search([
                         ('date', '=', date),
-                        ('sheet_id', '=', sheet.id)
+                        ('sheet_id', '=', sheet.id),
+                        ('task_id.standby', '=', False)
                     ]).mapped('unit_amount'))
                     if i < 5 and hours > 8:
                         overtime_hours += hours - 8
