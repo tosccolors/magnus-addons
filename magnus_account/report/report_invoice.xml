@@ -37,7 +37,7 @@
 
             <div style="padding-left:85px;padding-right:15px;">
                 <div class="row" style="padding:0px;padding-right:15px;border-bottom:1px solid black;">
-                    <div class="col-xs-6" style="padding:0px;">
+                    <div class="col-xs-7" style="padding:0px;">
                          <div class="col-xs-3" style="padding:0px;">
                              <span>Datum</span>
                              <br/>
@@ -45,12 +45,17 @@
                              <br/>
                              <span>Referentie</span>
                              <br/>
-                             <span t-if="sale_inv">Your VAT</span>
-                             <span t-if="not sale_inv">Our Vat</span>
+                             <span>Your VAT</span>
+                             <br/>
+                             <span>Our Vat</span>
                              <br/>
                              <br/>
                          </div>
                          <div class="col-xs-1" style="padding:0px;">
+                             <span><strong> </strong></span>
+                             <br/>
+                             <span><strong> </strong></span>
+                             <br/>
                              <span><strong> </strong></span>
                              <br/>
                              <span><strong> </strong></span>
@@ -67,8 +72,9 @@
                              <span t-if="sale_inv" t-field="o.invoice_line_ids[0].account_analytic_id.project_ids[0].po_number"/>
                              <span t-if="not sale_inv" t-field="o.name"/>
                              <br/>
-                             <span t-if="sale_inv" t-field="o.partner_id.vat"/>
-                             <span t-if="not sale_inv and o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
+                             <span t-field="o.partner_id.vat"/>
+                             <br/>
+                             <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
                                    t-field="o.operating_unit_id.partner_id.vat"/>
                              <br/>
                              <br/>
@@ -108,13 +114,13 @@
                     <table class="table table-condensed table-padding">
                         <t t-foreach="o.group_by_analytic_acc()" t-as="aaLines">
                             <tr>
-                                <td style='border-top:none' width="20%"><strong><span t-field="aaLines.name"/></strong></td>
+                                <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                             </tr>
                             <tr t-foreach="aaLines_value" t-as="l">
+                                <td style='border-top:none' width="40%"><span t-field="l.name"/></td>
                                 <td style='border-top:none' width="20%"> </td>
-                                <td style='border-top:none' width="20%"><span t-field="l.name"/></td>
-                                <td style='border-top:none' width="20%"> </td>
-                                <td style='border-top:none' width="20%"> </td>
+                                <td style='border-top:none' width="10%"> </td>
+                                <td style='border-top:none' width="10%"> </td>
                                 <td style='border-top:none' class="text-right">
                                     <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
                                         t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
@@ -156,7 +162,7 @@
             <t t-if="o.operating_unit_id and o.operating_unit_id.partner_id">
                 <t t-set="bank_acc" t-value="any([b.acc_number for b in o.operating_unit_id.partner_id.bank_ids])"/>
                 <p t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                    <strong>Bankrekening:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                    <strong>Bank:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
                     <strong>IBAN</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
                     <strong>BIC</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
                 </p>
