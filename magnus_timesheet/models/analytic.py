@@ -223,66 +223,6 @@ class AccountAnalyticLine(models.Model):
         amount = self.unit_amount * fr
         return amount
 
-    '''@api.model
-    def create(self, vals):
-#        import pdb; pdb.set_trace()
-        res = super(AccountAnalyticLine, self).create(vals)
-        if self._context.get('aal_loop', False):
-            return res
-        if res.product_uom_id == self.env.ref('product.product_uom_hour'):
-            s_args1 = [
-                ('week_id', '=', res.week_id.id),
-                ('product_id', '=', res.product_id.id),
-                ('user_id', '=', res.user_id.id),
-                ('company_id', '=', res.company_id.id),
-                ('task_id', '=', res.task_id.id),
-                ('account_id', '=', res.account_id.id),
-                ('partner_id', '=', res.partner_id.id),
-                ('product_uom_id', '=', res.product_uom_id.id),
-                ('child_ids', '!=', False),
-            ]
-            second1= self.search(s_args1)
-            if len(second1) == 1:
-                res.parent_id = second1.id
-                second1.unit_amount += res.unit_amount
-                second1.amount += res.amount
-            s_args2 = [
-                ('week_id', '=', res.week_id.id),
-                ('product_id', '=', res.product_id.id),
-                ('user_id', '=', res.user_id.id),
-                ('company_id', '=', res.company_id.id),
-                ('task_id', '=', res.task_id.id),
-                ('account_id', '=', res.account_id.id),
-                ('partner_id', '=', res.partner_id.id),
-                ('product_uom_id', '=', res.product_uom_id.id),
-                ('child_ids', '=', False),
-            ]
-            second2 = self.search(s_args2)
-            if len(second2) > 1:
-                values = {
-                    'name': '/',
-                    'week_id': res.week_id.id,
-                    'product_id': res.product_id.id,
-                    'user_id': res.user_id.id,
-                    'company_id': res.company_id.id,
-                    'task_id': res.task_id.id,_compute_sheet
-                    'account_id': res.account_id.id,
-                    'partner_id': res.partner_id.id,
-                    'product_uom_id': res.product_uom_id.id,
-                }
-                res2 = self.with_context(aal_loop=True).create(values)
-                ua = 0
-                a = 0
-                for line in second2:
-                    ua += line.unit_amount
-                    a += line.amount
-                    line.parent_id = res2.id
-                res2.unit_amount = ua
-                res2.amount = a
-        return res'''
-
-
-
 
     def _fetch_emp_plan(self):
         emp = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
