@@ -57,14 +57,13 @@ class AnalyticLineStatus(models.TransientModel):
             analytic_account_ids = res[0]
             partner_id = res[1]
             month_id = res[2]
-            search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('state', '!=', 'invoiced')]
-            analytic_invobj = analytic_invoice.search(search_domain)
+            search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('state', '!=', 'invoiced'),('month_id', '=', month_id)]
+            analytic_invobj = analytic_invoice.search(search_domain, limit=1)
             if analytic_invobj:
-                if len(analytic_invobj) > 1:
-                    analytic_invobj = analytic_invobj.search([('month_id', '=', month_id)], limit=1)
                 analytic_invobj.partner_id = partner_id
+                analytic_invobj.month_id = month_id
             else:
-                analytic_invoice.create({'partner_id':partner_id})
+                analytic_invoice.create({'partner_id':partner_id, 'month_id':month_id})
 
 
     @api.onchange('wip_percentage')
