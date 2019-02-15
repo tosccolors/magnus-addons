@@ -3,8 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
-from lxml import etree
+from odoo.exceptions import UserError, ValidationError
 
 
 class AnalyticInvoice(models.Model):
@@ -287,6 +286,11 @@ class AnalyticInvoice(models.Model):
             if len(user_total_ids) > 1:
                 cond = 'IN'
                 rec = tuple(user_total_ids.ids)
+
+            #reset analytic line state to invoiceable
+            analytic_lines = user_total_ids.mapped('children_ids')
+            self.analytic_line_status(analytic_lines, 'invoiceable')
+
             self.env.cr.execute("""
                                 DELETE FROM  analytic_user_total WHERE id %s %s
                         """ % (cond, rec))
@@ -307,6 +311,16 @@ class AnalyticInvoice(models.Model):
         if analytic_lines:
             self.analytic_line_status(analytic_lines, 'progress')
         return res
+
+    @api.multi
+    def unlink(self):
+        """
+            reset analytic line state to invoiceable
+            :return:
+        """
+        analytic_lines = self.user_total_ids.mapped('children_ids')
+        self.analytic_line_status(analytic_lines, 'invoiceable')
+        return super(AnalyticInvoice, self).unlink()
 
     @api.model
     def _prepare_invoice(self, lines):
@@ -457,6 +471,13 @@ class AnalyticInvoice(models.Model):
             action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
             action['res_id'] = invoices.id
         return action
+
+    @api.one
+    @api.constrains('partner_id', 'month_id')
+    def _check_project_standard(self):
+        analytic_inv = self.search([('partner_id', '=', self.partner_id.id), ('month_id', '=', self.month_id.id), ('state', '!=', 'invoiced')])
+        if len(analytic_inv) > 1:
+            raise ValidationError(_('You can have only one analytic invoice with per month and per partner!'))
 
 
 class AnalyticUserTotal(models.Model):
