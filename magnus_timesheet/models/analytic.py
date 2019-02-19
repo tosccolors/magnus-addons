@@ -20,8 +20,6 @@ class AccountAnalyticLine(models.Model):
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
-            # if not line.project_id:
-            #     super(AccountAnalyticLine, line)._compute_sheet()
             if line.project_id and line.task_id and line.user_id and not line.planned:
                 if line.sheet_id.week_id and line.date:
                     line.week_id = line.sheet_id.week_id

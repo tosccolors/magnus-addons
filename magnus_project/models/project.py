@@ -15,6 +15,10 @@ class Project(models.Model):
     correction_charge = fields.Boolean('Correction Chargeability')
     chargeable = fields.Boolean('Chargeable')
     invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
+    analytic_account_related = fields.Many2one(
+        related='analytic_account_id',
+        string='Contract/Analytic',
+        )
 
 
     @api.multi

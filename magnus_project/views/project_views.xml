@@ -35,7 +35,7 @@
                 <xpath expr="//div[@class='oe_title']" position="after">
                       <group>
                         <group>
-                          <field name="analytic_account_id" readonly="1"/>
+                          <field name="analytic_account_related" readonly="1"/>
                           <field name="linked_operating_unit" />
                           <field name="operating_unit_ids" widget="many2many_tags" readonly="0"/>
                         </group>
