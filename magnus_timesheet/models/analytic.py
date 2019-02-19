@@ -10,8 +10,6 @@ class AccountAnalyticLine(models.Model):
     _description = 'Analytic Line'
     _order = 'date desc'
 
-    # Todo: combine AccountAnalyticLine overrides of create() and write() from magnus_invoicing and magnus_timesheet
-    #  and change dependency such, that magnus_timesheet is dependency of invoicing.
 
     @api.depends('date', 'user_id', 'project_id', 'sheet_id_computed.date_to', 'sheet_id_computed.date_from',
                  'sheet_id_computed.employee_id', 'task_id', 'product_uom_id', 'planned')
@@ -55,23 +53,6 @@ class AccountAnalyticLine(models.Model):
                 line.operating_unit_id = line.project_id.analytic_account_id.operating_unit_ids[0]
             else:
                 line.operating_unit_id = False
-
-
-    def _search_sheet(self, operator, value):
-        assert operator == 'in'
-        ids = []
-        for ts in self.env['hr_timesheet_sheet.sheet'].browse(value):
-            self._cr.execute("""
-                        SELECT l.id
-                            FROM account_analytic_line l
-                        WHERE %(date_to)s >= l.date
-                            AND %(date_from)s <= l.date
-                            AND %(user_id)s = l.user_id
-                        GROUP BY l.id""", {'date_from': ts.date_from,
-                                           'date_to': ts.date_to,
-                                           'user_id': ts.employee_id.user_id.id, })
-            ids.extend([row[0] for row in self._cr.fetchall()])
-        return [('id', 'in', ids)]
 
     def find_daterange_week(self, date):
         """
@@ -265,48 +246,17 @@ class AccountAnalyticLine(models.Model):
             if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                 amount = vals['unit_amount'] * fee_rate
                 UpdateCols.append("amount = %s"%amount)
-                # self.env.cr.execute(
-                #     """UPDATE account_analytic_line SET amount = %s
-                #     WHERE id = %s""",
-                #     (amount, res.id),
-                # )
         if self.env.context.get('default_planned', False):
             if res.week_id != res.select_week_id:
                 UpdateCols.append("week_id = %s" % res.select_week_id.id)
-                # self.env.cr.execute(
-                #     """UPDATE account_analytic_line SET week_id = %s
-                #     WHERE id = %s""",
-                #     (res.select_week_id.id, res.id),
-                # )
-
             if res.project_id != False:
                 UpdateCols.append("planned = True")
-                # self.env.cr.execute(
-                #     """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(res.id)
-                # )
         if UpdateCols:
             col_up = ', '.join(UpdateCols)
             self.env.cr.execute(
                 """UPDATE account_analytic_line SET %s WHERE id = %s""" % (col_up, res.id)
             )
         return res
-
-
-    # @api.model
-    # def create(self, vals):
-    #     res = super(AccountAnalyticLine, self).create(vals)
-    #     if self.env.context.get('default_planned', False) and res.week_id != res.select_week_id:
-    #         self.env.cr.execute(
-    #             """UPDATE account_analytic_line SET week_id = %s
-    #             WHERE id = %s""",
-    #             (res.select_week_id.id, res.id),
-    #         )
-    #
-    #     if self.env.context.get('default_planned', True) and res.project_id != False:
-    #         self.env.cr.execute(
-    #             """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(res.id)
-    #         )
-    #     return res
 
     @api.multi
     def write(self, vals):
@@ -325,29 +275,13 @@ class AccountAnalyticLine(models.Model):
                         for user in task.task_user_ids:
                             if user.user_id.id == user_id:
                                 fee_rate = user.fee_rate or user.product_id.lst_price
-
                         if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                             amount = unit_amount * fee_rate
                             UpdateCols.append("amount = %s, product_id = %s" % (amount, product_id))
-                            # self.env.cr.execute(
-                            #     """UPDATE account_analytic_line SET amount = %s , product_id = %s
-                            #     WHERE id = %s""",
-                            #     (amount, product_id, aal.id),
-                            # )
-
             if vals.get('select_week_id', False) and aal.week_id != aal.select_week_id:
                 UpdateCols.append("week_id = %s"%aal.select_week_id.id)
-                # self.env.cr.execute(
-                #     """UPDATE account_analytic_line SET week_id = %s
-                #     WHERE id = %s""",
-                #     (aal.select_week_id.id, aal.id),
-                # )
-
             if self.env.context.get('default_planned', False) and aal.project_id != False:
                 UpdateCols.append("planned = True")
-                # self.env.cr.execute(
-                #     """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(aal.id)
-                # )
             if UpdateCols:
                 col_up = ', '.join(UpdateCols)
                 self.env.cr.execute(
@@ -357,22 +291,6 @@ class AccountAnalyticLine(models.Model):
         return res
 
 
-    # @api.multi
-    # def write(self, vals):
-    #     res = super(AccountAnalyticLine, self).write(vals)
-    #     for obj in self:
-    #         if vals.get('select_week_id', False) and obj.week_id != obj.select_week_id:
-    #             self.env.cr.execute(
-    #                 """UPDATE account_analytic_line SET week_id = %s
-    #                 WHERE id = %s""",
-    #                 (obj.select_week_id.id, obj.id),
-    #             )
-    #
-    #         if self.env.context.get('default_planned', True) and obj.project_id != False:
-    #             self.env.cr.execute(
-    #                 """UPDATE account_analytic_line SET planned = TRUE WHERE id = %s""" %(obj.id)
-    #             )
-    #     return res
 
     @api.depends('unit_amount')
     def _get_qty(self):
