@@ -72,7 +72,18 @@ class HrTimesheetSheet(models.Model):
         if self.employee_id:
             user = self.employee_id.user_id or False
             if user:
-                vehicle = self.env['fleet.vehicle'].search([('driver_id', '=', user.partner_id.id)], limit=1)
+                dtt_vehicle = self.env['data.time.tracker'].search([
+                    ('model','=','fleet.vehicle'),
+                    ('relation_model','=','res.partner'),
+                    ('relation_ref', '=', user.partner_id.id),
+                    ('date_from', '<', self.date_from),
+                    ('date_to', '>=', self.date_to)],limit=1)
+                if dtt_vehicle:
+                    vehicle = self.env['fleet.vehicle'].search([
+                        ('id', '=', dtt_vehicle.model_ref)], limit=1)
+                else:
+                    vehicle = self.env['fleet.vehicle'].search([
+                    ('driver_id', '=', user.partner_id.id)], limit=1)
         return vehicle
 
     def _get_latest_mileage(self):
