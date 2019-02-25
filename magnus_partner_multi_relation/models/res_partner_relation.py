@@ -7,8 +7,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
-class ResPartnerRelation(models.Model):
-    """Model res.partner.relation is used to describe all links or relations
+class ResPartnerRelationExtension(models.Model):
+    """Model res.partner.relation.extension is used to extend relations
     between partners in the database.
 
     This model is actually only used to store the data. The model
@@ -16,8 +16,16 @@ class ResPartnerRelation(models.Model):
     two times, once for the normal relation, once for the inverse relation,
     will be used to maintain the data.
     """
-    _inherit = 'res.partner.relation'
+    _name = 'res.partner.relation.extension'
+    _inherits = {'res.partner.relation': "relation_id"}
 
+    relation_id = fields.Many2one(
+        'res.partner.relation',
+        string='Partner Multi Relation',
+        ondelete="cascade",
+        required=True,
+        auto_join=True
+    )
     distribution_key = fields.Float(
         string='Percentage Distribution Key'
     )
