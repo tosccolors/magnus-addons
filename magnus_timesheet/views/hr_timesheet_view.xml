@@ -97,5 +97,9 @@
     </record>
 
 
+    <menuitem id="hr_timesheet.menu_timesheets_reports" name="Reports"
+            parent="hr_timesheet.timesheet_menu_root" sequence="99" groups="magnus_timesheet.group_magnus_reports"/>
+
+
   </data>
 </odoo>
