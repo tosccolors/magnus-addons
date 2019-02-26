@@ -91,6 +91,7 @@ class FleetVehicleOdometer(models.Model):
             }
             one.write(vals)
             former_value = period + former_value
+        self.env.invalidate_all()
 
 
 
