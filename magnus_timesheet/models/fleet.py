@@ -85,9 +85,12 @@ class FleetVehicleOdometer(models.Model):
         former_value = self.value
         for one in newer:
             period = one.value_period
-            one.value_period_update = 0
-            one.value_update = period + former_value
-            former_value = one.value_update
+            vals = {
+                'value_period_update' : 0,
+                'value_update': period + former_value
+            }
+            one.write(vals)
+            former_value = period + former_value
 
 
 
@@ -95,15 +98,15 @@ class FleetVehicleOdometer(models.Model):
     def create(self, data):
         res = super(FleetVehicleOdometer, self).create(data)
         if res.date < self.search([('vehicle_id', '=', res.vehicle_id.id)], limit=1, order='date desc').date:
-            res.odo_newer()
+            res.with_context(odo_newer=True).odo_newer()
         return res
 
     @api.multi
     def write(self, data):
         res = super(FleetVehicleOdometer, self).write(data)
-        for record in self:
+        for record in self.filtered(lambda s: not s.env.context.get('odo_newer')):
             if record.date < self.search([('vehicle_id', '=', record.vehicle_id.id)], limit=1, order='date desc').date:
-                record.odo_newer()
+                record.with_context(odo_newer=True).odo_newer()
         return res
 
 
@@ -126,4 +129,4 @@ class FleetVehicleOdometer(models.Model):
                     ('date', '<', value['gone_date'])
                 ], limit=1, order='date desc')
                 if len(older) == 1:
-                    older.odo_newer()
+                    older.with_context(odo_newer=True).odo_newer()
