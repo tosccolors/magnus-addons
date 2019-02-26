@@ -125,10 +125,10 @@
                     <attribute name="invisible">False</attribute>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="before">
-                    <field name="analytic_policy_always_posted" invisible="1"/>
+                    <field name="analytic_policy" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="attributes">
-                    <attribute name="attrs">{'required': [('analytic_policy_always_posted', '=', True)]}</attribute>
+                    <attribute name="attrs">{'required': [('analytic_policy', 'in', ['always','posted'])]}</attribute>
                 </xpath>
             </field>
         </record>

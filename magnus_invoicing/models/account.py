@@ -20,14 +20,15 @@ class AccountInvoiceLine(models.Model):
         'Timesheet User',
         index = True
     )
-    analytic_policy_always_posted = fields.Boolean('Analytic Policy')
+    analytic_policy = fields.Char(compute='_compute_analytic_policy', string='Analytic Policy', store=True)
 
-    @api.onchange('account_id')
-    def onchange_account_id(self):
-        self.analytic_policy_always_posted = False
+    @api.one
+    @api.depends('account_id')
+    def _compute_analytic_policy(self):
         if self.account_id and self.account_id.user_type_id and self.account_id.user_type_id.analytic_policy:
-            if self.account_id.user_type_id.analytic_policy in ['always', 'posted']:
-                self.analytic_policy_always_posted = True
+            self.analytic_policy = self.account_id.user_type_id.analytic_policy
+        else:
+            self.analytic_policy = False
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
