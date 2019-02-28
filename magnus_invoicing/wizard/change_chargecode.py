@@ -24,7 +24,9 @@ class ChangeChargecode(models.TransientModel):
     def post(self):
         context = self.env.context.copy()
         analytic_ids = context.get('active_ids', [])
-        analytic_lines = self.env['account.analytic.line'].search([('id', 'in', analytic_ids),('state', '=', 'open')])
+        analytic_lines = self.env['account.analytic.line'].search([
+            ('id', 'in', analytic_ids),
+            ('state', 'in', ['invoiceable','approved'])])
         project_id = self.project_id.id
         task_id = self.task_id.id
         for aal in analytic_lines:
@@ -34,7 +36,8 @@ class ChangeChargecode(models.TransientModel):
             if aal.amount == 0.0:
                 amount = aal.get_fee_rate()
             self.env.cr.execute("""
-                UPDATE account_analytic_line SET amount = %s, state = '%s' WHERE id = %s
+                UPDATE account_analytic_line SET amount = %s, state = '%s' 
+                WHERE id = %s
                 """ % (amount, 'change-chargecode', aal.id))
             aal.copy(default={'sheet_id': False, 'amount': -amount, 'state': 'change-chargecode'})
             aal.copy(default={'sheet_id': False, 'amount': 0.0, 'project_id': project_id, 'task_id': task_id, 'state':'open'})

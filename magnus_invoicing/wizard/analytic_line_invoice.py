@@ -10,8 +10,9 @@ class AnalyticLineStatus(models.TransientModel):
 
     name = fields.Selection([
         ('invoiceable', 'To be invoiced'),
+        ('approved', 'Confirmed'),
         ('delayed', 'Delayed'),
-        # ('write-off', 'Write-Off'),
+        ('written-off', 'Written-Off'),
     ], string='Lines to be')
     wip = fields.Boolean("WIP")
     wip_percentage = fields.Float("WIP Percentage")
