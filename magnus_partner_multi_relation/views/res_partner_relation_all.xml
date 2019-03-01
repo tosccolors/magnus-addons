@@ -7,10 +7,7 @@
                ref="partner_multi_relation.tree_res_partner_relation_all"/>
         <field name="arch" type="xml">
             <field name="date_start" position="before">
-                <field name="distribution_key"
-                       attrs="{'invisible': [
-                       ('type_selection_id','!=', %(magnus_partner_multi_relation.rel_type_consortium)d)
-                       ]}"/>
+                <field name="distribution_key"/>
             </field>
         </field>
     </record>
