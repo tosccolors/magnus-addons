@@ -26,19 +26,28 @@ class ChangeChargecode(models.TransientModel):
         analytic_ids = context.get('active_ids', [])
         analytic_lines = self.env['account.analytic.line'].search([
             ('id', 'in', analytic_ids),
-            ('state', 'in', ['invoiceable','approved'])])
+            ('state', 'in', ['invoiceable','open'])])
         project_id = self.project_id.id
         task_id = self.task_id.id
         for aal in analytic_lines:
             if aal.task_id.id == task_id:
                 continue
-            amount = aal.amount
-            if aal.amount == 0.0:
-                amount = aal.get_fee_rate()
+            unit_amount = aal.unit_amount
             self.env.cr.execute("""
                 UPDATE account_analytic_line SET amount = %s, state = '%s' 
                 WHERE id = %s
-                """ % (amount, 'change-chargecode', aal.id))
-            aal.copy(default={'sheet_id': False, 'amount': -amount, 'state': 'change-chargecode'})
-            aal.copy(default={'sheet_id': False, 'amount': 0.0, 'project_id': project_id, 'task_id': task_id, 'state':'open'})
+                """ % (0.0, 'change-chargecode', aal.id))
+            aal.copy(default={'sheet_id': False,
+                              'unit_amount': -unit_amount,
+                              'state': 'change-chargecode'})
+            aal_new = aal.copy(default={'sheet_id': False,
+                                        'amount': 0.0,
+                                        'project_id': project_id,
+                                        'task_id': task_id,
+                                        'state':'open'})
+            amount = aal_new.get_fee_rate()
+            self.env.cr.execute("""
+                            UPDATE account_analytic_line SET amount = %s 
+                            WHERE id = %s
+                            """ % (amount, aal_new.id))
         return True
