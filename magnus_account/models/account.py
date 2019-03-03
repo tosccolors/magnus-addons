@@ -22,6 +22,7 @@
 
 from odoo import api, fields, models, _
 
+# these overrides are switched off in _manifest__
 
 class AnalyticLine(models.Model):
     _inherit = 'account.analytic.line'

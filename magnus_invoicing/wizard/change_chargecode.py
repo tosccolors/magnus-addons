@@ -33,12 +33,14 @@ class ChangeChargecode(models.TransientModel):
             if aal.task_id.id == task_id:
                 continue
             unit_amount = aal.unit_amount
+            amount = aal.amount
             self.env.cr.execute("""
-                UPDATE account_analytic_line SET amount = %s, state = '%s' 
+                UPDATE account_analytic_line SET state = '%s' 
                 WHERE id = %s
-                """ % (0.0, 'change-chargecode', aal.id))
+                """ % ('change-chargecode', aal.id))
             aal.copy(default={'sheet_id': False,
                               'unit_amount': -unit_amount,
+                              'amount': -amount,
                               'state': 'change-chargecode'})
             aal_new = aal.copy(default={'sheet_id': False,
                                         'amount': 0.0,
