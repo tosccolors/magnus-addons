@@ -4,6 +4,7 @@
 
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
+from odoo.exceptions import UserError, ValidationError
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -11,36 +12,31 @@ class AccountAnalyticLine(models.Model):
     _order = 'date desc'
 
 
-    @api.depends('date', 'user_id', 'project_id', 'sheet_id_computed.date_to', 'sheet_id_computed.date_from',
+    @api.depends('date', 'user_id', 'project_id', 'account_id','sheet_id_computed.date_to',
+                 'sheet_id_computed.date_from',
                  'sheet_id_computed.employee_id', 'task_id', 'product_uom_id', 'planned')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
-            if line.project_id and line.task_id and line.user_id and not line.planned:
-                if line.sheet_id.week_id and line.date:
-                    line.week_id = line.sheet_id.week_id
-                    line.month_id = line.find_daterange_month(line.date)
-                elif line.date:
-                    line.week_id = line.find_daterange_week(line.date)
-                    line.month_id = line.find_daterange_month(line.date)
-                elif not line.child_ids == []:
-                    line.week_id = line.find_daterange_week(line.child_ids.date)
-                    line.month_id = line.find_daterange_month(line.child_ids.date)
-                if line.product_uom_id.id == UomHrs:
-                    line.ts_line = True
-            if not line.ts_line or line.planned:
-                # for planned update correction_charge & chargeable
-                if line.planned:
-                    line.correction_charge = line.project_id.correction_charge
-                    line.chargeable = line.project_id.chargeable
+            if line.project_id:
+                if line.task_id and line.user_id and not line.planned:
+                    if line.sheet_id.week_id and line.date:
+                        line.week_id = line.sheet_id.week_id
+                        line.month_id = line.find_daterange_month(line.date)
+                    elif line.date:
+                        line.week_id = line.find_daterange_week(line.date)
+                        line.month_id = line.find_daterange_month(line.date)
+                    elif not line.child_ids == []:
+                        line.week_id = line.find_daterange_week(line.child_ids.date)
+                        line.month_id = line.find_daterange_month(line.child_ids.date)
+                    if line.product_uom_id.id == UomHrs:
+                        line.ts_line = True
+                if not line.ts_line or line.planned:
+                    continue
+            else:
                 continue
-            project = line.project_id
-            line.correction_charge = project.correction_charge
-            line.chargeable = project.chargeable
-            line.expenses = project.invoice_properties.expenses if project.invoice_properties else False
-
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
                 [('week_id', '=', line.week_id.id),
                  ('employee_id.user_id.id', '=', line.user_id.id),
@@ -49,8 +45,13 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
-            if line.project_id and line.chargeable and line.project_id.analytic_account_id.operating_unit_ids:
-                line.operating_unit_id = line.project_id.analytic_account_id.operating_unit_ids[0]
+            if line.user_id and not line.move_id and line.user_id.default_operating_unit_id:
+                line.operating_unit_id = line.user_id.default_operating_unit_id
+            elif line.user_id and not line.move_id:
+                raise ValidationError(_
+                    ('You can not book your time on chargeable project if the '
+                     'Default Operating Unit in your user settings lacks')
+                                      )
             else:
                 line.operating_unit_id = False
 
@@ -99,7 +100,7 @@ class AccountAnalyticLine(models.Model):
 
 
     user_total_id = fields.Many2one(
-        'analytic.user.total',
+        comodel_name='analytic.user.total',
         string='Summary Reference',
         index=True
     )
@@ -116,19 +117,18 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
     correction_charge = fields.Boolean(
-        compute=_compute_sheet,
+        related='project_id.correction_charge',
         string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
-        compute=_compute_sheet,
+        related='project_id.chargeable',
         string='Chargeable',
         store=True,
     )
     expenses = fields.Boolean(
-        compute=_compute_sheet,
+        related='project_id.invoice_properties.expenses',
         string='Expenses',
-        store=True,
     )
     operating_unit_id = fields.Many2one(
         'operating.unit',
@@ -170,6 +170,11 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_sheet,
         string='Timesheet line',
         store=True,
+    )
+    project_mgr = fields.Many2one(
+        comodel_name='res.users',
+        related='account_id.project_ids.user_id',
+        store=True
     )
 
 

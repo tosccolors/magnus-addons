@@ -29,13 +29,17 @@
             <field name="inherit_id" ref="analytic.view_account_analytic_line_tree"/>
             <field name="arch" type="xml">
                 <data>
+                    <xpath expr="//field[@name='ref']" position="replace">
+                    </xpath>
                     <xpath expr="//field[@name='name']" position="after">
                         <field name="user_id" />
                         <field name="product_id" />
                     </xpath>
-                    <xpath expr="//field[@name='account_id']" position="after">
+                    <xpath expr="//field[@name='account_id']" position="replace">
+                        <field name="operating_unit_id" />
                         <field name="project_id" />
                         <field name="task_id" />
+
                     </xpath>
                     <xpath expr="//field[@name='unit_amount']" position="after">
                         <field name="product_uom_id" />
@@ -50,14 +54,45 @@
             <field name="arch" type="xml">
                 <data>
                     <xpath expr="//field[@name='name']" position="before">
-                        <filter name="hours" string="Hours" domain="[('product_uom_id','=',%(product.product_uom_hour)d)]"/>
-                        <field name="task_id" />
+                        <filter string="My Projects"
+                                domain="[
+                                '|',
+                                ('project_id.user_id.id', '=', uid),
+                                ('account_id.project_ids.user_id.id', '=', uid)
+                                ]"
+                                context="{u'pivot_column_groupby': [u'month_id'],
+                                  u'pivot_row_groupby': [u'account_id', u'user_id'],
+                                  u'pivot_measures': [u'unit_amount', u'amount']}"/>
+                        <filter string="All Projects"
+                                context="{u'pivot_column_groupby': [u'month_id'],
+                                  u'pivot_row_groupby': [u'project_mgr',u'account_id', u'user_id'],
+                                  u'pivot_measures': [u'unit_amount', u'amount']}"/>
+                        <filter name="hours" string="Hours"
+                                domain="[('product_uom_id','=',%(product.product_uom_hour)d)]"/>
+                        <filter name="kms" string="Kilometers"
+                                domain="[('product_uom_id','=',%(product.product_uom_km)d)]"/>
+                        <filter name="invoiceable" string="Invoiceable"
+                                domain="[
+                                '|', '&amp;',
+                                ('state', 'in', ['draft','open']),
+                                ('move_id','!=',False),
+                                ('state', 'not in', ['draft','invoiced','delayed','write_off','progress','change-chargecode']),
+                                ('invoiced','=',False),
+                                ('non_invoiceable_mileage', '=', False),
+                                ('chargeable', '=', True)
+                                ]"/>
+                        <filter name="cost_expense" string="Cost/Expense"
+                                domain="[
+                                ('state', 'not in', ['draft', 'invoiced'])
+                                ('move_id','!=',False]"/>
+                        <field name="project_mgr" />
                     </xpath>
                     <xpath expr="//field[@name='date']" position="after">
                         <field name="user_id"/>
                         <field name="task_id" />
                     </xpath>
                     <xpath expr="//group[@name='groupby']" position="after">
+                        <filter string="Project Manager" context="{'group_by':'project_mgr'}"/>
                         <filter string="Professional" context="{'group_by':'user_id'}"/>
                         <filter string="Task" context="{'group_by':'task_id'}"/>
                         <filter string="Measure" context="{'group_by':'product_uom_id'}"/>
@@ -67,7 +102,7 @@
             </field>
         </record>
 
-        <!--record id="view_account_analytic_line_pivot" model="ir.ui.view">
+        <record id="view_account_analytic_line_pivot" model="ir.ui.view">
             <field name="name">account.analytic.line.pivot</field>
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="analytic.view_account_analytic_line_pivot"/>
@@ -76,7 +111,7 @@
                     <field name="partner_id" type="row"/>
                 </field>
             </field>
-        </record-->
+        </record>
 
         <!--<record id="view_account_analytic_line_tree_magnus" model="ir.ui.view">
             <field name="name">account.analytic.line.tree.magnus</field>
@@ -96,7 +131,9 @@
             <field name="view_id" ref="analytic.view_account_analytic_line_tree"/>
             <field name="view_type">form</field>
             <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
-            <field name="domain">[('state', 'not in', ['draft', 'invoiced']),('invoiced','=',False),('non_invoiceable_mileage', '=', False),('chargeable', '=', True)]</field>
+            <!--field name="domain">[('state', 'not in', ['draft',
+            'invoiced']),('invoiced','=',False),('non_invoiceable_mileage', '=', False),('chargeable', '=', True)
+            ]</field-->
             <field name="help" type="html">
               <p>
                 No activity yet.

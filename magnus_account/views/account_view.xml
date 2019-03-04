@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+        <!-- Currently switched-offin __manifest__? -->
+
                 <!-- Account Analytic Line-->
         <record id="view_account_analytic_line_form_slam" model="ir.ui.view">
             <field name="name">account.analytic.line.form.slam</field>
