@@ -24,5 +24,17 @@
 
         </field>
     </record>
+      <!-- Update account invoice from sale module !-->
+    <record model="ir.ui.view" id="account_invoice_form">
+        <field name="name">Account Invoice</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="sale.account_invoice_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page/field[@name='invoice_line_ids']/tree/field[@name='layout_category_id']"
+                   position="replace">
+            </xpath>
+        </field>
+    </record>
+
   </data>
 </odoo>

@@ -11,10 +11,6 @@
                     <field name="reference" position="after">
                         <field name="supplier_invoice_number"/>
                     </field>
-                    <!--<field name="origin" position="replace"/>-->
-                    <!--<field name="partner_id" position="after">-->
-                    <!--<field name="name"/>-->
-                    <!--</field>-->
                 </data>
             </field>
         </record>
@@ -46,7 +42,10 @@
                         <div class="oe_clear">
                             <label for="invoice_description"/>
                         </div>
-                        <field name="invoice_description" class="oe_inline" placeholder="Add description" />
+                        <field name="invoice_description"
+                               type="html"
+                               class="oe_inline"
+                               placeholder="Add description" />
                     </page>
                 </xpath>
             </field>

@@ -25,6 +25,22 @@ class AccountInvoice(models.Model):
                 move_line_dict['user_id'] = iline.user_id.id
         return res
 
+    @api.model
+    def line_get_convert(self, line, part):
+        res = super(AccountInvoice, self).line_get_convert(line, part)
+        res['user_id'] = line.get('user_id', False)
+        return res
+
+    def inv_line_characteristic_hashcode(self, invoice_line):
+        """Overridable hashcode generation for invoice lines. Lines having the same hashcode
+        will be grouped together if the journal has the 'group line' option. Of course a module
+        can add fields to invoice lines that would need to be tested too before merging lines
+        or not."""
+        res = super(AccountInvoice, self).inv_line_characteristic_hashcode(invoice_line)
+        return res + "%s" % (
+            invoice_line['user_id']
+        )
+
     @api.multi
     def _get_timesheet_by_group(self):
         self.ensure_one()

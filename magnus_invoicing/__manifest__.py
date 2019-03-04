@@ -25,7 +25,10 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['magnus_timesheet','invoice_line_revenue_distribution_operating_unit'],
+    'depends': ['magnus_timesheet',
+                'invoice_line_revenue_distribution_operating_unit',
+                'sale'
+                ],
 
     # always loaded
     'data': [
@@ -41,6 +44,7 @@
         'views/analytic_invoice.xml',
         'views/product_view.xml',
         'views/menuitem.xml',
+        'views/account_move_view.xml',
         'views/invoice_view.xml',
 
     ],

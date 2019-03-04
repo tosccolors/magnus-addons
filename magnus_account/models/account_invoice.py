@@ -24,7 +24,7 @@ from odoo import fields, models, api
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
-    invoice_description = fields.Text('Description')
+    invoice_description = fields.Html('Description')
 
     @api.multi
     def invoice_print(self):

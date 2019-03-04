@@ -13,7 +13,7 @@ class AccountMoveLine(models.Model):
 
     user_id = fields.Many2one(
         'res.users',
-        string='Professional'
+        string='Timesheet User'
     )
 
 
@@ -21,10 +21,10 @@ class AccountMoveLine(models.Model):
     @api.constrains('operating_unit_id', 'analytic_account_id','user_id')
     def _check_analytic_operating_unit(self):
         for rec in self.filtered('user_id'):
-            if rec.user_id and not rec.operating_unit_id == \
+            if not rec.operating_unit_id == \
                                     rec.user_id.default_operating_unit_id:
                 raise UserError(_('The Operating Unit in the'
-                                  ' Move Line must be the default'
+                                  ' Move Line must be the Default '
                                   'Operating Unit in the user'))
         super(AccountMoveLine, self - self.filtered('user_id'))._check_analytic_operating_unit()
 
