@@ -32,7 +32,7 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'security/magnus_security.xml',
         'data/data.xml',
         'wizard/analytic_line_invoice_view.xml',
