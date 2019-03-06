@@ -46,6 +46,13 @@ class AccountInvoice(models.Model):
                 result[line.account_analytic_id] = [line]
         return result
 
+    @api.multi
+    def parse_invoice_description(self):
+        res = False
+        if self.invoice_description != '<p><br></p>':
+            res = True
+        return res
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 

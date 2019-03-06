@@ -130,13 +130,14 @@
                     <group col="4">
                         <field name="name"/>
                         <field name="expenses"/>
-                        <field name="specs_invoice_report"/>
                         <field name="actual_time_spent"/>
                         <field name="actual_expenses"/>
                         <field name="actual_costs"/>
                         <field name="fixed_amount"/>
                         <field name="fixed_fee_capped"/>
                         <field name="fixed_fee_limit" attrs="{'required':[('fixed_fee_capped','=',True)], 'invisible':[('fixed_fee_capped','=',False)]}"/>
+                        <field name="specs_invoice_report"/>
+                        <field name="specs_type" attrs="{'invisible':[('specs_invoice_report','=',False)], 'required':[('specs_invoice_report','=',True)]}"/>
                     </group>
                 </form>
             </field>
