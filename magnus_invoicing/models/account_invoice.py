@@ -42,6 +42,20 @@ class AccountInvoice(models.Model):
         )
 
     @api.multi
+    def finalize_invoice_move_lines(self, move_lines):
+        move_lines = super(AccountInvoice,
+                           self).finalize_invoice_move_lines(move_lines)
+
+        new_move_lines = []
+        for line_tuple in move_lines:
+            if not line_tuple[2]['user_id'] and line_tuple[2]['debit'] > 0:
+                inv_lines = self.invoice_line_ids.filtered('analytic_invoice_id')
+                if inv_lines:
+                    line_tuple[2]['operating_unit_id'] = inv_lines[0].analytic_invoice_id.project_operating_unit_id.id
+            new_move_lines.append(line_tuple)
+        return new_move_lines
+
+    @api.multi
     def _get_timesheet_by_group(self):
         self.ensure_one()
         aal_ids = []
