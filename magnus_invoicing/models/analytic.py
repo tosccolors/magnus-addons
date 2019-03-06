@@ -16,7 +16,7 @@ class AccountAnalyticLine(models.Model):
         ('invoiceable', 'To be Invoiced'),
         ('progress', 'In Progress'),
         ('invoiced', 'Invoiced'),
-        ('write_off', 'Write-Off'),
+        # ('write_off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
     ],
         string='Status',
@@ -40,7 +40,7 @@ class AccountAnalyticLine(models.Model):
         :return: True or super
         """
         context = self.env.context.copy()
-        if not 'active_model' in context:
+        if not 'active_model' in context or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
 
