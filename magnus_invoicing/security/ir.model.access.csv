@@ -1,1 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_analytic_invoice_manager,analytic_invoice_manager,model_analytic_invoice,magnus_project.group_magnus_invoicing,1,1,1,1
+access_analytic_invoice_user,access_analytic_invoice_user,model_analytic_invoice,base.group_user,1,0,0,0
+access_analytic_user_total_manager,analytic_user_total_manager,model_analytic_user_total,magnus_project.group_magnus_invoicing,1,1,1,1
+access_analytic_user_total_user,access_analytic_user_total_user,model_analytic_user_total,base.group_user,1,0,0,0

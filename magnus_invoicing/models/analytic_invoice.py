@@ -353,7 +353,7 @@ class AnalyticInvoice(models.Model):
     @api.multi
     def _prepare_invoice_line(self, line):
         """
-        Prepare the dict of values to create the new invoice line for a sales order line.
+        Prepare the dict of values to create the new invoice line for a analytic_user_total.
 
         :param line: sales order line to invoice
         """

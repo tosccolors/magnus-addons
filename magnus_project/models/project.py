@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api
+from odoo.exceptions import UserError, ValidationError
 
 class Project(models.Model):
     _inherit = "project.project"
@@ -24,6 +25,21 @@ class Project(models.Model):
     @api.multi
     def name_get(self):
         return [(value.id, "%s%s" % (value.code + '-' if value.code else '', value.name)) for value in self]
+
+class AccountAnalyticAccount(models.Model):
+    _inherit = 'account.analytic.account'
+    _description = 'Analytic Account'
+
+    @api.multi
+    @api.constrains('project_ids')
+    def _check_length_projects(self):
+        for aa in self:
+            if len(aa.project_ids) > 1:
+                raise ValidationError(
+                    _('Fill in maximum one Project. '
+                      'In Magnus Analytic Accounts can have one project maximum. '
+                    ))
+        return True
 
 class Task(models.Model):
     _inherit = "project.task"

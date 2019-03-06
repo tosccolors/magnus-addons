@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <!-- this view is switched off in __manifest__-->
         <record id="view_account_analytic_line_tree_inherit_magnus_account" model="ir.ui.view">
             <field name="name">account.analytic.line.tree.inherit.magnus.account</field>
             <field name="model">account.analytic.line</field>

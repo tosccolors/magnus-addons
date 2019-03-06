@@ -47,7 +47,7 @@ voor de interface naar slam.
     'data' : [
         "report/report_layout.xml",
         "report/report_invoice.xml",
-        "views/account_view.xml",
+#        "views/account_view.xml",
         "views/account_invoice_view.xml",
         "views/account_invoice_report.xml",
     ],
