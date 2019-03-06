@@ -2,7 +2,7 @@
 # Copyright 2018 Magnus ((www.magnus.nl).)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
 class Project(models.Model):
@@ -79,4 +79,5 @@ class ProjectInvoicingProperties(models.Model):
     fixed_fee_capped = fields.Boolean('Invoice Fixed Fee Capped')
     fixed_fee_limit = fields.Monetary('Fixed Fee Limit')
     currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    specs_type = fields.Selection([('per_month','Per Month'), ('per_day','Per Day'), ('per_week','Per Week')], string="Specification Type", default='per_month')
 

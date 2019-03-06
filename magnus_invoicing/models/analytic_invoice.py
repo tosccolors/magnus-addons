@@ -497,6 +497,83 @@ class AnalyticInvoice(models.Model):
     #     if len(analytic_inv) > 1:
     #         raise ValidationError(_('You can have only one analytic invoice with per month and per partner!'))
 
+    @api.multi
+    def _get_user_per_month(self):
+        self.ensure_one()
+        res = {}
+        for user_tot in self.user_total_ids:
+            if user_tot.project_id in res:
+                if user_tot.user_id in res[user_tot.project_id]:
+                    res[user_tot.project_id][user_tot.user_id]['hours'] += user_tot.unit_amount
+                    res[user_tot.project_id][user_tot.user_id]['fee_rate'] += user_tot.fee_rate
+                    res[user_tot.project_id][user_tot.user_id]['amount'] += user_tot.amount
+                else:
+                    res[user_tot.project_id][user_tot.user_id] = {'hours': user_tot.unit_amount,
+                                                                  'fee_rate': user_tot.fee_rate,
+                                                                  'amount': user_tot.amount}
+            else:
+                res[user_tot.project_id] = {}
+                res[user_tot.project_id][user_tot.user_id] = {'hours':user_tot.unit_amount, 'fee_rate':user_tot.fee_rate, 'amount': user_tot.amount}
+        return res
+        # aal_entries = self.user_total_ids.mapped('children_ids')
+        # fields_grouped = [
+        #     'id',
+        #     'user_id',
+        #     'project_id',
+        #     'month_id',
+        # ]
+        # grouped_by = [
+        #     'user_id',
+        #     'project_id',
+        #     'month_id',
+        # ]
+        # if self.gb_week:
+        #     grouped_by.append('week_id')
+        #
+        # result = self.env['account.analytic.line'].read_group(
+        #     [('id','in',aal_entries.ids)],
+        #     fields_grouped,
+        #     grouped_by,
+        #     offset=0,
+        #     limit=None,
+        #     orderby=False,
+        #     lazy=False
+        # )
+        #
+        # res = {}
+        #
+        # if len(result) > 0:
+        #     userTotData = []
+        #     for item in result:
+        #         project_id = item.get('project_id')[0] if item.get('project_id') != False else False
+        #         user_id = item.get('user_id')[0] if item.get('user_id') != False else False
+        #         if not project_id or not user_id:
+        #             continue
+        #         project = self.env['project.project'].browse(project_id)
+        #         user = self.env['res.users'].browse(user_id)
+        #         res[project.name] = [user.name,
+        #         # task_id = item.get('task_id')[0] if item.get('task_id') != False else False
+        #         # project_id = False
+        #         # if task_id:
+        #         #     project_id = self.env['project.task'].browse(task_id).project_id.id or False
+        #         # vals = {
+        #         #     'analytic_invoice_id': self.id,
+        #         #     'name': '/',
+        #         #     'user_id': ,
+        #         #     'task_id': item.get('task_id')[0] if item.get('task_id') != False else False,
+        #         #     'project_id': project_id,
+        #         #     'account_id': item.get('account_id')[0] if item.get(
+        #         #         'account_id') != False else False,
+        #         #     'gb_month_id': item.get('month_id')[0] if item.get(
+        #         #         'month_id') != False else False,
+        #         #     'gb_week_id': item.get('week_id')[0] if self.gb_week and item.get('week_id') != False else False,
+        #         #     'unit_amount': item.get('unit_amount'),
+        #         #     'product_id': item.get('product_id'),
+        #         #     'operating_unit_id': item.get('operating_unit_id'),
+        #         #     'project_operating_unit_id': item.get('project_operating_unit_id'),
+        #         # }
+
+
 
 class AnalyticUserTotal(models.Model):
     _name = "analytic.user.total"
