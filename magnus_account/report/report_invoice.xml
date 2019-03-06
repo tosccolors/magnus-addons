@@ -128,7 +128,7 @@
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
                         <tr t-foreach="aaLines_value" t-as="l">
-                            <td style='border-top:none' width="40%">Hours:<span t-field="l.quantity"/></td>
+                            <td style='border-top:none' width="40%">Totaal: <span t-field="l.quantity"/> uur.</td>
                             <td style='border-top:none' width="20%"> </td>
                             <td style='border-top:none' width="10%"> </td>
                             <td style='border-top:none' width="10%"> </td>
