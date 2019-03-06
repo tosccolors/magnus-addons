@@ -55,6 +55,9 @@ class AccountAnalyticLine(models.Model):
             else:
                 line.operating_unit_id = False
 
+            line.project_operating_unit_id = line.account_id.operating_unit_ids and line.account_id.operating_unit_ids[
+                0]
+
     def find_daterange_week(self, date):
         """
         try to find a date range with type 'week'
@@ -136,6 +139,12 @@ class AccountAnalyticLine(models.Model):
         string='Operating Unit',
         store=True
     )
+    project_operating_unit_id = fields.Many2one(
+        'operating.unit',
+        compute=_compute_sheet,
+        string='Project Operating Unit',
+        store=True
+    )
     write_off_move = fields.Many2one(
         'account.move',
         string='Write-off Move',
@@ -199,7 +208,7 @@ class AccountAnalyticLine(models.Model):
         if uid and tid:
             task_user = self.env['task.user'].search([
                 ('user_id', '=', uid),
-                ('task_id', '=', tid)])
+                ('task_id', '=', tid)], limit=1)
             fr = task_user.fee_rate
         if not fr :
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])

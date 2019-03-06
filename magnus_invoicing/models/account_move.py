@@ -35,6 +35,9 @@ class AccountMoveLine(models.Model):
         if self.user_id:
             self.operating_unit_id = \
                 self.user_id.default_operating_unit_id
+        elif self.analytic_account_id:
+            self.operating_unit_id = \
+                self.analytic_account_id.operating_unit_ids[0]
 
 class AccountMove(models.Model):
     _inherit = "account.move"

@@ -10,9 +10,8 @@ class AnalyticLineStatus(models.TransientModel):
 
     name = fields.Selection([
         ('invoiceable', 'To be invoiced'),
-        ('open', 'Confirmed'),
         ('delayed', 'Delayed'),
-        ('write_off', 'Write-Off'),
+        # ('write-off', 'Write-Off'),
     ], string='Lines to be')
     wip = fields.Boolean("WIP")
     wip_percentage = fields.Float("WIP Percentage")
@@ -27,11 +26,7 @@ class AnalyticLineStatus(models.TransientModel):
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'change-chargecode']
         entries = analytic_lines.filtered(lambda a: a.invoiced != True and a.state not in not_lookup_states)
         if entries:
-            cond = '='
-            rec = entries.ids[0]
-            if len(entries) > 1:
-                cond = 'IN'
-                rec = tuple(entries.ids)
+            cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             invoiceable = True if status == 'invoiceable' else False
             self.env.cr.execute("""
                 UPDATE account_analytic_line SET state = '%s', invoiceable = %s WHERE id %s %s
@@ -39,32 +34,76 @@ class AnalyticLineStatus(models.TransientModel):
             if status == 'delayed':
                 self.prepare_account_move()
             if status == 'invoiceable':
-                self._prepare_analytic_invoice(cond, rec)
+                self._prepare_analytic_invoice(entries)
 
         return True
 
 
-    def _prepare_analytic_invoice(self, cond, rec):
-        analytic_invoice = self.env['analytic.invoice']
-        self.env.cr.execute("""
-            SELECT array_agg(account_id), partner_id, month_id
-            FROM account_analytic_line
-            WHERE id %s %s
-            GROUP BY partner_id, month_id"""
-            % (cond, rec))
+    def _prepare_analytic_invoice(self, entries):
 
-        result = self.env.cr.fetchall()
-        for res in result:
-            analytic_account_ids = res[0]
-            partner_id = res[1]
-            month_id = res[2]
-            search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('state', '!=', 'invoiced'),('month_id', '=', month_id)]
-            analytic_invobj = analytic_invoice.search(search_domain, limit=1)
-            if analytic_invobj:
-                analytic_invobj.partner_id = partner_id
-                analytic_invobj.month_id = month_id
-            else:
-                analytic_invoice.create({'partner_id':partner_id, 'month_id':month_id})
+        analytic_invoice = self.env['analytic.invoice']
+        cond, rec = ("in", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
+
+        sep_entries = self.env['account.analytic.line'].search([('id', cond, rec), '|', ('project_id.invoice_properties.group_invoice', '=', False),('task_id.project_id.invoice_properties.group_invoice', '=', False)])
+        if sep_entries:
+            rec = list(set(entries.ids)-set(sep_entries.ids))
+            cond, rec = ("IN", tuple(rec)) if len(rec) > 1 else ("=", rec and rec[0] or [])
+        if rec:
+            self.env.cr.execute("""
+                SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id
+                FROM account_analytic_line
+                WHERE id %s %s
+                GROUP BY partner_id, month_id, project_operating_unit_id"""
+                % (cond, rec))
+
+            result = self.env.cr.fetchall()
+            for res in result:
+                analytic_account_ids = res[0]
+                partner_id = res[1]
+                month_id = res[2]
+                project_operating_unit_id = res[3]
+                search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('project_operating_unit_id', '=', project_operating_unit_id), ('state', '!=', 'invoiced'), ('month_id', '=', month_id), ('link_project', '=', False)]
+                analytic_invobj = analytic_invoice.search(search_domain, limit=1)
+                if analytic_invobj:
+                    ctx = self.env.context.copy()
+                    ctx.update({'active_invoice_id': analytic_invobj.id})
+                    analytic_invobj.with_context(ctx).partner_id = partner_id
+                    # analytic_invobj.with_context(ctx).month_id = month_id
+                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
+                else:
+                    analytic_invoice.create({'partner_id':partner_id, 'month_id':month_id, 'project_operating_unit_id':project_operating_unit_id})
+
+        if sep_entries:
+            cond1, rec1 = ("IN", tuple(sep_entries.ids)) if len(sep_entries) > 1 else ("=", sep_entries.id)
+            self.env.cr.execute("""
+                SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id, project_id
+                FROM account_analytic_line
+                WHERE id %s %s
+                GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
+                        % (cond1, rec1))
+
+            result1 = self.env.cr.fetchall()
+            for res in result1:
+                analytic_account_ids = res[0]
+                partner_id = res[1]
+                month_id = res[2]
+                project_operating_unit_id = res[3]
+                project_id = res[4]
+
+                search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('project_operating_unit_id', '=', project_operating_unit_id), ('state', '!=', 'invoiced'), ('month_id', '=', month_id), ('project_id', '=', project_id), ('link_project', '=', True)]
+
+                analytic_invobj = analytic_invoice.search(search_domain, limit=1)
+                if analytic_invobj:
+                    ctx = self.env.context.copy()
+                    ctx.update({'active_invoice_id': analytic_invobj.id})
+                    analytic_invobj.with_context(ctx).partner_id = partner_id
+                    # analytic_invobj.with_context(ctx).month_id = month_id
+                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
+                    # analytic_invobj.with_context(ctx).project_id = project_id
+                else:
+                    analytic_invoice.create({'partner_id':partner_id, 'month_id':month_id, 'project_operating_unit_id':project_operating_unit_id, 'project_id':project_id, 'link_project': True})
+                # analytic_invoice.create(
+                #     {'partner_id': entries.partner_id, 'month_id': entries.month_id, 'project_operating_unit_id': entries.project_operating_unit_id, 'project_id':})
 
 
     @api.onchange('wip_percentage')
@@ -103,13 +142,13 @@ class AnalyticLineStatus(models.TransientModel):
             'product_uom_id': line.product_uom_id.id,
             'analytic_account_id': line.account_id.id,
             'analytic_tag_ids': analytic_tag_ids,
-            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
+            'operating_unit_id': line.project_operating_unit_id and line.project_operating_unit_id.id or False,
         }
 
         res.append(move_line_debit)
 
         move_line_credit = move_line_debit.copy()
-        move_line_credit.update({'debit':0.0, 'credit':amount, 'account_id':line.product_id.property_account_wip_id.id})
+        move_line_credit.update({'debit':0.0, 'credit':amount, 'account_id':line.product_id.property_account_wip_id.id,'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False})
         res.append(move_line_credit)
 
         return res
