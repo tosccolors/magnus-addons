@@ -20,6 +20,9 @@ class AccountAnalyticLine(models.Model):
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
+            line.project_operating_unit_id = \
+                line.account_id.operating_unit_ids \
+                and line.account_id.operating_unit_ids[0] or False
             if line.project_id:
                 if line.task_id and line.user_id and not line.planned:
                     if line.sheet_id.week_id and line.date:
@@ -45,18 +48,16 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
-            if line.user_id and not line.move_id and line.user_id.default_operating_unit_id:
-                line.operating_unit_id = line.user_id.default_operating_unit_id
-            elif line.user_id and not line.move_id:
-                raise ValidationError(_
-                    ('You can not book your time on chargeable project if the '
-                     'Default Operating Unit in your user settings lacks')
-                                      )
+            uou = line.user_id._get_operating_unit_id()
+            if line.user_id and not line.move_id and uou:
+                line.operating_unit_id = uou
+#            elif line.user_id and not line.move_id:
+#                raise ValidationError(_
+#                    ('You can not book your time on chargeable project if the '
+#                     'Default Operating Unit in your user settings lacks')
+#                )
             else:
                 line.operating_unit_id = False
-
-            line.project_operating_unit_id = line.account_id.operating_unit_ids and line.account_id.operating_unit_ids[
-                0]
 
     def find_daterange_week(self, date):
         """
