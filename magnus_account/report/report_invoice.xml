@@ -118,6 +118,7 @@
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
+
                         <td style='border-top:none' width="40%">Hours:<span t-esc="aaLines_value['tot_hrs']"/></td>
                         <td style='border-top:none' width="20%"> </td>
                         <td style='border-top:none' width="10%"> </td>
@@ -126,6 +127,7 @@
                             <span t-if="o.type == 'out_refund'">-</span><span t-esc="aaLines_value['sub_total']"
                                 t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                         </td>
+
                     </t>
                 </table>
             </div>
