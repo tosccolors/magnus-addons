@@ -4,6 +4,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
+from datetime import datetime
 
 
 class AnalyticInvoice(models.Model):
@@ -401,15 +402,28 @@ class AnalyticInvoice(models.Model):
         :param line: sales order line to invoice
         """
         line.ensure_one()
+
         account = line.product_id.property_account_income_id or line.product_id.categ_id.property_account_income_categ_id
-        if not account and line.product_id:
-            raise UserError(
-                _('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
-                (line.product_id.name, line.product_id.id, line.product_id.categ_id.name))
+
+        period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").date()
+        cur_date = datetime.now().date()
+        if cur_date.year >= period_date.year and cur_date.month > period_date.month:
+            account = line.product_id.property_account_wip_id
+            if not account and line.product_id:
+                raise UserError(
+                    _('Please define WIP account for this product: "%s" (id:%d).') %
+                    (line.product_id.name, line.product_id.id))
+
+        else:
+            if not account and line.product_id:
+                raise UserError(
+                    _('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
+                    (line.product_id.name, line.product_id.id, line.product_id.categ_id.name))
 
         fpos = self.partner_id.property_account_position_id
         if fpos:
             account = fpos.map_account(account)
+
 
         # project = False
         # if line.project_id:
@@ -428,7 +442,7 @@ class AnalyticInvoice(models.Model):
             'uom_id': line.product_uom_id.id,
             'product_id': line.product_id and line.product_id.id or False,
             # 'layout_category_id': line.layout_category_id and line.layout_category_id.id or False,
-            # 'invoice_line_tax_ids': [(6, 0, line.tax_id.ids or [])],
+            'invoice_line_tax_ids': [(6, 0, line.product_id.taxes_id.ids or [])],
             'account_analytic_id': line.account_id and line.account_id.id or False,
             'analytic_tag_ids': [(6, 0, line.tag_ids.ids or [])],
             'analytic_invoice_id':line.analytic_invoice_id.id,
