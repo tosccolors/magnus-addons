@@ -79,5 +79,5 @@ class ProjectInvoicingProperties(models.Model):
     fixed_fee_capped = fields.Boolean('Invoice Fixed Fee Capped')
     fixed_fee_limit = fields.Monetary('Fixed Fee Limit')
     currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
-    specs_type = fields.Selection([('per_month','Per Month'), ('per_day','Per Day'), ('per_week','Per Week')], string="Specification Type", default='per_month')
+    specs_type = fields.Selection([('per_month','Per Month'), ('per_day','Per Day'), ('both','Monthly/Daily Specification')], string="Specification Type", default='per_month')
 

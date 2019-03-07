@@ -7,6 +7,7 @@
     <t t-call="report_qweb_operating_unit.external_layout_ou">
 
         <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
+
         <div class="page" style="page-break-after:always;">
             <div class="row mt32 mb32" style="padding-left:85px;">
                  <div class="col-xs-7" style="padding:0px;">
@@ -36,6 +37,7 @@
             <t t-set="sale_inv" t-value="any([l.sale_line_ids for l in o.invoice_line_ids])"/>
             <t t-set="invoice_desc" t-value="o.parse_invoice_description()"/>
             <t t-set="analytic_invoice_id" t-value="o.invoice_line_ids.mapped('analytic_invoice_id')"/>
+
 
             <div style="padding-left:85px;padding-right:15px;">
                 <div class="row" style="padding:0px;padding-right:15px;border-bottom:1px solid black;">
@@ -80,14 +82,15 @@
                              <span t-field="o.number"/>
                              <br/>
                              <span t-if="sale_inv" t-field="o.invoice_line_ids[0].account_analytic_id.project_ids[0].po_number"/>
-                             <span t-if="not sale_inv" t-field="o.name"/>
+                             <span t-if="not sale_inv and not analytic_invoice_id" t-field="o.name"/>
+                             <span t-if="not sale_inv and analytic_invoice_id" t-field="analytic_invoice_id[0].project_id.po_number"/>
                              <br/>
                              <span t-field="o.partner_id.vat"/>
                              <br/>
                              <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
                                    t-field="o.operating_unit_id.partner_id.vat"/>
                              <br/>
-                             <t t-if="not sale_inv">
+                             <t t-if="analytic_invoice_id">
                                  <span t-esc="time.strftime('%B %Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/>
                                  <br/>
                              </t>
@@ -101,50 +104,35 @@
             <br/>
 
 
-            <t t-if="not sale_inv">
-                <div style="padding-left:85px;padding-right:15px;" t-if="invoice_desc">
-                    <strong><span t-field="o.invoice_description"/></strong>
-                    <br/>
-                    <br/>
-                </div>
 
-                <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc">
-                    <!--<table class="table table-condensed table-padding">
-                        <tr t-foreach="o.invoice_line_ids" t-as="l">
-                            <td style='border-top:none' width="20%"><span t-field="l.name"/></td>
-                            <td style='border-top:none' width="20%"> </td>
-                            <td style='border-top:none' width="20%"> </td>
-                            <td style='border-top:none' width="20%"> </td>
-                            <td style='border-top:none' class="text-right">
-                                <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
-                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                            </td>
-                        </tr>
-                    </table>-->
+            <div style="padding-left:85px;padding-right:15px;" t-if="invoice_desc">
+                <strong><span t-field="o.invoice_description"/></strong>
+                <br/>
+                <br/>
+            </div>
 
-                    <table class="table table-condensed table-padding">
-                    <t t-foreach="o.group_by_analytic_acc()" t-as="aaLines">
+            <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc and not sale_inv">
+
+                <table class="table table-condensed table-padding">
+                    <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
-                        <tr t-foreach="aaLines_value" t-as="l">
-                            <td style='border-top:none' width="40%">Hours:<span t-field="l.quantity"/></td>
-                            <td style='border-top:none' width="20%"> </td>
-                            <td style='border-top:none' width="10%"> </td>
-                            <td style='border-top:none' width="10%"> </td>
-                            <td style='border-top:none' class="text-right">
-                                <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
-                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                            </td>
-                        </tr>
+                        <td style='border-top:none' width="40%">Hours:<span t-esc="aaLines_value['tot_hrs']"/></td>
+                        <td style='border-top:none' width="20%"> </td>
+                        <td style='border-top:none' width="10%"> </td>
+                        <td style='border-top:none' width="10%"> </td>
+                        <td style='border-top:none' class="text-right">
+                            <span t-if="o.type == 'out_refund'">-</span><span t-esc="aaLines_value['sub_total']"
+                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                        </td>
                     </t>
                 </table>
-                </div>
-            </t>
-            <t t-if="sale_inv">
-            <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc">
+            </div>
+
+            <div style="padding-left:85px;padding-right:15px;" t-if="sale_inv and not invoice_desc">
                 <table class="table table-condensed table-padding">
-                    <t t-foreach="o.group_by_analytic_acc()" t-as="aaLines">
+                    <t t-foreach="o.group_by_analytic_acc('sale_order')" t-as="aaLines">
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
@@ -161,7 +149,6 @@
                     </t>
                 </table>
             </div>
-            </t>
 
             <div class="row" style="padding-left:85px;padding-right:15px;page-break-inside:avoid;">
                 <div class="col-xs-6 pull-right">
@@ -200,31 +187,86 @@
                 </p>
             </t>
 
-            <div style="padding-left:85px;padding-right:15px;page-break-before:always;" t-if="not invoice_desc" >
-                <table class="table table-condensed table-padding">
-                    <p>Hours Overview</p>
-                    <tr>
-                        <td width="25%">Name</td>
-                        <td width="25%">Hours</td>
-                        <td width="25%">Fee Rate</td>
-                        <td width="25%">Amount</td>
-                    </tr>
-                    <t t-foreach="analytic_invoice_id[0]._get_user_per_month()" t-as="aaLines">
-                        <!--<tr>
-                            <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
-                        </tr>-->
+
+            <t t-if="analytic_invoice_id">
+                <t t-set="analytic_inv" t-value="analytic_invoice_id[0]._get_user_per_month()"/>
+                <t t-if="analytic_inv">
+                        <div style="padding-left:85px;padding-right:15px;page-break-before:always;">
+                            <t t-foreach="analytic_inv" t-as="proLines">
+                                <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report">
+
+                                    <div width="50%"><strong><span t-field="proLines.name"/></strong></div>
+
+                                    <table class="table table-condensed table-padding" style="border:none;width:50%;">
+                                        <div><strong>Hours Overview</strong></div>
+                                        <thead>
+                                            <th width="20%">Name</th>
+                                            <th width="20%">Hours</th>
+                                            <t t-if="proLines.invoice_properties.specs_type != 'both'">
+                                                <th class="text-right" width="20%">Fee Rate</th>
+                                                <th class="text-right" width="20%">Amount</th>
+                                            </t>
+                                        </thead>
+                                        <t t-foreach="proLines_value" t-as="userLine">
+                                            <tr t-if="userLine not in ('amt_tot','hrs_tot')" style='border-top:none;'>
+                                                <td style='border-top:none;' width="20%"><span t-field="userLine.name"/></td>
+                                                <td style='border-top:none;' width="20%"><span t-esc="userLine_value['hours']"></span></td>
+                                                <t t-if="proLines.invoice_properties.specs_type != 'both'">
+                                                    <td style='border-top:none;' class="text-right" width="20%">
+                                                        <span t-esc="userLine_value['fee_rate']"/>
+                                                    </td>
+                                                    <td style='border-top:none;' class="text-right" width="20%">
+                                                        <span t-esc="userLine_value['amount']"/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                        <tr >
+                                            <td style='border-top:1px solid black;' width="20%"></td>
+                                            <td style='border-top:1px solid black;' width="20%"> <span t-esc="proLines_value['hrs_tot']"></span> </td>
+                                            <t t-if="proLines.invoice_properties.specs_type != 'both'">
+                                                <td style='border-top:1px solid black;' class="text-right" width="20%"></td>
+                                                <td style='border-top:1px solid black;' class="text-right" width="20%">
+                                                     <span t-esc="proLines_value['amt_tot']"/>
+                                                </td>
+                                            </t>
+                                        </tr>
+                                    </table>
+                                </t>
+                            </t>
+                        </div>
+
+                        <div style="padding-left:85px;padding-right:15px;page-break-inside:avoid;">
+                            <t t-foreach="analytic_invoice_id[0]._get_user_per_day()" t-as="proLines">
+                                <div width="50%"><strong><span t-field="proLines.name"/></strong></div>
+
+                                <table class="table table-condensed table-padding" style="border:none;width:50%;">
+                                    <div><strong>Hours Overview</strong></div>
+                                    <thead>
+                                        <th width="20%">Name</th>
+                                        <th width="20%">Hours</th>
+                                        <th width="20%">Date</th>
+                                        <th  width="20%">Description</th>
+                                    </thead>
+                                    <t t-foreach="proLines_value" t-as="aaLine">
+                                        <tr>
+                                            <td style='border-top:none;' width="20%"><span t-field="aaLine.user_id.name"/></td>
+                                            <td style='border-top:none;' width="20%"><span t-field="aaLine.unit_amount"></span></td>
+                                            <td style='border-top:none;' width="20%">
+                                                <span t-field="aaLine.date"/>
+                                            </td>
+                                            <td style='border-top:none;' width="20%">
+                                                 <span t-field="aaLine.name"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </table>
+                            </t>
+                        </div>
 
 
-                        <tr t-foreach="aaLines_value" t-as="userLine">
-                                <td style='border-top:none' width="25%"><span t-field="userLine.name"/></td>
-                                <td style='border-top:none' width="25%"><span t-esc="userLine_value['hours']"></span></td>
-                                <td style='border-top:none' width="25%"><span t-esc="userLine_value['fee_rate']"></span></td>
-                                <td style='border-top:none' width="25%"><span t-esc="userLine_value['amount']"></span></td>
-                        </tr>
-                    </t>
-                </table>
-            </div>
-
+                </t>
+            </t>
         </div>
     </t>
 </template>
