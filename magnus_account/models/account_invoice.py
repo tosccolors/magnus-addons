@@ -36,20 +36,53 @@ class AccountInvoice(models.Model):
         return self.env['report'].get_action(self, 'account.invoice.custom')
 
     @api.multi
-    def group_by_analytic_acc(self):
+    def group_by_analytic_acc(self, type):
         self.ensure_one()
         result = {}
-        for line in self.invoice_line_ids:
-            if line.account_analytic_id in result:
-                result[line.account_analytic_id].append(line)
-            else:
-                result[line.account_analytic_id] = [line]
+        if type == 'sale_order':
+            for line in self.invoice_line_ids:
+                if line.account_analytic_id in result:
+                    result[line.account_analytic_id].append(line)
+                else:
+                    result[line.account_analytic_id] = [line]
+        if type == 'project':
+            for line in self.invoice_line_ids:
+                quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)
+                price_subtotal = line.uom_id._compute_price(line.price_subtotal, line.uom_id)
+                if line.account_analytic_id in result:
+                    result[line.account_analytic_id]['tot_hrs'] += quantity
+                    result[line.account_analytic_id]['sub_total'] += price_subtotal
+                else:
+                    result[line.account_analytic_id] = {'tot_hrs':quantity, 'sub_total':price_subtotal}
         return result
+
+    @api.multi
+    def group_by_analytic_acc(self, type):
+        self.ensure_one()
+        result = {}
+        if type == 'sale_order':
+            for line in self.invoice_line_ids:
+                if line.account_analytic_id in result:
+                    result[line.account_analytic_id].append(line)
+                else:
+                    result[line.account_analytic_id] = [line]
+        if type == 'project':
+            for line in self.invoice_line_ids:
+                quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)
+                price_subtotal = line.uom_id._compute_price(line.price_subtotal, line.uom_id)
+                if line.account_analytic_id in result:
+                    result[line.account_analytic_id]['tot_hrs'] += quantity
+                    result[line.account_analytic_id]['sub_total'] += price_subtotal
+                else:
+                    result[line.account_analytic_id] = {'tot_hrs': quantity, 'sub_total': price_subtotal}
+        return result
+
 
     @api.multi
     def parse_invoice_description(self):
         res = False
-        if self.invoice_description != '<p><br></p>':
+        desc = self.invoice_description
+        if desc and desc != '<p><br></p>':
             res = True
         return res
 

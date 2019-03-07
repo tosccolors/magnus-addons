@@ -91,4 +91,79 @@ msgstr "Ons BTW Nr."
 msgid "Your VAT"
 msgstr "Uw BTW Nr."
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Date"
+msgstr "Datum"
+
+#. module: magnus_account
+#: model:ir.model.fields,field_description:magnus_account.field_account_invoice_invoice_description
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Description"
+msgstr "Omschrijving"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Fee Rate"
+msgstr "Tarief"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Hours"
+msgstr "Uren"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Hours Overview"
+msgstr "Uren overzicht"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Hours:"
+msgstr "Uren:"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Name"
+msgstr "Naam"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "<span>Datum</span>\n"
+"                             <br/>\n"
+"                             <span>Factuur</span>\n"
+"                             <br/>\n"
+"                             <span>Referentie</span>\n"
+"                             <br/>\n"
+"                             <span>Your VAT</span>\n"
+"                             <br/>\n"
+"                             <span>Our Vat</span>\n"
+"                             <br/>"
+msgstr "<span>Datum</span>\n"
+"                             <br/>\n"
+"                             <span>Factuur</span>\n"
+"                             <br/>\n"
+"                             <span>Referentie</span>\n"
+"                             <br/>\n"
+"                             <span>Uw btw</span>\n"
+"                             <br/>\n"
+"                             <span>Onze btw</span>\n"
+"                             <br/>"
+
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "<span>Month</span>\n"
+"                                 <br/>"
+msgstr "<span>Maand</span>\n"
+"                                 <br/>"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Amount"
+msgstr "Bedrag"
+
+
+
+
 
