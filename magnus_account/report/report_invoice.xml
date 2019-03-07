@@ -43,18 +43,18 @@
                 <div class="row" style="padding:0px;padding-right:15px;border-bottom:1px solid black;">
                     <div class="col-xs-7" style="padding:0px;">
                          <div class="col-xs-3" style="padding:0px;">
-                             <span>Datum</span>
+                             <span>Datum      :</span>
                              <br/>
-                             <span>Factuur</span>
+                             <span>Factuur    :</span>
                              <br/>
-                             <span>Referentie</span>
+                             <span>Referentie :</span>
                              <br/>
-                             <span>Your VAT</span>
+                             <span>Uw BTW nr  :</span>
                              <br/>
-                             <span>Our Vat</span>
+                             <span>Ons BTW nr :</span>
                              <br/>
                              <t t-if="not sale_inv">
-                                 <span>Month</span>
+                                 <span>Maand  :</span>
                                  <br/>
                              </t>
                              <br/>
@@ -119,7 +119,7 @@
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
 
-                        <td style='border-top:none' width="40%">Hours:<span t-esc="aaLines_value['tot_hrs']"/></td>
+                        <td style='border-top:none' width="40%">- Uren: <span t-esc="aaLines_value['tot_hrs']"/></td>
                         <td style='border-top:none' width="20%"> </td>
                         <td style='border-top:none' width="10%"> </td>
                         <td style='border-top:none' width="10%"> </td>
