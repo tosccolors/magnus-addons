@@ -51,11 +51,11 @@ class AccountAnalyticLine(models.Model):
             uou = line.user_id._get_operating_unit_id()
             if line.user_id and not line.move_id and uou:
                 line.operating_unit_id = uou
-            elif line.user_id and not line.move_id:
-                raise ValidationError(_
-                    ('You can not book your time on chargeable project if the '
-                     'Default Operating Unit in your user settings lacks')
-                )
+#            elif line.user_id and not line.move_id:
+#                raise ValidationError(_
+#                    ('You can not book your time on chargeable project if the '
+#                     ' Operating Unit in your user/department settings lacks')
+#                )
             else:
                 line.operating_unit_id = False
 

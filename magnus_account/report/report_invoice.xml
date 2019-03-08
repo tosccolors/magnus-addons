@@ -92,7 +92,7 @@
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
-                        
+
                         <td style='border-top:none' width="40%">Hours:
                             <span t-esc="o.value_conversion(aaLines_value['tot_hrs'])"/>
                         </td>
