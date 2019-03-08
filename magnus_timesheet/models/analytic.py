@@ -23,7 +23,7 @@ class AccountAnalyticLine(models.Model):
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
-            uou = line.user_id._get_operating_unit_id()
+            uou = line.user_id._get_operating_unit_id() if line.user_id else False
             if line.user_id and line.task_id and not line.move_id and uou:
                 line.operating_unit_id = uou
             if line.project_id:
