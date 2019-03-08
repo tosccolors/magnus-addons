@@ -47,11 +47,20 @@ class AnalyticInvoice(models.Model):
     def _compute_objects(self):
         ctx = self.env.context.copy()
         current_ref = ctx.get('active_invoice_id', False)
+
+        userTotObj = userInvoicedObjs = self.env['analytic.user.total']
+
         ana_ids = self.env['account.analytic.line']
         if current_ref:
-            tot_obj = self.env['analytic.user.total'].search([('analytic_invoice_id', '!=', current_ref), ('state', '!=', 'invoiced')])
+            # get all invoiced user total objs using current reference
+            userInvoicedObjs = userTotObj.search(
+                [('analytic_invoice_id', '=', current_ref), ('state', '=', 'invoiced')])
+
+            # don't look for analytic lines which has been already added for other analytic invoice
+            tot_obj = userTotObj.search([('analytic_invoice_id', '!=', current_ref), ('state', '!=', 'invoiced')])
             for t in tot_obj:
                 ana_ids |= t.children_ids
+
 
         partner_id = self.partner_id or False
         if partner_id and len(self.account_analytic_ids) == 0:
@@ -120,10 +129,9 @@ class AnalyticInvoice(models.Model):
             )
 
             taskUserObj = self.env['task.user']
-            taskUserIds = []
+            taskUserIds, userTotData = [], []
 
             if len(result) > 0:
-                userTotData = []
                 for item in result:
                     task_id = item.get('task_id')[0] if item.get('task_id') != False else False
                     project_id = False
@@ -166,13 +174,19 @@ class AnalyticInvoice(models.Model):
 
                     taskUser = taskUserObj.search([('task_id', '=', vals['task_id']),('user_id', '=', vals['user_id'])])
                     taskUserIds += taskUser.ids
-                self.user_total_ids = userTotData
 
-                if taskUserIds:
-                    taskUserIds = list(set(taskUserIds))
-                    self.task_user_ids = [(6, 0, taskUserIds)]
-                else:
-                    self.task_user_ids = [(6, 0, [])]
+                    if taskUserIds:
+                        taskUserIds = list(set(taskUserIds))
+                        self.task_user_ids = [(6, 0, taskUserIds)]
+                    else:
+                        self.task_user_ids = [(6, 0, [])]
+
+            #add invoiced user total
+            for usrTot in userInvoicedObjs:
+                userTotData.append((4, usrTot.id))
+            self.user_total_ids = userTotData
+
+
 
     @api.model
     def _get_fiscal_month_domain(self):
