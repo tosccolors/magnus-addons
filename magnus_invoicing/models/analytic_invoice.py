@@ -402,7 +402,6 @@ class AnalyticInvoice(models.Model):
         :param line: sales order line to invoice
         """
         line.ensure_one()
-
         account = line.product_id.property_account_income_id or line.product_id.categ_id.property_account_income_categ_id
 
         period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").date()
@@ -457,6 +456,7 @@ class AnalyticInvoice(models.Model):
         invoices = {}
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
         inv_from_summary = []
+
         for line in user_summary_lines:
             invoices['lines'] = []
             inv_line_vals = self._prepare_invoice_line(line)
@@ -467,7 +467,7 @@ class AnalyticInvoice(models.Model):
                 invoice.write({'invoice_line_ids': invoices['lines']})
             elif not self.invoice_ids:
                 vals = self._prepare_invoice(invoices)
-                vals['operating_unit_id'] = line.operating_unit_id and line.operating_unit_id.id or False
+                vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
                 invoice = self.env['account.invoice'].create(vals)
                 invoice.compute_taxes()
                 self.invoice_ids = [(4, invoice.id)]
@@ -504,12 +504,6 @@ class AnalyticInvoice(models.Model):
             action['res_id'] = invoices.id
         return action
 
-    # @api.one
-    # @api.constrains('partner_id', 'month_id')
-    # def _check_project_standard(self):
-    #     analytic_inv = self.search([('partner_id', '=', self.partner_id.id), ('month_id', '=', self.month_id.id), ('state', '!=', 'invoiced')])
-    #     if len(analytic_inv) > 1:
-    #         raise ValidationError(_('You can have only one analytic invoice with per month and per partner!'))
 
     @api.multi
     def _get_user_per_month(self):
@@ -567,11 +561,11 @@ class AnalyticUserTotal(models.Model):
         task_user = self.analytic_invoice_id.task_user_ids.filtered(lambda line: line.user_id == self.user_id and line.task_id == self.task_id)
         if task_user:
             self.fee_rate = fr = task_user[0].fee_rate
-            self.amount = self.unit_amount * fr
+            self.amount = - self.unit_amount * fr
         else:
             unit_amt = self.unit_amount or 1
             self.fee_rate = fr = self.get_fee_rate() / unit_amt
-            self.amount = self.unit_amount * fr
+            self.amount = - self.unit_amount * fr
 
 
     @api.one
@@ -590,13 +584,6 @@ class AnalyticUserTotal(models.Model):
         compute=_compute_fee_rate,
         string='Amount'
     )
-    # children_ids = fields.One2many(
-    #     'account.analytic.line',
-    #     'user_total_id',
-    #     string='Detail Time Lines',
-    #     readonly=True,
-    #     copy=False
-    # )
     children_ids = fields.Many2many(
         'account.analytic.line',
         'analytic_invoice_account_line_rel'
@@ -618,86 +605,3 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
-
-    '''
-    uom_id = fields.Many2one('product.uom', string='Unit of Measure',
-                             ondelete='set null', index=True, oldname='uos_id')
-    product_id = fields.Many2one('product.product', string='Product',
-                                 ondelete='restrict', index=True)
-    account_id = fields.Many2one('account.account', string='Account',
-                                 required=True,
-                                 domain=[('deprecated', '=', False)],
-                                 default=_default_account,
-                                 help="The income or expense account related to the selected product.")
-    price_unit = fields.Float(string='Unit Price', required=True,
-                              digits=dp.get_precision('Product Price'))
-    price_subtotal = fields.Monetary(string='Amount',
-                                     store=True, readonly=True,
-                                     compute='_compute_price')
-    price_subtotal_signed = fields.Monetary(string='Amount Signed',
-                                            currency_field='company_currency_id',
-                                            store=True, readonly=True,
-                                            compute='_compute_price',
-                                            help="Total amount in the currency of the company, negative for credit notes.")
-    quantity = fields.Float(string='Quantity',
-                            digits=dp.get_precision('Product Unit of Measure'),
-                            required=True, default=1)
-    discount = fields.Float(string='Discount (%)',
-                            digits=dp.get_precision('Discount'),
-                            default=0.0)
-
-    analytic_tag_ids = fields.Many2many('account.analytic.tag',
-                                        string='Analytic Tags')
-    company_id = fields.Many2one('res.company', string='Company',
-                                 related='invoice_id.company_id', store=True,
-                                 readonly=True, related_sudo=False)
-
-    currency_id = fields.Many2one('res.currency',
-                                  related='invoice_id.currency_id', store=True,
-                                  related_sudo=False)
-    company_currency_id = fields.Many2one('res.currency',
-                                          related='invoice_id.company_currency_id',
-                                          readonly=True,
-                                          related_sudo=False)'''
-
-
-
-'''class InterInvoiceLine(models.Model):
-    _name = 'inter.invoice.line'
-    _description = 'Inter Invoice Line'
-
-    name = fields.Text(string='Description', required=True)
-    origin = fields.Char(string='Source Document',
-                         help="Reference of the document that produced this invoice.")
-    sequence = fields.Integer(default=10,
-                              help="Gives the sequence of this line when displaying the invoice.")
-    invoice_id = fields.Many2one('account.invoice', string='Invoice Reference',
-                                 ondelete='cascade', index=True)
-    uom_id = fields.Many2one('product.uom', string='Unit of Measure',
-                             ondelete='set null', index=True, oldname='uos_id')
-    product_id = fields.Many2one('product.product', string='Product',
-                                 ondelete='restrict', index=True)
-    account_id = fields.Many2one('account.account', string='Account',
-                                 required=True, domain=[('deprecated', '=', False)],
-                                 default=_default_account,
-                                 help="The income or expense account related to the selected product.")
-    price_unit = fields.Float(string='Unit Price', required=True, digits=dp.get_precision('Product Price'))
-    price_subtotal = fields.Monetary(string='Amount',
-                                     store=True, readonly=True, compute='_compute_price')
-    price_subtotal_signed = fields.Monetary(string='Amount Signed', currency_field='company_currency_id',
-                                            store=True, readonly=True, compute='_compute_price',
-                                            help="Total amount in the currency of the company, negative for credit notes.")
-    quantity = fields.Float(string='Quantity', digits=dp.get_precision('Product Unit of Measure'),
-                            required=True, default=1)
-    discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'),
-                            default=0.0)
-    account_analytic_id = fields.Many2one('account.analytic.account',
-                                          string='Analytic Account')
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
-    company_id = fields.Many2one('res.company', string='Company',
-                                 related='invoice_id.company_id', store=True, readonly=True, related_sudo=False)
-    partner_id = fields.Many2one('res.partner', string='Partner',
-                                 related='invoice_id.partner_id', store=True, readonly=True, related_sudo=False)
-    currency_id = fields.Many2one('res.currency', related='invoice_id.currency_id', store=True, related_sudo=False)
-    company_currency_id = fields.Many2one('res.currency', related='invoice_id.company_currency_id', readonly=True,
-                                          related_sudo=False)'''

@@ -51,11 +51,11 @@ class AccountAnalyticLine(models.Model):
             uou = line.user_id._get_operating_unit_id()
             if line.user_id and not line.move_id and uou:
                 line.operating_unit_id = uou
-#            elif line.user_id and not line.move_id:
-#                raise ValidationError(_
-#                    ('You can not book your time on chargeable project if the '
-#                     'Default Operating Unit in your user settings lacks')
-#                )
+            elif line.user_id and not line.move_id:
+                raise ValidationError(_
+                    ('You can not book your time on chargeable project if the '
+                     'Default Operating Unit in your user settings lacks')
+                )
             else:
                 line.operating_unit_id = False
 
@@ -216,7 +216,7 @@ class AccountAnalyticLine(models.Model):
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
-        amount = self.unit_amount * fr
+        amount = - self.unit_amount * fr
         return amount
 
 
@@ -259,7 +259,7 @@ class AccountAnalyticLine(models.Model):
                 fee_rate = res.sheet_id.employee_id.fee_rate or res.sheet_id.employee_id.product_id.lst_price
 
             if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                amount = vals['unit_amount'] * fee_rate
+                amount = vals['unit_amount'] * - fee_rate
                 UpdateCols.append("amount = %s"%amount)
         if self.env.context.get('default_planned', False):
             if res.week_id != res.select_week_id:
@@ -291,7 +291,7 @@ class AccountAnalyticLine(models.Model):
                             if user.user_id.id == user_id:
                                 fee_rate = user.fee_rate or user.product_id.lst_price
                         if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                            amount = unit_amount * fee_rate
+                            amount = - unit_amount * fee_rate
                             UpdateCols.append("amount = %s, product_id = %s" % (amount, product_id))
             if vals.get('select_week_id', False) and aal.week_id != aal.select_week_id:
                 UpdateCols.append("week_id = %s"%aal.select_week_id.id)
