@@ -114,8 +114,9 @@ msgstr "Uren"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "Hours Overview"
-msgstr "Uren overzicht"
+msgid "<strong>Hours Overview</strong>"
+msgstr "<strong>Uren overzicht</strong>"
+
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
@@ -129,34 +130,21 @@ msgstr "Naam"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "<span>Datum</span>\n"
-"                             <br/>\n"
-"                             <span>Factuur</span>\n"
-"                             <br/>\n"
-"                             <span>Referentie</span>\n"
-"                             <br/>\n"
-"                             <span>Your VAT</span>\n"
-"                             <br/>\n"
-"                             <span>Our Vat</span>\n"
-"                             <br/>"
-msgstr "<span>Datum</span>\n"
-"                             <br/>\n"
-"                             <span>Factuur</span>\n"
-"                             <br/>\n"
-"                             <span>Referentie</span>\n"
-"                             <br/>\n"
-"                             <span>Uw btw</span>\n"
-"                             <br/>\n"
-"                             <span>Onze btw</span>\n"
-"                             <br/>"
-
+msgid "<span>Datum</span><br/>\n"
+"                             <span>Factuur</span><br/>\n"
+"                             <span>Referentie</span><br/>\n"
+"                             <span>Your VAT</span><br/>\n"
+"                             <span>Our Vat</span><br/>"
+msgstr "<span>Datum</span><br/>\n"
+"                             <span>Factuur</span><br/>\n"
+"                             <span>Referentie</span><br/>\n"
+"                             <span>Uw btw</span><br/>\n"
+"                             <span>Onze btw</span><br/>"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "<span>Month</span>\n"
-"                                 <br/>"
-msgstr "<span>Maand</span>\n"
-"                                 <br/>"
+msgid "Month"
+msgstr "Maand"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
