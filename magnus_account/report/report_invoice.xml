@@ -92,14 +92,11 @@
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
-
-<<<<<<< HEAD
-                        <td style='border-top:none' width="40%">- Uren: <span t-esc="aaLines_value['tot_hrs']"/></td>
-=======
+                        
                         <td style='border-top:none' width="40%">Hours:
                             <span t-esc="o.value_conversion(aaLines_value['tot_hrs'])"/>
                         </td>
->>>>>>> 9534e8a339801513e29bf1b66a572afc551c1b7c
+
                         <td style='border-top:none' width="20%"> </td>
                         <td style='border-top:none' width="10%"> </td>
                         <td style='border-top:none' width="10%"> </td>
