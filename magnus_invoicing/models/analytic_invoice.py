@@ -405,9 +405,9 @@ class AnalyticInvoice(models.Model):
 
         account = line.product_id.property_account_income_id or line.product_id.categ_id.property_account_income_categ_id
 
-        period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").date()
-        cur_date = datetime.now().date()
-        if cur_date.year >= period_date.year and cur_date.month > period_date.month:
+        period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+        cur_date = datetime.now().date().strftime("%Y-%m")
+        if cur_date > period_date:
             account = line.product_id.property_account_wip_id
             if not account and line.product_id:
                 raise UserError(
