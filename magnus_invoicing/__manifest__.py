@@ -25,7 +25,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['magnus_timesheet',
+    'depends': ['magnus_timesheet', 'web_domain_field',
                 'invoice_line_revenue_distribution_operating_unit',
                 'sale'
                 ],

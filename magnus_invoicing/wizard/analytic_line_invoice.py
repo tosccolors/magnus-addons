@@ -32,7 +32,7 @@ class AnalyticLineStatus(models.TransientModel):
             self.env.cr.execute("""
                 UPDATE account_analytic_line SET state = '%s', invoiceable = %s WHERE id %s %s
                 """ % (status, invoiceable, cond, rec))
-            if status == 'delayed':
+            if status == 'delayed' and self.wip_percentage > 0.0:
                 self.prepare_account_move()
             if status == 'invoiceable':
                 self._prepare_analytic_invoice(entries)

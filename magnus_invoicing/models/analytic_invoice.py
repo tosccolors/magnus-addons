@@ -5,7 +5,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
-
+import json
 
 class AnalyticInvoice(models.Model):
     _name = "analytic.invoice"
@@ -194,6 +194,15 @@ class AnalyticInvoice(models.Model):
         fm = self.env.ref('account_fiscal_month.date_range_fiscal_month').id
         return [('type_id', '=', fm)]
 
+    @api.multi
+    @api.depends('user_total_ids')
+    def _compute_task_user_ids_domain(self):
+        for rec in self:
+            rec.task_user_ids_domain = json.dumps([
+                ('user_id', 'in', rec.user_total_ids.mapped('user_id').ids),
+                ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
+            ])
+
     def _compute_invoice_count(self):
         for line in self:
             line.invoice_count = len(line.invoice_ids.ids)
@@ -221,10 +230,16 @@ class AnalyticInvoice(models.Model):
         string='Analytic Account',
         store=True
     )
+    task_user_ids_domain = fields.Char(
+        compute="_compute_task_user_ids_domain",
+        readonly=True,
+        store=False,
+    )
     task_user_ids = fields.Many2many(
         'task.user',
         compute='_compute_objects',
-        string='User Role',
+#        inverse='',
+        string='Task Fee Rate',
         store=True
     )
     partner_id = fields.Many2one(
@@ -298,21 +313,18 @@ class AnalyticInvoice(models.Model):
         ('invoiced', 'Invoiced'),
     ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
 
-    invoice_count = fields.Integer('Invoices', compute='_compute_invoice_count')
-
-    # operating_unit_ids = fields.Many2many(
-    #     'operating.unit',
-    #     compute='_compute_objects',
-    #     string='Operating Unit',
-    #     store=True
-    # )
+    invoice_count = fields.Integer(
+        'Invoices',
+        compute='_compute_invoice_count'
+    )
     project_operating_unit_id = fields.Many2one(
         'operating.unit',
         string='Project Operating Unit',
     )
-
-    link_project = fields.Boolean("Link Project", help="If true then must select project of type group invoice False")
-
+    link_project = fields.Boolean(
+        "Link Project",
+        help="If true then must select project of type group invoice False"
+    )
     project_id = fields.Many2one(
         'project.project',
         domain=[('invoice_properties.group_invoice', '=', False)]
@@ -471,21 +483,21 @@ class AnalyticInvoice(models.Model):
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
         inv_from_summary = []
 
+        invoices['lines'] = []
         for line in user_summary_lines:
-            invoices['lines'] = []
             inv_line_vals = self._prepare_invoice_line(line)
             invoices['lines'].append((0, 0, inv_line_vals))
-
-            if self.invoice_ids and invoices['lines']:
-                invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
-                invoice.write({'invoice_line_ids': invoices['lines']})
-            elif not self.invoice_ids:
-                vals = self._prepare_invoice(invoices)
-                vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
-                invoice = self.env['account.invoice'].create(vals)
-                invoice.compute_taxes()
-                self.invoice_ids = [(4, invoice.id)]
             inv_from_summary.append(line)
+        if self.invoice_ids and invoices['lines']:
+            invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
+            invoice.write({'invoice_line_ids': invoices['lines']})
+        elif not self.invoice_ids:
+            vals = self._prepare_invoice(invoices)
+            vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
+            invoice = self.env['account.invoice'].create(vals)
+            invoice.compute_taxes()
+            self.invoice_ids = [(4, invoice.id)]
+
 
         if self.state == 'draft' and inv_from_summary:
             self.state = 'open'
@@ -572,7 +584,10 @@ class AnalyticUserTotal(models.Model):
             Else, get fee rate from method get_fee_rate()
         :return:
         """
-        task_user = self.analytic_invoice_id.task_user_ids.filtered(lambda line: line.user_id == self.user_id and line.task_id == self.task_id)
+        task_user = self.analytic_invoice_id.task_user_ids.filtered(
+            lambda line: line.user_id == self.user_id
+                         and line.task_id == self.task_id
+        )
         if task_user:
             self.fee_rate = fr = task_user[0].fee_rate
             self.amount = - self.unit_amount * fr

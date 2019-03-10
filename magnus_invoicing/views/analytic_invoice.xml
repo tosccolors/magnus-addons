@@ -46,7 +46,14 @@
                         </group>-->
                      </group>
                     <separator string="Fee Rates"/>
-                    <field name="task_user_ids" string="Fee Rates" readonly="0" context="{'tree_view_ref' : 'magnus_invoicing.view_task_user_tree'}" options="{'no_create':True}"/>
+                    <field name="task_user_ids_domain"
+                           invisible="1" />
+                    <field name="task_user_ids"
+                           string="Fee Rates"
+                           domain="task_user_ids_domain"
+                           readonly="0"
+                           context="{'tree_view_ref' : 'magnus_invoicing.view_task_user_tree'}"
+                           options="{'no_create':True}"/>
                     <separator string="Invoice Lines"/>
                     <field name="invoice_line_ids"
                            context="{'type': 'out_invoice'}" attrs="{'readonly': [('state','=','invoiced')]}">
