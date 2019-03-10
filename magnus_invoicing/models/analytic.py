@@ -34,13 +34,27 @@ class AccountAnalyticLine(models.Model):
         'Invoiceable'
     )
 
+    @api.multi
+    def write(self, vals):
+        state_lines = self.env['account.analytic.line']
+        for aal in self:
+            if 'state' in vals:
+                state_lines |= aal
+        state_lines = state_lines.with_context(state=True)
+        super(AccountAnalyticLine, state_lines).write(vals)
+        super(AccountAnalyticLine, self - state_lines).write(vals)
+        return True
+
     def _check_state(self):
         """
         to check if any lines computes method calls allow to modify
         :return: True or super
         """
         context = self.env.context.copy()
-        if not 'active_model' in context or 'active_invoice_id' in context:
+        if not 'active_model' in context \
+                or 'active_invoice_id' in context \
+                or 'cc' in context and context['cc']\
+                or 'state' in context and context['state']:
             return True
         return super(AccountAnalyticLine, self)._check_state()
 

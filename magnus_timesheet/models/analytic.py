@@ -22,25 +22,24 @@ class AccountAnalyticLine(models.Model):
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
-            if line.project_id:
-                if line.task_id and line.user_id and not line.move_id:
-                    uou = line.user_id._get_operating_unit_id()
-                    if uou:
-                        line.operating_unit_id = uou
-                    if not line.planned:
-                        if line.sheet_id.week_id and line.date:
-                            line.week_id = line.sheet_id.week_id
-                            line.month_id = line.find_daterange_month(line.date)
-                        elif line.date:
-                            line.week_id = line.find_daterange_week(line.date)
-                            line.month_id = line.find_daterange_month(line.date)
-                        elif not line.child_ids == []:
-                            line.week_id = line.find_daterange_week(line.child_ids.date)
-                            line.month_id = line.find_daterange_month(line.child_ids.date)
-                        if line.product_uom_id.id == UomHrs:
-                            line.ts_line = True
-                    if not line.ts_line or line.planned:
-                        continue
+            if line.task_id and line.user_id:
+                uou = line.user_id._get_operating_unit_id()
+                if uou:
+                    line.operating_unit_id = uou
+                if not line.planned:
+                    if line.sheet_id.week_id and line.date:
+                        line.week_id = line.sheet_id.week_id
+                        line.month_id = line.find_daterange_month(line.date)
+                    elif line.date:
+                        line.week_id = line.find_daterange_week(line.date)
+                        line.month_id = line.find_daterange_month(line.date)
+                    elif not line.child_ids == []:
+                        line.week_id = line.find_daterange_week(line.child_ids.date)
+                        line.month_id = line.find_daterange_month(line.child_ids.date)
+                    if line.product_uom_id.id == UomHrs:
+                        line.ts_line = True
+                if not line.ts_line or line.planned:
+                    continue
             else:
                 continue
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
@@ -205,9 +204,9 @@ class AccountAnalyticLine(models.Model):
         return product_id
 
     @api.model
-    def get_fee_rate(self):
-        uid = self.user_id.id or False
-        tid = self.task_id.id or False
+    def get_fee_rate(self, task_id=None, user_id=None):
+        uid = user_id or self.user_id.id or False
+        tid = task_id or self.task_id.id or False
         amount, fr = 0.0, 0.0
         if uid and tid:
             task_user = self.env['task.user'].search([
@@ -219,9 +218,13 @@ class AccountAnalyticLine(models.Model):
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
+        return fr
+
+    @api.model
+    def get_fee_rate_amount(self, task_id=None, user_id=None):
+        fr = self.get_fee_rate(task_id=task_id, user_id=user_id)
         amount = - self.unit_amount * fr
         return amount
-
 
     def _fetch_emp_plan(self):
         emp = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
@@ -255,7 +258,7 @@ class AccountAnalyticLine(models.Model):
                 raise UserError(_(
                     'Please fill in Fee Rate Product in employee %s.\n '
                     ) % vals['user_id'])
-            taskuser = self.env['task.user'].search([('user_id','=', vals['user_id'])])
+            taskuser = self.env['task.user'].search([('task_id', '=', vals['task_id']),('user_id','=', vals['user_id'])])
             if taskuser and taskuser.fee_rate or taskuser.product_id:
                 fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
             else:
@@ -283,18 +286,19 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in Employee %s.\n '
                     ) % vals['user_id'])
 #                fr = 0
-                taskuser = self.env['task.user'].search([('user_id', '=', user_id)])
+                taskuser = self.env['task.user'].search([('task_id', '=', task_id),('user_id', '=', user_id)])
                 if taskuser and taskuser.fee_rate or taskuser.product_id:
                     fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
                 else:
-                    fr = user_id._get_related_employees().fee_rate \
-                               or user_id._get_related_employees().product_id.lst_price or 0.0
+                    user = self.env['res.users'].browse(user_id)
+                    fr = user._get_related_employees().fee_rate \
+                               or user._get_related_employees().product_id.lst_price or 0.0
                 if (vals.get('product_uom_id', False)
                     and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id) \
                     or (aal.product_uom_id
                     and aal.product_uom_id == self.env.ref('product.product_uom_hour')):
                     vals['amount'] = - unit_amount * fr
-            if self.env.context.get('default_planned', False) or aal.default_planned:
+            if self.env.context.get('default_planned', False):
                 if vals.get('select_week_id', False):
                     vals['week_id'] = vals('select_week_id')
                 if aal.project_id:

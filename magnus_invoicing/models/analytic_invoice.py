@@ -88,11 +88,18 @@ class AnalyticInvoice(models.Model):
             if self.project_id and self.link_project:
                 domain += [('project_id', '=', self.project_id.id)]
             else:
-                domain +=['|', ('project_id.invoice_properties.group_invoice', '=', True), ('task_id.project_id.invoice_properties.group_invoice', '=', True)]
-
+                domain +=['|',
+                          ('project_id.invoice_properties.group_invoice', '=', True),
+                          ('task_id.project_id.invoice_properties.group_invoice', '=', True)
+                          ]
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('chargeable', '=', True),('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'progress']),
-                                    '|',('invoiceable', '=', True),('invoiced', '=', False)]
+            time_domain = domain + [
+                ('chargeable', '=', True),
+                ('product_uom_id', '=', hrs),
+                ('state', 'in', ['invoiceable', 'progress']),
+                '|',
+                ('invoiceable', '=', True),
+                ('invoiced', '=', False)]
             if ana_ids:
                 time_domain += [('id', 'not in', ana_ids.ids)]
 
@@ -186,7 +193,46 @@ class AnalyticInvoice(models.Model):
                 userTotData.append((4, usrTot.id))
             self.user_total_ids = userTotData
 
-
+    @api.multi
+    @api.depends('invoice_ids.state' )
+    def _compute_state(self):
+        for ai in self:
+            if not ai.invoice_ids:
+                ai.state = 'draft'
+            elif ai.invoice_ids.state == 'cancel':
+                ai.state = 'draft'
+            elif ai.invoice_ids.state == 'draft':
+                if ai.state == 'invoiced':
+                    ai.state = 'open'
+                    for line in ai.invoice_line_ids:
+                        cond = '='
+                        rec = line.user_task_total_line_id.children_ids.ids[0]
+                        if len(line.user_task_total_line_id.children_ids) > 1:
+                            cond = 'IN'
+                            rec = tuple(line.user_task_total_line_id.children_ids.ids)
+                        self.env.cr.execute("""
+                                            UPDATE account_analytic_line SET state = 'progress', invoiced = true 
+                                            WHERE id %s %s
+                                    """ % (cond, rec))
+                        self.env.cr.execute("""
+                                            UPDATE analytic_user_total SET state = 'progress', invoiced = true WHERE id = %s
+                                    """ % (line.user_task_total_line_id.id))
+                else:
+                    ai.state = 'open'
+            elif ai.invoice_ids.state == 'open':
+                ai.state = 'invoiced'
+                for line in ai.invoice_line_ids:
+                    cond = '='
+                    rec = line.user_task_total_line_id.children_ids.ids[0]
+                    if len(line.user_task_total_line_id.children_ids) > 1:
+                        cond = 'IN'
+                        rec = tuple(line.user_task_total_line_id.children_ids.ids)
+                    self.env.cr.execute("""
+                                        UPDATE account_analytic_line SET state = 'invoiced', invoiced = true WHERE id %s %s
+                                """ % (cond, rec))
+                    self.env.cr.execute("""
+                                        UPDATE analytic_user_total SET state = 'invoiced', invoiced = true WHERE id = %s
+                                """ % (line.user_task_total_line_id.id))
 
     @api.model
     def _get_fiscal_month_domain(self):
@@ -206,10 +252,6 @@ class AnalyticInvoice(models.Model):
     def _compute_invoice_count(self):
         for line in self:
             line.invoice_count = len(line.invoice_ids.ids)
-
-    @api.multi
-    def action_done(self):
-        self.state = 'invoiced'
 
     @api.onchange('account_analytic_ids')
     def onchange_account_analytic(self):
@@ -311,7 +353,12 @@ class AnalyticInvoice(models.Model):
         ('draft', 'Draft'),
         ('open', 'In Progress'),
         ('invoiced', 'Invoiced'),
-    ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
+    ],  string='Status',
+        compute=_compute_state,
+        copy=False,
+        index=True,
+        track_visibility='onchange',
+    )
 
     invoice_count = fields.Integer(
         'Invoices',
@@ -392,6 +439,7 @@ class AnalyticInvoice(models.Model):
             self.analytic_line_status(analytic_lines, 'invoiceable')
         return super(AnalyticInvoice, self).unlink()
 
+
     @api.model
     def _prepare_invoice(self, lines):
         self.ensure_one()
@@ -450,12 +498,6 @@ class AnalyticInvoice(models.Model):
             account = fpos.map_account(account)
 
 
-        # project = False
-        # if line.project_id:
-        #     project = line.project_id
-        # elif line.task_id:
-        #     project = line.task_id.project_id
-
         res = {
             'name': line.product_id.name or '/',
             # 'sequence': line.sequence,
@@ -484,38 +526,37 @@ class AnalyticInvoice(models.Model):
         inv_from_summary = []
 
         invoices['lines'] = []
+        invObj = self.env['account.invoice']
+        invoice = invObj
         for line in user_summary_lines:
             inv_line_vals = self._prepare_invoice_line(line)
+            inv_line_vals['user_task_total_line_id'] = line.id
             invoices['lines'].append((0, 0, inv_line_vals))
             inv_from_summary.append(line)
         if self.invoice_ids and invoices['lines']:
-            invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
+            invoice = invObj.browse(self.invoice_ids.ids[0])
             invoice.write({'invoice_line_ids': invoices['lines']})
         elif not self.invoice_ids:
             vals = self._prepare_invoice(invoices)
             vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
-            invoice = self.env['account.invoice'].create(vals)
-            invoice.compute_taxes()
+            invoice = invObj.create(vals)
             self.invoice_ids = [(4, invoice.id)]
-
-
+        if invoice:
+            invoice.compute_taxes()
         if self.state == 'draft' and inv_from_summary:
             self.state = 'open'
-
-        for line in inv_from_summary:
-            cond = '='
-            rec = line.children_ids.ids[0]
-            if len(line.children_ids) > 1:
-                cond = 'IN'
-                rec = tuple(line.children_ids.ids)
-            self.env.cr.execute("""
-                        UPDATE account_analytic_line SET state = 'invoiced', invoiced = true WHERE id %s %s
-                """ % (cond, rec))
-            self.env.cr.execute("""
-                        UPDATE analytic_user_total SET state = 'invoiced', invoiced = true WHERE id = %s
-                """ % (line.id))
-
         return True
+
+    @api.one
+    def delete_invoice(self):
+        if self.state == 'invoiced':
+            self.invoice_ids.action_cancel()
+            self.action_invoice_draft()
+            self.invoice_line_ids.unlink()
+        elif not self.invoice_ids.move_name:
+            self.invoice_ids.unlink()
+        elif self.state == 'open':
+            self.invoice_line_ids.unlink()
 
 
     @api.multi
@@ -586,14 +627,13 @@ class AnalyticUserTotal(models.Model):
         """
         task_user = self.analytic_invoice_id.task_user_ids.filtered(
             lambda line: line.user_id == self.user_id
-                         and line.task_id == self.task_id
+                    and line.task_id == self.task_id
         )
         if task_user:
             self.fee_rate = fr = task_user[0].fee_rate
             self.amount = - self.unit_amount * fr
         else:
-            unit_amt = self.unit_amount or 1
-            self.fee_rate = fr = self.get_fee_rate() / unit_amt
+            self.fee_rate = fr = self.get_fee_rate(False, False)
             self.amount = - self.unit_amount * fr
 
 

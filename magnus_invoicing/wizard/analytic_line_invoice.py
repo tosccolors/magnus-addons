@@ -13,10 +13,17 @@ class AnalyticLineStatus(models.TransientModel):
         ('delayed', 'Delayed'),
         ('write-off', 'Write-Off'),
         ('open', 'Confirmed')
-    ], string='Lines to be')
-    wip = fields.Boolean("WIP")
-    wip_percentage = fields.Float("WIP Percentage")
-    description = fields.Char("Description")
+    ], string='Lines to be'
+    )
+    wip = fields.Boolean(
+        "WIP"
+    )
+    wip_percentage = fields.Float(
+        "WIP Percentage"
+    )
+    description = fields.Char(
+        "Description"
+    )
 
     @api.one
     def analytic_invoice_lines(self):
@@ -24,7 +31,7 @@ class AnalyticLineStatus(models.TransientModel):
         analytic_ids = context.get('active_ids',[])
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
         status = str(self.name)
-        not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'change-chargecode']
+        not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
         entries = analytic_lines.filtered(lambda a: a.invoiced != True and a.state not in not_lookup_states)
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
@@ -35,19 +42,23 @@ class AnalyticLineStatus(models.TransientModel):
             if status == 'delayed' and self.wip_percentage > 0.0:
                 self.prepare_account_move()
             if status == 'invoiceable':
-                self._prepare_analytic_invoice(entries)
+                self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
 
         return True
 
 
-    def _prepare_analytic_invoice(self, entries):
+    def prepare_analytic_invoice(self):
+        context = self.env.context.copy()
+        entries_ids = context.get('active_ids', [])
+        if self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable'):
+            raise UserError(_('Please select only Analytic Lines with state "To Be Invoiced".'))
 
         analytic_invoice = self.env['analytic.invoice']
-        cond, rec = ("in", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
+        cond, rec = ("in", tuple(entries_ids)) if len(entries_ids) > 1 else ("=", entries_ids[0])
 
         sep_entries = self.env['account.analytic.line'].search([('id', cond, rec), '|', ('project_id.invoice_properties.group_invoice', '=', False),('task_id.project_id.invoice_properties.group_invoice', '=', False)])
         if sep_entries:
-            rec = list(set(entries.ids)-set(sep_entries.ids))
+            rec = list(set(entries_ids)-set(sep_entries.ids))
             cond, rec = ("IN", tuple(rec)) if len(rec) > 1 else ("=", rec and rec[0] or [])
         if rec:
             self.env.cr.execute("""
@@ -63,7 +74,13 @@ class AnalyticLineStatus(models.TransientModel):
                 partner_id = res[1]
                 month_id = res[2]
                 project_operating_unit_id = res[3]
-                search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('project_operating_unit_id', '=', project_operating_unit_id), ('state', '!=', 'invoiced'), ('month_id', '=', month_id), ('link_project', '=', False)]
+                search_domain = [
+                    ('partner_id', '=', partner_id),
+                    ('account_analytic_ids', 'in', analytic_account_ids),
+                    ('project_operating_unit_id', '=', project_operating_unit_id),
+                    ('state', '!=', 'invoiced'),
+                    ('month_id', '=', month_id),
+                    ('link_project', '=', False)]
                 analytic_invobj = analytic_invoice.search(search_domain, limit=1)
                 if analytic_invobj:
                     ctx = self.env.context.copy()
@@ -72,7 +89,11 @@ class AnalyticLineStatus(models.TransientModel):
                     # analytic_invobj.with_context(ctx).month_id = month_id
                     # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
                 else:
-                    analytic_invoice.create({'partner_id':partner_id, 'month_id':month_id, 'project_operating_unit_id':project_operating_unit_id})
+                    analytic_invoice.create({
+                        'partner_id':partner_id,
+                        'month_id':month_id,
+                        'project_operating_unit_id':project_operating_unit_id
+                    })
 
         if sep_entries:
             cond1, rec1 = ("IN", tuple(sep_entries.ids)) if len(sep_entries) > 1 else ("=", sep_entries.id)
@@ -91,8 +112,15 @@ class AnalyticLineStatus(models.TransientModel):
                 project_operating_unit_id = res[3]
                 project_id = res[4]
 
-                search_domain = [('partner_id', '=', partner_id), ('account_analytic_ids', 'in', analytic_account_ids), ('project_operating_unit_id', '=', project_operating_unit_id), ('state', '!=', 'invoiced'), ('month_id', '=', month_id), ('project_id', '=', project_id), ('link_project', '=', True)]
-
+                search_domain = [
+                    ('partner_id', '=', partner_id),
+                    ('account_analytic_ids', 'in', analytic_account_ids),
+                    ('project_operating_unit_id', '=', project_operating_unit_id),
+                    ('state', '!=', 'invoiced'),
+                    ('month_id', '=', month_id),
+                    ('project_id', '=', project_id),
+                    ('link_project', '=', True)
+                ]
                 analytic_invobj = analytic_invoice.search(search_domain, limit=1)
                 if analytic_invobj:
                     ctx = self.env.context.copy()
@@ -102,7 +130,13 @@ class AnalyticLineStatus(models.TransientModel):
                     # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
                     # analytic_invobj.with_context(ctx).project_id = project_id
                 else:
-                    analytic_invoice.create({'partner_id':partner_id, 'month_id':month_id, 'project_operating_unit_id':project_operating_unit_id, 'project_id':project_id, 'link_project': True})
+                    analytic_invoice.create({
+                        'partner_id':partner_id,
+                        'month_id':month_id,
+                        'project_operating_unit_id':project_operating_unit_id,
+                        'project_id':project_id,
+                        'link_project': True
+                    })
                 # analytic_invoice.create(
                 #     {'partner_id': entries.partner_id, 'month_id': entries.month_id, 'project_operating_unit_id': entries.project_operating_unit_id, 'project_id':})
 
@@ -116,7 +150,7 @@ class AnalyticLineStatus(models.TransientModel):
 
     @api.model
     def _calculate_fee_rate(self, line):
-        amount = line.get_fee_rate()
+        amount = line.get_fee_rate_amount(False, False)
         if self.wip and self.wip_percentage > 0:
             amount = amount - (amount * (self.wip_percentage / 100))
         return amount
