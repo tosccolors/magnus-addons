@@ -18,10 +18,12 @@ class Task(models.Model):
 
     standard = fields.Boolean(string='Standard')
 
+
 class Project(models.Model):
     _inherit = "project.project"
 
     overtime = fields.Boolean(string='Overtime')
+
 
 class ProjectInvoicingProperties(models.Model):
     _inherit = "project.invoicing.properties"

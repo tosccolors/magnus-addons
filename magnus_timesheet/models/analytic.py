@@ -248,7 +248,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-        fee_rate = 0
+#        fee_rate = 0
         if 'task_id' in vals and 'user_id' in vals:
             vals['product_id'] = self.get_task_user_product(vals['task_id'], vals['user_id']) or False
             if not vals['product_id']:
@@ -282,7 +282,7 @@ class AccountAnalyticLine(models.Model):
                     raise UserError(_(
                         'Please fill in Fee Rate Product in Employee %s.\n '
                     ) % vals['user_id'])
-                fr = 0
+#                fr = 0
                 taskuser = self.env['task.user'].search([('user_id', '=', user_id)])
                 if taskuser and taskuser.fee_rate or taskuser.product_id:
                     fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
