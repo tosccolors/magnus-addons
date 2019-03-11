@@ -41,19 +41,20 @@ class AccountInvoice(models.Model):
             invoice_line['user_id']
         )
 
-    @api.multi
+    ### deze vertrouw ik niet
+    '''@api.multi
     def finalize_invoice_move_lines(self, move_lines):
         move_lines = super(AccountInvoice,
                            self).finalize_invoice_move_lines(move_lines)
 
         new_move_lines = []
         for line_tuple in move_lines:
-            if not line_tuple[2]['user_id'] and line_tuple[2]['debit'] > 0:
+            if not line_tuple[2]['user_id']:
                 inv_lines = self.invoice_line_ids.filtered('analytic_invoice_id')
                 if inv_lines:
                     line_tuple[2]['operating_unit_id'] = inv_lines[0].analytic_invoice_id.project_operating_unit_id.id
             new_move_lines.append(line_tuple)
-        return new_move_lines
+        return new_move_lines'''
 
     @api.multi
     def _get_timesheet_by_group(self):
@@ -94,7 +95,7 @@ class AccountInvoiceLine(models.Model):
     def _compute_operating_unit(self):
         super(AccountInvoiceLine, self)._compute_operating_unit()
         for line in self.filtered('user_id'):
-            line.operating_unit_id = line.user_id.default_operating_unit_id
+            line.operating_unit_id = line.user_id._get_operating_unit_id()
 
 
 

@@ -22,10 +22,11 @@ class AccountMoveLine(models.Model):
     def _check_analytic_operating_unit(self):
         for rec in self.filtered('user_id'):
             if not rec.operating_unit_id == \
-                                    rec.user_id.default_operating_unit_id:
+                                    rec.user_id._get_operating_unit_id():
                 raise UserError(_('The Operating Unit in the'
-                                  ' Move Line must be the Default '
-                                  'Operating Unit in the user'))
+                                  ' Move Line must be the '
+                                  'Operating Unit in the department'
+                                  ' of the user/employee'))
         super(AccountMoveLine, self - self.filtered('user_id'))._check_analytic_operating_unit()
 
     @api.onchange('analytic_account_id', 'user_id')
@@ -34,10 +35,7 @@ class AccountMoveLine(models.Model):
         super(AccountMoveLine, self).onchange_operating_unit()
         if self.user_id:
             self.operating_unit_id = \
-                self.user_id.default_operating_unit_id
-        elif self.analytic_account_id:
-            self.operating_unit_id = \
-                self.analytic_account_id.operating_unit_ids[0]
+                self.user_id._get_operating_unit_id()
 
 class AccountMove(models.Model):
     _inherit = "account.move"

@@ -96,6 +96,7 @@
                         <td style='border-top:none' width="40%">Hours:
                             <span t-esc="o.value_conversion(aaLines_value['tot_hrs'])"/>
                         </td>
+
                         <td style='border-top:none' width="20%"> </td>
                         <td style='border-top:none' width="10%"> </td>
                         <td style='border-top:none' width="10%"> </td>

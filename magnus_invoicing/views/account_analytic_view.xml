@@ -67,10 +67,16 @@
                                 context="{u'pivot_column_groupby': [u'month_id'],
                                   u'pivot_row_groupby': [u'project_mgr',u'account_id', u'user_id'],
                                   u'pivot_measures': [u'unit_amount', u'amount']}"/>
+                        <separator />
                         <filter name="hours" string="Hours"
                                 domain="[('product_uom_id','=',%(product.product_uom_hour)d)]"/>
                         <filter name="kms" string="Kilometers"
                                 domain="[('product_uom_id','=',%(product.product_uom_km)d)]"/>
+                        <filter name="cost_expense" string="Cost/Expense"
+                                domain="[
+                                ('move_id','!=',False)
+                                ]"/>
+                        <separator />
                         <filter name="invoiceable" string="Invoiceable"
                                 domain="[
                                 '|', '&amp;',
@@ -81,10 +87,23 @@
                                 ('non_invoiceable_mileage', '=', False),
                                 ('chargeable', '=', True)
                                 ]"/>
-                        <filter name="cost_expense" string="Cost/Expense"
-                                domain="[
-                                ('state', 'not in', ['draft', 'invoiced'])
-                                ('move_id','!=',False]"/>
+                        <separator />
+                        <filter name="draft" string="Draft"
+                                domain="[('state','=','draft')]"/>
+                        <filter name="open" string="Confirmed"
+                                domain="[('state','=','open')]"/>
+                        <filter name="progress" string="In progress"
+                                domain="[('state','=','progress')]"/>
+                        <filter name="invoiceable" string="To Be Invoiced"
+                                domain="[('state','=','invoiceable')]"/>
+                        <filter name="invoiced" string="Invoiced"
+                                domain="[('state','=','invoiced')]"/>
+                        <filter name="delayed" string="Delayed"
+                                domain="[('state','=','delayed')]"/>
+                        <filter name="write_off" string="Write-Off"
+                                domain="[('state','=','write_off')]"/>
+                        <filter name="change-chargecode" string="Correcties"
+                                domain="[('state','=','change-chargecode')]"/>
                         <field name="project_mgr" />
                     </xpath>
                     <xpath expr="//field[@name='date']" position="after">
@@ -128,12 +147,11 @@
             <field name="name">Analytic Entries</field>
             <field name="res_model">account.analytic.line</field>
             <field name="view_mode">tree,form,graph,pivot</field>
-            <field name="view_id" ref="analytic.view_account_analytic_line_tree"/>
+            <field name="view_id" ref="magnus_invoicing.view_account_analytic_line_tree_inherit_magnus_invoicing"/>
             <field name="view_type">form</field>
             <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
-            <!--field name="domain">[('state', 'not in', ['draft',
-            'invoiced']),('invoiced','=',False),('non_invoiceable_mileage', '=', False),('chargeable', '=', True)
-            ]</field-->
+            <field name="context">{"search_default_invoiceable":1}</field>
+            <field name="domain">{}</field>
             <field name="help" type="html">
               <p>
                 No activity yet.

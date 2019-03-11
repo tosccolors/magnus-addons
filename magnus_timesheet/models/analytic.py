@@ -20,21 +20,28 @@ class AccountAnalyticLine(models.Model):
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
+            line.project_operating_unit_id = \
+                line.account_id.operating_unit_ids \
+                and line.account_id.operating_unit_ids[0] or False
             if line.project_id:
-                if line.task_id and line.user_id and not line.planned:
-                    if line.sheet_id.week_id and line.date:
-                        line.week_id = line.sheet_id.week_id
-                        line.month_id = line.find_daterange_month(line.date)
-                    elif line.date:
-                        line.week_id = line.find_daterange_week(line.date)
-                        line.month_id = line.find_daterange_month(line.date)
-                    elif not line.child_ids == []:
-                        line.week_id = line.find_daterange_week(line.child_ids.date)
-                        line.month_id = line.find_daterange_month(line.child_ids.date)
-                    if line.product_uom_id.id == UomHrs:
-                        line.ts_line = True
-                if not line.ts_line or line.planned:
-                    continue
+                if line.task_id and line.user_id and not line.move_id:
+                    uou = line.user_id._get_operating_unit_id()
+                    if uou:
+                        line.operating_unit_id = uou
+                    if not line.planned:
+                        if line.sheet_id.week_id and line.date:
+                            line.week_id = line.sheet_id.week_id
+                            line.month_id = line.find_daterange_month(line.date)
+                        elif line.date:
+                            line.week_id = line.find_daterange_week(line.date)
+                            line.month_id = line.find_daterange_month(line.date)
+                        elif not line.child_ids == []:
+                            line.week_id = line.find_daterange_week(line.child_ids.date)
+                            line.month_id = line.find_daterange_month(line.child_ids.date)
+                        if line.product_uom_id.id == UomHrs:
+                            line.ts_line = True
+                    if not line.ts_line or line.planned:
+                        continue
             else:
                 continue
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
@@ -45,18 +52,7 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
-            if line.user_id and not line.move_id and line.user_id.default_operating_unit_id:
-                line.operating_unit_id = line.user_id.default_operating_unit_id
-            elif line.user_id and not line.move_id:
-                raise ValidationError(_
-                    ('You can not book your time on chargeable project if the '
-                     'Default Operating Unit in your user settings lacks')
-                                      )
-            else:
-                line.operating_unit_id = False
 
-            line.project_operating_unit_id = line.account_id.operating_unit_ids and line.account_id.operating_unit_ids[
-                0]
 
     def find_daterange_week(self, date):
         """
@@ -215,7 +211,7 @@ class AccountAnalyticLine(models.Model):
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
-        amount = self.unit_amount * fr
+        amount = - self.unit_amount * fr
         return amount
 
 
@@ -258,7 +254,7 @@ class AccountAnalyticLine(models.Model):
                 fee_rate = res.sheet_id.employee_id.fee_rate or res.sheet_id.employee_id.product_id.lst_price
 
             if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                amount = vals['unit_amount'] * fee_rate
+                amount = vals['unit_amount'] * - fee_rate
                 UpdateCols.append("amount = %s"%amount)
         if self.env.context.get('default_planned', False):
             if res.week_id != res.select_week_id:
@@ -290,7 +286,7 @@ class AccountAnalyticLine(models.Model):
                             if user.user_id.id == user_id:
                                 fee_rate = user.fee_rate or user.product_id.lst_price
                         if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                            amount = unit_amount * fee_rate
+                            amount = - unit_amount * fee_rate
                             UpdateCols.append("amount = %s, product_id = %s" % (amount, product_id))
             if vals.get('select_week_id', False) and aal.week_id != aal.select_week_id:
                 UpdateCols.append("week_id = %s"%aal.select_week_id.id)
