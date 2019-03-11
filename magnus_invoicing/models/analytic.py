@@ -26,12 +26,6 @@ class AccountAnalyticLine(models.Model):
         track_visibility='onchange',
         default='draft'
     )
-#    invoiced = fields.Boolean(
-#        'Invoiced'
-#    )
-#    invoiceable = fields.Boolean(
-#        'Invoiceable'
-#    )
 
     @api.multi
     def write(self, vals):
