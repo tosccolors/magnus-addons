@@ -77,13 +77,12 @@
                                 ('move_id','!=',False)
                                 ]"/>
                         <separator />
-                        <filter name="invoiceable" string="Invoiceable"
+                        <filter name="invoice-able" string="Invoice-able"
                                 domain="[
                                 '|', '&amp;',
                                 ('state', 'in', ['draft','open']),
                                 ('move_id','!=',False),
-                                ('state', 'not in', ['draft','invoiced','delayed','write_off','progress','change-chargecode']),
-                                ('invoiced','=',False),
+                                ('state', 'not in', ['draft','delayed','write_off','invoiced','progress','change-chargecode']),
                                 ('non_invoiceable_mileage', '=', False),
                                 ('chargeable', '=', True)
                                 ]"/>
@@ -150,7 +149,7 @@
             <field name="view_id" ref="magnus_invoicing.view_account_analytic_line_tree_inherit_magnus_invoicing"/>
             <field name="view_type">form</field>
             <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
-            <field name="context">{"search_default_invoiceable":1}</field>
+            <field name="context">{"search_default_invoice-able":1}</field>
             <field name="domain">{}</field>
             <field name="help" type="html">
               <p>

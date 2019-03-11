@@ -347,26 +347,6 @@ class HrTimesheetSheet(models.Model):
             l.write({'unit_amount': 0})
         return result
 
-class AccountAnalyticLine(models.Model):
-    _inherit = "account.analytic.line"
-
-    sheet_id = fields.Many2one(ondelete='cascade')
-    kilometers = fields.Integer('Kilometers')
-    non_invoiceable_mileage = fields.Boolean(string='Invoice Mileage', store=True)
-    ref_id = fields.Many2one('account.analytic.line', string='Reference')
-
-    @api.onchange('project_id')
-    def onchange_project_id(self):
-        res = super(AccountAnalyticLine, self).onchange_project_id()
-        tasks = self.env['project.task'].search([('project_id', '=', self.project_id.id)])
-        if len(tasks) == 1:
-            self.task_id = tasks.id
-        elif len(tasks.filtered('standard')) == 1:
-            self.task_id = tasks.filtered('standard').id
-        else:
-            self.task_id = False
-        return res
-
 
 class DateRangeGenerator(models.TransientModel):
     _inherit = 'date.range.generator'

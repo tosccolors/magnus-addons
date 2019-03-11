@@ -5,7 +5,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
-
+import json
 
 class AnalyticInvoice(models.Model):
     _name = "analytic.invoice"
@@ -24,11 +24,11 @@ class AnalyticInvoice(models.Model):
                 domain += [('account_id', 'in', account_analytic_ids)]
             else:
                 domain = [('account_id', 'in', account_analytic_ids)]
-
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'invoiced']),
-                                    '|',('invoiceable', '=', True),('invoiced', '=', True)]
-
+            time_domain = domain + [
+                ('product_uom_id', '=', hrs),
+                ('state', 'in', ['invoiceable', 'invoiced']),
+            ]
             self.time_line_ids = self.env['account.analytic.line'].search(time_domain).ids
 
             cost_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '<', 0)]
@@ -88,11 +88,16 @@ class AnalyticInvoice(models.Model):
             if self.project_id and self.link_project:
                 domain += [('project_id', '=', self.project_id.id)]
             else:
-                domain +=['|', ('project_id.invoice_properties.group_invoice', '=', True), ('task_id.project_id.invoice_properties.group_invoice', '=', True)]
-
+                domain +=['|',
+                          ('project_id.invoice_properties.group_invoice', '=', True),
+                          ('task_id.project_id.invoice_properties.group_invoice', '=', True)
+                          ]
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('chargeable', '=', True),('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'progress']),
-                                    '|',('invoiceable', '=', True),('invoiced', '=', False)]
+            time_domain = domain + [
+                ('chargeable', '=', True),
+                ('product_uom_id', '=', hrs),
+                ('state', 'in', ['invoiceable', 'progress'])
+                ]
             if ana_ids:
                 time_domain += [('id', 'not in', ana_ids.ids)]
 
@@ -186,7 +191,47 @@ class AnalyticInvoice(models.Model):
                 userTotData.append((4, usrTot.id))
             self.user_total_ids = userTotData
 
-
+    @api.multi
+    @api.depends('invoice_ids.state' )
+    def _compute_state(self):
+        for ai in self:
+            if not ai.invoice_ids:
+                ai.state = 'draft'
+            elif ai.invoice_ids.state == 'cancel':
+                ai.state = 'draft'
+            elif ai.invoice_ids.state == 'draft':
+                if ai.state == 'invoiced':
+                    ai.state = 'open'
+                    for line in ai.invoice_line_ids:
+                        cond = '='
+                        rec = line.user_task_total_line_id.children_ids.ids[0]
+                        if len(line.user_task_total_line_id.children_ids) > 1:
+                            cond = 'IN'
+                            rec = tuple(line.user_task_total_line_id.children_ids.ids)
+                        self.env.cr.execute("""
+                                            UPDATE account_analytic_line SET state = 'progress' 
+                                            WHERE id %s %s
+                                    """ % (cond, rec))
+                        self.env.cr.execute("""
+                                            UPDATE analytic_user_total SET state = 'progress' 
+                                            WHERE id = %s
+                                    """ % (line.user_task_total_line_id.id))
+                else:
+                    ai.state = 'open'
+            elif ai.invoice_ids.state == 'open':
+                ai.state = 'invoiced'
+                for line in ai.invoice_line_ids:
+                    cond = '='
+                    rec = line.user_task_total_line_id.children_ids.ids[0]
+                    if len(line.user_task_total_line_id.children_ids) > 1:
+                        cond = 'IN'
+                        rec = tuple(line.user_task_total_line_id.children_ids.ids)
+                    self.env.cr.execute("""
+                                        UPDATE account_analytic_line SET state = 'invoiced' WHERE id %s %s
+                                """ % (cond, rec))
+                    self.env.cr.execute("""
+                                        UPDATE analytic_user_total SET state = 'invoiced' WHERE id = %s
+                                """ % (line.user_task_total_line_id.id))
 
     @api.model
     def _get_fiscal_month_domain(self):
@@ -194,13 +239,18 @@ class AnalyticInvoice(models.Model):
         fm = self.env.ref('account_fiscal_month.date_range_fiscal_month').id
         return [('type_id', '=', fm)]
 
+    @api.multi
+    @api.depends('user_total_ids')
+    def _compute_task_user_ids_domain(self):
+        for rec in self:
+            rec.task_user_ids_domain = json.dumps([
+                ('user_id', 'in', rec.user_total_ids.mapped('user_id').ids),
+                ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
+            ])
+
     def _compute_invoice_count(self):
         for line in self:
             line.invoice_count = len(line.invoice_ids.ids)
-
-    @api.multi
-    def action_done(self):
-        self.state = 'invoiced'
 
     @api.onchange('account_analytic_ids')
     def onchange_account_analytic(self):
@@ -221,10 +271,15 @@ class AnalyticInvoice(models.Model):
         string='Analytic Account',
         store=True
     )
+    task_user_ids_domain = fields.Char(
+        compute="_compute_task_user_ids_domain",
+        readonly=True,
+        store=False,
+    )
     task_user_ids = fields.Many2many(
         'task.user',
         compute='_compute_objects',
-        string='User Role',
+        string='Task Fee Rate',
         store=True
     )
     partner_id = fields.Many2one(
@@ -296,29 +351,31 @@ class AnalyticInvoice(models.Model):
         ('draft', 'Draft'),
         ('open', 'In Progress'),
         ('invoiced', 'Invoiced'),
-    ], string='Status', readonly=True, copy=False, index=True, track_visibility='onchange', default='draft')
+    ],  string='Status',
+        compute=_compute_state,
+        copy=False,
+        index=True,
+        track_visibility='onchange',
+    )
 
-    invoice_count = fields.Integer('Invoices', compute='_compute_invoice_count')
-
-    # operating_unit_ids = fields.Many2many(
-    #     'operating.unit',
-    #     compute='_compute_objects',
-    #     string='Operating Unit',
-    #     store=True
-    # )
+    invoice_count = fields.Integer(
+        'Invoices',
+        compute='_compute_invoice_count'
+    )
     project_operating_unit_id = fields.Many2one(
         'operating.unit',
         string='Project Operating Unit',
     )
-
-    link_project = fields.Boolean("Link Project", help="If true then must select project of type group invoice False")
-
+    link_project = fields.Boolean(
+        "Link Project",
+        help="If true then must select project of type group invoice False"
+    )
     project_id = fields.Many2one(
         'project.project',
         domain=[('invoice_properties.group_invoice', '=', False)]
     )
 
-    def analytic_line_status(self, aal, status='progress'):
+    '''def analytic_line_status(self, aal, status='progress'):
         aal = aal.search([('invoiced', '=', False),('id', 'in', aal.ids)]) if aal else aal
         if not aal:
             return True
@@ -330,41 +387,32 @@ class AnalyticInvoice(models.Model):
         self.env.cr.execute("""
                 UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
         """ % (status, cond, rec))
-        return True
+        return True'''
 
     def unlink_rec(self):
         user_total_ids = self.env['analytic.user.total'].search(
             [('analytic_invoice_id', '=', False)])
         if user_total_ids:
-            cond = '='
-            rec = user_total_ids.ids[0]
-            if len(user_total_ids) > 1:
-                cond = 'IN'
-                rec = tuple(user_total_ids.ids)
-
             #reset analytic line state to invoiceable
-            analytic_lines = user_total_ids.mapped('children_ids')
-            self.analytic_line_status(analytic_lines, 'invoiceable')
-
-            self.env.cr.execute("""
-                                DELETE FROM  analytic_user_total WHERE id %s %s
-                        """ % (cond, rec))
+            analytic_lines = self.env['account.analytic.line'].browse(user_total_ids.mapped('children_ids'))
+            analytic_lines.write({'state': 'invoiceable'})
+            user_total_ids.unlink()
 
     @api.multi
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
         self.unlink_rec()
-        analytic_lines = self.user_total_ids.mapped('children_ids')
+        analytic_lines = self.env['account.analytic.line'].browse(self.user_total_ids.mapped('children_ids'))
         if analytic_lines:
-            self.analytic_line_status(analytic_lines, 'progress')
+            analytic_lines.write({'state': 'progress'})
         return res
 
     @api.model
     def create(self, vals):
         res = super(AnalyticInvoice, self).create(vals)
-        analytic_lines = res.user_total_ids.mapped('children_ids')
+        analytic_lines = self.env['account.analytic.line'].browse(res.user_total_ids.mapped('children_ids'))
         if analytic_lines:
-            self.analytic_line_status(analytic_lines, 'progress')
+            analytic_lines.write({'state': 'progress'})
         return res
 
     @api.multi
@@ -375,10 +423,11 @@ class AnalyticInvoice(models.Model):
         """
         analytic_lines = self.env['account.analytic.line']
         for obj in self:
-            analytic_lines |= obj.user_total_ids.mapped('children_ids')
+            analytic_lines |= self.env['account.analytic.line'].browse(obj.user_total_ids.mapped('children_ids'))
         if analytic_lines:
-            self.analytic_line_status(analytic_lines, 'invoiceable')
+            analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()
+
 
     @api.model
     def _prepare_invoice(self, lines):
@@ -438,12 +487,6 @@ class AnalyticInvoice(models.Model):
             account = fpos.map_account(account)
 
 
-        # project = False
-        # if line.project_id:
-        #     project = line.project_id
-        # elif line.task_id:
-        #     project = line.task_id.project_id
-
         res = {
             'name': line.product_id.name or '/',
             # 'sequence': line.sequence,
@@ -471,39 +514,38 @@ class AnalyticInvoice(models.Model):
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
         inv_from_summary = []
 
+        invoices['lines'] = []
+        invObj = self.env['account.invoice']
+        invoice = invObj
         for line in user_summary_lines:
-            invoices['lines'] = []
             inv_line_vals = self._prepare_invoice_line(line)
+            inv_line_vals['user_task_total_line_id'] = line.id
             invoices['lines'].append((0, 0, inv_line_vals))
-
-            if self.invoice_ids and invoices['lines']:
-                invoice = self.env['account.invoice'].browse(self.invoice_ids.ids[0])
-                invoice.write({'invoice_line_ids': invoices['lines']})
-            elif not self.invoice_ids:
-                vals = self._prepare_invoice(invoices)
-                vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
-                invoice = self.env['account.invoice'].create(vals)
-                invoice.compute_taxes()
-                self.invoice_ids = [(4, invoice.id)]
             inv_from_summary.append(line)
-
+        if self.invoice_ids and invoices['lines']:
+            invoice = invObj.browse(self.invoice_ids.ids[0])
+            invoice.write({'invoice_line_ids': invoices['lines']})
+        elif not self.invoice_ids:
+            vals = self._prepare_invoice(invoices)
+            vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
+            invoice = invObj.create(vals)
+            self.invoice_ids = [(4, invoice.id)]
+        if invoice:
+            invoice.compute_taxes()
         if self.state == 'draft' and inv_from_summary:
             self.state = 'open'
-
-        for line in inv_from_summary:
-            cond = '='
-            rec = line.children_ids.ids[0]
-            if len(line.children_ids) > 1:
-                cond = 'IN'
-                rec = tuple(line.children_ids.ids)
-            self.env.cr.execute("""
-                        UPDATE account_analytic_line SET state = 'invoiced', invoiced = true WHERE id %s %s
-                """ % (cond, rec))
-            self.env.cr.execute("""
-                        UPDATE analytic_user_total SET state = 'invoiced', invoiced = true WHERE id = %s
-                """ % (line.id))
-
         return True
+
+    @api.one
+    def delete_invoice(self):
+        if self.state == 'invoiced':
+            self.invoice_ids.action_cancel()
+            self.action_invoice_draft()
+            self.invoice_line_ids.unlink()
+        elif not self.invoice_ids.move_name:
+            self.invoice_ids.unlink()
+        elif self.state == 'open':
+            self.invoice_line_ids.unlink()
 
 
     @api.multi
@@ -572,13 +614,15 @@ class AnalyticUserTotal(models.Model):
             Else, get fee rate from method get_fee_rate()
         :return:
         """
-        task_user = self.analytic_invoice_id.task_user_ids.filtered(lambda line: line.user_id == self.user_id and line.task_id == self.task_id)
+        task_user = self.analytic_invoice_id.task_user_ids.filtered(
+            lambda line: line.user_id == self.user_id
+                    and line.task_id == self.task_id
+        )
         if task_user:
             self.fee_rate = fr = task_user[0].fee_rate
             self.amount = - self.unit_amount * fr
         else:
-            unit_amt = self.unit_amount or 1
-            self.fee_rate = fr = self.get_fee_rate() / unit_amt
+            self.fee_rate = fr = self.get_fee_rate(False, False)
             self.amount = - self.unit_amount * fr
 
 

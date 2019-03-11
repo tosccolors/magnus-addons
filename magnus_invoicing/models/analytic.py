@@ -26,13 +26,28 @@ class AccountAnalyticLine(models.Model):
         track_visibility='onchange',
         default='draft'
     )
+#    invoiced = fields.Boolean(
+#        'Invoiced'
+#    )
+#    invoiceable = fields.Boolean(
+#        'Invoiceable'
+#    )
 
-    invoiced = fields.Boolean(
-        'Invoiced'
-    )
-    invoiceable = fields.Boolean(
-        'Invoiceable'
-    )
+    @api.multi
+    def write(self, vals):
+        if 'state' in vals:
+            state_lines = self.env['account.analytic.line']
+            state_vals = {}
+            for aal in self:
+                if 'state' in vals:
+                    state_lines |= aal
+                    state_vals['state'] = vals['state']
+                    vals.pop('state')
+            if state_lines:
+                state_lines = state_lines.with_context(state=True)
+            super(AccountAnalyticLine, state_lines).write(state_vals)
+        super(AccountAnalyticLine, self).write(vals)
+        return True
 
     def _check_state(self):
         """
@@ -40,7 +55,10 @@ class AccountAnalyticLine(models.Model):
         :return: True or super
         """
         context = self.env.context.copy()
-        if not 'active_model' in context or 'active_invoice_id' in context:
+        if not 'active_model' in context \
+                or 'active_invoice_id' in context \
+                or 'cc' in context and context['cc']\
+                or 'state' in context and context['state']:
             return True
         return super(AccountAnalyticLine, self)._check_state()
 

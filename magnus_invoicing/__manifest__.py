@@ -25,7 +25,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['magnus_timesheet',
+    'depends': ['magnus_timesheet', 'web_domain_field',
                 'invoice_line_revenue_distribution_operating_unit',
                 'sale'
                 ],
@@ -37,7 +37,6 @@
         'data/data.xml',
         'wizard/analytic_line_invoice_view.xml',
         'wizard/change_chargecode_view.xml',
-        'views/hr_view.xml',
         'views/task_view.xml',
         'views/account_analytic_view.xml',
         'views/templates.xml',

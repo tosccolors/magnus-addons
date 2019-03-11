@@ -89,6 +89,12 @@ class AccountInvoiceLine(models.Model):
         'Timesheet User',
         index = True
     )
+    user_task_total_line_id = fields.Many2one(
+        'analytic.user.total',
+        string='Grouped Analytic line',
+        ondelete='cascade',
+        index=True
+    )
 
     @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
     @api.multi

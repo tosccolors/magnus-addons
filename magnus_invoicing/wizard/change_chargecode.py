@@ -20,6 +20,8 @@ class ChangeChargecode(models.TransientModel):
                 res['task_id'] = tasks.id
         return {'value': res, 'domain': domain}
 
+    # TODO: aal with km's?
+    # TODO: Reverse of correction?
     @api.multi
     def post(self):
         context = self.env.context.copy()
@@ -34,22 +36,22 @@ class ChangeChargecode(models.TransientModel):
                 continue
             unit_amount = aal.unit_amount
             amount = aal.amount
-            self.env.cr.execute("""
-                UPDATE account_analytic_line SET state = '%s' 
-                WHERE id = %s
-                """ % ('change-chargecode', aal.id))
-            aal.copy(default={'sheet_id': False,
-                              'unit_amount': -unit_amount,
-                              'amount': -amount,
-                              'state': 'change-chargecode'})
-            aal_new = aal.copy(default={'sheet_id': False,
-                                        'amount': 0.0,
-                                        'project_id': project_id,
-                                        'task_id': task_id,
-                                        'state':'open'})
-            amount = aal_new.get_fee_rate() if aal.chargeable else 0.0
-            self.env.cr.execute("""
-                            UPDATE account_analytic_line SET amount = %s 
-                            WHERE id = %s
-                            """ % (amount, aal_new.id))
+            aal.with_context(cc=True).write({'state': 'change-chargecode'})
+            aal.copy(
+                default={'sheet_id': False,
+                         'unit_amount': -unit_amount,
+                         'amount': -amount,
+                         'state': 'change-chargecode'
+                        }
+            )
+            aal.copy(
+                default={'sheet_id': False,
+                         'amount': aal.get_fee_rate_amount(
+                             task_id,
+                             aal.user_id.id
+                         ) if self.project_id.chargeable else 0.0,
+                         'project_id': project_id,
+                         'task_id': task_id,
+                         'state':'open'
+                         })
         return True
