@@ -151,7 +151,8 @@ class HrTimesheetSheet(models.Model):
         On timesheet reset draft check analytic shouldn't be in invoiced
         :return: Super
         """
-        if self.timesheet_ids.filtered('invoiced') or any([ts.state == 'progress' for ts in self.timesheet_ids]):
+        if any([ts.state == 'progress' for ts in self.timesheet_ids]):
+        # if self.timesheet_ids.filtered('invoiced') or any([ts.state == 'progress' for ts in self.timesheet_ids]):
             raise UserError(_('You cannot modify timesheet entries either Invoiced or belongs to Analytic Invoiced!'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.timesheet_ids:
