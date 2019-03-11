@@ -32,13 +32,13 @@ class AnalyticLineStatus(models.TransientModel):
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
         status = str(self.name)
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
-        entries = analytic_lines.filtered(lambda a: a.invoiced != True and a.state not in not_lookup_states)
+        entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
-            invoiceable = True if status == 'invoiceable' else False
             self.env.cr.execute("""
-                UPDATE account_analytic_line SET state = '%s', invoiceable = %s WHERE id %s %s
-                """ % (status, invoiceable, cond, rec))
+                UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
+                """ % (status, cond, rec))
+            self.env.invalidate_all()
             if status == 'delayed' and self.wip_percentage > 0.0:
                 self.prepare_account_move()
             if status == 'invoiceable':
@@ -50,13 +50,18 @@ class AnalyticLineStatus(models.TransientModel):
     def prepare_analytic_invoice(self):
         context = self.env.context.copy()
         entries_ids = context.get('active_ids', [])
-        if self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable'):
+        if len(self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable')) > 0:
             raise UserError(_('Please select only Analytic Lines with state "To Be Invoiced".'))
 
         analytic_invoice = self.env['analytic.invoice']
         cond, rec = ("in", tuple(entries_ids)) if len(entries_ids) > 1 else ("=", entries_ids[0])
 
-        sep_entries = self.env['account.analytic.line'].search([('id', cond, rec), '|', ('project_id.invoice_properties.group_invoice', '=', False),('task_id.project_id.invoice_properties.group_invoice', '=', False)])
+        sep_entries = self.env['account.analytic.line'].search([
+            ('id', cond, rec),
+            '|',
+            ('project_id.invoice_properties.group_invoice', '=', False),
+            ('task_id.project_id.invoice_properties.group_invoice', '=', False)
+        ])
         if sep_entries:
             rec = list(set(entries_ids)-set(sep_entries.ids))
             cond, rec = ("IN", tuple(rec)) if len(rec) > 1 else ("=", rec and rec[0] or [])

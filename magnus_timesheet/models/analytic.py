@@ -276,9 +276,18 @@ class AccountAnalyticLine(models.Model):
     @api.multi
     def write(self, vals):
         for aal in self:
-            task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id
-            user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id
-            unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount
+            if 'task_id' in vals:
+                task_id = vals['task_id']
+            else:
+                task_id = aal.task_id and aal.task_id.id or False
+            if 'user_id' in vals:
+                user_id = vals['user_id']
+            else:
+                user_id = aal.user_id and aal.user_id.id or False
+            if 'unit_amount' in vals:
+                unit_amount = vals['unit_amount']
+            else:
+                unit_amount = aal.unit_amount or 0.0
             if task_id and user_id:
                 vals['product_id'] = product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:

@@ -24,11 +24,11 @@ class AnalyticInvoice(models.Model):
                 domain += [('account_id', 'in', account_analytic_ids)]
             else:
                 domain = [('account_id', 'in', account_analytic_ids)]
-
             hrs = self.env.ref('product.product_uom_hour').id
-            time_domain = domain + [('product_uom_id', '=', hrs), ('state', 'in', ['invoiceable', 'invoiced']),
-                                    '|',('invoiceable', '=', True),('invoiced', '=', True)]
-
+            time_domain = domain + [
+                ('product_uom_id', '=', hrs),
+                ('state', 'in', ['invoiceable', 'invoiced']),
+            ]
             self.time_line_ids = self.env['account.analytic.line'].search(time_domain).ids
 
             cost_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '<', 0)]
@@ -96,10 +96,8 @@ class AnalyticInvoice(models.Model):
             time_domain = domain + [
                 ('chargeable', '=', True),
                 ('product_uom_id', '=', hrs),
-                ('state', 'in', ['invoiceable', 'progress']),
-                '|',
-                ('invoiceable', '=', True),
-                ('invoiced', '=', False)]
+                ('state', 'in', ['invoiceable', 'progress'])
+                ]
             if ana_ids:
                 time_domain += [('id', 'not in', ana_ids.ids)]
 
@@ -211,11 +209,12 @@ class AnalyticInvoice(models.Model):
                             cond = 'IN'
                             rec = tuple(line.user_task_total_line_id.children_ids.ids)
                         self.env.cr.execute("""
-                                            UPDATE account_analytic_line SET state = 'progress', invoiced = true 
+                                            UPDATE account_analytic_line SET state = 'progress' 
                                             WHERE id %s %s
                                     """ % (cond, rec))
                         self.env.cr.execute("""
-                                            UPDATE analytic_user_total SET state = 'progress', invoiced = true WHERE id = %s
+                                            UPDATE analytic_user_total SET state = 'progress' 
+                                            WHERE id = %s
                                     """ % (line.user_task_total_line_id.id))
                 else:
                     ai.state = 'open'
@@ -228,10 +227,10 @@ class AnalyticInvoice(models.Model):
                         cond = 'IN'
                         rec = tuple(line.user_task_total_line_id.children_ids.ids)
                     self.env.cr.execute("""
-                                        UPDATE account_analytic_line SET state = 'invoiced', invoiced = true WHERE id %s %s
+                                        UPDATE account_analytic_line SET state = 'invoiced' WHERE id %s %s
                                 """ % (cond, rec))
                     self.env.cr.execute("""
-                                        UPDATE analytic_user_total SET state = 'invoiced', invoiced = true WHERE id = %s
+                                        UPDATE analytic_user_total SET state = 'invoiced' WHERE id = %s
                                 """ % (line.user_task_total_line_id.id))
 
     @api.model
@@ -280,7 +279,6 @@ class AnalyticInvoice(models.Model):
     task_user_ids = fields.Many2many(
         'task.user',
         compute='_compute_objects',
-#        inverse='',
         string='Task Fee Rate',
         store=True
     )
@@ -377,7 +375,7 @@ class AnalyticInvoice(models.Model):
         domain=[('invoice_properties.group_invoice', '=', False)]
     )
 
-    def analytic_line_status(self, aal, status='progress'):
+    '''def analytic_line_status(self, aal, status='progress'):
         aal = aal.search([('invoiced', '=', False),('id', 'in', aal.ids)]) if aal else aal
         if not aal:
             return True
@@ -389,41 +387,32 @@ class AnalyticInvoice(models.Model):
         self.env.cr.execute("""
                 UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
         """ % (status, cond, rec))
-        return True
+        return True'''
 
     def unlink_rec(self):
         user_total_ids = self.env['analytic.user.total'].search(
             [('analytic_invoice_id', '=', False)])
         if user_total_ids:
-            cond = '='
-            rec = user_total_ids.ids[0]
-            if len(user_total_ids) > 1:
-                cond = 'IN'
-                rec = tuple(user_total_ids.ids)
-
             #reset analytic line state to invoiceable
-            analytic_lines = user_total_ids.mapped('children_ids')
-            self.analytic_line_status(analytic_lines, 'invoiceable')
-
-            self.env.cr.execute("""
-                                DELETE FROM  analytic_user_total WHERE id %s %s
-                        """ % (cond, rec))
+            analytic_lines = self.env['account.analytic.line'].browse(user_total_ids.mapped('children_ids'))
+            analytic_lines.write({'state': 'invoiceable'})
+            user_total_ids.unlink()
 
     @api.multi
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
         self.unlink_rec()
-        analytic_lines = self.user_total_ids.mapped('children_ids')
+        analytic_lines = self.env['account.analytic.line'].browse(self.user_total_ids.mapped('children_ids'))
         if analytic_lines:
-            self.analytic_line_status(analytic_lines, 'progress')
+            analytic_lines.write({'state': 'progress'})
         return res
 
     @api.model
     def create(self, vals):
         res = super(AnalyticInvoice, self).create(vals)
-        analytic_lines = res.user_total_ids.mapped('children_ids')
+        analytic_lines = self.env['account.analytic.line'].browse(res.user_total_ids.mapped('children_ids'))
         if analytic_lines:
-            self.analytic_line_status(analytic_lines, 'progress')
+            analytic_lines.write({'state': 'progress'})
         return res
 
     @api.multi
@@ -434,9 +423,9 @@ class AnalyticInvoice(models.Model):
         """
         analytic_lines = self.env['account.analytic.line']
         for obj in self:
-            analytic_lines |= obj.user_total_ids.mapped('children_ids')
+            analytic_lines |= self.env['account.analytic.line'].browse(obj.user_total_ids.mapped('children_ids'))
         if analytic_lines:
-            self.analytic_line_status(analytic_lines, 'invoiceable')
+            analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()
 
 

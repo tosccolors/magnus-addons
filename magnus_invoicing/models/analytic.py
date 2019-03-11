@@ -26,23 +26,27 @@ class AccountAnalyticLine(models.Model):
         track_visibility='onchange',
         default='draft'
     )
-
-    invoiced = fields.Boolean(
-        'Invoiced'
-    )
-    invoiceable = fields.Boolean(
-        'Invoiceable'
-    )
+#    invoiced = fields.Boolean(
+#        'Invoiced'
+#    )
+#    invoiceable = fields.Boolean(
+#        'Invoiceable'
+#    )
 
     @api.multi
     def write(self, vals):
-        state_lines = self.env['account.analytic.line']
-        for aal in self:
-            if 'state' in vals:
-                state_lines |= aal
-        state_lines = state_lines.with_context(state=True)
-        super(AccountAnalyticLine, state_lines).write(vals)
-        super(AccountAnalyticLine, self - state_lines).write(vals)
+        if 'state' in vals:
+            state_lines = self.env['account.analytic.line']
+            state_vals = {}
+            for aal in self:
+                if 'state' in vals:
+                    state_lines |= aal
+                    state_vals['state'] = vals['state']
+                    vals.pop('state')
+            if state_lines:
+                state_lines = state_lines.with_context(state=True)
+            super(AccountAnalyticLine, state_lines).write(state_vals)
+        super(AccountAnalyticLine, self).write(vals)
         return True
 
     def _check_state(self):
