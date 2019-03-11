@@ -479,7 +479,7 @@ class AnalyticInvoice(models.Model):
     @api.one
     def generate_invoice(self):
         invoices = {}
-        user_summary_lines = self.user_total_ids.filtered(lambda x: x.invoiced == False)
+        user_summary_lines = self.user_total_ids.filtered(lambda x: x.state != 'invoiced')
         inv_from_summary = []
 
         invoices['lines'] = []
