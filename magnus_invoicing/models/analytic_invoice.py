@@ -177,7 +177,7 @@ class AnalyticInvoice(models.Model):
 
                     userTotData.append((0, 0, vals))
 
-                    taskUser = taskUserObj.search([('task_id', '=', vals['task_id']),('user_id', '=', vals['user_id'])])
+                    taskUser = taskUserObj.search([('task_id', '=', vals['task_id']),('user_id', '=', vals['user_id'])], limit=1)
                     taskUserIds += taskUser.ids
 
                     if taskUserIds:

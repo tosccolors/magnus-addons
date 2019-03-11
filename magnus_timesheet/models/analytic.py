@@ -259,7 +259,7 @@ class AccountAnalyticLine(models.Model):
                 raise UserError(_(
                     'Please fill in Fee Rate Product in employee %s.\n '
                     ) % vals['user_id'])
-            taskuser = self.env['task.user'].search([('task_id', '=', vals['task_id']),('user_id','=', vals['user_id'])])
+            taskuser = self.env['task.user'].search([('task_id', '=', vals['task_id']),('user_id','=', vals['user_id'])], limit=1)
             if taskuser and taskuser.fee_rate or taskuser.product_id:
                 fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
             else:
@@ -277,35 +277,37 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        for aal in self:
-            task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id or False
-            user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id or False
-            unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount or 0.0
-            if task_id and user_id:
-                vals['product_id'] = product_id = aal.get_task_user_product(task_id, user_id) or False
-                if not product_id:
-                    raise UserError(_(
-                        'Please fill in Fee Rate Product in Employee %s.\n '
-                    ) % vals['user_id'])
-#                fr = 0
-                taskuser = self.env['task.user'].search([('task_id', '=', task_id),('user_id', '=', user_id)])
-                if taskuser and taskuser.fee_rate or taskuser.product_id:
-                    fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
-                else:
-                    user = self.env['res.users'].browse(user_id)
-                    employee = user._get_related_employees()
-                    fr = employee.fee_rate \
-                               or employee.product_id.lst_price or 0.0
-                if (vals.get('product_uom_id', False)
-                    and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id) \
-                    or (aal.product_uom_id
-                    and aal.product_uom_id == self.env.ref('product.product_uom_hour')):
-                    vals['amount'] = - unit_amount * fr
-            if self.env.context.get('default_planned', False):
-                if vals.get('select_week_id', False):
-                    vals['week_id'] = vals('select_week_id')
-                if aal.project_id:
-                    vals['planned'] = True
+        if 'task_id' in vals or 'user_id' in vals or 'unit_amount' in vals or 'product_id' in vals \
+                or 'amount' in vals or 'select_week_id' in vals or 'planned' in vals:
+            for aal in self:
+                task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id or False
+                user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id or False
+                unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount or 0.0
+                if task_id and user_id:
+                    vals['product_id'] = product_id = aal.get_task_user_product(task_id, user_id) or False
+                    if not product_id:
+                        raise UserError(_(
+                            'Please fill in Fee Rate Product in Employee %s.\n '
+                        ) % vals['user_id'])
+    #                fr = 0
+                    taskuser = self.env['task.user'].search([('task_id', '=', task_id),('user_id', '=', user_id)], limit=1)
+                    if taskuser and taskuser.fee_rate or taskuser.product_id:
+                        fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
+                    else:
+                        user = self.env['res.users'].browse(user_id)
+                        employee = user._get_related_employees()
+                        fr = employee.fee_rate \
+                                   or employee.product_id.lst_price or 0.0
+                    if (vals.get('product_uom_id', False)
+                        and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id) \
+                        or (aal.product_uom_id
+                        and aal.product_uom_id == self.env.ref('product.product_uom_hour')):
+                        vals['amount'] = - unit_amount * fr
+                if self.env.context.get('default_planned', False):
+                    if vals.get('select_week_id', False):
+                        vals['week_id'] = vals('select_week_id')
+                    if aal.project_id:
+                        vals['planned'] = True
         return super(AccountAnalyticLine, self).write(vals)
 
 
