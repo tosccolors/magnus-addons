@@ -35,19 +35,10 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
+        ctx = self.env.context.copy()
         if 'state' in vals:
-            state_lines = self.env['account.analytic.line']
-            state_vals = {}
-            for aal in self:
-                if 'state' in vals:
-                    state_lines |= aal
-                    state_vals['state'] = vals['state']
-                    vals.pop('state')
-            if state_lines:
-                state_lines = state_lines.with_context(state=True)
-            super(AccountAnalyticLine, state_lines).write(state_vals)
-        super(AccountAnalyticLine, self).write(vals)
-        return True
+            ctx.update({'state': True})
+        return super(AccountAnalyticLine, self.with_context(ctx)).write(vals)
 
     def _check_state(self):
         """

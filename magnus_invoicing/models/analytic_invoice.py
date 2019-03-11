@@ -203,35 +203,15 @@ class AnalyticInvoice(models.Model):
                 if ai.state == 'invoiced':
                     ai.state = 'open'
                     for line in ai.invoice_line_ids:
-                        cond = '='
-                        rec = line.user_task_total_line_id.children_ids.ids[0]
-                        if len(line.user_task_total_line_id.children_ids) > 1:
-                            cond = 'IN'
-                            rec = tuple(line.user_task_total_line_id.children_ids.ids)
-                        self.env.cr.execute("""
-                                            UPDATE account_analytic_line SET state = 'progress' 
-                                            WHERE id %s %s
-                                    """ % (cond, rec))
-                        self.env.cr.execute("""
-                                            UPDATE analytic_user_total SET state = 'progress' 
-                                            WHERE id = %s
-                                    """ % (line.user_task_total_line_id.id))
+                        line.user_task_total_line_id.children_ids.write({'state': 'progress'})
+                        line.user_task_total_line_id.write({'state': 'progress'})
                 else:
                     ai.state = 'open'
             elif ai.invoice_ids.state == 'open':
                 ai.state = 'invoiced'
                 for line in ai.invoice_line_ids:
-                    cond = '='
-                    rec = line.user_task_total_line_id.children_ids.ids[0]
-                    if len(line.user_task_total_line_id.children_ids) > 1:
-                        cond = 'IN'
-                        rec = tuple(line.user_task_total_line_id.children_ids.ids)
-                    self.env.cr.execute("""
-                                        UPDATE account_analytic_line SET state = 'invoiced' WHERE id %s %s
-                                """ % (cond, rec))
-                    self.env.cr.execute("""
-                                        UPDATE analytic_user_total SET state = 'invoiced' WHERE id = %s
-                                """ % (line.user_task_total_line_id.id))
+                    line.user_task_total_line_id.children_ids.write({'state': 'invoiced'})
+                    line.user_task_total_line_id.write({'state': 'invoiced'})
 
     @api.model
     def _get_fiscal_month_domain(self):
@@ -259,7 +239,9 @@ class AnalyticInvoice(models.Model):
         for aa in self.account_analytic_ids:
             operating_units |= aa.operating_unit_ids
         if operating_units:
-            res['domain'] = {'project_operating_unit_id':[('id', 'in', operating_units.ids)]}
+            res['domain'] = {'project_operating_unit_id':[
+                                ('id', 'in', operating_units.ids)
+                                ]}
         return res
 
 
@@ -375,26 +357,12 @@ class AnalyticInvoice(models.Model):
         domain=[('invoice_properties.group_invoice', '=', False)]
     )
 
-    '''def analytic_line_status(self, aal, status='progress'):
-        aal = aal.search([('invoiced', '=', False),('id', 'in', aal.ids)]) if aal else aal
-        if not aal:
-            return True
-        cond = '='
-        rec = aal.ids[0]
-        if len(aal) > 1:
-            cond = 'IN'
-            rec = tuple(aal.ids)
-        self.env.cr.execute("""
-                UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
-        """ % (status, cond, rec))
-        return True'''
-
     def unlink_rec(self):
         user_total_ids = self.env['analytic.user.total'].search(
             [('analytic_invoice_id', '=', False)])
         if user_total_ids:
             #reset analytic line state to invoiceable
-            analytic_lines = self.env['account.analytic.line'].browse(user_total_ids.mapped('children_ids'))
+            analytic_lines = user_total_ids.mapped('children_ids')
             analytic_lines.write({'state': 'invoiceable'})
             user_total_ids.unlink()
 
@@ -402,7 +370,7 @@ class AnalyticInvoice(models.Model):
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
         self.unlink_rec()
-        analytic_lines = self.env['account.analytic.line'].browse(self.user_total_ids.mapped('children_ids'))
+        analytic_lines = self.user_total_ids.mapped('children_ids')
         if analytic_lines:
             analytic_lines.write({'state': 'progress'})
         return res
@@ -410,7 +378,7 @@ class AnalyticInvoice(models.Model):
     @api.model
     def create(self, vals):
         res = super(AnalyticInvoice, self).create(vals)
-        analytic_lines = self.env['account.analytic.line'].browse(res.user_total_ids.mapped('children_ids'))
+        analytic_lines = res.user_total_ids.mapped('children_ids')
         if analytic_lines:
             analytic_lines.write({'state': 'progress'})
         return res
@@ -423,7 +391,7 @@ class AnalyticInvoice(models.Model):
         """
         analytic_lines = self.env['account.analytic.line']
         for obj in self:
-            analytic_lines |= self.env['account.analytic.line'].browse(obj.user_total_ids.mapped('children_ids'))
+            analytic_lines |= obj.user_total_ids.mapped('children_ids')
         if analytic_lines:
             analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()

@@ -199,7 +199,8 @@ class AccountAnalyticLine(models.Model):
                                           limit=1)
             product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
         if not product_id:
-            employee = self.env['hr.employee'].search([('user_id', '=', user_id)])
+            user = self.env['res.users'].browse(user_id)
+            employee = user._get_related_employees()
             product_id = employee.product_id and employee.product_id.id or False
         return product_id
 
@@ -263,7 +264,8 @@ class AccountAnalyticLine(models.Model):
                 fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
             else:
                 user = self.env['res.users'].browse(vals['user_id'])
-                fee_rate = user._get_related_employees().fee_rate or user._get_related_employees().product_id.lst_price or 0.0
+                employee = user._get_related_employees()
+                fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
             if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
                 vals['amount'] = vals['unit_amount'] * - fee_rate
         if self.env.context.get('default_planned', False):
@@ -276,18 +278,9 @@ class AccountAnalyticLine(models.Model):
     @api.multi
     def write(self, vals):
         for aal in self:
-            if 'task_id' in vals:
-                task_id = vals['task_id']
-            else:
-                task_id = aal.task_id and aal.task_id.id or False
-            if 'user_id' in vals:
-                user_id = vals['user_id']
-            else:
-                user_id = aal.user_id and aal.user_id.id or False
-            if 'unit_amount' in vals:
-                unit_amount = vals['unit_amount']
-            else:
-                unit_amount = aal.unit_amount or 0.0
+            task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id or False
+            user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id or False
+            unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount or 0.0
             if task_id and user_id:
                 vals['product_id'] = product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:
@@ -300,8 +293,9 @@ class AccountAnalyticLine(models.Model):
                     fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
                 else:
                     user = self.env['res.users'].browse(user_id)
-                    fr = user._get_related_employees().fee_rate \
-                               or user._get_related_employees().product_id.lst_price or 0.0
+                    employee = user._get_related_employees()
+                    fr = employee.fee_rate \
+                               or employee.product_id.lst_price or 0.0
                 if (vals.get('product_uom_id', False)
                     and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id) \
                     or (aal.product_uom_id

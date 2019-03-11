@@ -48,7 +48,7 @@
                      </group>
                     <separator string="Fee Rates"/>
                     <field name="task_user_ids_domain"
-                           invisible="1" />
+                           invisible="0" />
                     <field name="task_user_ids"
                            string="Fee Rates"
                            domain="task_user_ids_domain"
