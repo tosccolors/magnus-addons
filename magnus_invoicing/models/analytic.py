@@ -33,8 +33,8 @@ class AccountAnalyticLine(models.Model):
             state = vals['state']
             cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=", self.id)
             self.env.cr.execute("""
-                                UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
-                                """ % (state, cond, rec))
+                                UPDATE %s SET state = '%s' WHERE id %s %s
+                                """ % (self._table, state, cond, rec))
             self.env.invalidate_all()
             vals.pop('state')
         return super(AccountAnalyticLine, self).write(vals) if vals else True

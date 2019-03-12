@@ -479,7 +479,8 @@ class AnalyticInvoice(models.Model):
     def generate_invoice(self):
         invoices = {}
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.state != 'invoiced')
-        inv_from_summary = []
+        aal_from_summary = self.env['account.analytic.line']
+        user_total = self.env['analytic.user.total']
 
         invoices['lines'] = []
         invObj = self.env['account.invoice']
@@ -488,7 +489,9 @@ class AnalyticInvoice(models.Model):
             inv_line_vals = self._prepare_invoice_line(line)
             inv_line_vals['user_task_total_line_id'] = line.id
             invoices['lines'].append((0, 0, inv_line_vals))
-            inv_from_summary.append(line)
+            aal_from_summary |= line.children_ids
+            user_total |= line
+
         if self.invoice_ids and invoices['lines']:
             invoice = invObj.browse(self.invoice_ids.ids[0])
             invoice.write({'invoice_line_ids': invoices['lines']})
@@ -499,8 +502,12 @@ class AnalyticInvoice(models.Model):
             self.invoice_ids = [(4, invoice.id)]
         if invoice:
             invoice.compute_taxes()
-        if self.state == 'draft' and inv_from_summary:
+        if self.state == 'draft' and aal_from_summary:
             self.state = 'open'
+        if aal_from_summary:
+            aal_from_summary.write({'state':'invoiced'})
+        if user_total:
+            user_total.write({'state':'invoiced'})
         return True
 
     @api.one
