@@ -45,7 +45,7 @@ class AccountAnalyticLine(models.Model):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
                 [('week_id', '=', line.week_id.id),
                  ('employee_id.user_id.id', '=', line.user_id.id),
-                 ('state', 'in', ['draft', 'new', 'done'])])
+                 ('state', 'in', ['draft', 'new'])])
             if sheets:
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]

@@ -29,10 +29,15 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        ctx = self.env.context.copy()
         if 'state' in vals:
-            ctx.update({'state': True})
-        return super(AccountAnalyticLine, self.with_context(ctx)).write(vals)
+            state = vals['state']
+            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=", self.id)
+            self.env.cr.execute("""
+                                UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
+                                """ % (state, cond, rec))
+            self.env.invalidate_all()
+            vals.pop('state')
+        return super(AccountAnalyticLine, self).write(vals) if vals else True
 
     def _check_state(self):
         """
