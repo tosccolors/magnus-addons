@@ -32,7 +32,16 @@ class AnalyticLineStatus(models.TransientModel):
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
         status = str(self.name)
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
+
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
+
+        no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
+        if no_invoicing_property_entries:
+            project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
+            raise UserError(_(
+                'Project(s) %s doesn\'t have invoicing properties.'
+                )%project_names)
+
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             self.env.cr.execute("""

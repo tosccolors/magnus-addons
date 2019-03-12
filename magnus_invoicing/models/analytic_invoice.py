@@ -143,7 +143,6 @@ class AnalyticInvoice(models.Model):
                     if task_id:
                         project_id = self.env['project.task'].browse(task_id).project_id.id or False
                     vals = {
-                        'analytic_invoice_id': self.id,
                         'name': '/',
                         'user_id': item.get('user_id')[0] if item.get(
                             'user_id') != False else False,
