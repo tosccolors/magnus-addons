@@ -162,7 +162,7 @@ class HrTimesheetSheet(models.Model):
                 cond = 'IN'
                 rec = tuple(self.timesheet_ids.ids)
             self.env.cr.execute("""
-                            UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s;
+                            UPDATE account_analytic_line SET state = 'draft' WHERE id %s %s;
                             DELETE FROM account_analytic_line WHERE ref_id %s %s;
                     """ % (cond, rec, cond, rec))
             self.env.invalidate_all()

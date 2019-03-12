@@ -39,6 +39,7 @@ class AccountAnalyticLine(models.Model):
             vals.pop('state')
         return super(AccountAnalyticLine, self).write(vals) if vals else True
 
+
     def _check_state(self):
         """
         to check if any lines computes method calls allow to modify
@@ -46,9 +47,7 @@ class AccountAnalyticLine(models.Model):
         """
         context = self.env.context.copy()
         if not 'active_model' in context \
-                or 'active_invoice_id' in context \
-                or 'cc' in context and context['cc']\
-                or 'state' in context and context['state']:
+                or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
 

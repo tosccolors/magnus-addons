@@ -336,6 +336,7 @@ class AnalyticInvoice(models.Model):
         compute=_compute_state,
         copy=False,
         index=True,
+        store=True,
         track_visibility='onchange',
     )
 
