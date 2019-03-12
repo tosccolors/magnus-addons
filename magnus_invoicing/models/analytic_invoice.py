@@ -575,7 +575,7 @@ class AnalyticUserTotal(models.Model):
     _description = "Analytic User Total"
 
     @api.one
-    @api.depends('unit_amount', 'user_id', 'task_id')
+    @api.depends('unit_amount', 'user_id', 'task_id','analytic_invoice_id.task_user_ids')
     def _compute_fee_rate(self):
         """
             First, look get fee rate from task_user_ids from analytic invoice.
