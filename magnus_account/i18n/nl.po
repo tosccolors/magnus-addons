@@ -130,9 +130,9 @@ msgstr "Naam"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "<span>Datum</span><br/>\n"
-"                             <span>Factuur</span><br/>\n"
-"                             <span>Referentie</span><br/>\n"
+msgid "<span>Date</span><br/>\n"
+"                             <span>Invoice</span><br/>\n"
+"                             <span>Reference</span><br/>\n"
 "                             <span>Your VAT</span><br/>\n"
 "                             <span>Our Vat</span><br/>"
 msgstr "<span>Datum</span><br/>\n"
@@ -151,7 +151,18 @@ msgstr "Maand"
 msgid "Amount"
 msgstr "Bedrag"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Subtotal"
+msgstr "Subtotaal"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Total amount"
+msgstr "Totaal te voldoen"
 
-
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Payment terms:"
+msgstr "Betaaltermijn:"
 
