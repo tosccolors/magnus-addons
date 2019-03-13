@@ -96,9 +96,6 @@ class AccountAnalyticLine(models.Model):
         return date_range
 
 
-    sheet_id = fields.Many2one(
-        ondelete='cascade', store=True
-    )
     kilometers = fields.Integer(
         'Kilometers'
     )
