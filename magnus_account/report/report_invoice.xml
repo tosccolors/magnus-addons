@@ -174,9 +174,9 @@
                         <t t-foreach="analytic_inv" t-as="proLines">
                             <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report">
 
-                                <div width="100%"><strong><span t-field="proLines.name"/></strong></div>
+                                <div width="85%"><strong><span t-field="proLines.name"/></strong></div>
 
-                                <table class="table table-condensed table-padding" style="border:none;width:100%;">
+                                <table class="table table-condensed table-padding" style="border:none;width:85%;">
                                     <br/>
                                     <div><strong>Hours Overview</strong></div>
                                     <thead>
@@ -220,20 +220,20 @@
                         <t t-foreach="analytic_invoice_id[0]._get_user_per_day()" t-as="proLines">
                             <div width="50%"><strong><span t-field="proLines.name"/></strong></div>
 
-                            <table class="table table-condensed table-padding" style="border:none;width:100%;">
+                            <table class="table table-condensed table-padding" style="border:none;width:85%;">
                                 <br/>
                                 <div><strong>Hours Overview</strong></div>
                                 <thead>
                                     <th style="font-weight:normal;" width="20%">Name</th>
                                     <th style="font-weight:normal;" width="10%">Hours</th>
-                                    <th style="font-weight:normal;" width="20%">Date</th>
+                                    <th style="font-weight:normal;" width="15%">Date</th>
                                     <th style="font-weight:normal;" width="40%">Description</th>
                                 </thead>
                                 <t t-foreach="proLines_value" t-as="aaLine">
                                     <tr>
                                         <td style='border-top:none;' width="20%"><span t-field="aaLine.user_id.name"/></td>
                                         <td style='border-top:none;' width="10%"><span t-field="aaLine.unit_amount"></span></td>
-                                        <td style='border-top:none;' width="20%">
+                                        <td style='border-top:none;' width="15%">
                                             <span t-field="aaLine.date"/>
                                         </td>
                                         <td style='border-top:none;' width="40%">
