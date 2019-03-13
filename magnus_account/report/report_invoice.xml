@@ -203,7 +203,7 @@
                                     </t>
                                     <tr >
                                         <td style='border-top-style: solid;border-top-color: black;border-top-width: thin;' width="20%"></td>
-                                        <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' width="20%"> <span t-esc="o.value_conversion(proLines_value['hrs_tot'])"></span> </td>
+                                        <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"> <span t-esc="o.value_conversion(proLines_value['hrs_tot'])"></span> </td>
                                         <t t-if="proLines.invoice_properties.specs_type != 'both'">
                                             <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"></td>
                                             <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%">
