@@ -152,7 +152,7 @@ msgid "Amount"
 msgstr "Bedrag"
 
 #. module: magnus_account
-#: model:ir.ui.view,arch_db:magnus_account.model_account_invoice
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
 msgid "Subtotal"
 msgstr "Subtotaal"
 
