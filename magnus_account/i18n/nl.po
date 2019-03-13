@@ -170,3 +170,8 @@ msgstr "Betaaltermijn:"
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
 msgid "Within"
 msgstr "Binnen"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "to"
+msgstr "aan"
