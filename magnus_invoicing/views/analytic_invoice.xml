@@ -150,7 +150,7 @@
                                 ]"/>
                         <filter string="In Progress"
                                 domain="[
-                                ('state', '=', 'progress'),
+                                ('state', '=', 'open'),
                                 ]"/>
                         <filter string="Invoiced"
                                 domain="[
