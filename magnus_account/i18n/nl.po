@@ -83,13 +83,13 @@ msgstr ""
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "Our Vat"
-msgstr "Ons BTW Nr."
+msgid "Our VAT"
+msgstr "Ons BTW nr."
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
 msgid "Your VAT"
-msgstr "Uw BTW Nr."
+msgstr "Uw BTW nr."
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
@@ -130,16 +130,16 @@ msgstr "Naam"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "<span>Datum</span><br/>\n"
-"                             <span>Factuur</span><br/>\n"
-"                             <span>Referentie</span><br/>\n"
+msgid "<span>Date</span><br/>\n"
+"                             <span>Invoice</span><br/>\n"
+"                             <span>Reference</span><br/>\n"
 "                             <span>Your VAT</span><br/>\n"
-"                             <span>Our Vat</span><br/>"
+"                             <span>Our VAT</span><br/>"
 msgstr "<span>Datum</span><br/>\n"
 "                             <span>Factuur</span><br/>\n"
 "                             <span>Referentie</span><br/>\n"
-"                             <span>Uw btw</span><br/>\n"
-"                             <span>Onze btw</span><br/>"
+"                             <span>Uw BTW nr.</span><br/>\n"
+"                             <span>Ons BTW nr.</span><br/>"
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
@@ -151,7 +151,27 @@ msgstr "Maand"
 msgid "Amount"
 msgstr "Bedrag"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.model_account_invoice
+msgid "Subtotal"
+msgstr "Subtotaal"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Total amount"
+msgstr "Totaal te voldoen"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Payment terms:"
+msgstr "Betaaltermijn:"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "Within"
+msgstr "Binnen"
 
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "to"
+msgstr "aan"

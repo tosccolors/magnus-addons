@@ -43,11 +43,11 @@
                 <div class="row" style="padding:0px;padding-right:15px;border-bottom:1px solid black;">
                     <div class="col-xs-7" style="padding:0px;">
                          <div class="col-xs-3" style="padding:0px;">
-                             <span>Datum</span><br/>
-                             <span>Factuur</span><br/>
-                             <span>Referentie</span><br/>
+                             <span>Date</span><br/>
+                             <span>Invoice</span><br/>
+                             <span>Reference</span><br/>
                              <span>Your VAT</span><br/>
-                             <span>Our Vat</span><br/>
+                             <span>Our VAT</span><br/>
                              <span t-if="not sale_inv">Month</span><br/>
                              <br/>
                          </div>
@@ -133,7 +133,7 @@
                 <div class="col-xs-6 pull-right">
                 <table class="table table-condensed">
                     <tr class="border-black">
-                        <td><strong>Subtotaal</strong></td>
+                        <td><strong>Subtotal</strong></td>
                         <td class="text-right">
                             <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                         </td>
@@ -145,7 +145,7 @@
                         </td>
                     </tr>
                     <tr class="border-black">
-                        <td><strong>Totaal te voldoen</strong></td>
+                        <td><strong>Total amount</strong></td>
                         <td class="text-right">
                              <span t-if="o.type == 'out_refund'">-</span><span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                         </td>
@@ -154,15 +154,15 @@
                 </div>
             </div>
             <p t-if="o.payment_term_id" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                <strong>Betaaltermijn:</strong> Binnen <span t-field="o.payment_term_id.name"/> <strong> <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
+                <strong>Payment terms:</strong> Within <span t-field="o.payment_term_id.name"/> to <strong> <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
             </p>
 
             <t t-if="o.operating_unit_id and o.operating_unit_id.partner_id">
                 <t t-set="bank_acc" t-value="any([b.acc_number for b in o.operating_unit_id.partner_id.bank_ids])"/>
                 <p t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
                     <strong>Bank:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                    <strong>IBAN</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                    <strong>BIC</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                    <strong>IBAN:</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                    <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
                 </p>
             </t>
 
