@@ -83,7 +83,7 @@ msgstr ""
 
 #. module: magnus_account
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
-msgid "Our Vat"
+msgid "Our VAT"
 msgstr "Ons BTW nr."
 
 #. module: magnus_account

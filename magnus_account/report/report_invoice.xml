@@ -47,7 +47,7 @@
                              <span>Invoice</span><br/>
                              <span>Reference</span><br/>
                              <span>Your VAT</span><br/>
-                             <span>Our Vat</span><br/>
+                             <span>Our VAT</span><br/>
                              <span t-if="not sale_inv">Month</span><br/>
                              <br/>
                          </div>
