@@ -156,7 +156,26 @@
                                 domain="[
                                 ('state', '=', 'invoiced'),
                                 ]"/>
-                        <separator />
+                     <separator string="Operating Unit Project"/>
+                        <filter name="red" string="Red"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_red)d)]"/>
+                        <filter name="blue" string="Blue"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_blue)d)]"/>
+                        <filter name="green" string="Green"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_green)d)]"/>
+                        <filter name="black" string="Black"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_black)d)]"/>
+                        <filter name="bquind" string="bQuind"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_bquind)d)]"/>
+                     <separator />
+                     <group expand="0" string="Group By...">
+                        <filter name="ou" string="Operating Unit"
+                                icon="terp-personal" domain="[]" context="{'group_by':'project_operating_unit_id'}"/>
+                        <filter name="customer" string="Customer"
+                                icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Month" icon="terp-go-today" domain="[]"
+                                context="{'group_by':'month_id'}"/>
+                    </group>
                  </search>
             </field>
         </record>
