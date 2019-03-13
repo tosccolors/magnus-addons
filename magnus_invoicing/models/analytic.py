@@ -15,6 +15,7 @@ class AccountAnalyticLine(models.Model):
         ('delayed', 'Delayed'),
         ('invoiceable', 'To be Invoiced'),
         ('progress', 'In Progress'),
+        ('invoice_created', 'Invoice Created'),
         ('invoiced', 'Invoiced'),
         ('write_off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),

@@ -54,10 +54,10 @@ class AnalyticInvoice(models.Model):
         if current_ref:
             # get all invoiced user total objs using current reference
             userInvoicedObjs = userTotObj.search(
-                [('analytic_invoice_id', '=', current_ref), ('state', '=', 'invoiced')])
+                [('analytic_invoice_id', '=', current_ref), ('state', 'in', ('invoice_created', 'invoiced'))])
 
             # don't look for analytic lines which has been already added for other analytic invoice
-            tot_obj = userTotObj.search([('analytic_invoice_id', '!=', current_ref), ('state', '!=', 'invoiced')])
+            tot_obj = userTotObj.search([('analytic_invoice_id', '!=', current_ref), ('state', 'not in', ('invoice_created', 'invoiced'))])
             for t in tot_obj:
                 ana_ids |= t.children_ids
 
@@ -190,27 +190,51 @@ class AnalyticInvoice(models.Model):
                 userTotData.append((4, usrTot.id))
             self.user_total_ids = userTotData
 
+    def _sql_update(self, self_obj, status):
+        if not self_obj.ids or not status:
+            return True
+        cond = '='
+        rec = self_obj.ids[0]
+        if len(self_obj) > 1:
+            cond = 'IN'
+            rec = tuple(self_obj.ids)
+        self.env.cr.execute("""
+                            UPDATE %s SET state = '%s'
+                            WHERE id %s %s
+                    """ % (self_obj._table, status, cond, rec))
+
+
     @api.multi
-    @api.depends('invoice_ids.state' )
+    @api.depends('invoice_ids.state')
     def _compute_state(self):
         for ai in self:
             if not ai.invoice_ids:
                 ai.state = 'draft'
+                user_tot_objs = ai.user_total_ids.filtered(lambda ut: ut.state != 'draft')
+                for user_tot in user_tot_objs:
+                    self._sql_update(user_tot.children_ids, 'progress')
+                    self._sql_update(user_tot, 'draft')
+
             elif ai.invoice_ids.state == 'cancel':
                 ai.state = 'draft'
+                for line in ai.invoice_line_ids:
+                    self._sql_update(line.user_task_total_line_id.children_ids, 'progress')
+                    self._sql_update(line.user_task_total_line_id, 'draft')
+
             elif ai.invoice_ids.state == 'draft':
                 if ai.state == 'invoiced':
                     ai.state = 'open'
-                    for line in ai.invoice_line_ids:
-                        line.user_task_total_line_id.children_ids.write({'state': 'progress'})
-                        line.user_task_total_line_id.write({'state': 'progress'})
                 else:
                     ai.state = 'open'
+                for line in ai.invoice_line_ids:
+                    self._sql_update(line.user_task_total_line_id.children_ids, 'invoice_created')
+                    self._sql_update(line.user_task_total_line_id, 'invoice_created')
+
             elif ai.invoice_ids.state == 'open':
                 ai.state = 'invoiced'
                 for line in ai.invoice_line_ids:
-                    line.user_task_total_line_id.children_ids.write({'state': 'invoiced'})
-                    line.user_task_total_line_id.write({'state': 'invoiced'})
+                    self._sql_update(line.user_task_total_line_id.children_ids, 'invoiced')
+                    self._sql_update(line.user_task_total_line_id, 'invoiced')
 
     @api.model
     def _get_fiscal_month_domain(self):
@@ -227,6 +251,7 @@ class AnalyticInvoice(models.Model):
                 ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
             ])
 
+    @api.depends('invoice_ids')
     def _compute_invoice_count(self):
         for line in self:
             line.invoice_count = len(line.invoice_ids.ids)
@@ -479,7 +504,7 @@ class AnalyticInvoice(models.Model):
     @api.one
     def generate_invoice(self):
         invoices = {}
-        user_summary_lines = self.user_total_ids.filtered(lambda x: x.state != 'invoiced')
+        user_summary_lines = self.user_total_ids.filtered(lambda x: x.state == 'draft')
         aal_from_summary = self.env['account.analytic.line']
         user_total = self.env['analytic.user.total']
 
@@ -493,10 +518,12 @@ class AnalyticInvoice(models.Model):
             aal_from_summary |= line.children_ids
             user_total |= line
 
-        if self.invoice_ids and invoices['lines']:
+        invoice_obj = self.invoice_ids.filtered(lambda inv: inv.state == 'draft')
+
+        if invoice_obj and invoices['lines']:
             invoice = invObj.browse(self.invoice_ids.ids[0])
             invoice.write({'invoice_line_ids': invoices['lines']})
-        elif not self.invoice_ids:
+        elif not invoice_obj:
             vals = self._prepare_invoice(invoices)
             vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
             invoice = invObj.create(vals)
@@ -506,21 +533,28 @@ class AnalyticInvoice(models.Model):
         if self.state == 'draft' and aal_from_summary:
             self.state = 'open'
         if aal_from_summary:
-            aal_from_summary.write({'state':'invoiced'})
+            aal_from_summary.write({'state':'invoice_created'})
         if user_total:
-            user_total.write({'state':'invoiced'})
+            user_total.write({'state':'invoice_created'})
         return True
 
     @api.one
     def delete_invoice(self):
         if self.state == 'invoiced':
             self.invoice_ids.action_cancel()
-            self.action_invoice_draft()
+            self.invoice_ids.action_invoice_draft()
             self.invoice_line_ids.unlink()
         elif not self.invoice_ids.move_name:
             self.invoice_ids.unlink()
         elif self.state == 'open':
             self.invoice_line_ids.unlink()
+
+        if self.invoice_ids and not self.invoice_ids.invoice_line_ids:
+            self.state = 'draft'
+            for user_total in self.user_total_ids:
+                self._sql_update(user_total.children_ids, 'progress')
+                self._sql_update(user_total, 'draft')
+
 
 
     @api.multi

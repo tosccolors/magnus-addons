@@ -85,7 +85,7 @@
                                 '|', '&amp;',
                                 ('state', 'in', ['draft','open']),
                                 ('move_id','!=',False),
-                                ('state', 'not in', ['draft','delayed','write_off','invoiced','progress','change-chargecode']),
+                                ('state', 'not in', ['draft','delayed','write_off','invoice_created','invoiced','progress','change-chargecode']),
                                 ('non_invoiceable_mileage', '=', False),
                                 ('chargeable', '=', True)
                                 ]"/>
