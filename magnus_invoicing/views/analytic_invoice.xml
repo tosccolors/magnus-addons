@@ -124,10 +124,40 @@
             <field name="model">analytic.invoice</field>
             <field name="arch" type="xml">
                 <tree string="Create invoices" >
-                        <field name="partner_id" string="Client"/>
-                        <field name="account_analytic_ids"/>
-                        <field name="month_id" string="Invoicing Period"/>
+                    <field name="partner_id" string="Client"/>
+                    <field name="project_operating_unit_id"
+                           string="Operating Unit Invoice" />
+                    <field name="account_analytic_ids"
+                           attrs="{'invisible': [('project_id','!=', False)]}"/>
+                    <field name="project_id"
+                           attrs="{'invisible': [('project_id','=', False)]}"/>
+                    <field name="month_id" string="Invoicing Period"/>
+                    <field name="state" />
                 </tree>
+            </field>
+        </record>
+
+        <record id="view_analytic_invoice_filter" model="ir.ui.view">
+            <field name="name">analytic.invoice.filter</field>
+            <field name="model">analytic.invoice</field>
+            <field name="arch" type="xml">
+                 <search string="Analytic Invoice Search">
+                     <field name="partner_id" string="Customer"/>
+                     <field name="month_id"/>
+                        <filter string="Draft"
+                                domain="[
+                                ('state', '=', 'draft'),
+                                ]"/>
+                        <filter string="In Progress"
+                                domain="[
+                                ('state', '=', 'progress'),
+                                ]"/>
+                        <filter string="Invoiced"
+                                domain="[
+                                ('state', '=', 'invoiced'),
+                                ]"/>
+                        <separator />
+                 </search>
             </field>
         </record>
 
