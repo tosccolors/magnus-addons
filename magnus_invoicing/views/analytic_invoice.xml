@@ -124,10 +124,59 @@
             <field name="model">analytic.invoice</field>
             <field name="arch" type="xml">
                 <tree string="Create invoices" >
-                        <field name="partner_id" string="Client"/>
-                        <field name="account_analytic_ids"/>
-                        <field name="month_id" string="Invoicing Period"/>
+                    <field name="partner_id" string="Client"/>
+                    <field name="project_operating_unit_id"
+                           string="Operating Unit Invoice" />
+                    <field name="account_analytic_ids"
+                           attrs="{'invisible': [('project_id','!=', False)]}"/>
+                    <field name="project_id"
+                           attrs="{'invisible': [('project_id','=', False)]}"/>
+                    <field name="month_id" string="Invoicing Period"/>
+                    <field name="state" />
                 </tree>
+            </field>
+        </record>
+
+        <record id="view_analytic_invoice_filter" model="ir.ui.view">
+            <field name="name">analytic.invoice.filter</field>
+            <field name="model">analytic.invoice</field>
+            <field name="arch" type="xml">
+                 <search string="Analytic Invoice Search">
+                     <field name="partner_id" string="Customer"/>
+                     <field name="month_id"/>
+                        <filter string="Draft"
+                                domain="[
+                                ('state', '=', 'draft'),
+                                ]"/>
+                        <filter string="In Progress"
+                                domain="[
+                                ('state', '=', 'open'),
+                                ]"/>
+                        <filter string="Invoiced"
+                                domain="[
+                                ('state', '=', 'invoiced'),
+                                ]"/>
+                     <separator string="Operating Unit Project"/>
+                        <filter name="red" string="Red"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_red)d)]"/>
+                        <filter name="blue" string="Blue"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_blue)d)]"/>
+                        <filter name="green" string="Green"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_green)d)]"/>
+                        <filter name="black" string="Black"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_black)d)]"/>
+                        <filter name="bquind" string="bQuind"
+                                domain="[('project_operating_unit_id','=',%(ou.magnus_bquind)d)]"/>
+                     <separator />
+                     <group expand="0" string="Group By...">
+                        <filter name="ou" string="Operating Unit"
+                                icon="terp-personal" domain="[]" context="{'group_by':'project_operating_unit_id'}"/>
+                        <filter name="customer" string="Customer"
+                                icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
+                        <filter string="Month" icon="terp-go-today" domain="[]"
+                                context="{'group_by':'month_id'}"/>
+                    </group>
+                 </search>
             </field>
         </record>
 

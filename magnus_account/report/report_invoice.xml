@@ -174,14 +174,14 @@
                         <t t-foreach="analytic_inv" t-as="proLines">
                             <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report">
 
-                                <div width="50%"><strong><span t-field="proLines.name"/></strong></div>
+                                <div width="85%"><strong><span t-field="proLines.name"/></strong></div>
 
-                                <table class="table table-condensed table-padding" style="border:none;width:50%;">
+                                <table class="table table-condensed table-padding" style="border:none;width:85%;">
                                     <br/>
                                     <div><strong>Hours Overview</strong></div>
                                     <thead>
                                         <th style="font-weight:normal;" width="20%">Name</th>
-                                        <th style="font-weight:normal;" width="20%">Hours</th>
+                                        <th style="font-weight:normal;" class="text-right" width="20%">Hours</th>
                                         <t t-if="proLines.invoice_properties.specs_type != 'both'">
                                             <th style="font-weight:normal;" class="text-right" width="20%">Fee Rate</th>
                                             <th style="font-weight:normal;" class="text-right" width="20%">Amount</th>
@@ -190,24 +190,24 @@
                                     <t t-foreach="proLines_value" t-as="userLine">
                                         <tr t-if="userLine not in ('amt_tot','hrs_tot')" style='border-top:none;'>
                                             <td style='border-top:none;' width="20%"><span t-field="userLine.name"/></td>
-                                            <td style='border-top:none;' width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
+                                            <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
                                             <t t-if="proLines.invoice_properties.specs_type != 'both'">
                                                 <td style='border-top:none;' class="text-right" width="20%">
                                                     <span t-esc="o.value_conversion(userLine_value['fee_rate'])"/>
                                                 </td>
                                                 <td style='border-top:none;' class="text-right" width="20%">
-                                                    <span t-esc="o.value_conversion(userLine_value['amount'], monetary=True, currency_obj=o.company_currency_id)"/>
+                                                    <span t-esc="o.value_conversion(-userLine_value['amount'], monetary=True, currency_obj=o.company_currency_id)"/>
                                                 </td>
                                             </t>
                                         </tr>
                                     </t>
                                     <tr >
                                         <td style='border-top-style: solid;border-top-color: black;border-top-width: thin;' width="20%"></td>
-                                        <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' width="20%"> <span t-esc="o.value_conversion(proLines_value['hrs_tot'])"></span> </td>
+                                        <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"> <span t-esc="o.value_conversion(proLines_value['hrs_tot'])"></span> </td>
                                         <t t-if="proLines.invoice_properties.specs_type != 'both'">
                                             <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"></td>
                                             <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%">
-                                                 <span t-esc="o.value_conversion(proLines_value['amt_tot'], monetary=True, currency_obj=o.company_currency_id)"/>
+                                                 <span t-esc="o.value_conversion(-proLines_value['amt_tot'], monetary=True, currency_obj=o.company_currency_id)"/>
                                             </td>
                                         </t>
                                     </tr>
@@ -220,23 +220,23 @@
                         <t t-foreach="analytic_invoice_id[0]._get_user_per_day()" t-as="proLines">
                             <div width="50%"><strong><span t-field="proLines.name"/></strong></div>
 
-                            <table class="table table-condensed table-padding" style="border:none;width:50%;">
+                            <table class="table table-condensed table-padding" style="border:none;width:85%;">
                                 <br/>
                                 <div><strong>Hours Overview</strong></div>
                                 <thead>
                                     <th style="font-weight:normal;" width="20%">Name</th>
-                                    <th style="font-weight:normal;" width="20%">Hours</th>
-                                    <th style="font-weight:normal;" width="20%">Date</th>
-                                    <th style="font-weight:normal;" width="20%">Description</th>
+                                    <th style="font-weight:normal;" width="10%">Hours</th>
+                                    <th style="font-weight:normal;" width="15%">Date</th>
+                                    <th style="font-weight:normal;" width="40%">Description</th>
                                 </thead>
                                 <t t-foreach="proLines_value" t-as="aaLine">
                                     <tr>
                                         <td style='border-top:none;' width="20%"><span t-field="aaLine.user_id.name"/></td>
-                                        <td style='border-top:none;' width="20%"><span t-field="aaLine.unit_amount"></span></td>
-                                        <td style='border-top:none;' width="20%">
+                                        <td style='border-top:none;' width="10%"><span t-field="aaLine.unit_amount"></span></td>
+                                        <td style='border-top:none;' width="15%">
                                             <span t-field="aaLine.date"/>
                                         </td>
-                                        <td style='border-top:none;' width="20%">
+                                        <td style='border-top:none;' width="40%">
                                              <span t-field="aaLine.name"/>
                                         </td>
                                     </tr>
