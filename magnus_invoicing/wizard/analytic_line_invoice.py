@@ -176,7 +176,7 @@ class AnalyticLineStatus(models.TransientModel):
             return res
 
         analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.account_id.tag_ids]
-        amount = self._calculate_fee_rate(line)
+        amount = abs(self._calculate_fee_rate(line))
 
         move_line_debit = {
             'date_maturity': line.date,
@@ -191,13 +191,18 @@ class AnalyticLineStatus(models.TransientModel):
             'product_uom_id': line.product_uom_id.id,
             'analytic_account_id': line.account_id.id,
             'analytic_tag_ids': analytic_tag_ids,
-            'operating_unit_id': line.project_operating_unit_id and line.project_operating_unit_id.id or False,
+            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
         }
 
         res.append(move_line_debit)
 
         move_line_credit = move_line_debit.copy()
-        move_line_credit.update({'debit':0.0, 'credit':amount, 'account_id':line.product_id.property_account_wip_id.id,'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False})
+        move_line_credit.update({
+            'debit': 0.0,
+            'credit': amount,
+            'account_id': line.product_id.property_account_wip_id.id,
+            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False
+        })
         res.append(move_line_credit)
 
         return res
