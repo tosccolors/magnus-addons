@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "magnus_expense",
+    'name': "magnus_security",
 
     'summary': """
-        Adjustments to Expense Module
-        """,
+        Magnus Security""",
 
     'description': """
+        Magnus Security
     """,
 
     'author': "Magnus",
@@ -19,13 +19,13 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['hr_expense', 'hr_expense_operating_unit', 'invoice_line_revenue_distribution_operating_unit', 'web_readonly_bypass'],
+    'depends': ['magnus_timesheet','hr_holidays'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/hr_expense_views.xml',
-#        'views/account_views.xml',
+        'views/hr_views.xml',
+        'views/hr_timesheet_assets.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

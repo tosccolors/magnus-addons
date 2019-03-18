@@ -49,6 +49,7 @@ class HrTimesheetSheet(models.Model):
                 expenses,
                 chargeable,
                 operating_unit_id,
+                project_operating_unit_id,
                 correction_charge,
                 write_off_move,
                 ref_id,
@@ -65,7 +66,7 @@ class HrTimesheetSheet(models.Model):
                 aal.account_id as account_id,
                 aal.company_id as company_id,
                 aal.write_uid as write_uid,
-                aal.amount as amount,
+                0.0 as amount,
                 aal.kilometers as unit_amount,
                 aal.date as date,
                 %(create)s as create_date,
@@ -93,6 +94,7 @@ class HrTimesheetSheet(models.Model):
                 aal.expenses as expenses,
                 aal.chargeable as chargeable,
                 aal.operating_unit_id as operating_unit_id,
+                aal.project_operating_unit_id as project_operating_unit_id,
                 aal.correction_charge as correction_charge,
                 aal.write_off_move as write_off_move,              
                 aal.id as ref_id,
@@ -149,7 +151,8 @@ class HrTimesheetSheet(models.Model):
         On timesheet reset draft check analytic shouldn't be in invoiced
         :return: Super
         """
-        if self.timesheet_ids.filtered('invoiced') or any([ts.state == 'progress' for ts in self.timesheet_ids]):
+        if any([ts.state == 'progress' for ts in self.timesheet_ids]):
+        # if self.timesheet_ids.filtered('invoiced') or any([ts.state == 'progress' for ts in self.timesheet_ids]):
             raise UserError(_('You cannot modify timesheet entries either Invoiced or belongs to Analytic Invoiced!'))
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.timesheet_ids:
@@ -159,7 +162,7 @@ class HrTimesheetSheet(models.Model):
                 cond = 'IN'
                 rec = tuple(self.timesheet_ids.ids)
             self.env.cr.execute("""
-                            UPDATE account_analytic_line SET state = 'draft', invoiceable = false WHERE id %s %s;
+                            UPDATE account_analytic_line SET state = 'draft' WHERE id %s %s;
                             DELETE FROM account_analytic_line WHERE ref_id %s %s;
                     """ % (cond, rec, cond, rec))
             self.env.invalidate_all()

@@ -4,43 +4,44 @@
 
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
+from odoo.exceptions import UserError, ValidationError
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
     _description = 'Analytic Line'
     _order = 'date desc'
 
-
-    @api.depends('date', 'user_id', 'project_id', 'sheet_id_computed.date_to', 'sheet_id_computed.date_from',
+    @api.depends('date', 'user_id', 'project_id', 'account_id','sheet_id_computed.date_to',
+                 'sheet_id_computed.date_from',
                  'sheet_id_computed.employee_id', 'task_id', 'product_uom_id', 'planned')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
-            if line.project_id and line.task_id and line.user_id and not line.planned:
-                if line.sheet_id.week_id and line.date:
-                    line.week_id = line.sheet_id.week_id
-                    line.month_id = line.find_daterange_month(line.date)
-                elif line.date:
-                    line.week_id = line.find_daterange_week(line.date)
-                    line.month_id = line.find_daterange_month(line.date)
-                elif not line.child_ids == []:
-                    line.week_id = line.find_daterange_week(line.child_ids.date)
-                    line.month_id = line.find_daterange_month(line.child_ids.date)
-                if line.product_uom_id.id == UomHrs:
-                    line.ts_line = True
-            if not line.ts_line or line.planned:
-                # for planned update correction_charge & chargeable
-                if line.planned:
-                    line.correction_charge = line.project_id.correction_charge
-                    line.chargeable = line.project_id.chargeable
+            line.project_operating_unit_id = \
+                line.account_id.operating_unit_ids \
+                and line.account_id.operating_unit_ids[0] or False
+            if line.task_id and line.user_id:
+                uou = line.user_id._get_operating_unit_id()
+                if uou:
+                    line.operating_unit_id = uou
+                if not line.planned:
+                    if line.sheet_id.week_id and line.date:
+                        line.week_id = line.sheet_id.week_id
+                        line.month_id = line.find_daterange_month(line.date)
+                    elif line.date:
+                        line.week_id = line.find_daterange_week(line.date)
+                        line.month_id = line.find_daterange_month(line.date)
+                    elif not line.child_ids == []:
+                        line.week_id = line.find_daterange_week(line.child_ids.date)
+                        line.month_id = line.find_daterange_month(line.child_ids.date)
+                    if line.product_uom_id.id == UomHrs:
+                        line.ts_line = True
+                if not line.ts_line or line.planned:
+                    continue
+            else:
                 continue
-            project = line.project_id
-            line.correction_charge = project.correction_charge
-            line.chargeable = project.chargeable
-            line.expenses = project.invoice_properties.expenses if project.invoice_properties else False
-
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
                 [('week_id', '=', line.week_id.id),
                  ('employee_id.user_id.id', '=', line.user_id.id),
@@ -49,10 +50,7 @@ class AccountAnalyticLine(models.Model):
                 # [0] because only one sheet possible for an employee between 2 dates
                 line.sheet_id_computed = sheets[0]
                 line.sheet_id = sheets[0]
-            if line.project_id and line.chargeable and line.project_id.analytic_account_id.operating_unit_ids:
-                line.operating_unit_id = line.project_id.analytic_account_id.operating_unit_ids[0]
-            else:
-                line.operating_unit_id = False
+
 
     def find_daterange_week(self, date):
         """
@@ -98,8 +96,19 @@ class AccountAnalyticLine(models.Model):
         return date_range
 
 
+    kilometers = fields.Integer(
+        'Kilometers'
+    )
+    non_invoiceable_mileage = fields.Boolean(
+        string='Invoice Mileage',
+        store=True
+    )
+    ref_id = fields.Many2one(
+        'account.analytic.line',
+        string='Reference'
+    )
     user_total_id = fields.Many2one(
-        'analytic.user.total',
+        comodel_name='analytic.user.total',
         string='Summary Reference',
         index=True
     )
@@ -116,19 +125,18 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
     correction_charge = fields.Boolean(
-        compute=_compute_sheet,
+        related='project_id.correction_charge',
         string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
-        compute=_compute_sheet,
+        related='project_id.chargeable',
         string='Chargeable',
         store=True,
     )
     expenses = fields.Boolean(
-        compute=_compute_sheet,
+        related='project_id.invoice_properties.expenses',
         string='Expenses',
-        store=True,
     )
     operating_unit_id = fields.Many2one(
         'operating.unit',
@@ -136,11 +144,12 @@ class AccountAnalyticLine(models.Model):
         string='Operating Unit',
         store=True
     )
-    write_off_move = fields.Many2one(
-        'account.move',
-        string='Write-off Move',
+    project_operating_unit_id = fields.Many2one(
+        'operating.unit',
+        compute=_compute_sheet,
+        string='Project Operating Unit',
+        store=True
     )
-
     task_id = fields.Many2one(
         'project.task', 'Task',
         ondelete='restrict'
@@ -171,6 +180,11 @@ class AccountAnalyticLine(models.Model):
         string='Timesheet line',
         store=True,
     )
+    project_mgr = fields.Many2one(
+        comodel_name='res.users',
+        related='account_id.project_ids.user_id',
+        store=True
+    )
 
 
     @api.model
@@ -182,28 +196,33 @@ class AccountAnalyticLine(models.Model):
                                           limit=1)
             product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
         if not product_id:
-            employee = self.env['hr.employee'].search([('user_id', '=', user_id)])
+            user = self.env['res.users'].browse(user_id)
+            employee = user._get_related_employees()
             product_id = employee.product_id and employee.product_id.id or False
         return product_id
 
     @api.model
-    def get_fee_rate(self):
-        uid = self.user_id.id or False
-        tid = self.task_id.id or False
+    def get_fee_rate(self, task_id=None, user_id=None):
+        uid = user_id or self.user_id.id or False
+        tid = task_id or self.task_id.id or False
         amount, fr = 0.0, 0.0
         if uid and tid:
             task_user = self.env['task.user'].search([
                 ('user_id', '=', uid),
-                ('task_id', '=', tid)])
+                ('task_id', '=', tid)], limit=1)
             fr = task_user.fee_rate
         if not fr :
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
-        amount = self.unit_amount * fr
-        return amount
+        return fr
 
+    @api.model
+    def get_fee_rate_amount(self, task_id=None, user_id=None):
+        fr = self.get_fee_rate(task_id=task_id, user_id=user_id)
+        amount = - self.unit_amount * fr
+        return amount
 
     def _fetch_emp_plan(self):
         emp = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
@@ -230,65 +249,63 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-        res = super(AccountAnalyticLine, self).create(vals)
-        fee_rate = 0
-        UpdateCols = []
+#        fee_rate = 0
         if 'task_id' in vals and 'user_id' in vals:
-            vals['product_id'] = res.get_task_user_product(vals['task_id'], vals['user_id'])
-            task = self.env['project.task'].browse(vals['task_id'])
-            if task.task_user_ids:
-                for user in task.task_user_ids:
-                    if user.user_id.id == vals['user_id']:
-                        fee_rate = user.fee_rate or user.product_id.lst_price
+            vals['product_id'] = self.get_task_user_product(vals['task_id'], vals['user_id']) or False
+            if not vals['product_id']:
+                raise UserError(_(
+                    'Please fill in Fee Rate Product in employee %s.\n '
+                    ) % vals['user_id'])
+            taskuser = self.env['task.user'].search([('task_id', '=', vals['task_id']),('user_id','=', vals['user_id'])], limit=1)
+            if taskuser and taskuser.fee_rate or taskuser.product_id:
+                fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
             else:
-                fee_rate = res.sheet_id.employee_id.fee_rate or res.sheet_id.employee_id.product_id.lst_price
-
+                user = self.env['res.users'].browse(vals['user_id'])
+                employee = user._get_related_employees()
+                fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
             if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                amount = vals['unit_amount'] * fee_rate
-                UpdateCols.append("amount = %s"%amount)
+                vals['amount'] = vals['unit_amount'] * - fee_rate
         if self.env.context.get('default_planned', False):
-            if res.week_id != res.select_week_id:
-                UpdateCols.append("week_id = %s" % res.select_week_id.id)
-            if res.project_id != False:
-                UpdateCols.append("planned = True")
-        if UpdateCols:
-            col_up = ', '.join(UpdateCols)
-            self.env.cr.execute(
-                """UPDATE account_analytic_line SET %s WHERE id = %s""" % (col_up, res.id)
-            )
-        return res
+            if vals.get['select_week_id', False] and vals['week_id'] != vals['select_week_id']:
+                vals['week_id'] = vals['select_week_id']
+            if vals.get['project_id', False]:
+                vals['planned'] = True
+        return super(AccountAnalyticLine, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        res = super(AccountAnalyticLine, self).write(vals)
-        for aal in self:
-            task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id
-            user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id
-            unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount
-            UpdateCols = []
-            if task_id and user_id:
-                product_id = aal.get_task_user_product(task_id, user_id)
-                if product_id:
-                    fee_rate = 0
-                    task = self.env['project.task'].browse(task_id)
-                    if task.task_user_ids:
-                        for user in task.task_user_ids:
-                            if user.user_id.id == user_id:
-                                fee_rate = user.fee_rate or user.product_id.lst_price
-                        if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                            amount = unit_amount * fee_rate
-                            UpdateCols.append("amount = %s, product_id = %s" % (amount, product_id))
-            if vals.get('select_week_id', False) and aal.week_id != aal.select_week_id:
-                UpdateCols.append("week_id = %s"%aal.select_week_id.id)
-            if self.env.context.get('default_planned', False) and aal.project_id != False:
-                UpdateCols.append("planned = True")
-            if UpdateCols:
-                col_up = ', '.join(UpdateCols)
-                self.env.cr.execute(
-                    """UPDATE account_analytic_line SET %s WHERE id = %s""" % (col_up, aal.id)
-                )
-            return res
-        return res
+        if 'task_id' in vals or 'user_id' in vals or 'unit_amount' in vals or 'product_id' in vals \
+                or 'amount' in vals or 'select_week_id' in vals or 'planned' in vals:
+            for aal in self:
+                task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id or False
+                user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id or False
+                unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount or 0.0
+                if task_id and user_id:
+                    vals['product_id'] = product_id = aal.get_task_user_product(task_id, user_id) or False
+                    if not product_id:
+                        raise UserError(_(
+                            'Please fill in Fee Rate Product in Employee %s.\n '
+                        ) % vals['user_id'])
+    #                fr = 0
+                    taskuser = self.env['task.user'].search([('task_id', '=', task_id),('user_id', '=', user_id)], limit=1)
+                    if taskuser and taskuser.fee_rate or taskuser.product_id:
+                        fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
+                    else:
+                        user = self.env['res.users'].browse(user_id)
+                        employee = user._get_related_employees()
+                        fr = employee.fee_rate \
+                                   or employee.product_id.lst_price or 0.0
+                    if (vals.get('product_uom_id', False)
+                        and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id) \
+                        or (aal.product_uom_id
+                        and aal.product_uom_id == self.env.ref('product.product_uom_hour')):
+                        vals['amount'] = - unit_amount * fr
+                if self.env.context.get('default_planned', False):
+                    if vals.get('select_week_id', False):
+                        vals['week_id'] = vals('select_week_id')
+                    if aal.project_id:
+                        vals['planned'] = True
+        return super(AccountAnalyticLine, self).write(vals)
 
 
 

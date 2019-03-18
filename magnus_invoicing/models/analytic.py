@@ -15,8 +15,9 @@ class AccountAnalyticLine(models.Model):
         ('delayed', 'Delayed'),
         ('invoiceable', 'To be Invoiced'),
         ('progress', 'In Progress'),
+        ('invoice_created', 'Invoice Created'),
         ('invoiced', 'Invoiced'),
-        # ('write-off', 'Write-Off'),
+        ('write_off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
     ],
         string='Status',
@@ -27,12 +28,18 @@ class AccountAnalyticLine(models.Model):
         default='draft'
     )
 
-    invoiced = fields.Boolean(
-        'Invoiced'
-    )
-    invoiceable = fields.Boolean(
-        'Invoiceable'
-    )
+    @api.multi
+    def write(self, vals):
+        if 'state' in vals:
+            state = vals['state']
+            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=", self.id)
+            self.env.cr.execute("""
+                                UPDATE %s SET state = '%s' WHERE id %s %s
+                                """ % (self._table, state, cond, rec))
+            self.env.invalidate_all()
+            vals.pop('state')
+        return super(AccountAnalyticLine, self).write(vals) if vals else True
+
 
     def _check_state(self):
         """
@@ -40,7 +47,8 @@ class AccountAnalyticLine(models.Model):
         :return: True or super
         """
         context = self.env.context.copy()
-        if not 'active_model' in context:
+        if not 'active_model' in context \
+                or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
 

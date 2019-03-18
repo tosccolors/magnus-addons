@@ -2,7 +2,8 @@
 # Copyright 2018 Magnus ((www.magnus.nl).)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError, ValidationError
 
 class Project(models.Model):
     _inherit = "project.project"
@@ -24,6 +25,21 @@ class Project(models.Model):
     @api.multi
     def name_get(self):
         return [(value.id, "%s%s" % (value.code + '-' if value.code else '', value.name)) for value in self]
+
+class AccountAnalyticAccount(models.Model):
+    _inherit = 'account.analytic.account'
+    _description = 'Analytic Account'
+
+    @api.multi
+    @api.constrains('project_ids')
+    def _check_length_projects(self):
+        for aa in self:
+            if len(aa.project_ids) > 1:
+                raise ValidationError(
+                    _('Fill in maximum one Project. '
+                      'In Magnus Analytic Accounts can have one project maximum. '
+                    ))
+        return True
 
 class Task(models.Model):
     _inherit = "project.task"
@@ -63,4 +79,5 @@ class ProjectInvoicingProperties(models.Model):
     fixed_fee_capped = fields.Boolean('Invoice Fixed Fee Capped')
     fixed_fee_limit = fields.Monetary('Fixed Fee Limit')
     currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.user.company_id.currency_id)
+    specs_type = fields.Selection([('per_month','Per Month'), ('per_day','Per Day'), ('both','Monthly/Daily Specification')], string="Specification Type", default='per_month')
 

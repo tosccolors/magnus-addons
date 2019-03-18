@@ -24,7 +24,7 @@ from odoo import fields, models, api
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
-    invoice_description = fields.Text('Description')
+    invoice_description = fields.Html('Description')
 
     @api.multi
     def invoice_print(self):
@@ -36,15 +36,48 @@ class AccountInvoice(models.Model):
         return self.env['report'].get_action(self, 'account.invoice.custom')
 
     @api.multi
-    def group_by_analytic_acc(self):
+    def group_by_analytic_acc(self, type):
         self.ensure_one()
         result = {}
-        for line in self.invoice_line_ids:
-            if line.account_analytic_id in result:
-                result[line.account_analytic_id].append(line)
-            else:
-                result[line.account_analytic_id] = [line]
+        if type == 'sale_order':
+            for line in self.invoice_line_ids:
+                if line.account_analytic_id in result:
+                    result[line.account_analytic_id].append(line)
+                else:
+                    result[line.account_analytic_id] = [line]
+        if type == 'project':
+            for line in self.invoice_line_ids:
+                quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)
+                price_subtotal = line.uom_id._compute_price(line.price_subtotal, line.uom_id)
+                if line.account_analytic_id in result:
+                    result[line.account_analytic_id]['tot_hrs'] += quantity
+                    result[line.account_analytic_id]['sub_total'] += price_subtotal
+                else:
+                    result[line.account_analytic_id] = {'tot_hrs':quantity, 'sub_total':price_subtotal}
         return result
+
+    @api.multi
+    def parse_invoice_description(self):
+        res = False
+        desc = self.invoice_description
+        if desc and desc != '<p><br></p>':
+            res = True
+        return res
+
+    @api.multi
+    def value_conversion(self, value, monetary=False, digits=2, currency_obj=False):
+        lang_objs = self.env['res.lang'].search([('code', '=', self.partner_id.lang)])
+        if not lang_objs:
+            lang_objs = self.env['res.lang'].search([], limit=1)
+        lang_obj = lang_objs[0]
+
+        res = lang_obj.format('%.' + str(digits) + 'f', value, grouping=True, monetary=monetary)
+        if currency_obj and currency_obj.symbol:
+            if currency_obj.position == 'after':
+                res = u'%s\N{NO-BREAK SPACE}%s' % (res, currency_obj.symbol)
+            elif currency_obj and currency_obj.position == 'before':
+                res = u'%s\N{NO-BREAK SPACE}%s' % (currency_obj.symbol, res)
+        return res
 
 class ResCompany(models.Model):
     _inherit = 'res.company'

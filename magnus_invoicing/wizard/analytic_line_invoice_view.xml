@@ -17,6 +17,8 @@
                     </group>
                     <footer>
                         <button name="analytic_invoice_lines" string="Update Entries" type="object" class="oe_highlight"/>
+                        <button name="prepare_analytic_invoice" string="Make Analytic invoice" type="object"
+                                class="oe_highlight"/>
                         <button string="Cancel" class="oe_link" special="cancel" />
                     </footer>
                 </form>
