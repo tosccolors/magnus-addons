@@ -86,6 +86,7 @@ class AnalyticLineStatus(models.TransientModel):
             for res in result:
                 analytic_account_ids = res[0]
                 partner_id = res[1]
+                partner = self.env['res.partner'].browse(partner_id)
                 month_id = res[2]
                 project_operating_unit_id = res[3]
                 search_domain = [
@@ -104,9 +105,18 @@ class AnalyticLineStatus(models.TransientModel):
                     # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
                 else:
                     analytic_invoice.create({
-                        'partner_id':partner_id,
+                        'partner_id': partner_id,
+                        'type': 'out_invoice',
+                        'account_id': partner.property_account_receivable_id.id,
                         'month_id':month_id,
-                        'project_operating_unit_id':project_operating_unit_id
+                        'project_operating_unit_id':project_operating_unit_id,
+                        'operating_unit_id': project_operating_unit_id,
+                        'link_project': False,
+                        'payment_term_id': partner.property_payment_term_id.id or False,
+                        'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
+                        'fiscal_position_id': partner.property_account_position_id.id or False,
+                        'user_id': self.env.user.id,
+                        'company_id': self.env.user.company_id.id,
                     })
 
         if sep_entries:
@@ -122,6 +132,7 @@ class AnalyticLineStatus(models.TransientModel):
             for res in result1:
                 analytic_account_ids = res[0]
                 partner_id = res[1]
+                partner = self.env['res.partner'].browse(partner_id)
                 month_id = res[2]
                 project_operating_unit_id = res[3]
                 project_id = res[4]
@@ -145,15 +156,20 @@ class AnalyticLineStatus(models.TransientModel):
                     # analytic_invobj.with_context(ctx).project_id = project_id
                 else:
                     analytic_invoice.create({
-                        'partner_id':partner_id,
+                        'partner_id': partner_id,
+                        'type': 'out_invoice',
+                        'account_id': partner.property_account_receivable_id.id,
                         'month_id':month_id,
-                        'project_operating_unit_id':project_operating_unit_id,
-                        'project_id':project_id,
-                        'link_project': True
+                        'project_operating_unit_id': project_operating_unit_id,
+                        'operating_unit_id': project_operating_unit_id,
+                        'project_id': project_id,
+                        'link_project': True,
+                        'payment_term_id': partner.property_payment_term_id.id or False,
+                        'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
+                        'fiscal_position_id': partner.property_account_position_id.id or False,
+                        'user_id': self.env.user.id,
+                        'company_id': self.env.user.company_id.id,
                     })
-                # analytic_invoice.create(
-                #     {'partner_id': entries.partner_id, 'month_id': entries.month_id, 'project_operating_unit_id': entries.project_operating_unit_id, 'project_id':})
-
 
     @api.onchange('wip_percentage')
     def onchange_wip_percentage(self):
