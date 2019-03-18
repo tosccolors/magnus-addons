@@ -9,6 +9,7 @@ class HrChargeabilityReport(models.Model):
 
     date = fields.Date('Date', readonly=True)
     user_id = fields.Many2one('res.users', string='User', readonly=True)
+    operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', readonly=True)
     chargeable_hours = fields.Float(string="Charegeable Hrs", readonly=True)
     norm_hours = fields.Float(string="Norm Hrs", readonly=True)
     chargeability = fields.Float(string="Chargeability", readonly=True)
@@ -24,26 +25,69 @@ class HrChargeabilityReport(models.Model):
                     min(aa.id) as id,
                     aa.date as date,
                     aa.user_id as user_id,
-                    SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END) as chargeable_hours,
-                    ((SUM(CASE WHEN aa.correction_charge = 'true' THEN 8 ELSE 0 END)) 
-                      - SUM(CASE WHEN aa.correction_charge = 'true' THEN unit_amount ELSE 0 END)) as norm_hours,                      
-                    ((SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END))/
-                     (CASE WHEN
-                        ((SUM(CASE WHEN aa.correction_charge = 'true' THEN 8 ELSE 0 END)) - SUM(CASE WHEN aa.correction_charge = 'true' THEN unit_amount ELSE 0 END)) = 0  
-                        THEN (
-                            CASE WHEN (SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END)) = 0
-                            THEN 1
-                            ELSE SUM(CASE WHEN aa.chargeable = 'true' THEN unit_amount ELSE 0 END)
-                            END
-                            )
-                        ELSE ((SUM(CASE WHEN aa.correction_charge = 'true' THEN 8 ELSE 0 END)) - SUM(CASE WHEN aa.correction_charge = 'true' THEN unit_amount ELSE 0 END)) END
-                     ))*100 as chargeability
+                    aa.operating_unit_id as operating_unit_id,
+                    SUM(CASE 
+                             WHEN aa.chargeable = 'true' 
+                             THEN unit_amount 
+                             ELSE 0 
+                        END) as chargeable_hours,
+                    ((SUM(
+                        CASE 
+                             WHEN aa.correction_charge = 'true' 
+                             THEN 8 
+                             ELSE 0 
+                        END)) 
+                    - SUM(
+                        CASE 
+                            WHEN aa.correction_charge = 'true' 
+                            THEN unit_amount 
+                            ELSE 0 
+                        END)) as norm_hours,                      
+                    ((SUM(
+                        CASE WHEN aa.chargeable = 'true' 
+                             THEN unit_amount 
+                             ELSE 0 
+                        END))
+                        / (CASE WHEN ((SUM(CASE WHEN aa.correction_charge = 'true' 
+                                                THEN 8 
+                                                ELSE 0 
+                                           END)) 
+                                       - SUM(CASE WHEN aa.correction_charge = 'true' 
+                                             THEN unit_amount 
+                                             ELSE 0 
+                                        END)) = 0  
+                             THEN (
+                                  CASE WHEN (SUM(
+                                                CASE WHEN aa.chargeable = 'true' 
+                                                     THEN unit_amount 
+                                                     ELSE 0 
+                                                END)) = 0
+                                       THEN 1
+                                       ELSE SUM(
+                                                CASE WHEN aa.chargeable = 'true' 
+                                                     THEN unit_amount 
+                                                     ELSE 0 
+                                                END)
+                                  END)
+                             ELSE ((SUM(
+                                        CASE WHEN aa.correction_charge = 'true' 
+                                             THEN 8 
+                                             ELSE 0 
+                                        END)) - 
+                                    SUM(
+                                        CASE WHEN aa.correction_charge = 'true' 
+                                             THEN unit_amount 
+                                             ELSE 0 
+                                        END)) 
+                        END))*100 as chargeability
                 FROM
                     account_analytic_line as aa 
-                WHERE aa.product_uom_id = %s AND aa.planned = FALSE AND aa.project_id IS NOT NULL 
+                WHERE aa.product_uom_id = %s 
+                AND aa.planned = FALSE 
+                AND aa.project_id IS NOT NULL 
                 AND (aa.correction_charge = true OR aa.chargeable = true)
     
-                GROUP BY aa.user_id, aa.date
+                GROUP BY aa.operating_unit_id, aa.user_id, aa.date
             )""" % (uom))
 
 
