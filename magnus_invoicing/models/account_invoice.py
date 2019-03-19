@@ -109,6 +109,17 @@ class AccountInvoiceLine(models.Model):
         self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes()
         return res
 
+    @api.model
+    def default_get(self, fields):
+        res = super(AccountInvoiceLine, self).default_get(fields)
+        ctx = self.env.context.copy()
+        if 'default_invoice_id' in ctx:
+            invoice_obj = self.env['account.invoice'].browse(ctx['default_invoice_id'])
+            analytic_invoice_id = invoice_obj.invoice_line_ids.mapped('analytic_invoice_id')
+            if analytic_invoice_id:
+                res['analytic_invoice_id'] = analytic_invoice_id.id
+        return res
+
 #    @api.onchange('product_id')
 #    def _onchange_product_id(self):
 #        if self.analytic_invoice_id:

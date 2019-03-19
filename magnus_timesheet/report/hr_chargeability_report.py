@@ -13,6 +13,10 @@ class HrChargeabilityReport(models.Model):
     chargeable_hours = fields.Float(string="Charegeable Hrs", readonly=True)
     norm_hours = fields.Float(string="Norm Hrs", readonly=True)
     chargeability = fields.Float(string="Chargeability", readonly=True)
+    department_id = fields.Many2one('hr.department', string='Department', readonly=True)
+    dept_operating_unit_id = fields.Many2one('operating.unit', string='Dept. Operating Unit', readonly=True)
+    external = fields.Boolean(string='External', readonly=True)
+
 
     @api.model_cr
     def init(self):
@@ -26,6 +30,9 @@ class HrChargeabilityReport(models.Model):
                     aa.date as date,
                     aa.user_id as user_id,
                     aa.operating_unit_id as operating_unit_id,
+                    emp.department_id as department_id,
+                    dept.operating_unit_id as dept_operating_unit_id,
+                    emp.external as external,
                     SUM(CASE 
                              WHEN aa.chargeable = 'true' 
                              THEN unit_amount 
@@ -81,13 +88,16 @@ class HrChargeabilityReport(models.Model):
                                         END)) 
                         END))*100 as chargeability
                 FROM
-                    account_analytic_line as aa 
+                    account_analytic_line aa
+                JOIN resource_resource resource ON (resource.user_id = aa.user_id)
+                JOIN hr_employee emp ON (emp.resource_id = resource.id)
+                JOIN hr_department dept ON (dept.id = emp.department_id)
                 WHERE aa.product_uom_id = %s 
                 AND aa.planned = FALSE 
                 AND aa.project_id IS NOT NULL 
                 AND (aa.correction_charge = true OR aa.chargeable = true)
     
-                GROUP BY aa.operating_unit_id, aa.user_id, aa.date
+                GROUP BY aa.operating_unit_id, aa.user_id, aa.date, emp.department_id, dept.operating_unit_id, emp.external
             )""" % (uom))
 
 

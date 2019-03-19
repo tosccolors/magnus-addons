@@ -88,7 +88,7 @@
             <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc and not sale_inv">
 
                 <table class="table table-condensed table-padding">
-                    <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
+                    <t t-foreach="o.group_by_analytic_acc('project',uom_hrs=True)" t-as="aaLines">
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
@@ -105,6 +105,18 @@
                             <span t-esc="o.value_conversion(aaLines_value['sub_total'], monetary=True, currency_obj=o.company_currency_id)" />
                         </td>
 
+                    </t>
+                    <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
+                        <tr t-foreach="aaLines_value" t-as="l">
+                            <td style='border-top:none' width="40%"><span t-field="l.name"/></td>
+                            <td style='border-top:none' width="20%"> </td>
+                            <td style='border-top:none' width="10%"> </td>
+                            <td style='border-top:none' width="10%"> </td>
+                            <td style='border-top:none' class="text-right">
+                                <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
+                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </td>
+                        </tr>
                     </t>
                 </table>
             </div>
