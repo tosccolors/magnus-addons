@@ -14,9 +14,7 @@ from odoo.tools.translate import _
 
 
 class AccountAnalyticAccount(models.Model):
-    _inherit = ['account.analytic.account',
-                'account.analytic.contract',
-                ]
+    _inherit = 'account.analytic.account'
 
     @api.multi
     def _prepare_invoice(self):
