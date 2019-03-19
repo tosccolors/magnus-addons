@@ -14,6 +14,21 @@ class AccountJournal(models.Model):
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
+    target_invoice_amount = fields.Monetary(
+        'Target Invoice Amount'
+    )
+
+    def compute_target_invoice_amount(self):
+        if self.amount_untaxed != self.target_invoice_amount:
+            factor = self.target_invoice_amount / self.amount_untaxed
+            discount = (1.0 - factor) * 100
+            for line in self.invoice_line_ids:
+                line.discount = discount
+
+    def reset_target_invoice_amount(self):
+        for line in self.invoice_line_ids:
+            line.discount = 0.0
+
     @api.model
     def invoice_line_move_line_get(self):
         """Copy operating_unit_id from invoice line to move lines"""
