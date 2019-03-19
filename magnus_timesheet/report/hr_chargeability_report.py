@@ -147,6 +147,7 @@ class HrChargeabilityReport(models.Model):
                         norm_hours = (len(result) * 8) - norm_hours
                 else:
                     norm_hours = chargeable_hours #if norm_hrs zero chargeability would be 100%
+                norm_hours = norm_hours if norm_hours else 1
                 res[index]['chargeability'] = (chargeable_hours / norm_hours) * 100
 
         return res
