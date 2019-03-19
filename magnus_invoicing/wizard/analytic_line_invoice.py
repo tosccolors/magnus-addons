@@ -239,7 +239,6 @@ class AnalyticLineStatus(models.TransientModel):
             orderby=False,
             lazy=False
         )
-        import pdb; pdb.set_trace()
         narration = self.description if self.wip else ''
 
         if len(result) > 0:
