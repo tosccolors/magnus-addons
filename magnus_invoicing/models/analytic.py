@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-
     state = fields.Selection([
         ('draft', 'Draft'),
         ('open', 'Confirmed'),
@@ -39,7 +38,6 @@ class AccountAnalyticLine(models.Model):
             self.env.invalidate_all()
             vals.pop('state')
         return super(AccountAnalyticLine, self).write(vals) if vals else True
-
 
     def _check_state(self):
         """

@@ -21,10 +21,10 @@ class Project(models.Model):
         string='Contract/Analytic',
         )
 
-
     @api.multi
     def name_get(self):
         return [(value.id, "%s%s" % (value.code + '-' if value.code else '', value.name)) for value in self]
+
 
 class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
