@@ -192,6 +192,7 @@ class AnalyticLineStatus(models.TransientModel):
             'analytic_account_id': line.account_id.id,
             'analytic_tag_ids': analytic_tag_ids,
             'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
+            'user_id': line.user_id and line.user_id.id or False
         }
 
         res.append(move_line_debit)
@@ -201,7 +202,9 @@ class AnalyticLineStatus(models.TransientModel):
             'debit': 0.0,
             'credit': amount,
             'account_id': line.product_id.property_account_wip_id.id,
-            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False
+            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
+            'analytic_account_id': False,
+            'user_id': False,
         })
         res.append(move_line_credit)
 
