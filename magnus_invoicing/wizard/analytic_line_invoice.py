@@ -36,7 +36,7 @@ class AnalyticLineStatus(models.TransientModel):
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
 
         no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
-        if no_invoicing_property_entries:
+        if no_invoicing_property_entries and status == 'invoiceable':
             project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
@@ -184,7 +184,8 @@ class AnalyticLineStatus(models.TransientModel):
             'name': line.name,
             'debit': amount,
             'credit': 0.0,
-            'account_id': line.partner_id.property_account_receivable_id.id,
+            ## todo also the category properties
+            'account_id': line.product_id.property_account_wip_id.id,
             'currency_id': line.currency_id.id,
             'quantity': line.unit_amount,
             'product_id': line.product_id.id,
@@ -201,10 +202,8 @@ class AnalyticLineStatus(models.TransientModel):
         move_line_credit.update({
             'debit': 0.0,
             'credit': amount,
-            'account_id': line.product_id.property_account_wip_id.id,
-            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
-            'analytic_account_id': False,
-            'user_id': False,
+            ## todo also the category properties
+            'account_id': line.product_id.property_account_income_id.id,
         })
         res.append(move_line_credit)
 
@@ -240,6 +239,7 @@ class AnalyticLineStatus(models.TransientModel):
             orderby=False,
             lazy=False
         )
+        import pdb; pdb.set_trace()
         narration = self.description if self.wip else ''
 
         if len(result) > 0:
