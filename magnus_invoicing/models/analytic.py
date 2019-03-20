@@ -16,7 +16,7 @@ class AccountAnalyticLine(models.Model):
         ('progress', 'In Progress'),
         ('invoice_created', 'Invoice Created'),
         ('invoiced', 'Invoiced'),
-        ('write_off', 'Write-Off'),
+        ('write-off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
     ],
         string='Status',
