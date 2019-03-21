@@ -49,6 +49,7 @@ voor de interface naar slam.
         "report/report_invoice.xml",
 #        "views/account_view.xml",
         "views/account_invoice_view.xml",
+        "views/project_view.xml",
         "views/account_invoice_report.xml",
     ],
     'demo' : [],
