@@ -80,7 +80,7 @@
             <br/>
 
             <div style="padding-left:85px;padding-right:15px;" t-if="invoice_desc">
-                <t t-if="analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
+                <t t-if="analytic_invoice_id and analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
                     <span t-field="analytic_invoice_id[0].project_id.project_header"/>
                     <br/>
                     <br/>
@@ -91,7 +91,7 @@
             </div>
 
             <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc and not sale_inv">
-                <t t-if="analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
+                <t t-if="analytic_invoice_id and analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
                     <span t-field="analytic_invoice_id[0].project_id.project_header"/>
                     <br/>
                     <br/>
@@ -183,7 +183,7 @@
             <div style="page-break-inside:avoid;">
 
                 <span style="padding-left:85px;padding-right:15px;padding-top:30px;"
-                     t-if="analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
+                     t-if="analytic_invoice_id and analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
                     <span t-field="analytic_invoice_id[0].project_id.project_footer"/>
                 </span>
 
