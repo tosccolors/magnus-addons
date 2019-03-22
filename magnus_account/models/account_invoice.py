@@ -87,6 +87,19 @@ class AccountInvoice(models.Model):
                 res = u'%s\N{NO-BREAK SPACE}%s' % (currency_obj.symbol, res)
         return res
 
+    @api.multi
+    def get_invoice_project(self):
+        project = self.env['project.project']
+        analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
+
+        if analytic_invoice_id:
+            project = analytic_invoice_id.project_id
+        else:
+            account_analytic_id = self.invoice_line_ids.mapped('account_analytic_id')
+            if len(account_analytic_id) == 1 and len(account_analytic_id.project_ids) == 1:
+                project = account_analytic_id.project_ids
+        return project
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
