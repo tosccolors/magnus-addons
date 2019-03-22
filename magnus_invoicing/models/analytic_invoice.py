@@ -478,6 +478,8 @@ class AnalyticInvoice(models.Model):
 
     @api.one
     def generate_invoice(self):
+        if self.invoice_id.state == 'cancel':
+            raise UserError(_("Can't generate invoice, kindly re-set invoice to draft'"))
         invoices = {}
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.state == 'draft')
         aal_from_summary = self.env['account.analytic.line']
