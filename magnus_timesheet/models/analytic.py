@@ -114,7 +114,7 @@ class AccountAnalyticLine(models.Model):
         string='Reference'
     )
     user_total_id = fields.Many2one(
-        comodel_name='analytic.user.total',
+        'analytic.user.total',
         string='Summary Reference',
         index=True
     )
