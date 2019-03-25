@@ -37,6 +37,7 @@
             <t t-set="sale_inv" t-value="any([l.sale_line_ids for l in o.invoice_line_ids])"/>
             <t t-set="invoice_desc" t-value="o.parse_invoice_description()"/>
             <t t-set="analytic_invoice_id" t-value="o.invoice_line_ids.mapped('analytic_invoice_id')"/>
+            <t t-set="invoice_project" t-value="o.get_invoice_project()"/>
 
 
             <div style="padding-left:85px;padding-right:15px;">
@@ -80,15 +81,25 @@
             <br/>
 
             <div style="padding-left:85px;padding-right:15px;" t-if="invoice_desc">
+                <t t-if="not sale_inv and invoice_project and invoice_project.custom_layout">
+                    <span t-field="invoice_project.project_header"/>
+                    <br/>
+                    <br/>
+                </t>
                 <strong><span t-field="o.invoice_description"/></strong>
                 <br/>
                 <br/>
             </div>
 
             <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc and not sale_inv">
+                <t t-if="invoice_project and invoice_project.custom_layout">
+                    <span t-field="invoice_project.project_header"/>
+                    <br/>
+                    <br/>
+                </t>
 
                 <table class="table table-condensed table-padding">
-                    <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
+                    <t t-foreach="o.group_by_analytic_acc('project',uom_hrs=True)" t-as="aaLines">
                         <tr>
                             <td style='border-top:none' width="50%"><strong><span t-field="aaLines.name"/></strong></td>
                         </tr>
@@ -105,6 +116,18 @@
                             <span t-esc="o.value_conversion(aaLines_value['sub_total'], monetary=True, currency_obj=o.company_currency_id)" />
                         </td>
 
+                    </t>
+                    <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
+                        <tr t-foreach="aaLines_value" t-as="l">
+                            <td style='border-top:none' width="40%"><span t-field="l.name"/></td>
+                            <td style='border-top:none' width="20%"> </td>
+                            <td style='border-top:none' width="10%"> </td>
+                            <td style='border-top:none' width="10%"> </td>
+                            <td style='border-top:none' class="text-right">
+                                <span t-if="o.type == 'out_refund'">-</span><span t-field="l.price_subtotal"
+                                    t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </td>
+                        </tr>
                     </t>
                 </table>
             </div>
@@ -153,18 +176,36 @@
                 </table>
                 </div>
             </div>
-            <p t-if="o.payment_term_id" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                <strong>Payment terms:</strong> Within <span t-field="o.payment_term_id.name"/> to <strong> <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
-            </p>
 
-            <t t-if="o.operating_unit_id and o.operating_unit_id.partner_id">
-                <t t-set="bank_acc" t-value="any([b.acc_number for b in o.operating_unit_id.partner_id.bank_ids])"/>
-                <p t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                    <strong>Bank:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                    <strong>IBAN:</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                    <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                </p>
-            </t>
+            <br/>
+            <br/>
+            <br/>
+
+            <div style="page-break-inside:avoid;">
+
+                <span style="padding-left:85px;padding-right:15px;padding-top:30px;"
+                     t-if="not sale_inv and invoice_project and invoice_project.custom_layout">
+                    <span t-field="invoice_project.project_footer"/>
+                </span>
+
+                <span t-if="o.payment_term_id">
+                    <br/>
+                    <span style="padding-left:85px;padding-right:15px;padding-top:30px;">
+                        <strong>Payment terms:</strong> Within <span t-field="o.payment_term_id.name"/> to <strong>
+                        <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
+                    </span>
+                </span>
+
+                <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id">
+                    <br/>
+                    <t t-set="bank_acc" t-value="any([b.acc_number for b in o.operating_unit_id.partner_id.bank_ids])"/>
+                    <span t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
+                        <strong>Bank:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                        <strong>IBAN:</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                        <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                    </span>
+                </span>
+            </div>
 
 
             <t t-if="analytic_invoice_id">

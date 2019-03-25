@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api
-
+from odoo.exceptions import UserError, ValidationError
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
@@ -13,6 +13,21 @@ class AccountJournal(models.Model):
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
+
+    target_invoice_amount = fields.Monetary(
+        'Target Invoice Amount'
+    )
+
+    def compute_target_invoice_amount(self):
+        if self.amount_untaxed != self.target_invoice_amount:
+            factor = self.target_invoice_amount / self.amount_untaxed
+            discount = (1.0 - factor) * 100
+            for line in self.invoice_line_ids:
+                line.discount = discount
+
+    def reset_target_invoice_amount(self):
+        for line in self.invoice_line_ids:
+            line.discount = 0.0
 
     @api.model
     def invoice_line_move_line_get(self):
@@ -40,21 +55,6 @@ class AccountInvoice(models.Model):
         return res + "%s" % (
             invoice_line['user_id']
         )
-
-    ### deze vertrouw ik niet
-    '''@api.multi
-    def finalize_invoice_move_lines(self, move_lines):
-        move_lines = super(AccountInvoice,
-                           self).finalize_invoice_move_lines(move_lines)
-
-        new_move_lines = []
-        for line_tuple in move_lines:
-            if not line_tuple[2]['user_id']:
-                inv_lines = self.invoice_line_ids.filtered('analytic_invoice_id')
-                if inv_lines:
-                    line_tuple[2]['operating_unit_id'] = inv_lines[0].analytic_invoice_id.project_operating_unit_id.id
-            new_move_lines.append(line_tuple)
-        return new_move_lines'''
 
     @api.multi
     def _get_timesheet_by_group(self):
@@ -103,8 +103,27 @@ class AccountInvoiceLine(models.Model):
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
 
+    @api.multi
+    def write(self, vals):
+        res = super(AccountInvoiceLine, self).write(vals)
+        self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes()
+        return res
 
+    @api.model
+    def default_get(self, fields):
+        res = super(AccountInvoiceLine, self).default_get(fields)
+        ctx = self.env.context.copy()
+        if 'default_invoice_id' in ctx:
+            invoice_obj = self.env['account.invoice'].browse(ctx['default_invoice_id'])
+            analytic_invoice_id = invoice_obj.invoice_line_ids.mapped('analytic_invoice_id')
+            if analytic_invoice_id:
+                res['analytic_invoice_id'] = analytic_invoice_id.id
+        return res
 
-        
+#    @api.onchange('product_id')
+#    def _onchange_product_id(self):
+#        if self.analytic_invoice_id:
+#            self.invoice_id = self.env['account.invoice'].browse(self.analytic_invoice_id.invoice_ids.id)
+#        return super(AccountInvoiceLine, self)._onchange_product_id()
 
 
