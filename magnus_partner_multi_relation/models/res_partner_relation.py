@@ -22,6 +22,11 @@ class ResPartnerRelation(models.Model):
         string='Percentage Distribution Key'
     )
 
+    invoicing_property_id = fields.Many2one(
+        comodel_name='project.invoicing.properties',
+        string='Invoicing Property'
+    )
+
     @api.one
     @api.constrains('distribution_key')
     def _check_distribution_key(self):
@@ -35,3 +40,12 @@ class ResPartnerRelation(models.Model):
                 _('The percentage can not be greater than 100 '
                   'or smaller than 0.')
             )
+
+    @api.multi
+    def name_get(self):
+        return [
+            (this.id, '%s %s %s' % (
+                this.left_partner_id.name,
+                this.type_id.display_name,
+                this.right_partner_id.name,
+            )) for this in self]
