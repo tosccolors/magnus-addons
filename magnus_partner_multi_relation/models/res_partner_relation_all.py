@@ -18,6 +18,7 @@ SELECT
     rel.date_start,
     rel.date_end,
     rel.distribution_key,
+    rel.invoicing_property_id,
     %(is_inverse)s as is_inverse
 FROM res_partner_relation rel"""
 
@@ -33,6 +34,7 @@ SELECT
     rel.date_start,
     rel.date_end,
     rel.distribution_key,
+    rel.invoicing_property_id,
     %(is_inverse)s as is_inverse
 FROM res_partner_relation rel"""
 
@@ -42,6 +44,10 @@ class ResPartnerRelationAll(models.AbstractModel):
 
     distribution_key = fields.Float(
         string='Percentage Distribution Key'
+    )
+    invoicing_property_id = fields.Many2one(
+        comodel_name='project.invoicing.properties',
+        string='Invoicing Property'
     )
 
     def get_register(self):
