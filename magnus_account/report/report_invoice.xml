@@ -37,6 +37,7 @@
             <t t-set="sale_inv" t-value="any([l.sale_line_ids for l in o.invoice_line_ids])"/>
             <t t-set="invoice_desc" t-value="o.parse_invoice_description()"/>
             <t t-set="analytic_invoice_id" t-value="o.invoice_line_ids.mapped('analytic_invoice_id')"/>
+            <t t-set="invoice_project" t-value="o.get_invoice_project()"/>
 
 
             <div style="padding-left:85px;padding-right:15px;">
@@ -80,8 +81,8 @@
             <br/>
 
             <div style="padding-left:85px;padding-right:15px;" t-if="invoice_desc">
-                <t t-if="analytic_invoice_id and analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
-                    <span t-field="analytic_invoice_id[0].project_id.project_header"/>
+                <t t-if="not sale_inv and invoice_project and invoice_project.custom_layout">
+                    <span t-field="invoice_project.project_header"/>
                     <br/>
                     <br/>
                 </t>
@@ -91,8 +92,8 @@
             </div>
 
             <div style="padding-left:85px;padding-right:15px;" t-if="not invoice_desc and not sale_inv">
-                <t t-if="analytic_invoice_id and analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
-                    <span t-field="analytic_invoice_id[0].project_id.project_header"/>
+                <t t-if="invoice_project and invoice_project.custom_layout">
+                    <span t-field="invoice_project.project_header"/>
                     <br/>
                     <br/>
                 </t>
@@ -183,8 +184,8 @@
             <div style="page-break-inside:avoid;">
 
                 <span style="padding-left:85px;padding-right:15px;padding-top:30px;"
-                     t-if="analytic_invoice_id and analytic_invoice_id[0].project_id and analytic_invoice_id[0].project_id.custom_layout">
-                    <span t-field="analytic_invoice_id[0].project_id.project_footer"/>
+                     t-if="not sale_inv and invoice_project and invoice_project.custom_layout">
+                    <span t-field="invoice_project.project_footer"/>
                 </span>
 
                 <span t-if="o.payment_term_id">
