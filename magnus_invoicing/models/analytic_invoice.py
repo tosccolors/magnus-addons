@@ -421,88 +421,82 @@ class AnalyticInvoice(models.Model):
             analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()
 
-
-
-
-
     @api.multi
-    def _prepare_invoice_line(self, line):
-        """
-        Prepare the dict of values to create the new invoice line for a analytic_user_total.
+    def get_product_wip_account(self, product, fiscal_pos=None):
+        account = product.property_account_wip_id
+        if not account and product:
+            raise UserError(
+                _('Please define WIP account for this product: "%s" (id:%d).') %
+                (product.name, product.id))
 
-        :param line: sales order line to invoice
-        """
-        line.ensure_one()
-        account = line.product_id.property_account_income_id or line.product_id.categ_id.property_account_income_categ_id
+        if not fiscal_pos:
+            fiscal_pos = self.env['account.fiscal.position']
+        return fiscal_pos.map_account(account)
 
+    @api.model
+    def _prepare_invoice_line(self, line, invoice_id):
+        ctx = self.env.context.copy()
+        ctx.update({
+            'active_model':'analytic.invoice',
+            'active_id':line.id,
+        })
+        invoice_line = self.env['account.invoice.line'].with_context(ctx).new({
+            'invoice_id': invoice_id,
+            'product_id': line.product_id.id,
+            'quantity': line.unit_amount,
+            'uom_id': line.product_uom_id.id,
+            # 'discount': line.discount,
+        })
+
+        # Add analytic tags to invoice line
+        invoice_line.analytic_tag_ids |= line.tag_ids
+
+        # Get other invoice line values from product onchange
+        invoice_line._onchange_product_id()
+        invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
+
+        # if invoicing period is doesn't lies in same month
         period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
         cur_date = datetime.now().date().strftime("%Y-%m")
         if cur_date > period_date:
-            account = line.product_id.property_account_wip_id
-            if not account and line.product_id:
-                raise UserError(
-                    _('Please define WIP account for this product: "%s" (id:%d).') %
-                    (line.product_id.name, line.product_id.id))
+            fpos = self.invoice_id.fiscal_position_id
+            account = self.get_product_wip_account(line.product_id, fpos)
+            invoice_line_vals.update({
+                    'account_id':account.id
+                })
 
-        else:
-            if not account and line.product_id:
-                raise UserError(
-                    _('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
-                    (line.product_id.name, line.product_id.id, line.product_id.categ_id.name))
-
-        fpos = self.partner_id.property_account_position_id
-        if fpos:
-            account = fpos.map_account(account)
-
-
-        res = {
-            'name': line.product_id.name or '/',
-            # 'sequence': line.sequence,
-            'origin': line.task_id.project_id.po_number if line.task_id and line.task_id.project_id and line.task_id.project_id.correction_charge else '/',
-            'account_id': account.id,
-            'price_unit': line.fee_rate,
-            'quantity': line.unit_amount,
-            # 'discount': line.discount,
-            'uom_id': line.product_uom_id.id,
-            'product_id': line.product_id and line.product_id.id or False,
-            # 'layout_category_id': line.layout_category_id and line.layout_category_id.id or False,
-            'invoice_line_tax_ids': [(6, 0, line.product_id.taxes_id.ids or [])],
+        invoice_line_vals.update({
             'account_analytic_id': line.account_id and line.account_id.id or False,
-            'analytic_tag_ids': [(6, 0, line.tag_ids.ids or [])],
-            'analytic_invoice_id':line.analytic_invoice_id.id,
-            'user_id':line.user_id.id,
-            # 'project_id': project.id if project else False
-        }
+            'price_unit': line.fee_rate,
+            'analytic_invoice_id': line.analytic_invoice_id.id,
+            'origin': line.task_id.project_id.po_number
+                        if line.task_id and line.task_id.project_id and line.task_id.project_id.correction_charge
+                        else '/',
+        })
 
-        return res
+        return invoice_line_vals
 
     @api.one
     def generate_invoice(self):
+        if self.invoice_id.state == 'cancel':
+            raise UserError(_("Can't generate invoice, kindly re-set invoice to draft'"))
         invoices = {}
         user_summary_lines = self.user_total_ids.filtered(lambda x: x.state == 'draft')
         aal_from_summary = self.env['account.analytic.line']
         user_total = self.env['analytic.user.total']
 
         invoices['lines'] = []
-#        invObj = self.env['account.invoice']
-#        invoice = invObj
+
         for line in user_summary_lines:
-            inv_line_vals = self._prepare_invoice_line(line)
+            inv_line_vals = self._prepare_invoice_line(line, self.invoice_id.id)
             inv_line_vals['user_task_total_line_id'] = line.id
             invoices['lines'].append((0, 0, inv_line_vals))
             aal_from_summary |= line.children_ids
             user_total |= line
 
-#        invoice_obj = self.invoice_ids.filtered(lambda inv: inv.state == 'draft')
-
         if invoices['lines']:
-#            invoice = invObj.browse(self.invoice_ids.ids[0])
             self.write({'invoice_line_ids': invoices['lines']})
-#        elif not invoice_obj:
-#            vals = self._prepare_invoice(invoices)
-#            vals['operating_unit_id'] = self.project_operating_unit_id and self.project_operating_unit_id.id or False
-#            invoice = invObj.create(vals)
-#            self.invoice_ids = [(4, invoice.id)]
+
         self.invoice_id.compute_taxes()
         if self.state == 'draft' and aal_from_summary:
             self.state = 'open'
@@ -515,27 +509,26 @@ class AnalyticInvoice(models.Model):
     @api.one
     def delete_invoice(self):
         if self.state == 'invoiced':
-            self.invoice_ids.action_cancel()
-            self.invoice_ids.action_invoice_draft()
+            self.invoice_id.action_cancel()
+            self.invoice_id.action_invoice_draft()
             self.invoice_line_ids.unlink()
-        elif not self.invoice_ids.move_name:
-            self.invoice_ids.unlink()
+        elif not self.invoice_id.move_name:
+            self.invoice_line_ids.unlink()
         elif self.state == 'open':
             self.invoice_line_ids.unlink()
 
-        if self.invoice_ids and not self.invoice_ids.invoice_line_ids:
+        if not self.invoice_line_ids:
             self.state = 'draft'
             for user_total in self.user_total_ids:
                 self._sql_update(user_total.children_ids, 'progress')
                 self._sql_update(user_total, 'draft')
 
 
-
     @api.multi
     def action_view_invoices(self):
         self.ensure_one()
         action = self.env.ref('account.action_invoice_tree1').read()[0]
-        invoices = self.mapped('invoice_ids')
+        invoices = self.mapped('invoice_id')
         if len(invoices) > 1:
             action['domain'] = [('id', 'in', invoices.ids)]
         elif invoices:
