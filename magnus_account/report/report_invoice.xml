@@ -65,10 +65,16 @@
                              <span t-field="o.date_invoice"/><br/>
                              <span t-field="o.number"/><br/>
                              <span t-if="sale_inv" t-field="o.invoice_line_ids[0].account_analytic_id.project_ids[0].po_number"/>
-                             <t t-if="not sale_inv and analytic_invoice_id">
-                                 <span t-if="not analytic_invoice_id[0].project_id" t-field="o.name"/>
-                                 <span t-if="analytic_invoice_id[0].project_id" t-field="analytic_invoice_id[0].project_id.po_number"/>
-                             </t><br/>
+                             <t t-if="not sale_inv">
+                                 <t t-if="analytic_invoice_id">
+                                    <span t-if="not analytic_invoice_id[0].project_id" t-field="o.name"/>
+                                    <span t-if="analytic_invoice_id[0].project_id" t-field="analytic_invoice_id[0].project_id.po_number"/>
+                                 </t>
+                                 <t t-if="not analytic_invoice_id">
+                                    <span t-if="invoice_project" t-field="invoice_project.po_number"/>
+                                 </t>
+                                 <br/>
+                             </t>
                              <span t-field="o.partner_id.vat"/><br/>
                              <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
                                    t-field="o.operating_unit_id.partner_id.vat"/><br/>
