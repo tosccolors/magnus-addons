@@ -36,7 +36,7 @@ class AccountInvoice(models.Model):
         return self.env['report'].get_action(self, 'account.invoice.custom')
 
     @api.multi
-    def group_by_analytic_acc(self, type):
+    def group_by_analytic_acc(self, type, uom_hrs=False):
         self.ensure_one()
         result = {}
         if type == 'sale_order':
@@ -46,14 +46,22 @@ class AccountInvoice(models.Model):
                 else:
                     result[line.account_analytic_id] = [line]
         if type == 'project':
-            for line in self.invoice_line_ids:
-                quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)
-                price_subtotal = line.uom_id._compute_price(line.price_subtotal, line.uom_id)
-                if line.account_analytic_id in result:
-                    result[line.account_analytic_id]['tot_hrs'] += quantity
-                    result[line.account_analytic_id]['sub_total'] += price_subtotal
-                else:
-                    result[line.account_analytic_id] = {'tot_hrs':quantity, 'sub_total':price_subtotal}
+            UOMHrs = self.env.ref('product.product_uom_hour').id
+            if uom_hrs:
+                for line in self.invoice_line_ids.filtered(lambda l: l.uom_id.id == UOMHrs):
+                    quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)
+                    price_subtotal = line.uom_id._compute_price(line.price_subtotal, line.uom_id)
+                    if line.account_analytic_id in result:
+                        result[line.account_analytic_id]['tot_hrs'] += quantity
+                        result[line.account_analytic_id]['sub_total'] += price_subtotal
+                    else:
+                        result[line.account_analytic_id] = {'tot_hrs':quantity, 'sub_total':price_subtotal}
+            else:
+                for line in self.invoice_line_ids.filtered(lambda l: not l.uom_id or l.uom_id.id != UOMHrs):
+                    if line.account_analytic_id in result:
+                        result[line.account_analytic_id].append(line)
+                    else:
+                        result[line.account_analytic_id] = [line]
         return result
 
     @api.multi
@@ -78,6 +86,19 @@ class AccountInvoice(models.Model):
             elif currency_obj and currency_obj.position == 'before':
                 res = u'%s\N{NO-BREAK SPACE}%s' % (currency_obj.symbol, res)
         return res
+
+    @api.multi
+    def get_invoice_project(self):
+        project = self.env['project.project']
+        analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
+
+        if analytic_invoice_id:
+            project = analytic_invoice_id.project_id
+        else:
+            account_analytic_id = self.invoice_line_ids.mapped('account_analytic_id')
+            if len(account_analytic_id) == 1 and len(account_analytic_id.project_ids) == 1:
+                project = account_analytic_id.project_ids
+        return project
 
 class ResCompany(models.Model):
     _inherit = 'res.company'

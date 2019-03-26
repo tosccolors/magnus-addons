@@ -36,7 +36,7 @@ class AnalyticLineStatus(models.TransientModel):
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
 
         no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
-        if no_invoicing_property_entries:
+        if no_invoicing_property_entries and status == 'invoiceable':
             project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
@@ -176,7 +176,7 @@ class AnalyticLineStatus(models.TransientModel):
             return res
 
         analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.account_id.tag_ids]
-        amount = self._calculate_fee_rate(line)
+        amount = abs(self._calculate_fee_rate(line))
 
         move_line_debit = {
             'date_maturity': line.date,
@@ -184,20 +184,27 @@ class AnalyticLineStatus(models.TransientModel):
             'name': line.name,
             'debit': amount,
             'credit': 0.0,
-            'account_id': line.partner_id.property_account_receivable_id.id,
+            ## todo also the category properties
+            'account_id': line.product_id.property_account_wip_id.id,
             'currency_id': line.currency_id.id,
             'quantity': line.unit_amount,
             'product_id': line.product_id.id,
             'product_uom_id': line.product_uom_id.id,
             'analytic_account_id': line.account_id.id,
             'analytic_tag_ids': analytic_tag_ids,
-            'operating_unit_id': line.project_operating_unit_id and line.project_operating_unit_id.id or False,
+            'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
+            'user_id': line.user_id and line.user_id.id or False
         }
 
         res.append(move_line_debit)
 
         move_line_credit = move_line_debit.copy()
-        move_line_credit.update({'debit':0.0, 'credit':amount, 'account_id':line.product_id.property_account_wip_id.id,'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False})
+        move_line_credit.update({
+            'debit': 0.0,
+            'credit': amount,
+            ## todo also the category properties
+            'account_id': line.product_id.property_account_income_id.id,
+        })
         res.append(move_line_credit)
 
         return res

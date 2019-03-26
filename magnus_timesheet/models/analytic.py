@@ -22,6 +22,12 @@ class AccountAnalyticLine(models.Model):
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
+            if line.project_id:
+                line.chargeable = line.project_id.chargeable
+                line.correction_charge = line.project_id.correction_charge
+                line.expenses = line.project_id.invoice_properties.expenses
+            if line.account_id:
+                line.project_mgr = line.account_id.project_ids.user_id
             if line.task_id and line.user_id:
                 uou = line.user_id._get_operating_unit_id()
                 if uou:
@@ -108,7 +114,7 @@ class AccountAnalyticLine(models.Model):
         string='Reference'
     )
     user_total_id = fields.Many2one(
-        comodel_name='analytic.user.total',
+        'analytic.user.total',
         string='Summary Reference',
         index=True
     )
@@ -123,20 +129,6 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_sheet,
         string='Month',
         store=True,
-    )
-    correction_charge = fields.Boolean(
-        related='project_id.correction_charge',
-        string='Correction Chargeability',
-        store=True,
-    )
-    chargeable = fields.Boolean(
-        related='project_id.chargeable',
-        string='Chargeable',
-        store=True,
-    )
-    expenses = fields.Boolean(
-        related='project_id.invoice_properties.expenses',
-        string='Expenses',
     )
     operating_unit_id = fields.Many2one(
         'operating.unit',
@@ -180,9 +172,23 @@ class AccountAnalyticLine(models.Model):
         string='Timesheet line',
         store=True,
     )
+    correction_charge = fields.Boolean(
+        compute=_compute_sheet,
+        string='Correction Chargeability',
+        store=True,
+    )
+    chargeable = fields.Boolean(
+        compute=_compute_sheet,
+        string='Chargeable',
+        store=True,
+    )
+    expenses = fields.Boolean(
+        compute=_compute_sheet,
+        string='Expenses',
+    )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
-        related='account_id.project_ids.user_id',
+        compute=_compute_sheet,
         store=True
     )
 
