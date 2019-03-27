@@ -48,6 +48,9 @@
                                placeholder="Add description" />
                     </page>
                 </xpath>
+                <xpath expr="//notebook/page[@name='other_info']/group/group[2]/field[@name='name']" position="after">
+                    <field name="date"/>
+                </xpath>
             </field>
         </record>
 
