@@ -222,7 +222,7 @@ class AnalyticInvoice(models.Model):
                     self._sql_update(line.user_task_total_line_id.children_ids, 'progress')
                     self._sql_update(line.user_task_total_line_id, 'draft')
 
-            elif ai.invoice_id.state == 'draft':
+            elif ai.invoice_id.state in ('draft','proforma','proforma2'):
                 if ai.state == 'invoiced':
                     ai.state = 'open'
                 else:
@@ -231,7 +231,7 @@ class AnalyticInvoice(models.Model):
                     self._sql_update(line.user_task_total_line_id.children_ids, 'invoice_created')
                     self._sql_update(line.user_task_total_line_id, 'invoice_created')
 
-            elif ai.invoice_id.state == 'open':
+            elif ai.invoice_id.state in ('open','paid'):
                 ai.state = 'invoiced'
                 for line in ai.invoice_line_ids:
                     self._sql_update(line.user_task_total_line_id.children_ids, 'invoiced')
@@ -286,11 +286,6 @@ class AnalyticInvoice(models.Model):
         string='Task Fee Rate',
         store=True
     )
-#    partner_id = fields.Many2one(
-#        'res.partner',
-#        string='Partner',
-#        domain=[('is_company','=', True)],
-#    )
     invoice_id = fields.Many2one(
         'account.invoice',
         string='Customer Invoice',
@@ -299,13 +294,6 @@ class AnalyticInvoice(models.Model):
         ondelete='restrict',
         index=True
     )
-#    invoice_line_ids = fields.One2many(
-#        'account.invoice.line',
-#        'analytic_invoice_id',
-#        string='New Invoice Lines',
-#        ondelete='cascade',
-#        index=True
-#    )
     time_line_ids = fields.Many2many(
         'account.analytic.line',
         compute='_compute_analytic_lines',
@@ -364,11 +352,6 @@ class AnalyticInvoice(models.Model):
         store=True,
         track_visibility='onchange',
     )
-
-#    invoice_count = fields.Integer(
-#        'Invoices',
-#        compute='_compute_invoice_count'
-#    )
     project_operating_unit_id = fields.Many2one(
         'operating.unit',
         string='Project Operating Unit',
