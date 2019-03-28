@@ -14,9 +14,10 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,open,invoiced"/>
                 </header>
                 <sheet>
+                    <field name="invoice_id" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="action_view_invoices" type="object" icon="fa-usd" attrs="{'invisible': [('invoice_count','=',0)]}">
-                            <field string="Invoices" name="invoice_count" widget="statinfo" attrs="{'invisible': [('invoice_count','=',0)]}"/>
+                        <button class="oe_stat_button" name="action_view_invoices" type="object" icon="fa-usd" string="Invoices" attrs="{'invisible': [('invoice_id','=',False)]}">
+                            <!--<field  name="invoice_count" widget="statinfo" attrs="{'invisible': [('invoice_count','=',0)]}"/>-->
                         </button>
                     </div>
                     <group colspan="4" col="4">
@@ -36,28 +37,57 @@
                            readonly="0"
                            context="{'tree_view_ref' : 'magnus_invoicing.view_task_user_tree'}"
                            />
+
                     <separator string="Invoice Lines"/>
+                    <field name="journal_id" invisible="1"/>
                     <field name="invoice_line_ids"
-                           context="{'type': 'out_invoice'}" attrs="{'readonly': [('state','=','invoiced')]}">
-                        <tree string="Bill lines" editable="bottom">
-                            <field name="sequence" widget="handle" />
-                            <field name="product_id"
-                                context="{'partner_id': parent.partner_id}"/>
-                            <field name="origin" invisible="False"/>
+                           attrs="{'readonly': [('state','=','invoiced')]}"
+                           nolabel="1"
+                           widget="one2many_list"
+                           mode="tree,kanban"
+                           context="{'type': 'out_invoice', 'journal_id': journal_id,
+                                    'default_invoice_id': invoice_id}">
+                        <tree string="Invoice Lines"
+                              editable="bottom"
+                              create="true">
+                            <field name="sequence"
+                                   widget="handle"/>
+                            <field name="product_id"/>
+                            <field name="origin"
+                                   invisible="1"/>
                             <field name="name"/>
-                            <field name="company_id" invisible="1"/>
-                            <field name="account_id" groups="account.group_account_user"
-                                domain="[('company_id', '=', parent.company_id), ('internal_type', '=', 'other'), ('deprecated', '=', False)]"/>
-                            <field name="account_analytic_id" groups="analytic.group_analytic_accounting"
-                                domain="[('company_id', '=', parent.company_id)]"/>
-                            <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
+                            <field name="company_id"
+                                   invisible="1"/>
+                            <field name="account_id"
+                                   groups="account.group_account_user"
+                                   domain="[
+                                   ('company_id', '=', parent.company_id),
+                                   ('internal_type', '=', 'other')]"/>
+                            <field name="account_analytic_id"
+                                   groups="analytic.group_analytic_accounting"
+                                   domain="[
+                                   ('company_id', '=', parent.company_id)]"/>
+                            <field name="analytic_tag_ids"
+                                   groups="analytic.group_analytic_accounting"
+                                   widget="many2many_tags"/>
+                            <field name="user_id"
+                                   groups="base.group_no_one"/>
                             <field name="quantity"/>
-                            <field name="uom_id" groups="product.group_uom"/>
+                            <field name="uom_id"
+                                   groups="product.group_uom"/>
                             <field name="price_unit"/>
-                            <field name="user_id" groups="base.group_no_one"/>
-                            <field name="discount" groups="base.group_no_one"/>
+                            <field name="discount"
+                                   groups="base.group_no_one"/>
+                            <field name="invoice_line_tax_ids"
+                                   widget="many2many_tags"
+                                   context="{'type':parent.type}"
+                                   domain="[
+                                   ('type_tax_use','=','sale'),
+                                   ('company_id', '=', parent.company_id)]"
+                                   options="{'no_create': True}"/>
                             <field name="price_subtotal"/>
-                            <field name="currency_id" invisible="1"/>
+                            <field name="currency_id"
+                                   invisible="1"/>
                         </tree>
                     </field>
                     <notebook>
@@ -65,7 +95,11 @@
                             <group>
                                 <group invisible="1">
                                     <field name="time_line_ids" >
-                                        <tree string="Time lines" create="true" edit="false" delete="true" copy="false">
+                                        <tree string="Time lines"
+                                              create="true"
+                                              edit="false"
+                                              delete="true"
+                                              copy="false">
                                             <field name="user_id" />
                                             <field name="date" />
                                             <field name="product_id"

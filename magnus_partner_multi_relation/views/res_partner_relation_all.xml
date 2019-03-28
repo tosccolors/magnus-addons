@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <field name="date_start" position="before">
                 <field name="distribution_key"/>
+                <field name="invoicing_property_id"/>
             </field>
         </field>
     </record>
