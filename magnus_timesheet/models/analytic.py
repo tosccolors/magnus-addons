@@ -11,9 +11,19 @@ class AccountAnalyticLine(models.Model):
     _description = 'Analytic Line'
     _order = 'date desc'
 
-    @api.depends('date', 'user_id', 'project_id', 'account_id','sheet_id_computed.date_to',
+    @api.depends('date',
+                 'user_id',
+                 'project_id',
+                 'project_id.chargeable',
+                 'project_id.correction_charge',
+                 'project_id.invoice_properties.expenses',
+                 'account_id',
+                 'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
-                 'sheet_id_computed.employee_id', 'task_id', 'product_uom_id', 'planned')
+                 'sheet_id_computed.employee_id',
+                 'task_id',
+                 'product_uom_id',
+                 'planned')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         """
