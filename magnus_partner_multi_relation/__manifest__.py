@@ -18,6 +18,7 @@
         "data/data.xml",
         "views/res_partner_relation_all.xml",
         "views/project_view.xml",
+        "views/account_invoice_view.xml",
 #        'views/res_partner.xml',
 #        'views/res_partner_relation_type.xml',
 #        'views/menu.xml',
