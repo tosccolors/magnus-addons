@@ -4,4 +4,5 @@
 from . import res_partner_relation_all
 from . import res_partner_relation
 from . import project
+from . import account_invoice
 
