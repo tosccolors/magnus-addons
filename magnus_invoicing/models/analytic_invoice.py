@@ -603,7 +603,7 @@ class AnalyticUserTotal(models.Model):
     )
     children_ids = fields.Many2many(
         'account.analytic.line',
-        'analytic_invoice_account_line_rel'
+        'analytic_invoice_account_line_rel',
         'user_total_id',
         'analytic_account_id',
         string='Detail Time Lines',
