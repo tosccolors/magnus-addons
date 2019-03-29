@@ -44,7 +44,7 @@ class AnalyticInvoice(models.Model):
 
 
     @api.one
-    @api.depends('partner_id', 'account_analytic_ids', 'month_id', 'gb_week','project_operating_unit_id', 'project_id', 'link_project')
+    @api.depends('partner_id', 'month_id', 'gb_week','project_operating_unit_id', 'project_id', 'link_project')
     def _compute_objects(self):
         ctx = self.env.context.copy()
         current_ref = ctx.get('active_invoice_id', False)
