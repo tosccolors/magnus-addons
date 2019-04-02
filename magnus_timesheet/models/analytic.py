@@ -22,7 +22,7 @@ class AccountAnalyticLine(models.Model):
                  'product_uom_id',
                  'planned')
     def _compute_analytic_line(self):
-        """Links the timesheet line to the corresponding sheet
+        """Calculates a number of fields
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
@@ -32,9 +32,10 @@ class AccountAnalyticLine(models.Model):
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
-                line.expenses = line.project_id.invoice_properties.expenses
+                if line.project_id.invoice_properties:
+                    line.expenses = line.project_id.invoice_properties.expenses
             if line.account_id:
-                line.project_mgr = line.account_id.project_ids.user_id
+                line.project_mgr = line.account_id.project_ids.user_id or False
             if line.task_id and line.user_id:
                 uou = line.user_id._get_operating_unit_id()
                 if uou:
@@ -46,22 +47,8 @@ class AccountAnalyticLine(models.Model):
                     elif line.date:
                         line.week_id = line.find_daterange_week(line.date)
                         line.month_id = line.find_daterange_month(line.date)
-#                    elif not line.child_ids == []:
-#                        line.week_id = line.find_daterange_week(line.child_ids.date)
-#                        line.month_id = line.find_daterange_month(line.child_ids.date)
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
-#                if not line.ts_line or line.planned:
-#                    continue
-
-#            sheets = self.env['hr_timesheet_sheet.sheet'].search(
-#                [('week_id', '=', line.week_id.id),
-#                 ('employee_id.user_id.id', '=', line.user_id.id),
-#                 ('state', 'in', ['draft', 'new'])])
-#            if sheets:
-#                # [0] because only one sheet possible for an employee between 2 dates
-#                line.sheet_id_computed = sheets[0]
-#                line.sheet_id = sheets[0]
                 task = line.task_id
                 user = line.user_id
                 line.product_id = self.get_task_user_product(task.id, user.id) or False
@@ -74,7 +61,6 @@ class AccountAnalyticLine(models.Model):
                 if taskuser and taskuser.fee_rate or taskuser.product_id:
                     fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
                 else:
-#                    user = self.env['res.users'].browse(userid)
                     employee = user._get_related_employees()
                     fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
                 if line.product_uom_id and line.product_uom_id == self.env.ref(
@@ -192,7 +178,7 @@ class AccountAnalyticLine(models.Model):
         compute='_get_day'
     )
     ts_line = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Timesheet line',
         store=True,
     )
