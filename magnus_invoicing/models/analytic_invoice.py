@@ -524,7 +524,14 @@ class AnalyticInvoice(models.Model):
     def _get_user_per_month(self):
         self.ensure_one()
         res = {}
-        for user_tot in self.user_total_ids:
+        
+        #FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
+        user_total_objs = self.user_total_ids
+        if not user_total_objs:
+            usrTotIDS = self.read(['user_total_ids'])[0]['user_total_ids']
+            user_total_objs = self.user_total_ids.browse(usrTotIDS)
+
+        for user_tot in user_total_objs:
             if user_tot.project_id.invoice_properties.specs_invoice_report:
                 if user_tot.project_id in res:
                     if user_tot.user_id in res[user_tot.project_id]:
