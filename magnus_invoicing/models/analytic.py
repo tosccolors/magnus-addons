@@ -37,7 +37,8 @@ class AccountAnalyticLine(models.Model):
                                 """ % (self._table, state, cond, rec))
             self.env.invalidate_all()
             vals.pop('state')
-        return super(AccountAnalyticLine, self).write(vals) if vals else True
+        
+        return super(AccountAnalyticLine, self.with_context()).write(vals) if vals else True
 
     def _check_state(self):
         """
@@ -45,7 +46,7 @@ class AccountAnalyticLine(models.Model):
         :return: True or super
         """
         context = self.env.context.copy()
-        if not 'active_model' in context \
+        if not 'analytic_check_state' in context \
                 or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
