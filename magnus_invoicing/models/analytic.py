@@ -4,6 +4,7 @@
 
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
+from odoo.exceptions import UserError, ValidationError
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -29,16 +30,33 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        if 'state' in vals:
-            state = vals['state']
-            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=", self.id)
-            self.env.cr.execute("""
-                                UPDATE %s SET state = '%s' WHERE id %s %s
-                                """ % (self._table, state, cond, rec))
-            self.env.invalidate_all()
-            vals.pop('state')
-        
-        return super(AccountAnalyticLine, self.with_context()).write(vals) if vals else True
+        if 'sheet_id' in vals and vals['sheet_id'] == False:
+            raise ValidationError(_(
+                'Timesheet link can not be deleted for %s.\n '
+            ) % self)
+#        if 'state' in vals:
+#            state = vals['state']
+#            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=",
+#                        self.id)
+#            self.env.cr.execute("""
+#                                UPDATE %s SET state = '%s' WHERE id %s %s
+#                                """ % (self._table, state, cond, rec))
+#            self.env.invalidate_all()
+#            vals.pop('state')
+#        context = self.env.context.copy()
+        if self.filtered('ts_line') and not (
+                'unit_amount' in vals or
+                'product_uom_id' in vals or
+                'sheet_id' in vals or
+                'date' in vals or
+                'project_id' in vals or
+                'task_id' in vals or
+                'user_id' in vals or
+                'name' in vals or
+                'ref' in vals):
+            return super(AccountAnalyticLine, self.with_context(analytic_check_state=True)).write(
+                vals)
+        return super(AccountAnalyticLine, self).write(vals)
 
     def _check_state(self):
         """
@@ -46,7 +64,7 @@ class AccountAnalyticLine(models.Model):
         :return: True or super
         """
         context = self.env.context.copy()
-        if not 'analytic_check_state' in context \
+        if 'analytic_check_state' in context \
                 or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()

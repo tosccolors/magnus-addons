@@ -14,7 +14,27 @@ class AccountAnalyticLine(models.Model):
     @api.depends('date',
                  'user_id',
                  'project_id',
-                 'project_id.chargeable',
+                 'sheet_id_computed.date_to',
+                 'sheet_id_computed.date_from',
+                 'sheet_id_computed.employee_id')
+    def _compute_sheet(self):
+        """Links the timesheet line to the corresponding sheet
+        """
+        for ts_line in self.filtered('project_id'):
+            if not ts_line.ts_line :
+                continue
+            sheets = self.env['hr_timesheet_sheet.sheet'].search(
+                [('date_to', '>=', ts_line.date),
+                 ('date_from', '<=', ts_line.date),
+                 ('employee_id.user_id.id', '=', ts_line.user_id.id),
+                 ('state', 'in', ['draft', 'new'])])
+            if sheets:
+                # [0] because only one sheet possible for an employee between
+                # 2 dates
+                ts_line.sheet_id_computed = sheets[0]
+                ts_line.sheet_id = sheets[0]
+
+    @api.depends('project_id.chargeable',
                  'project_id.correction_charge',
                  'project_id.invoice_properties.expenses',
                  'account_id',
@@ -54,18 +74,23 @@ class AccountAnalyticLine(models.Model):
                         line.month_id = line.find_daterange_month(line.child_ids.date)
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
-                if not line.ts_line or line.planned:
-                    continue
-            else:
-                continue
-            sheets = self.env['hr_timesheet_sheet.sheet'].search(
-                [('week_id', '=', line.week_id.id),
-                 ('employee_id.user_id.id', '=', line.user_id.id),
-                 ('state', 'in', ['draft', 'new'])])
-            if sheets:
-                # [0] because only one sheet possible for an employee between 2 dates
-                line.sheet_id_computed = sheets[0]
-                line.sheet_id = sheets[0]
+                task = line.task_id
+                user = line.user_id
+                line.product_id = self.get_task_user_product(task.id, user.id) or False
+                if not line.product_id:
+                    raise ValidationError(_(
+                        'Please fill in Fee Rate Product in employee %s.\n '
+                    ) % line.user_id)
+                taskuser = self.env['task.user'].search(
+                    [('task_id', '=', task.id), ('user_id', '=', user.id)], limit=1)
+                if taskuser and taskuser.fee_rate or taskuser.product_id:
+                    fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
+                else:
+                    employee = user._get_related_employees()
+                    fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
+                if line.product_uom_id and line.product_uom_id.id == \
+                        self.env.ref('product.product_uom_hour').id:
+                    line.amount = line.unit_amount * - fee_rate
 
 
     def find_daterange_week(self, date):

@@ -39,6 +39,7 @@ class ChangeChargecode(models.TransientModel):
             aal.with_context(cc=True).write({'state': 'change-chargecode'})
             aal.copy(
                 default={'sheet_id': False,
+                         'ts_line': False,
                          'unit_amount': -unit_amount,
                          'amount': -amount,
                          'state': 'change-chargecode'
@@ -46,6 +47,7 @@ class ChangeChargecode(models.TransientModel):
             )
             aal.copy(
                 default={'sheet_id': False,
+                         'ts_line': False,
                          'amount': aal.get_fee_rate_amount(
                              task_id,
                              aal.user_id.id

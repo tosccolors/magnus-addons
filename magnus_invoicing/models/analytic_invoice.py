@@ -62,7 +62,6 @@ class AnalyticInvoice(models.Model):
             for t in tot_obj:
                 ana_ids |= t.children_ids
 
-
         partner_id = self.partner_id or False
         if partner_id and len(self.account_analytic_ids) == 0:
             account_analytic = self.env['account.analytic.account'].search([
@@ -70,11 +69,6 @@ class AnalyticInvoice(models.Model):
             if len(account_analytic) > 0:
                 self.account_analytic_ids = \
                     [(6, 0, account_analytic.ids)]
-
-        # operating_units = self.env['operating.unit']
-        # for aa in self.account_analytic_ids:
-        #     operating_units |= aa.operating_unit_ids
-        # self.operating_unit_ids = [(6, 0, operating_units.ids)]
 
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
@@ -524,7 +518,7 @@ class AnalyticInvoice(models.Model):
     def _get_user_per_month(self):
         self.ensure_one()
         res = {}
-        
+
         #FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
         user_total_objs = self.user_total_ids
         if not user_total_objs:
@@ -549,7 +543,7 @@ class AnalyticInvoice(models.Model):
                     res[user_tot.project_id][user_tot.user_id] = {'hours':user_tot.unit_amount, 'fee_rate':user_tot.fee_rate, 'amount': user_tot.amount}
                     res[user_tot.project_id]['hrs_tot'] = user_tot.unit_amount
                     res[user_tot.project_id]['amt_tot'] = user_tot.amount
-                                
+
         return res
 
     @api.multi
