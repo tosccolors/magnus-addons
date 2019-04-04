@@ -27,9 +27,8 @@
                             <div t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
                         </t>
                     </strong>
-                     <br></br>
+                     <br/>
                      <span t-if="proforma_invoice"><strong>PROFORMA INVOICE</strong></span><br/>
-                 </div>
                  </div>
             </div>
 
