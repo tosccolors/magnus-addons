@@ -7,7 +7,7 @@
     <t t-call="report_qweb_operating_unit.external_layout_ou">
 
         <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
-
+        <t t-set="proforma_invoice" t-value="o.state=='proforma' or o.state=='proforma2'"/>
         <div class="page" style="page-break-after:always;">
             <div class="row mt32 mb32" style="padding-left:85px;">
                  <div class="col-xs-7" style="padding:0px;">
@@ -27,6 +27,9 @@
                             <div t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
                         </t>
                     </strong>
+                     <br></br>
+                     <span t-if="proforma_invoice"><strong>PROFORMA INVOICE</strong></span><br/>
+                 </div>
                  </div>
             </div>
 
