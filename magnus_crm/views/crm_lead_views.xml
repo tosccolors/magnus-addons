@@ -16,19 +16,23 @@
                 </group>
                 <group>
                   <field name="end_date" />
+                  <field name="latest_revenue_date" invisible="1"/>
                   <field name="show_button" invisible="1"/>
                 </group>
               </group>
               <div attrs="{'invisible': [('planned_revenue', '=', 0)]}">
-                <field name="monthly_revenue_ids" context="{'default_lead_id':active_id, 'default_probability': probability}">
-                  <tree editable="bottom" create="true" >
-                    <field name="month" />
+                <field name='id' invisible='True'/>
+                <field name="monthly_revenue_ids" context="{'default_lead_id':active_id, 'default_percentage': probability}" attrs="{'readonly': [('id','=', False )]}">
+                  <tree editable="bottom" create="true" default_order="date" colors="grey:computed_line==True;">
+                    <field name="month" readonly="1"/>
                     <field name="date" />
-                    <field name="no_of_days" />
+                    <field name="latest_revenue_date" invisible="1"/>
+                    <field name="computed_line" invisible="1"/>
+                    <field name="no_of_days" readonly="1" />
                     <field name="company_currency" invisible="1" />
+                    <field name="weighted_revenue" readonly="1" widget="monetary" options="{'currency_field': 'company_currency'}" sum="Total"/>
                     <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}" sum="Total"/>
-                    <field name="nominal_revenue" widget="monetary" options="{'currency_field': 'company_currency'}" sum="Total"/>
-                    <field name="percentage" readonly="1" widget="integer"/>
+                    <field name="percentage" />
                   </tree>
                 </field>
               </div>
@@ -65,6 +69,10 @@
                 </div>
               </div>
             </xpath>
+            <xpath expr="//sheet/group/group/field[@name='partner_id']" position="after" >
+              <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}"
+                   domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
+            </xpath>
           </data>
       </field>
     </record>
@@ -88,8 +96,67 @@
                     </div>
                 </div>
             </xpath>
+            <xpath expr="//sheet/group/group/field[@name='partner_id']" position="after" >
+              <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}"
+                   domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
+            </xpath>
         </field>
     </record>
+
+    <!-- Inherited crm.lead list view (as Opportunity) -->
+    <record id="crm_case_tree_view_oppor_magnus" model="ir.ui.view">
+        <field name="name">crm.lead.tree.opportunity</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <field name="country_id" position="replace"/>
+            <field name="partner_id" position="replace">
+                <field name="partner_name" string="Customer name" />
+                <field name="partner_contact_id" />
+            </field>
+            <field name="date_action" position="before">
+                <field name="next_activity_id" />
+            </field>
+            <field name="title_action" position="replace">
+                <field name="tag_ids" />
+            </field>
+        </field>
+    </record>
+
+    <!-- Inherited crm_sector module crm.lead list view (as Opportunity) -->
+      <record id="crm_case_tree_view_oppor_sector_magnus" model="ir.ui.view">
+        <field name="name">Remove sector field from tree view</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm_sector.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <field name="sector_id" position="replace"/>
+        </field>
+    </record>
+
+    <!-- Inherited crm.lead search view (as Opportunity) -->
+    <record id="view_crm_case_opportunities_filter_magnus" model="ir.ui.view">
+        <field name="name">crm.lead.search.opportunity</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="arch" type="xml">
+            <filter name="stage" position="after">
+                <filter string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
+                <filter string="Contact Person" domain="[]" context="{'group_by': 'partner_contact_id'}"/>
+            </filter>
+        </field>
+      </record>
+
+      <!-- Inherited crm.lead search view (as Lead) -->
+      <record id="view_crm_case_leads_filter_magnus" model="ir.ui.view">
+            <field name="name">crm.lead.search.lead</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="arch" type="xml">
+                <filter name="customer" position="after">
+                    <filter string="Contact Person" domain="[]" context="{'group_by': 'partner_contact_id'}"/>
+                </filter>
+            </field>
+      </record>
 
       <!--Monthly Revenue form view-->
     <record id="crm_monthly_revenue_form_view" model="ir.ui.view">
@@ -105,8 +172,8 @@
                 <field name="no_of_days" readonly="1"/>
               </group>
               <group>
+                <field name="weighted_revenue" readonly="1" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                 <field name="expected_revenue" readonly="1" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                <field name="nominal_revenue" readonly="1" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                 <field name="percentage" widget="percentpie" readonly="1"/>
                 <field name="company_currency" readonly="1" />
                 <field name="user_id" readonly="1"/>
@@ -126,8 +193,8 @@
           <field name="lead_id" />
           <field name="month" />
           <field name="no_of_days" />
+          <field name="weighted_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
           <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-          <field name="nominal_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
           <field name="percentage" widget="integer"/>
           <field name="company_currency" invisible="1" />
           <field name="user_id" invisible="1" />
@@ -143,7 +210,7 @@
             <pivot string="Monthly Revenue Analysis">
                 <field name="lead_id" type="row"/>
                 <field name="month" type="col"/>
-                <field name="expected_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="weighted_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </pivot>
         </field>
     </record>
@@ -156,7 +223,7 @@
             <graph string="Monthly Revenue Analysis" stacked="True">
                 <field name="lead_id" type="row"/>
                 <field name="month" type="col"/>
-                <field name="expected_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="weighted_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </graph>
         </field>
     </record>
@@ -170,8 +237,8 @@
                 <field name="lead_id"/>
                 <field name="month"/>
                 <field name="no_of_days" />
+                <field name="weighted_revenue" />
                 <field name="expected_revenue" />
-                <field name="nominal_revenue" />
                 <field name="percentage" />
                 <field name="user_id" />
                 <field name="company_currency" />

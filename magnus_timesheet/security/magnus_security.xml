@@ -14,4 +14,17 @@
             <field name="implied_ids" eval="[(4, ref('magnus_timesheet.group_planning_forecasting'))]"/>
         </record>
     </data>
+    <data noupdate="1">
+        <record id="group_timesheet_manager" model="res.groups">
+            <field name="name">Timesheet ManagerX</field>
+            <field name="category_id" ref="base.module_category_hr_timesheet"/>
+        </record>
+        <record model="ir.rule" id="timesheet_manager">
+            <field name="name">Timesheet ManagerX</field>
+            <field name="model_id" search="[('model','=','hr_timesheet_sheet.sheet')]" model="ir.model"/>
+            <field name="global" eval="True"/>
+            <field name="groups" eval="[(4,ref('magnus_timesheet.group_timesheet_manager'))]"/>
+            <field name="domain_force">[(1,'=',1)]</field>
+        </record>
+    </data>
 </odoo>

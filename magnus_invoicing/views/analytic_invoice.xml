@@ -7,8 +7,8 @@
             <field name="arch" type="xml">
                 <form string="Create invoices" >
                 <header>
-                    <button name="generate_invoice" type="object" string="Generate Invoice" states="draft"/>
-                    <button name="generate_invoice" type="object" string="Re-Generate Invoice" states="open"/>
+                    <button name="generate_invoice" type="object" string="Generate Invoice" states="draft,open"/>
+                    <!--button name="generate_invoice" type="object" string="Re-Generate Invoice" states="open"/-->
                     <button name="delete_invoice" type="object" string="Delete Invoice" states="open,invoiced"/>
                     <!--button name="action_done" type="object" string="Invoiced" states="open"/-->
                     <field name="state" widget="statusbar" statusbar_visible="draft,open,invoiced"/>
