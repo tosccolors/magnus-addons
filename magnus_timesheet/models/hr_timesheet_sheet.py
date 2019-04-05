@@ -121,13 +121,14 @@ class HrTimesheetSheet(models.Model):
     def _get_overtime_hours(self):
         for sheet in self:
             if sheet.week_id and sheet.employee_id:
+                timesheet_id = sheet.id if isinstance(sheet.id, int) else sheet.timesheet_ids[0].sheet_id.id if sheet.timesheet_ids and isinstance(sheet.timesheet_ids[0].sheet_id.id, int) else False
                 date_from = datetime.strptime(sheet.week_id.date_start, "%Y-%m-%d").date()
                 overtime_hours = 0
                 for i in range(7):
                     date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
                     hours = sum(sheet.env['account.analytic.line'].search([
                         ('date', '=', date),
-                        ('sheet_id', '=', sheet.id),
+                        ('sheet_id', '=', timesheet_id),
                         ('task_id.standby', '=', False)
                     ]).mapped('unit_amount'))
                     if i < 5 and hours > 8:
@@ -135,7 +136,7 @@ class HrTimesheetSheet(models.Model):
                     elif i > 4 and hours > 0:
                         overtime_hours += hours
                 overtime_taken = sum(self.env['account.analytic.line'].search([
-                    ('sheet_id', '=', sheet.id),
+                    ('sheet_id', '=', timesheet_id),
                     ('sheet_id.employee_id', '=', sheet.employee_id.id),
                     ('project_id.overtime', '=', True)
                 ]).mapped('unit_amount'))
