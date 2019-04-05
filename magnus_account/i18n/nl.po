@@ -175,3 +175,8 @@ msgstr "Binnen"
 #: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
 msgid "to"
 msgstr "aan"
+
+#. module: magnus_account
+#: model:ir.ui.view,arch_db:magnus_account.report_invoice_document_magnus_account
+msgid "PROFORMA INVOICE"
+msgstr "PROFORMA FACTUUR"
