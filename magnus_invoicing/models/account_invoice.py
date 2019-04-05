@@ -14,8 +14,19 @@ class AccountJournal(models.Model):
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
+    @api.one
+    @api.depends('invoice_line_ids')
+    def _compute_month_id(self):
+        analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
+        self.month_id = analytic_invoice_id and analytic_invoice_id[0].month_id.id or False
+
     target_invoice_amount = fields.Monetary(
         'Target Invoice Amount'
+    )
+    month_id = fields.Many2one(
+        'date.range',
+        compute='_compute_month_id',
+        string="Invoicing Period"
     )
 
     def compute_target_invoice_amount(self):
