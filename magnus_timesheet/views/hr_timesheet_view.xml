@@ -7,9 +7,6 @@
       <field name="model">hr_timesheet_sheet.sheet</field>
       <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//header/button[@name='action_timesheet_draft'][1]" position="attributes">
-          <attribute name="groups">magnus_timesheet.group_timesheet_manager</attribute>
-        </xpath>
         <xpath expr="//group[1]/group[1]" position="after">
           <group>
             <field name="starting_mileage"  attrs="{'invisible': [('vehicle', '=', False)]}"/>
