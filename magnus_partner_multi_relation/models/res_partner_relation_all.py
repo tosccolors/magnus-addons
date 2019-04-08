@@ -5,6 +5,7 @@
 import logging
 import collections
 from odoo import _, api, fields, models
+import odoo.addons.decimal_precision as dp
 
 # Register relations
 RELATIONS_SQL_MAGNUS = """\
@@ -43,7 +44,8 @@ class ResPartnerRelationAll(models.AbstractModel):
     _inherit = 'res.partner.relation.all'
 
     distribution_key = fields.Float(
-        string='Percentage Distribution Key'
+        string='Percentage Distribution Key',
+        digits=dp.get_precision('Product Unit of Measure')
     )
     invoicing_property_id = fields.Many2one(
         comodel_name='project.invoicing.properties',

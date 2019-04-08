@@ -28,7 +28,9 @@
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='operating_unit_id']" position="before">
                 <field name="user_id"/>
             </xpath>
-
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="month_id" attrs="{'invisible':[('month_id', '=', False)]}"/>
+            </xpath>
         </field>
     </record>
       <!-- Update account invoice from sale module !-->
