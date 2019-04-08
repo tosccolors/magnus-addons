@@ -27,6 +27,11 @@ class AccountAnalyticLine(models.Model):
         track_visibility='onchange',
         default='draft'
     )
+    user_total_id = fields.Many2one(
+        'analytic.user.total',
+        string='Summary Reference',
+        index=True
+    )
 
     @api.multi
     def write(self, vals):

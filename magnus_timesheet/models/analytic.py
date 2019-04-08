@@ -148,11 +148,6 @@ class AccountAnalyticLine(models.Model):
         'account.analytic.line',
         string='Reference'
     )
-    user_total_id = fields.Many2one(
-        'analytic.user.total',
-        string='Summary Reference',
-        index=True
-    )
     week_id = fields.Many2one(
         'date.range',
         compute=_compute_sheet,
