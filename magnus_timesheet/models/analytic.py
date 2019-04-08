@@ -44,7 +44,7 @@ class AccountAnalyticLine(models.Model):
                  'product_uom_id',
                  'planned')
     def _compute_analytic_line(self):
-        """Links the timesheet line to the corresponding sheet
+        """Calculates a number of fields
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
@@ -54,9 +54,10 @@ class AccountAnalyticLine(models.Model):
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
-                line.expenses = line.project_id.invoice_properties.expenses
+                if line.project_id.invoice_properties:
+                    line.expenses = line.project_id.invoice_properties.expenses
             if line.account_id:
-                line.project_mgr = line.account_id.project_ids.user_id
+                line.project_mgr = line.account_id.project_ids.user_id or False
             if line.task_id and line.user_id:
                 uou = line.user_id._get_operating_unit_id()
                 if uou:
@@ -68,9 +69,6 @@ class AccountAnalyticLine(models.Model):
                     elif line.date:
                         line.week_id = line.find_daterange_week(line.date)
                         line.month_id = line.find_daterange_month(line.date)
-#                    elif not line.child_ids == []:
-#                        line.week_id = line.find_daterange_week(line.child_ids.date)
-#                        line.month_id = line.find_daterange_month(line.child_ids.date)
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
                 task = line.task_id
@@ -197,7 +195,7 @@ class AccountAnalyticLine(models.Model):
         compute='_get_day'
     )
     ts_line = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Timesheet line',
         store=True,
     )
