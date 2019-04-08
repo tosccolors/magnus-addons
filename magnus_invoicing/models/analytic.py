@@ -35,7 +35,8 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        if 'sheet_id' in vals and vals['sheet_id'] == False:
+        if 'sheet_id' in vals and vals['sheet_id'] == False and not \
+                'analytic_check_state' in self.env.context:
             raise ValidationError(_(
                 'Timesheet link can not be deleted for %s.\n '
             ) % self)
