@@ -35,21 +35,24 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        if 'sheet_id' in vals and vals['sheet_id'] == False and not \
-                'analytic_check_state' in self.env.context:
+        #Condition to check if sheet_id is already exists!
+        if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
             raise ValidationError(_(
                 'Timesheet link can not be deleted for %s.\n '
             ) % self)
-#        if 'state' in vals:
-#            state = vals['state']
-#            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=",
-#                        self.id)
-#            self.env.cr.execute("""
-#                                UPDATE %s SET state = '%s' WHERE id %s %s
-#                                """ % (self._table, state, cond, rec))
-#            self.env.invalidate_all()
-#            vals.pop('state')
-#        context = self.env.context.copy()
+
+        # don't call super if only state has to be updated
+        if 'state' in vals and len(vals) == 1:
+            state = vals['state']
+            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=",
+                       self.id)
+            self.env.cr.execute("""
+                               UPDATE %s SET state = '%s' WHERE id %s %s
+                               """ % (self._table, state, cond, rec))
+            self.env.invalidate_all()
+            vals.pop('state')
+            return True
+
         if self.filtered('ts_line') and not (
                 'unit_amount' in vals or
                 'product_uom_id' in vals or
@@ -60,7 +63,11 @@ class AccountAnalyticLine(models.Model):
                 'user_id' in vals or
                 'name' in vals or
                 'ref' in vals):
-            return super(AccountAnalyticLine, self.with_context(analytic_check_state=True)).write(
+
+            #always copy context to keep other context reference
+            context = self.env.context.copy()
+            context.update({'analytic_check_state': True})
+            return super(AccountAnalyticLine, self.with_context(context)).write(
                 vals)
         return super(AccountAnalyticLine, self).write(vals)
 
