@@ -201,6 +201,9 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_sheet,
         store=True
     )
+    overtime = fields.Boolean(
+        string='Overtime',
+    )
 
 
     @api.model
