@@ -219,6 +219,10 @@ class AccountAnalyticLine(models.Model):
         store=True
     )
 
+    OT = fields.Boolean(
+        string='Overtime',
+    )
+
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
@@ -294,7 +298,7 @@ class AccountAnalyticLine(models.Model):
         user_id = vals.get('user_id', False)
 
         #some cases product id is missing
-        if not vals.get('product_id', False):
+        if not vals.get('product_id', False) and user_id:
             product_id = self.get_task_user_product(task_id, user_id) or False
             if not product_id:
                 user = self.env.user.browse(user_id)
@@ -322,7 +326,7 @@ class AccountAnalyticLine(models.Model):
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
 
             # some cases product id is missing
-            if not vals.get('product_id', aal.product_id):
+            if not vals.get('product_id', aal.product_id) and user_id:
                 product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:
                     user = self.env.user.browse(user_id)
