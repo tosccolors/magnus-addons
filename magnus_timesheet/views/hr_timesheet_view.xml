@@ -10,7 +10,7 @@
         <xpath expr="//sheet/div[@class='oe_title']" position="before">
             <field name="overtime_analytic_line_id" invisible="1"/>
             <div class="oe_button_box" name="button_box">
-                <button class="oe_stat_button" name="action_view_overtime_entry" type="object" icon="fa-pencil-square-o" string="OvertimeEntry" attrs="{'invisible':[('overtime_analytic_line_id','=',False)]}" groups="hr_timesheet.group_hr_timesheet_user">
+                <button class="oe_stat_button" name="action_view_overtime_entry" type="object" icon="fa-pencil-square-o" string="OvertimeEntry" attrs="{'invisible':['|',('overtime_analytic_line_id','=',False),('state','not in',('confirm','done'))]}" groups="hr_timesheet.group_hr_timesheet_user">
                 </button>
             </div>
         </xpath>
