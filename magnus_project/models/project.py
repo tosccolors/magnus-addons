@@ -14,7 +14,7 @@ class Project(models.Model):
     slamid = fields.Char('Slam ID')
     invoice_address = fields.Many2one('res.partner', string='Invoice Address')
     correction_charge = fields.Boolean('Correction Chargeability')
-    chargeable = fields.Boolean('Chargeable')
+    chargeable = fields.Boolean('Chargeable', default=True)
     invoice_properties = fields.Many2one('project.invoicing.properties', 'Invoice Properties')
     analytic_account_related = fields.Many2one(
         related='analytic_account_id',
