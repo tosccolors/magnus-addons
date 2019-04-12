@@ -74,7 +74,7 @@ class AccountInvoice(models.Model):
         analytic_invoice_ids = self.invoice_line_ids.mapped('analytic_invoice_id')
         for analytic_invoice in analytic_invoice_ids:
             for grp_line in analytic_invoice.user_total_ids:
-                aal_ids += grp_line.children_ids
+                aal_ids += grp_line.detail_ids
         userProject = {}
         for aal in aal_ids:
             project_id, user_id = aal.project_id if aal.project_id else aal.task_id.project_id , aal.user_id
