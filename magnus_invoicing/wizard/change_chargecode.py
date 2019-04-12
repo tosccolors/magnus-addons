@@ -36,16 +36,18 @@ class ChangeChargecode(models.TransientModel):
                 continue
             unit_amount = aal.unit_amount
             amount = aal.amount
-            aal.with_context(cc=True).write({'state': 'change-chargecode'})
-            aal.copy(
+            aal.write({'state': 'change-chargecode'})
+            aal.with_context(analytic_check_state=True).copy(
                 default={'sheet_id': False,
+                         'ts_line': False,
                          'unit_amount': -unit_amount,
                          'amount': -amount,
                          'state': 'change-chargecode'
                         }
             )
-            aal.copy(
+            aal.with_context(analytic_check_state=True).copy(
                 default={'sheet_id': False,
+                         'ts_line': False,
                          'amount': aal.get_fee_rate_amount(
                              task_id,
                              aal.user_id.id

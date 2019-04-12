@@ -14,18 +14,37 @@ class AccountAnalyticLine(models.Model):
     @api.depends('date',
                  'user_id',
                  'project_id',
-                 'project_id.chargeable',
-                 'project_id.correction_charge',
-                 'project_id.invoice_properties.expenses',
-                 'account_id',
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
-                 'sheet_id_computed.employee_id',
+                 'sheet_id_computed.employee_id')
+    def _compute_sheet(self):
+        """Links the timesheet line to the corresponding sheet
+        """
+        for ts_line in self.filtered('project_id'):
+            if not ts_line.ts_line :
+                continue
+            sheets = self.env['hr_timesheet_sheet.sheet'].search(
+                [('date_to', '>=', ts_line.date),
+                 ('date_from', '<=', ts_line.date),
+                 ('employee_id.user_id.id', '=', ts_line.user_id.id),
+                 ('state', 'in', ['draft', 'new'])])
+            if sheets:
+                # [0] because only one sheet possible for an employee between
+                # 2 dates
+                ts_line.sheet_id_computed = sheets[0]
+                ts_line.sheet_id = sheets[0]
+
+    @api.depends('project_id.chargeable',
+                 'project_id.correction_charge',
+                 'project_id.invoice_properties.expenses',
+                 'sheet_id',
+                 'account_id',
+                 'unit_amount',
                  'task_id',
                  'product_uom_id',
                  'planned')
-    def _compute_sheet(self):
-        """Links the timesheet line to the corresponding sheet
+    def _compute_analytic_line(self):
+        """Calculates a number of fields
         """
         UomHrs = self.env.ref("product.product_uom_hour").id
         for line in self:
@@ -35,9 +54,10 @@ class AccountAnalyticLine(models.Model):
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
-                line.expenses = line.project_id.invoice_properties.expenses
+                if line.project_id.invoice_properties:
+                    line.expenses = line.project_id.invoice_properties.expenses
             if line.account_id:
-                line.project_mgr = line.account_id.project_ids.user_id
+                line.project_mgr = line.account_id.project_ids.user_id or False
             if line.task_id and line.user_id:
                 uou = line.user_id._get_operating_unit_id()
                 if uou:
@@ -49,23 +69,25 @@ class AccountAnalyticLine(models.Model):
                     elif line.date:
                         line.week_id = line.find_daterange_week(line.date)
                         line.month_id = line.find_daterange_month(line.date)
-                    elif not line.child_ids == []:
-                        line.week_id = line.find_daterange_week(line.child_ids.date)
-                        line.month_id = line.find_daterange_month(line.child_ids.date)
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
-                if not line.ts_line or line.planned:
-                    continue
-            else:
-                continue
-            sheets = self.env['hr_timesheet_sheet.sheet'].search(
-                [('week_id', '=', line.week_id.id),
-                 ('employee_id.user_id.id', '=', line.user_id.id),
-                 ('state', 'in', ['draft', 'new'])])
-            if sheets:
-                # [0] because only one sheet possible for an employee between 2 dates
-                line.sheet_id_computed = sheets[0]
-                line.sheet_id = sheets[0]
+                task = line.task_id
+                user = line.user_id
+                line.product_id = self.get_task_user_product(task.id, user.id) or False
+                if not line.product_id:
+                    raise ValidationError(_(
+                        'Please fill in Fee Rate Product in employee %s.\n '
+                    ) % line.user_id.name)
+                # taskuser = self.env['task.user'].search(
+                #     [('task_id', '=', task.id), ('user_id', '=', user.id)], limit=1)
+                # if taskuser and taskuser.fee_rate or taskuser.product_id:
+                #     fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
+                # else:
+                #     employee = user._get_related_employees()
+                #     fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
+                # if line.product_uom_id and line.product_uom_id.id == \
+                #         self.env.ref('product.product_uom_hour').id:
+                #     line.amount = line.unit_amount * - fee_rate
 
 
     def find_daterange_week(self, date):
@@ -123,32 +145,27 @@ class AccountAnalyticLine(models.Model):
         'account.analytic.line',
         string='Reference'
     )
-    user_total_id = fields.Many2one(
-        'analytic.user.total',
-        string='Summary Reference',
-        index=True
-    )
     week_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Week',
         store=True,
     )
     month_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Month',
         store=True,
     )
     operating_unit_id = fields.Many2one(
         'operating.unit',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Operating Unit',
         store=True
     )
     project_operating_unit_id = fields.Many2one(
         'operating.unit',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Project Operating Unit',
         store=True
     )
@@ -178,27 +195,27 @@ class AccountAnalyticLine(models.Model):
         compute='_get_day'
     )
     ts_line = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Timesheet line',
         store=True,
     )
     correction_charge = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Chargeable',
         store=True,
     )
     expenses = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Expenses',
     )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
 
@@ -226,7 +243,8 @@ class AccountAnalyticLine(models.Model):
             task_user = self.env['task.user'].search([
                 ('user_id', '=', uid),
                 ('task_id', '=', tid)], limit=1)
-            fr = task_user.fee_rate
+            if task_user and task_user.fee_rate or task_user.product_id:
+                fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
         if not fr :
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
@@ -235,9 +253,10 @@ class AccountAnalyticLine(models.Model):
         return fr
 
     @api.model
-    def get_fee_rate_amount(self, task_id=None, user_id=None):
+    def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=0.0):
         fr = self.get_fee_rate(task_id=task_id, user_id=user_id)
-        amount = - self.unit_amount * fr
+        unit_amount = unit_amount if unit_amount else self.unit_amount
+        amount = - unit_amount * fr
         return amount
 
     def _fetch_emp_plan(self):
@@ -265,62 +284,57 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-#        fee_rate = 0
-        if 'task_id' in vals and 'user_id' in vals:
-            vals['product_id'] = self.get_task_user_product(vals['task_id'], vals['user_id']) or False
-            if not vals['product_id']:
-                raise UserError(_(
-                    'Please fill in Fee Rate Product in employee %s.\n '
-                    ) % vals['user_id'])
-            taskuser = self.env['task.user'].search([('task_id', '=', vals['task_id']),('user_id','=', vals['user_id'])], limit=1)
-            if taskuser and taskuser.fee_rate or taskuser.product_id:
-                fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
-            else:
-                user = self.env['res.users'].browse(vals['user_id'])
-                employee = user._get_related_employees()
-                fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
-            if vals.get('product_uom_id', False) and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id:
-                vals['amount'] = vals['unit_amount'] * - fee_rate
         if self.env.context.get('default_planned', False):
             if vals.get['select_week_id', False] and vals['week_id'] != vals['select_week_id']:
                 vals['week_id'] = vals['select_week_id']
             if vals.get['project_id', False]:
                 vals['planned'] = True
+
+        task_id = vals.get('task_id', False)
+        user_id = vals.get('user_id', False)
+
+        #some cases product id is missing
+        if not vals.get('product_id', False):
+            product_id = self.get_task_user_product(task_id, user_id) or False
+            if not product_id:
+                user = self.env.user.browse(user_id)
+                raise ValidationError(_(
+                    'Please fill in Fee Rate Product in employee %s.\n '
+                ) % user.name)
+            vals['product_id'] = product_id
+
+        if vals.get('ts_line', False):
+            unit_amount = vals.get('unit_amount', False)
+            vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
         return super(AccountAnalyticLine, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        if 'task_id' in vals or 'user_id' in vals or 'unit_amount' in vals or 'product_id' in vals \
-                or 'amount' in vals or 'select_week_id' in vals or 'planned' in vals:
-            for aal in self:
-                task_id = vals['task_id'] if 'task_id' in vals else aal.task_id.id or False
-                user_id = vals['user_id'] if 'user_id' in vals else aal.user_id.id or False
-                unit_amount = vals['unit_amount'] if 'unit_amount' in vals else aal.unit_amount or 0.0
-                if task_id and user_id:
-                    vals['product_id'] = product_id = aal.get_task_user_product(task_id, user_id) or False
-                    if not product_id:
-                        raise UserError(_(
-                            'Please fill in Fee Rate Product in Employee %s.\n '
-                        ) % vals['user_id'])
-    #                fr = 0
-                    taskuser = self.env['task.user'].search([('task_id', '=', task_id),('user_id', '=', user_id)], limit=1)
-                    if taskuser and taskuser.fee_rate or taskuser.product_id:
-                        fr = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
-                    else:
-                        user = self.env['res.users'].browse(user_id)
-                        employee = user._get_related_employees()
-                        fr = employee.fee_rate \
-                                   or employee.product_id.lst_price or 0.0
-                    if (vals.get('product_uom_id', False)
-                        and vals['product_uom_id'] == self.env.ref('product.product_uom_hour').id) \
-                        or (aal.product_uom_id
-                        and aal.product_uom_id == self.env.ref('product.product_uom_hour')):
-                        vals['amount'] = - unit_amount * fr
+        for aal in self:
+            if 'select_week_id' in vals or 'planned' in vals:
                 if self.env.context.get('default_planned', False):
                     if vals.get('select_week_id', False):
                         vals['week_id'] = vals('select_week_id')
                     if aal.project_id:
                         vals['planned'] = True
+
+            task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
+            user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
+
+            # some cases product id is missing
+            if not vals.get('product_id', aal.product_id):
+                product_id = aal.get_task_user_product(task_id, user_id) or False
+                if not product_id:
+                    user = self.env.user.browse(user_id)
+                    raise ValidationError(_(
+                        'Please fill in Fee Rate Product in employee %s.\n '
+                    ) % user.name)
+                vals['product_id'] = product_id
+
+            ts_line = vals.get('ts_line', aal.ts_line)
+            if ts_line:
+                unit_amount = vals.get('unit_amount', aal.unit_amount)
+                vals['amount'] = aal.get_fee_rate_amount(task_id, user_id, unit_amount)
         return super(AccountAnalyticLine, self).write(vals)
 
 
