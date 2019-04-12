@@ -42,7 +42,7 @@ class AccountAnalyticLine(models.Model):
             ) % self)
 
         # don't call super if only state has to be updated
-        if 'state' in vals and len(vals) == 1:
+        if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
             cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=",
                        self.id)
