@@ -228,7 +228,7 @@ class AccountAnalyticLine(models.Model):
             taskUser = taskUserObj.search([('task_id', '=', task_id), ('user_id', '=', user_id)],
                                           limit=1)
             product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
-        if not product_id:
+        if not product_id and user_id:
             user = self.sudo().env['res.users'].browse(user_id)
             employee = user._get_related_employees()
             product_id = employee.product_id and employee.product_id.id or False
