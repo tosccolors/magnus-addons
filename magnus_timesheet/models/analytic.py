@@ -219,7 +219,7 @@ class AccountAnalyticLine(models.Model):
         store=True
     )
 
-    OT = fields.Boolean(
+    ot = fields.Boolean(
         string='Overtime',
     )
 
