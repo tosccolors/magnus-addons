@@ -246,11 +246,6 @@ class AnalyticInvoice(models.Model):
                 ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
             ])
 
-#    @api.depends('invoice_ids')
-#    def _compute_invoice_count(self):
-#        for line in self:
-#            line.invoice_count = len(line.invoice_ids.ids)
-
     @api.onchange('account_analytic_ids')
     def onchange_account_analytic(self):
         res ={}
@@ -422,7 +417,7 @@ class AnalyticInvoice(models.Model):
             'product_id': line.product_id.id,
             'quantity': line.unit_amount,
             'uom_id': line.product_uom_id.id,
-            # 'discount': line.discount,
+            'user_id': line.user_id.id,
         })
 
         # Add analytic tags to invoice line
