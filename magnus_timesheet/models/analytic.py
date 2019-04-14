@@ -228,7 +228,7 @@ class AccountAnalyticLine(models.Model):
             taskUser = taskUserObj.search([('task_id', '=', task_id), ('user_id', '=', user_id)],
                                           limit=1)
             product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
-        if not product_id:
+        if user_id and not product_id:
             user = self.env['res.users'].browse(user_id)
             employee = user._get_related_employees()
             product_id = employee.product_id and employee.product_id.id or False
@@ -294,7 +294,7 @@ class AccountAnalyticLine(models.Model):
         user_id = vals.get('user_id', False)
 
         #some cases product id is missing
-        if not vals.get('product_id', False):
+        if user_id and not vals.get('product_id', False):
             product_id = self.get_task_user_product(task_id, user_id) or False
             if not product_id:
                 user = self.env.user.browse(user_id)
@@ -322,7 +322,7 @@ class AccountAnalyticLine(models.Model):
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
 
             # some cases product id is missing
-            if not vals.get('product_id', aal.product_id):
+            if user_id and not vals.get('product_id', aal.product_id):
                 product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:
                     user = self.env.user.browse(user_id)

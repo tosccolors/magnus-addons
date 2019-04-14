@@ -167,21 +167,47 @@ class HrTimesheetSheet(models.Model):
     def duplicate_last_week(self):
         if self.week_id and self.employee_id:
             ds = self.week_id.date_start
-            date_start = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=7)
-            date_end = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=1)
+            date_start = datetime.strptime(ds, "%Y-%m-%d").date() - \
+                                                        timedelta(days=7)
+            date_end = datetime.strptime(ds, "%Y-%m-%d").date() - \
+                                                        timedelta(days=1)
             date_range_type_cw_id = self.env.ref(
                 'magnus_date_range_week.date_range_calender_week').id
-            last_week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
-                                                                                               date_start), ('date_end', '=', date_end)], limit=1)
+            last_week = self.env['date.range'].search([
+                ('type_id','=',date_range_type_cw_id),
+                ('date_start', '=', date_start),
+                ('date_end', '=', date_end)
+            ], limit=1)
             if last_week:
-                last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.employee_id.id), ('week_id', '=', last_week.id)], limit=1)
-                current_week_lines = [(0, 0, {'date': l.date,'name': l.name,'project_id': l.project_id.id,'task_id': l.task_id.id, 'unit_amount': l.unit_amount}) for l in self.timesheet_ids] if self.timesheet_ids else []
+                last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([
+                    ('employee_id', '=', self.employee_id.id),
+                    ('week_id', '=', last_week.id)
+                ], limit=1)
+                current_week_lines = [(0, 0, {
+                    'date': l.date,
+                    'name': l.name,
+                    'project_id': l.project_id.id,
+                    'task_id': l.task_id.id,
+                    'user_id': l.user_id.id,
+                    'unit_amount': l.unit_amount
+                }) for l in self.timesheet_ids] if self.timesheet_ids else []
                 if last_week_timesheet:
                     self.timesheet_ids.unlink()
-                    last_week_lines = [(0, 0, {'date': datetime.strptime(l.date, "%Y-%m-%d") + timedelta(days=7),'name': '/','project_id': l.project_id.id,'task_id': l.task_id.id}) for l in last_week_timesheet.timesheet_ids]
+                    last_week_lines = [(0, 0, {
+                        'date': datetime.strptime(l.date, "%Y-%m-%d") +
+                                timedelta(days=7),
+                        'name': '/',
+                        'project_id': l.project_id.id,
+                        'task_id': l.task_id.id,
+                        'user_id': l.user_id.id
+                    }) for l in last_week_timesheet.timesheet_ids]
                     self.timesheet_ids = current_week_lines + last_week_lines
                 else:
-                    raise UserError(_("You have no timesheet logged for last week. Duration: %s to %s") %(datetime.strftime(date_start, "%d-%b-%Y"), datetime.strftime(date_end, "%d-%b-%Y")))
+                    raise UserError(_(
+                        "You have no timesheet logged for last week. "
+                        "Duration: %s to %s"
+                    ) %(datetime.strftime(date_start, "%d-%b-%Y"),
+                        datetime.strftime(date_end, "%d-%b-%Y")))
 
     def _check_end_mileage(self):
         total = self.starting_mileage + self.business_mileage

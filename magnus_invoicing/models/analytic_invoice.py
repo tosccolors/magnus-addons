@@ -427,7 +427,7 @@ class AnalyticInvoice(models.Model):
         invoice_line._onchange_product_id()
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
 
-        # if invoicing period is doesn't lies in same month
+        # if invoicing period doesn't lie in same month
         period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
         cur_date = datetime.now().date().strftime("%Y-%m")
         if cur_date > period_date:
