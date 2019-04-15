@@ -20,8 +20,11 @@
           <field name="priority">24</field>
           <field name="arch" type="xml">
             <xpath expr="//label[@for='allow_timesheets']" position="after">
-              <field name="overtime" class="oe_inline" string="Overtime"/>
+              <separator/>
+              <field name="overtime" class="oe_inline" string="Overtime Taken"/>
               <label for="overtime"/>
+              <field name="overtime_hrs" class="oe_inline" string="Overtime hours"/>
+              <label for="overtime_hrs"/>
             </xpath>
           </field>
         </record>

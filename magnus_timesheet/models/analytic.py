@@ -219,6 +219,10 @@ class AccountAnalyticLine(models.Model):
         store=True
     )
 
+    ot = fields.Boolean(
+        string='Overtime',
+    )
+
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
