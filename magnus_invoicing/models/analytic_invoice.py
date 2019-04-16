@@ -60,8 +60,7 @@ class AnalyticInvoice(models.Model):
             # don't look for analytic lines which has been already added for other analytic invoice
             tot_obj = userTotObj.search([('analytic_invoice_id', '!=', current_ref), ('state', 'not in', ('invoice_created', 'invoiced'))])
             for t in tot_obj:
-                ana_ids |= t.children_ids
-
+                ana_ids |= t.detail_ids
 
         partner_id = self.partner_id or False
         if partner_id and len(self.account_analytic_ids) == 0:
@@ -70,11 +69,6 @@ class AnalyticInvoice(models.Model):
             if len(account_analytic) > 0:
                 self.account_analytic_ids = \
                     [(6, 0, account_analytic.ids)]
-
-        # operating_units = self.env['operating.unit']
-        # for aa in self.account_analytic_ids:
-        #     operating_units |= aa.operating_unit_ids
-        # self.operating_unit_ids = [(6, 0, operating_units.ids)]
 
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
@@ -173,7 +167,7 @@ class AnalyticInvoice(models.Model):
                     childData = []
                     for aal in self.env['account.analytic.line'].search(aal_domain):
                         childData.append((4, aal.id))
-                    vals['children_ids'] = childData
+                    vals['detail_ids'] = childData
 
                     userTotData.append((0, 0, vals))
 
@@ -213,13 +207,13 @@ class AnalyticInvoice(models.Model):
                 ai.state = 'draft'
                 user_tot_objs = ai.user_total_ids.filtered(lambda ut: ut.state != 'draft')
                 for user_tot in user_tot_objs:
-                    self._sql_update(user_tot.children_ids, 'progress')
+                    self._sql_update(user_tot.detail_ids, 'progress')
                     self._sql_update(user_tot, 'draft')
 
             elif ai.invoice_id.state == 'cancel':
                 ai.state = 'draft'
                 for line in ai.invoice_line_ids:
-                    self._sql_update(line.user_task_total_line_id.children_ids, 'progress')
+                    self._sql_update(line.user_task_total_line_id.detail_ids, 'progress')
                     self._sql_update(line.user_task_total_line_id, 'draft')
 
             elif ai.invoice_id.state in ('draft','proforma','proforma2'):
@@ -228,13 +222,13 @@ class AnalyticInvoice(models.Model):
                 else:
                     ai.state = 'open'
                 for line in ai.invoice_line_ids:
-                    self._sql_update(line.user_task_total_line_id.children_ids, 'invoice_created')
+                    self._sql_update(line.user_task_total_line_id.detail_ids, 'invoice_created')
                     self._sql_update(line.user_task_total_line_id, 'invoice_created')
 
             elif ai.invoice_id.state in ('open','paid'):
                 ai.state = 'invoiced'
                 for line in ai.invoice_line_ids:
-                    self._sql_update(line.user_task_total_line_id.children_ids, 'invoiced')
+                    self._sql_update(line.user_task_total_line_id.detail_ids, 'invoiced')
                     self._sql_update(line.user_task_total_line_id, 'invoiced')
 
     @api.model
@@ -251,11 +245,6 @@ class AnalyticInvoice(models.Model):
                 ('user_id', 'in', rec.user_total_ids.mapped('user_id').ids),
                 ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
             ])
-
-#    @api.depends('invoice_ids')
-#    def _compute_invoice_count(self):
-#        for line in self:
-#            line.invoice_count = len(line.invoice_ids.ids)
 
     @api.onchange('account_analytic_ids')
     def onchange_account_analytic(self):
@@ -370,7 +359,7 @@ class AnalyticInvoice(models.Model):
             [('analytic_invoice_id', '=', False)])
         if user_total_ids:
             #reset analytic line state to invoiceable
-            analytic_lines = user_total_ids.mapped('children_ids')
+            analytic_lines = user_total_ids.mapped('detail_ids')
             analytic_lines.write({'state': 'invoiceable'})
             user_total_ids.unlink()
 
@@ -378,7 +367,7 @@ class AnalyticInvoice(models.Model):
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
         self.unlink_rec()
-        analytic_lines = self.user_total_ids.mapped('children_ids')
+        analytic_lines = self.user_total_ids.mapped('detail_ids')
         if analytic_lines:
             analytic_lines.write({'state': 'progress'})
         return res
@@ -386,7 +375,7 @@ class AnalyticInvoice(models.Model):
     @api.model
     def create(self, vals):
         res = super(AnalyticInvoice, self).create(vals)
-        analytic_lines = res.user_total_ids.mapped('children_ids')
+        analytic_lines = res.user_total_ids.mapped('detail_ids')
         if analytic_lines:
             analytic_lines.write({'state': 'progress'})
         return res
@@ -399,7 +388,7 @@ class AnalyticInvoice(models.Model):
         """
         analytic_lines = self.env['account.analytic.line']
         for obj in self:
-            analytic_lines |= obj.user_total_ids.mapped('children_ids')
+            analytic_lines |= obj.user_total_ids.mapped('detail_ids')
         if analytic_lines:
             analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()
@@ -428,7 +417,7 @@ class AnalyticInvoice(models.Model):
             'product_id': line.product_id.id,
             'quantity': line.unit_amount,
             'uom_id': line.product_uom_id.id,
-            # 'discount': line.discount,
+            'user_id': line.user_id.id,
         })
 
         # Add analytic tags to invoice line
@@ -438,7 +427,7 @@ class AnalyticInvoice(models.Model):
         invoice_line._onchange_product_id()
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
 
-        # if invoicing period is doesn't lies in same month
+        # if invoicing period doesn't lie in same month
         period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
         cur_date = datetime.now().date().strftime("%Y-%m")
         if cur_date > period_date:
@@ -474,7 +463,7 @@ class AnalyticInvoice(models.Model):
             inv_line_vals = self._prepare_invoice_line(line, self.invoice_id.id)
             inv_line_vals['user_task_total_line_id'] = line.id
             invoices['lines'].append((0, 0, inv_line_vals))
-            aal_from_summary |= line.children_ids
+            aal_from_summary |= line.detail_ids
             user_total |= line
 
         if invoices['lines']:
@@ -503,7 +492,7 @@ class AnalyticInvoice(models.Model):
         if not self.invoice_line_ids:
             self.state = 'draft'
             for user_total in self.user_total_ids:
-                self._sql_update(user_total.children_ids, 'progress')
+                self._sql_update(user_total.detail_ids, 'progress')
                 self._sql_update(user_total, 'draft')
 
 
@@ -524,7 +513,7 @@ class AnalyticInvoice(models.Model):
     def _get_user_per_month(self):
         self.ensure_one()
         res = {}
-        
+
         #FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
         user_total_objs = self.user_total_ids
         if not user_total_objs:
@@ -549,7 +538,7 @@ class AnalyticInvoice(models.Model):
                     res[user_tot.project_id][user_tot.user_id] = {'hours':user_tot.unit_amount, 'fee_rate':user_tot.fee_rate, 'amount': user_tot.amount}
                     res[user_tot.project_id]['hrs_tot'] = user_tot.unit_amount
                     res[user_tot.project_id]['amt_tot'] = user_tot.amount
-                                
+
         return res
 
     @api.multi
@@ -560,9 +549,9 @@ class AnalyticInvoice(models.Model):
             inv_property = user_tot.project_id.invoice_properties
             if inv_property.specs_invoice_report and inv_property.specs_type != 'per_month':
                 if user_tot.project_id in result:
-                    result[user_tot.project_id] |= user_tot.children_ids
+                    result[user_tot.project_id] |= user_tot.detail_ids
                 else:
-                    result[user_tot.project_id] = user_tot.children_ids
+                    result[user_tot.project_id] = user_tot.detail_ids
         return result
 
 
@@ -595,7 +584,7 @@ class AnalyticUserTotal(models.Model):
     @api.one
     def _compute_analytic_line(self):
         for aut in self:
-            aut.count_analytic_line = str(len(aut.children_ids)) + ' (records)'
+            aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
 
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
@@ -608,11 +597,9 @@ class AnalyticUserTotal(models.Model):
         compute=_compute_fee_rate,
         string='Amount'
     )
-    children_ids = fields.Many2many(
+    detail_ids = fields.One2many(
         'account.analytic.line',
-        'analytic_invoice_account_line_rel',
         'user_total_id',
-        'analytic_account_id',
         string='Detail Time Lines',
         readonly=True,
         copy=False

@@ -22,7 +22,21 @@ class Task(models.Model):
 class Project(models.Model):
     _inherit = "project.project"
 
-    overtime = fields.Boolean(string='Overtime')
+    overtime = fields.Boolean(string='Overtime Taken')
+    overtime_hrs = fields.Boolean(string='Overtime Hours')
+
+    @api.one
+    @api.constrains('overtime', 'overtime_hrs')
+    def _check_project_overtime(self):
+        company_id = self.company_id.id if self.company_id else False
+
+        overtime_taken_project = self.search([('company_id', '=', company_id), ('overtime', '=', True)])
+        if len(overtime_taken_project) > 1:
+            raise ValidationError(_("You can have only one project with 'Overtime Taken' per company!"))
+
+        overtime_project = self.search([('company_id', '=', company_id), ('overtime_hrs', '=', True)])
+        if len(overtime_project) > 1:
+            raise ValidationError(_("You can have only one project with 'Overtime Hours' per company!"))
 
 
 class ProjectInvoicingProperties(models.Model):

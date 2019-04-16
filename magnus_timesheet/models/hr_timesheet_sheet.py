@@ -116,31 +116,17 @@ class HrTimesheetSheet(models.Model):
             m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
             sheet.private_mileage = m if m > 0 else 0
 
-    @api.multi
+    @api.one
     @api.depends('timesheet_ids')
     def _get_overtime_hours(self):
-        for sheet in self:
-            if sheet.week_id and sheet.employee_id:
-                timesheet_id = sheet.id if isinstance(sheet.id, int) else sheet.timesheet_ids[0].sheet_id.id if sheet.timesheet_ids and isinstance(sheet.timesheet_ids[0].sheet_id.id, int) else False
-                date_from = datetime.strptime(sheet.week_id.date_start, "%Y-%m-%d").date()
-                overtime_hours = 0
-                for i in range(7):
-                    date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
-                    hours = sum(sheet.env['account.analytic.line'].search([
-                        ('date', '=', date),
-                        ('sheet_id', '=', timesheet_id),
-                        ('task_id.standby', '=', False)
-                    ]).mapped('unit_amount'))
-                    if i < 5 and hours > 8:
-                        overtime_hours += hours - 8
-                    elif i > 4 and hours > 0:
-                        overtime_hours += hours
-                overtime_taken = sum(self.env['account.analytic.line'].search([
-                    ('sheet_id', '=', timesheet_id),
-                    ('sheet_id.employee_id', '=', sheet.employee_id.id),
-                    ('project_id.overtime', '=', True)
-                ]).mapped('unit_amount'))
-                sheet.overtime_hours = overtime_hours - overtime_taken
+        overtime_hours = 0.0
+        aal = self.timesheet_ids.filtered(lambda a: not a.task_id.standby and not a.project_id.overtime)
+        working_hrs = sum(aal.mapped('unit_amount'))
+        if working_hrs > 40:
+            overtime_hours = working_hrs - 40
+
+        self.overtime_hours = overtime_hours
+
 
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
@@ -152,6 +138,7 @@ class HrTimesheetSheet(models.Model):
     end_mileage = fields.Integer('End Mileage')
     overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
     odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
+    overtime_analytic_line_id = fields.Many2one('account.analytic.line', string="Overtime Entry")
 
     @api.onchange('week_id', 'date_from', 'date_to')
     def onchange_week(self):
@@ -167,21 +154,47 @@ class HrTimesheetSheet(models.Model):
     def duplicate_last_week(self):
         if self.week_id and self.employee_id:
             ds = self.week_id.date_start
-            date_start = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=7)
-            date_end = datetime.strptime(ds, "%Y-%m-%d").date() - timedelta(days=1)
+            date_start = datetime.strptime(ds, "%Y-%m-%d").date() - \
+                                                        timedelta(days=7)
+            date_end = datetime.strptime(ds, "%Y-%m-%d").date() - \
+                                                        timedelta(days=1)
             date_range_type_cw_id = self.env.ref(
                 'magnus_date_range_week.date_range_calender_week').id
-            last_week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
-                                                                                               date_start), ('date_end', '=', date_end)], limit=1)
+            last_week = self.env['date.range'].search([
+                ('type_id','=',date_range_type_cw_id),
+                ('date_start', '=', date_start),
+                ('date_end', '=', date_end)
+            ], limit=1)
             if last_week:
-                last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.employee_id.id), ('week_id', '=', last_week.id)], limit=1)
-                current_week_lines = [(0, 0, {'date': l.date,'name': l.name,'project_id': l.project_id.id,'task_id': l.task_id.id, 'unit_amount': l.unit_amount}) for l in self.timesheet_ids] if self.timesheet_ids else []
+                last_week_timesheet = self.env['hr_timesheet_sheet.sheet'].search([
+                    ('employee_id', '=', self.employee_id.id),
+                    ('week_id', '=', last_week.id)
+                ], limit=1)
+                current_week_lines = [(0, 0, {
+                    'date': l.date,
+                    'name': l.name,
+                    'project_id': l.project_id.id,
+                    'task_id': l.task_id.id,
+                    'user_id': l.user_id.id,
+                    'unit_amount': l.unit_amount
+                }) for l in self.timesheet_ids] if self.timesheet_ids else []
                 if last_week_timesheet:
                     self.timesheet_ids.unlink()
-                    last_week_lines = [(0, 0, {'date': datetime.strptime(l.date, "%Y-%m-%d") + timedelta(days=7),'name': '/','project_id': l.project_id.id,'task_id': l.task_id.id}) for l in last_week_timesheet.timesheet_ids]
+                    last_week_lines = [(0, 0, {
+                        'date': datetime.strptime(l.date, "%Y-%m-%d") +
+                                timedelta(days=7),
+                        'name': '/',
+                        'project_id': l.project_id.id,
+                        'task_id': l.task_id.id,
+                        'user_id': l.user_id.id
+                    }) for l in last_week_timesheet.timesheet_ids]
                     self.timesheet_ids = current_week_lines + last_week_lines
                 else:
-                    raise UserError(_("You have no timesheet logged for last week. Duration: %s to %s") %(datetime.strftime(date_start, "%d-%b-%Y"), datetime.strftime(date_end, "%d-%b-%Y")))
+                    raise UserError(_(
+                        "You have no timesheet logged for last week. "
+                        "Duration: %s to %s"
+                    ) %(datetime.strftime(date_start, "%d-%b-%Y"),
+                        datetime.strftime(date_end, "%d-%b-%Y")))
 
     def _check_end_mileage(self):
         total = self.starting_mileage + self.business_mileage
@@ -201,7 +214,7 @@ class HrTimesheetSheet(models.Model):
         date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
-            hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id)]).mapped('unit_amount'))
+            hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id), ('task_id.standby', '=', False)]).mapped('unit_amount'))
             if hour < 0 or hour > 24:
                 raise UserError(_('Logged hours should be 0 to 24.'))
             if not self.employee_id.timesheet_no_8_hours_day:
@@ -211,12 +224,40 @@ class HrTimesheetSheet(models.Model):
 
 
     @api.one
+    def create_overtime_entries(self):
+        analytic_line = self.env['account.analytic.line']
+        if self.overtime_hours and not self.overtime_analytic_line_id:
+            company_id = self.company_id.id if self.company_id else self.employee_id.company_id.id
+            overtime_project = self.env['project.project'].search([('company_id', '=', company_id), ('overtime_hrs', '=', True)])
+            if not overtime_project:
+                raise ValidationError(_("Please define project with 'Overtime Hours'!"))
+
+            uom = self.env.ref('product.product_uom_hour').id
+            analytic_line = analytic_line.create({
+                'name':'/',
+                'account_id':overtime_project.analytic_account_id.id,
+                'date':self.date_to,
+                'unit_amount':self.overtime_hours,
+                'product_uom_id':uom,
+                'ot':True,
+            })
+            self.overtime_analytic_line_id = analytic_line.id
+        elif self.overtime_analytic_line_id:
+            if self.overtime_hours:
+                self.overtime_analytic_line_id.write({'unit_amount':self.overtime_hours})
+            else:
+                self.overtime_analytic_line_id.unlink()
+        return self.overtime_analytic_line_id
+
+
+    @api.one
     def action_timesheet_done(self):
         """
         On timesheet confirmed update analytic state to confirmed
         :return: Super
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
+        self.create_overtime_entries()
         self.copy_wih_query()
         return res
 
@@ -247,6 +288,7 @@ class HrTimesheetSheet(models.Model):
                 department_id,
                 task_id,
                 sheet_id,
+                ts_line,
                 so_line,
                 user_total_id,
                 month_id,
@@ -289,6 +331,7 @@ class HrTimesheetSheet(models.Model):
                 aal.department_id as department_id,
                 aal.task_id as task_id,
                 NULL as sheet_id,
+                NULL as ts_line,
                 aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
                 aal.month_id as month_id,
@@ -347,6 +390,22 @@ class HrTimesheetSheet(models.Model):
         for l in lines:
             l.write({'unit_amount': 0})
         return result
+
+    @api.multi
+    def action_view_overtime_entry(self):
+        self.ensure_one()
+        action = self.env.ref('analytic.account_analytic_line_action_entries')
+        return {
+            'name': action.name,
+            'help': action.help,
+            'type': action.type,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'target': action.target,
+            'res_id': self.overtime_analytic_line_id.id or False,
+            'res_model': action.res_model,
+            'domain': [('id', '=', self.overtime_analytic_line_id.id)],
+        }
 
 
 class DateRangeGenerator(models.TransientModel):
