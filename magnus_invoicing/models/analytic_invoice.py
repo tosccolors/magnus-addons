@@ -246,11 +246,6 @@ class AnalyticInvoice(models.Model):
                 ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
             ])
 
-#    @api.depends('invoice_ids')
-#    def _compute_invoice_count(self):
-#        for line in self:
-#            line.invoice_count = len(line.invoice_ids.ids)
-
     @api.onchange('account_analytic_ids')
     def onchange_account_analytic(self):
         res ={}
@@ -422,7 +417,7 @@ class AnalyticInvoice(models.Model):
             'product_id': line.product_id.id,
             'quantity': line.unit_amount,
             'uom_id': line.product_uom_id.id,
-            # 'discount': line.discount,
+            'user_id': line.user_id.id,
         })
 
         # Add analytic tags to invoice line
@@ -432,7 +427,7 @@ class AnalyticInvoice(models.Model):
         invoice_line._onchange_product_id()
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
 
-        # if invoicing period is doesn't lies in same month
+        # if invoicing period doesn't lie in same month
         period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
         cur_date = datetime.now().date().strftime("%Y-%m")
         if cur_date > period_date:
