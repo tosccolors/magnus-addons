@@ -298,13 +298,13 @@ class AccountAnalyticLine(models.Model):
         user_id = vals.get('user_id', False)
 
         #some cases product id is missing
-            product_id = self.get_task_user_product(task_id, user_id) or False
-            if not product_id:
-                user = self.env.user.browse(user_id)
-                raise ValidationError(_(
-                    'Please fill in Fee Rate Product in employee %s.\n '
+        product_id = self.get_task_user_product(task_id, user_id) or False
+        if not product_id:
+            user = self.env.user.browse(user_id)
+            raise ValidationError(_(
+                'Please fill in Fee Rate Product in employee %s.\n '
                 ) % user.name)
-            vals['product_id'] = product_id
+        vals['product_id'] = product_id
 
         if vals.get('ts_line', False):
             unit_amount = vals.get('unit_amount', False)
@@ -327,7 +327,7 @@ class AccountAnalyticLine(models.Model):
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
                 if user_id and not vals.get('product_id', aal.product_id):
-                product_id = aal.get_task_user_product(task_id, user_id) or False
+                    product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:
                     user = self.env.user.browse(user_id)
                     raise ValidationError(_(
