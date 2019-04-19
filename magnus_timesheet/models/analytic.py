@@ -326,7 +326,7 @@ class AccountAnalyticLine(models.Model):
 
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
-            if user_id and not vals.get('product_id', aal.product_id):
+                if user_id and not vals.get('product_id', aal.product_id):
                 product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:
                     user = self.env.user.browse(user_id)
