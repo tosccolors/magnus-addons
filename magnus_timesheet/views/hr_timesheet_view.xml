@@ -24,7 +24,7 @@
             <field name="vehicle" invisible="1" />
             <field name="business_mileage" />
             <field name="private_mileage" />
-            <field name="end_mileage" />
+            <field name="end_mileage" attrs="{'readonly': [('state', 'not in', ['new','draft'])]}"/>
             <field name="overtime_hours" widget="float_time"/>
           </group>
         </xpath>
