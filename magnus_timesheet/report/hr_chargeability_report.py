@@ -38,18 +38,17 @@ class HrChargeabilityReport(models.Model):
                              THEN unit_amount 
                              ELSE 0 
                         END) as chargeable_hours,
-                    ((SUM(
-                        CASE 
-                             WHEN aa.correction_charge = 'true' 
+                    (CASE 
+                             WHEN dr.date_end - aa.date > 1
                              THEN 8 
                              ELSE 0 
-                        END)) 
+                     END
                     - SUM(
                         CASE 
                             WHEN aa.correction_charge = 'true' 
                             THEN unit_amount 
                             ELSE 0 
-                        END)) as norm_hours,                      
+                        END)) as norm_hours,                    
                     ((SUM(
                         CASE WHEN aa.chargeable = 'true' 
                              THEN unit_amount 
@@ -92,12 +91,14 @@ class HrChargeabilityReport(models.Model):
                 JOIN resource_resource resource ON (resource.user_id = aa.user_id)
                 JOIN hr_employee emp ON (emp.resource_id = resource.id)
                 JOIN hr_department dept ON (dept.id = emp.department_id)
+                JOIN date_range dr ON (dr.id = aa.week_id)
                 WHERE aa.product_uom_id = %s 
                 AND aa.planned = FALSE 
                 AND aa.project_id IS NOT NULL 
                 AND (aa.correction_charge = true OR aa.chargeable = true)
     
-                GROUP BY aa.operating_unit_id, aa.user_id, aa.date, emp.department_id, dept.operating_unit_id, emp.external
+                GROUP BY aa.operating_unit_id, aa.user_id, dr.date_end, aa.date, emp.department_id, 
+                dept.operating_unit_id, emp.external
             )""" % (uom))
 
 
