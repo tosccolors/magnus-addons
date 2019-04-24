@@ -48,44 +48,7 @@ class HrChargeabilityReport(models.Model):
                             WHEN aa.correction_charge = 'true' 
                             THEN unit_amount 
                             ELSE 0 
-                        END)) as norm_hours,                    
-                    ((SUM(
-                        CASE WHEN aa.chargeable = 'true' 
-                             THEN unit_amount 
-                             ELSE 0 
-                        END))
-                        / (CASE WHEN ((SUM(CASE WHEN aa.correction_charge = 'true' 
-                                                THEN 8 
-                                                ELSE 0 
-                                           END)) 
-                                       - SUM(CASE WHEN aa.correction_charge = 'true' 
-                                             THEN unit_amount 
-                                             ELSE 0 
-                                        END)) = 0  
-                             THEN (
-                                  CASE WHEN (SUM(
-                                                CASE WHEN aa.chargeable = 'true' 
-                                                     THEN unit_amount 
-                                                     ELSE 0 
-                                                END)) = 0
-                                       THEN 1
-                                       ELSE SUM(
-                                                CASE WHEN aa.chargeable = 'true' 
-                                                     THEN unit_amount 
-                                                     ELSE 0 
-                                                END)
-                                  END)
-                             ELSE ((SUM(
-                                        CASE WHEN aa.correction_charge = 'true' 
-                                             THEN 8 
-                                             ELSE 0 
-                                        END)) - 
-                                    SUM(
-                                        CASE WHEN aa.correction_charge = 'true' 
-                                             THEN unit_amount 
-                                             ELSE 0 
-                                        END)) 
-                        END))*100 as chargeability
+                        END)) as norm_hours
                 FROM
                     account_analytic_line aa
                 JOIN resource_resource resource ON (resource.user_id = aa.user_id)
