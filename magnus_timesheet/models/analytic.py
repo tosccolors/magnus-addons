@@ -36,6 +36,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('project_id.chargeable',
                  'project_id.correction_charge',
+                 'project_id.user_id',
                  'project_id.invoice_properties.expenses',
                  'sheet_id',
                  'account_id',
@@ -54,9 +55,10 @@ class AccountAnalyticLine(models.Model):
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
+                line.project_mgr = line.project_id.user_id or False
                 if line.project_id.invoice_properties:
                     line.expenses = line.project_id.invoice_properties.expenses
-            if line.account_id:
+            elif line.account_id:
                 line.project_mgr = line.account_id.project_ids.user_id or False
             if line.task_id and line.user_id:
                 uou = line.user_id._get_operating_unit_id()
