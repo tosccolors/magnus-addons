@@ -89,6 +89,8 @@ class Lead(models.Model):
 
     @api.onchange('start_date', 'end_date', 'planned_revenue', 'probability')
     def onchange_date(self):
+        if (self.start_date and not self.end_date) or (self.start_date > self.end_date):
+            self.end_date = self.start_date
         self.update_monthly_revenue()
 
     @api.onchange('partner_id')
