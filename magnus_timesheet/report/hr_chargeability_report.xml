@@ -24,7 +24,7 @@
                     <filter string="Internal Employees" domain="[('external','=',False)]" name="internal_emp_filter"/>
                     <group expand="0" string="Group By...">
                         <filter name="ou" string="Operating Unit"
-                        icon="terp-personal" domain="[]" context="{'group_by':'operating_unit_id'}"/>
+                        icon="terp-personal" domain="[]" context="{'group_by':'project_operating_unit_id'}"/>
                         <filter name="dept_ou" string="Dept. Operating Unit"
                         icon="terp-personal" domain="[]" context="{'group_by':'dept_operating_unit_id'}"/>
                         <filter name="department_id" string="Department"

@@ -9,7 +9,7 @@ class HrChargeabilityReport(models.Model):
 
     date = fields.Date('Date', readonly=True)
     user_id = fields.Many2one('res.users', string='User', readonly=True)
-    operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', readonly=True)
+    project_operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', readonly=True)
     chargeable_hours = fields.Float(string="Charegeable Hrs", readonly=True)
     norm_hours = fields.Float(string="Norm Hrs", readonly=True)
     chargeability = fields.Float(string="Chargeability", readonly=True)
@@ -29,39 +29,73 @@ class HrChargeabilityReport(models.Model):
                     min(aa.id) as id,
                     aa.date as date,
                     aa.user_id as user_id,
-                    aa.operating_unit_id as operating_unit_id,
-                    emp.department_id as department_id,
-                    dept.operating_unit_id as dept_operating_unit_id,
+                    aa.operating_unit_id as dept_operating_unit_id,
+                    aa.department_id as department_id,
+                    aa.project_operating_unit_id as project_operating_unit_id,
                     emp.external as external,
                     SUM(CASE 
                              WHEN aa.chargeable = 'true' 
                              THEN unit_amount 
                              ELSE 0 
                         END) as chargeable_hours,
-                    (CASE 
+                    (COUNT (DISTINCT aa.date) * (
+												CASE 
                              WHEN dr.date_end - aa.date > 1
                              THEN 8 
                              ELSE 0 
-                     END
+												END)
                     - SUM(
                         CASE 
                             WHEN aa.correction_charge = 'true' 
                             THEN unit_amount 
                             ELSE 0 
-                        END)) as norm_hours
+                        END)) as norm_hours,
+                    CASE
+                        WHEN
+                            (COUNT (DISTINCT aa.date) * (
+                             CASE 
+                                     WHEN dr.date_end - aa.date > 1
+                                     THEN 8 
+                                     ELSE 0 
+                             END)
+                             - SUM(
+                                        CASE 
+                                                WHEN aa.correction_charge = 'true' 
+                                                THEN unit_amount 
+                                                ELSE 0 
+                                        END)) = 0
+                        THEN 0.0
+                        ELSE
+                            SUM(CASE 
+                                             WHEN aa.chargeable = 'true' 
+                                             THEN unit_amount 
+                                             ELSE 0 
+                                    END) /
+                            (COUNT (DISTINCT aa.date) * (
+                             CASE 
+                                             WHEN dr.date_end - aa.date > 1
+                                             THEN 8 
+                                             ELSE 0 
+                             END)
+                            - SUM(
+                                    CASE 
+                                            WHEN aa.correction_charge = 'true' 
+                                            THEN unit_amount 
+                                            ELSE 0 
+                                    END)) * 100
+                    END	as chargeability
                 FROM
                     account_analytic_line aa
                 JOIN resource_resource resource ON (resource.user_id = aa.user_id)
                 JOIN hr_employee emp ON (emp.resource_id = resource.id)
-                JOIN hr_department dept ON (dept.id = emp.department_id)
                 JOIN date_range dr ON (dr.id = aa.week_id)
                 WHERE aa.product_uom_id = %s 
-                AND aa.planned = FALSE 
-                AND aa.project_id IS NOT NULL 
-                AND (aa.correction_charge = true OR aa.chargeable = true)
-    
-                GROUP BY aa.operating_unit_id, aa.user_id, dr.date_end, aa.date, emp.department_id, 
-                dept.operating_unit_id, emp.external
+                    AND aa.planned = FALSE 
+                    AND aa.project_id IS NOT NULL 
+                    AND (aa.correction_charge = true OR aa.chargeable = true)
+                GROUP BY aa.operating_unit_id, aa.user_id, dr.date_end, aa.date, aa.department_id, 
+                aa.project_operating_unit_id, emp.external
+				ORDER BY aa.date
             )""" % (uom))
 
 
