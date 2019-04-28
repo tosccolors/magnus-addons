@@ -50,40 +50,7 @@ class HrChargeabilityReport(models.Model):
                             THEN unit_amount 
                             ELSE 0 
                         END)) as norm_hours,
-                    CASE
-                        WHEN
-                            (COUNT (DISTINCT aa.date) * (
-                             CASE 
-                                     WHEN dr.date_end - aa.date > 1
-                                     THEN 8 
-                                     ELSE 0 
-                             END)
-                             - SUM(
-                                        CASE 
-                                                WHEN aa.correction_charge = 'true' 
-                                                THEN unit_amount 
-                                                ELSE 0 
-                                        END)) = 0
-                        THEN 0.0
-                        ELSE
-                            SUM(CASE 
-                                             WHEN aa.chargeable = 'true' 
-                                             THEN unit_amount 
-                                             ELSE 0 
-                                    END) /
-                            (COUNT (DISTINCT aa.date) * (
-                             CASE 
-                                             WHEN dr.date_end - aa.date > 1
-                                             THEN 8 
-                                             ELSE 0 
-                             END)
-                            - SUM(
-                                    CASE 
-                                            WHEN aa.correction_charge = 'true' 
-                                            THEN unit_amount 
-                                            ELSE 0 
-                                    END))
-                    END	as chargeability
+                0.0  as chargeability
                 FROM
                     account_analytic_line aa
                 JOIN resource_resource resource ON (resource.user_id = aa.user_id)
