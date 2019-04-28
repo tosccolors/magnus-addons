@@ -32,13 +32,15 @@ class StatusTimeReport(models.Model):
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW status_time_report AS (
             SELECT 
+            hrc.id * 100 + dr.id as id,
             dr.id as week_id, 
             hrc.id as employee_id, 
             hrc.department_id as dep_id, 
             hrc.name_related as name, 
             hrc.external as external,
             hrc.timesheet_optional as ts_optional,
-            string_agg(rp.name,',') as validatorsss,
+            string_agg(rp.name,',') as validators,
+            htsss.state as state,
             dr.name as week
             FROM date_range dr
             CROSS JOIN  hr_employee hrc
@@ -53,7 +55,7 @@ class StatusTimeReport(models.Model):
             hrc.end_date_of_employment > dr.date_end 
             OR hrc.end_date_of_employment is NULL
             )
-            GROUP BY hrc.id, dr.id, hrc.department_id, hrc.name_related
+            GROUP BY hrc.id, dr.id, hrc.department_id, hrc.name_related, htsss.state
             ORDER BY name, week
             )""" % (drcw))
 
