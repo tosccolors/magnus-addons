@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_status_time_report_pivot" model="ir.ui.view">
+            <field name="name">status.time.report.pivot</field>
+            <field name="model">status.time.report</field>
+            <field name="arch" type="xml">
+                <pivot string="Status Time Report" disable_linking="True">
+                    <field name="employee_id" type="row"/>
+                    <field name="week_id" type="col"/>
+                    <field name="state" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_status_time_report_tree" model="ir.ui.view">
+            <field name="name">status.time.report.tree</field>
+            <field name="model">status.time.report</field>
+            <field name="arch" type="xml">
+                <tree string="Status Time Report" >
+                    <field name="employee_id" />
+                    <field name="week_id" />
+                    <field name="state" />
+                    <field name="validators" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_status_time_report_search" model="ir.ui.view">
+            <field name="name">status.time.report.search</field>
+            <field name="model">status.time.report</field>
+            <field name="arch" type="xml">
+                <search string="Status Time Report Search">
+                    <field name="employee_id"/>
+                    <field name="week_id"/>
+                    <filter string="Internal Employees" domain="[('external','=',False)]" name="internal_emp_filter"/>
+                    <filter string="Time Sheet Optional" domain="[('ts_optional','=',False)]"
+                            name="ts_optional_filter"/>
+                    <group expand="0" string="Group By...">
+                        <!--filter name="dept_ou" string="Department Operating Unit"
+                        icon="terp-personal" domain="[]" context="{'group_by':'operating_unit_id'}"/-->
+                        <filter name="department_id" string="Department"
+                        icon="terp-personal" domain="[]" context="{'group_by':'department_id'}"/>
+                        <filter string="Year" icon="terp-go-today" domain="[]"
+                        context="{'group_by':'date:year'}"/>
+                        <filter string="Month" icon="terp-go-today" domain="[]"
+                        context="{'group_by':'date:month'}"/>
+                        <filter string="Week" icon="terp-go-today" domain="[]"
+                            context="{'group_by':'date:week'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_status_time_report" model="ir.actions.act_window">
+            <field name="name">Status Time Reports</field>
+            <field name="res_model">status.time.report</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="help">Status Time Report allows you to check status time reports per employee.</field>
+            <field name="search_view_id" ref="view_status_time_report_search"/>
+            <field name="context">{'search_default_internal_emp_filter':1, 'search_default_ts_optional_filter':1}</field>
+        </record>
+
+        <menuitem id="menu_status_time_report" parent="hr_timesheet.menu_timesheets_reports" action="action_status_time_report"
+            name="Status Time Reports"/>
+
+</odoo>
