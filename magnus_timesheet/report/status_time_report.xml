@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <record id="view_status_time_report_pivot" model="ir.ui.view">
+        <!--record id="view_status_time_report_pivot" model="ir.ui.view">
             <field name="name">status.time.report.pivot</field>
             <field name="model">status.time.report</field>
             <field name="arch" type="xml">
@@ -10,7 +10,7 @@
                     <field name="state" type="measure"/>
                 </pivot>
             </field>
-        </record>
+        </record-->
 
         <record id="view_status_time_report_tree" model="ir.ui.view">
             <field name="name">status.time.report.tree</field>
@@ -32,16 +32,28 @@
                 <search string="Status Time Report Search">
                     <field name="employee_id"/>
                     <field name="week_id"/>
-                    <filter string="Internal Employees" domain="[('external','=',False)]" name="internal_emp_filter"/>
-                    <filter string="Time Sheet Optional" domain="[('ts_optional','=',False)]"
+                    <filter string="Internal Employees"
+                            domain="[('external','=',False)]"
+                            name="internal_emp_filter"/>
+                    <filter string="Time Sheet Optional"
+                            domain="[('ts_optional','=',True)]"
                             name="ts_optional_filter"/>
+                    <separator/>
+                    <filter string="Not Submitted/Approved"
+                            domain="['|',('state','!=', 'done'),
+                                        ('state','=', False)]"
+                            name="not_submitted_filter"/>
                     <group expand="0" string="Group By...">
-                        <!--filter name="dept_ou" string="Department Operating Unit"
-                        icon="terp-personal" domain="[]" context="{'group_by':'operating_unit_id'}"/-->
-                        <filter name="department_id" string="Department"
-                        icon="terp-personal" domain="[]" context="{'group_by':'department_id'}"/>
-                        <filter string="Week" icon="terp-go-today" domain="[]"
-                            context="{'group_by':'week_id'}"/>
+                        <filter name="department_id_filter"
+                                string="Department"
+                                icon="terp-personal"
+                                domain="[]"
+                                context="{'group_by':'department_id'}"/>
+                        <filter name="week_id_filter"
+                                string="Week"
+                                icon="terp-go-today"
+                                domain="[]"
+                                context="{'group_by':'week_id'}"/>
                     </group>
                 </search>
             </field>
@@ -51,13 +63,20 @@
             <field name="name">Status Time Reports</field>
             <field name="res_model">status.time.report</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,pivot</field>
-            <field name="help">Status Time Report allows you to check status time reports per employee.</field>
+            <field name="view_mode">tree</field>
+            <field name="help">Status Time Report allows you to check status
+                                            time reports per employee.</field>
             <field name="search_view_id" ref="view_status_time_report_search"/>
-            <field name="context">{'search_default_internal_emp_filter':1, 'search_default_ts_optional_filter':1}</field>
+            <field name="context">{
+                        'search_default_internal_emp_filter':1,
+                        'search_default_not_submitted_filter':1,
+                        'search_default_week_id_filter':1
+                        }</field>
         </record>
 
-        <menuitem id="menu_status_time_report" parent="hr_timesheet.menu_timesheets_reports" action="action_status_time_report"
-            name="Status Time Reports"/>
+        <menuitem id="menu_status_time_report"
+                  parent="hr_timesheet.menu_timesheets_reports"
+                  action="action_status_time_report"
+                  name="Status Time Reports"/>
 
 </odoo>
