@@ -40,12 +40,8 @@
                         icon="terp-personal" domain="[]" context="{'group_by':'operating_unit_id'}"/-->
                         <filter name="department_id" string="Department"
                         icon="terp-personal" domain="[]" context="{'group_by':'department_id'}"/>
-                        <filter string="Year" icon="terp-go-today" domain="[]"
-                        context="{'group_by':'date:year'}"/>
-                        <filter string="Month" icon="terp-go-today" domain="[]"
-                        context="{'group_by':'date:month'}"/>
                         <filter string="Week" icon="terp-go-today" domain="[]"
-                            context="{'group_by':'date:week'}"/>
+                            context="{'group_by':'week_id'}"/>
                     </group>
                 </search>
             </field>
