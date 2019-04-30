@@ -36,6 +36,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('project_id.chargeable',
                  'project_id.correction_charge',
+                 'project_id.user_id',
                  'project_id.invoice_properties.expenses',
                  'sheet_id',
                  'account_id',
@@ -54,9 +55,10 @@ class AccountAnalyticLine(models.Model):
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
+                line.project_mgr = line.project_id.user_id or False
                 if line.project_id.invoice_properties:
                     line.expenses = line.project_id.invoice_properties.expenses
-            if line.account_id:
+            elif line.account_id:
                 line.project_mgr = line.account_id.project_ids.user_id or False
             if line.task_id and line.user_id:
                 uou = line.user_id._get_operating_unit_id()
@@ -298,13 +300,13 @@ class AccountAnalyticLine(models.Model):
         user_id = vals.get('user_id', False)
 
         #some cases product id is missing
-            product_id = self.get_task_user_product(task_id, user_id) or False
-            if not product_id:
-                user = self.env.user.browse(user_id)
-                raise ValidationError(_(
-                    'Please fill in Fee Rate Product in employee %s.\n '
+        product_id = self.get_task_user_product(task_id, user_id) or False
+        if not product_id:
+            user = self.env.user.browse(user_id)
+            raise ValidationError(_(
+                'Please fill in Fee Rate Product in employee %s.\n '
                 ) % user.name)
-            vals['product_id'] = product_id
+        vals['product_id'] = product_id
 
         if vals.get('ts_line', False):
             unit_amount = vals.get('unit_amount', False)
@@ -326,8 +328,8 @@ class AccountAnalyticLine(models.Model):
 
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
-            if user_id and not vals.get('product_id', aal.product_id):
-                product_id = aal.get_task_user_product(task_id, user_id) or False
+                if user_id and not vals.get('product_id', aal.product_id):
+                    product_id = aal.get_task_user_product(task_id, user_id) or False
                 if not product_id:
                     user = self.env.user.browse(user_id)
                     raise ValidationError(_(
