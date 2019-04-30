@@ -66,7 +66,7 @@ class HrChargeabilityReport(models.Model):
                     AND aa.planned = FALSE 
                     AND aa.project_id IS NOT NULL 
                 GROUP BY aa.operating_unit_id, aa.user_id, dr.date_end, aa.date, aa.department_id, 
-                emp.external
+                emp.external, emp.timesheet_optional, emp.timesheet_no_8_hours_day
 				ORDER BY aa.date
             )""" % (uom))
 
@@ -75,7 +75,7 @@ class HrChargeabilityReport(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super(HrChargeabilityReport, self).read_group(domain, fields, groupby, offset, limit=limit, orderby=orderby, lazy=lazy)
         for index, val in enumerate(res):
-            if res[index].get('norm_hours', False) and res[index].get(
+            if not res[index].get('norm_hours', False) and not res[index].get(
                     'chargeable_hours', False):
                 res[index]['chargeability'] = (res[index]['chargeable_hours'] / res[index]['norm_hours']) * 100 if res[
                             index]['norm_hours'] > 0 else 0.0
