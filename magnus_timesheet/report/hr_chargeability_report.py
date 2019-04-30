@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
 
 class HrChargeabilityReport(models.Model):
@@ -74,7 +74,7 @@ class HrChargeabilityReport(models.Model):
                     'chargeable_hours', False):
                 res[index]['chargeability'] = (res[index]['chargeable_hours'] / res[index]['norm_hours']) * 100 if res[
                             index]['norm_hours'] > 0 else 0.0
-            else
+            else:
                 raise UserError(
                     _('You have to select Chargeable Hours and Norm Hours as '
                       'measure for this report'))
