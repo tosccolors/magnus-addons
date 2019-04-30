@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, tools
+from odoo.exceptions import UserError
 
 class HrChargeabilityReport(models.Model):
     _name = 'hr.chargeability.report'
@@ -69,50 +70,12 @@ class HrChargeabilityReport(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super(HrChargeabilityReport, self).read_group(domain, fields, groupby, offset, limit=limit, orderby=orderby, lazy=lazy)
         for index, val in enumerate(res):
-            # domain = val.get('__domain', False)
-            #
-            # if domain:
-            #     where_query = self._where_calc(domain)
-            #     from_clause, where_clause, where_clause_params = where_query.get_sql()
-            #
-            #     list_query = ("""
-            #             SELECT
-            #                 chargeable_hours, norm_hours
-            #               FROM
-            #                 {0}
-            #               WHERE {1}
-            #          """.format(
-            #         from_clause,
-            #         where_clause
-            #     ))
-            #
-            #     self.env.cr.execute(list_query, where_clause_params)
-            # else:
-            #     list_query = ("""
-            #             SELECT
-            #                 chargeable_hours, norm_hours
-            #               FROM
-            #                 hr_chargeability_report
-            #          """
-            #     )
-            #     self.env.cr.execute(list_query)
-            # result = self._cr.fetchall()
-            # chargeable_hours, norm_hours = 0, 0
-            # for r in result:
-            #     chargeable_hours += r[0]
-            #     norm_hours += r[1]
-            # if chargeable_hours or norm_hours:
-            #     if norm_hours:
-            #         if 'date:month' in groupby:
-            #             norm_hours = (len(result)*8) - norm_hours
-            #         # elif 'date:week' in groupby:
-            #         #     norm_hours = (len(result)*8) - norm_hours
-            #         elif 'user_id' in groupby and len(groupby) ==1 or not groupby:
-            #             norm_hours = (len(result) * 8) - norm_hours
-            #     else:
-            #         norm_hours = chargeable_hours #if norm_hrs zero chargeability would be 100%
-            #     norm_hours = norm_hours if norm_hours else 1
-            res[index]['chargeability'] = (res[index]['chargeable_hours'] / res[index]['norm_hours']) * 100 if res[
-                index]['norm_hours'] > 0 else 0.0
-
+            if res[index].get('norm_hours', False) and res[index].get(
+                    'chargeable_hours', False):
+                res[index]['chargeability'] = (res[index]['chargeable_hours'] / res[index]['norm_hours']) * 100 if res[
+                            index]['norm_hours'] > 0 else 0.0
+            else
+                raise UserError(
+                    _('You have to select Chargeable Hours and Norm Hours as '
+                      'measure for this report'))
         return res
