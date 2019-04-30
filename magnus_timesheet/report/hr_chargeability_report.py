@@ -75,12 +75,12 @@ class HrChargeabilityReport(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super(HrChargeabilityReport, self).read_group(domain, fields, groupby, offset, limit=limit, orderby=orderby, lazy=lazy)
         for index, val in enumerate(res):
-            if res[index].get('norm_hours', False) and res[index].get(
-                    'chargeable_hours', False):
-                res[index]['chargeability'] = (res[index]['chargeable_hours'] / res[index]['norm_hours']) * 100 if res[
+            # if res[index].get('norm_hours', False) and res[index].get(
+            #         'chargeable_hours', False):
+            res[index]['chargeability'] = (res[index]['chargeable_hours'] / res[index]['norm_hours']) * 100 if res[
                             index]['norm_hours'] > 0 else 0.0
-            else:
-                raise UserError(
-                    _('You have to select Chargeable Hours and Norm Hours as '
-                      'measure for this report'))
+            # else:
+            #     raise UserError(
+            #         _('You have to select Chargeable Hours and Norm Hours as '
+            #           'measure for this report'))
         return res
