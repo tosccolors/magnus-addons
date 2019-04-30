@@ -44,6 +44,7 @@
             <field name="res_model">hr.chargeability.report</field>
             <field name="view_type">form</field>
             <field name="view_mode">pivot</field>
+            <field name="domain">[('ts_optional','=',False),('ts_no_8_hours_day','=',False)]</field>
             <field name="help">Chargeabiltiy analysis allows you to check chargeabiltiy grouping by employee.</field>
             <field name="search_view_id" ref="view_hr_chargeability_report_search"/>
             <field name="context">{'search_default_internal_emp_filter':1}</field>
