@@ -17,6 +17,9 @@ class HrChargeabilityReport(models.Model):
     department_id = fields.Many2one('hr.department', string='Department', readonly=True)
     operating_unit_id = fields.Many2one('operating.unit', string='Department Operating Unit', readonly=True)
     external = fields.Boolean(string='External', readonly=True)
+    ts_optional = fields.Boolean(string='Timesheet Optional', readonly=True)
+    ts_no_8_hours_day = fields.Boolean(string='No 8 Hours Per Day',
+                                       readonly=True)
 
 
     @api.model_cr
@@ -33,6 +36,8 @@ class HrChargeabilityReport(models.Model):
                     aa.operating_unit_id as operating_unit_id,
                     aa.department_id as department_id,
                     emp.external as external,
+                    emp.timesheet_optional as ts_optional,
+                    emp.timesheet_no_8_hours_day as ts_no_8_hours_day,
                     SUM(unit_amount) as captured_hours,
                     SUM(CASE 
                              WHEN aa.chargeable = 'true' 
