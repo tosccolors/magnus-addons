@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_hr_chargeability_report_user,hr_chargeability_report user,model_hr_chargeability_report,base.group_erp_manager,1,1,1,1
-access_hr_chargeability_report_mgr,hr_chargeability_report mgr,model_hr_chargeability_report,base.group_user,1,0,0,0
+access_hr_chargeability_report_mgr,hr_chargeability_report mgr,model_hr_chargeability_report,base.group_erp_manager,1,1,1,1
+access_hr_chargeability_report_user,hr_chargeability_report user,model_hr_chargeability_report,base.group_user,1,0,0,0
+access_status_time_report_mgr,status_time_report mgr,model_status_time_report,base.group_erp_manager,1,1,1,1
+access_status_time_report_user,status_time_report user,model_status_time_report,base.group_user,1,0,0,0

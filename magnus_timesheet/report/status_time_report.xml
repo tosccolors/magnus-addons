@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!--record id="view_status_time_report_pivot" model="ir.ui.view">
-            <field name="name">status.time.report.pivot</field>
-            <field name="model">status.time.report</field>
-            <field name="arch" type="xml">
-                <pivot string="Status Time Report" disable_linking="True">
-                    <field name="employee_id" type="row"/>
-                    <field name="week_id" type="col"/>
-                    <field name="state" type="measure"/>
-                </pivot>
-            </field>
-        </record-->
 
         <record id="view_status_time_report_tree" model="ir.ui.view">
             <field name="name">status.time.report.tree</field>
@@ -49,6 +38,11 @@
                                 icon="terp-personal"
                                 domain="[]"
                                 context="{'group_by':'department_id'}"/>
+                        <filter name="validators_filter"
+                                string="Validators"
+                                icon="terp-personal"
+                                domain="[]"
+                                context="{'group_by':'validators'}"/>
                         <filter name="week_id_filter"
                                 string="Week"
                                 icon="terp-go-today"
