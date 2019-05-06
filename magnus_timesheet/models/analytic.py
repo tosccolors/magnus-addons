@@ -291,9 +291,9 @@ class AccountAnalyticLine(models.Model):
     @api.model
     def create(self, vals):
         if self.env.context.get('default_planned', False):
-            if vals.get['select_week_id', False] and vals['week_id'] != vals['select_week_id']:
+            if vals.get('select_week_id', False) and vals.get('week_id', False) and vals['week_id'] != vals['select_week_id']:
                 vals['week_id'] = vals['select_week_id']
-            if vals.get['project_id', False]:
+            if vals.get('project_id', False):
                 vals['planned'] = True
 
         task_id = vals.get('task_id', False)
@@ -319,7 +319,7 @@ class AccountAnalyticLine(models.Model):
             if 'select_week_id' in vals or 'planned' in vals:
                 if self.env.context.get('default_planned', False):
                     if vals.get('select_week_id', False):
-                        vals['week_id'] = vals('select_week_id')
+                        vals['week_id'] = vals['select_week_id']
                     if aal.project_id:
                         vals['planned'] = True
 
