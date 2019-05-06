@@ -29,4 +29,18 @@
         </field>
     </record>
 
+    <!--Add model_track_ids to hr.department-->
+    <record id="view_department_form_inherit" model="ir.ui.view">
+        <field name="name">hr.department.tracker</field>
+        <field name="inherit_id" ref="hr.view_department_form"/>
+        <field name="model">hr.department</field>
+        <field type="xml" name="arch">
+            <xpath expr="//group" position="after">
+                <div name="time_track" string="Employee's Department history" >
+                    <field name="relation_track_ids" readonly="1" context="{'active_model':'hr.department', 'relation_ref':False}" nolabel="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

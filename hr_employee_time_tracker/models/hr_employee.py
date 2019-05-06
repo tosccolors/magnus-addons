@@ -10,3 +10,8 @@ class EmployeeCategory(models.Model):
 
     _name = "hr.employee.category"
     _inherit = ['hr.employee.category', 'data.track.thread']
+
+class HrDepartment(models.Model):
+
+    _name = "hr.department"
+    _inherit = ['hr.department', 'data.track.thread']
