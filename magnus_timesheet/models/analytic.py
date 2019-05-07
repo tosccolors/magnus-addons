@@ -233,7 +233,17 @@ class AccountAnalyticLine(models.Model):
         if task_id and user_id:
             taskUser = taskUserObj.search([('task_id', '=', task_id), ('user_id', '=', user_id)],
                                           limit=1)
-            product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+            if taskUser and taskUser.product_id:
+                product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+            else:
+                #check standard task for fee earners
+                project_id = self.env['project.task'].browse(task_id).project_id
+                standard_task = project_id.task_ids.filtered('standard')
+                if standard_task:
+                    taskUser = taskUserObj.search([('task_id', '=', standard_task.id), ('user_id', '=', user_id)],
+                                                  limit=1)
+                    product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+
         if user_id and not product_id:
             user = self.env['res.users'].browse(user_id)
             employee = user._get_related_employees()
@@ -251,6 +261,15 @@ class AccountAnalyticLine(models.Model):
                 ('task_id', '=', tid)], limit=1)
             if task_user and task_user.fee_rate or task_user.product_id:
                 fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
+            # check standard task for fee earners
+            if not fr:
+                project_id = self.env['project.task'].browse(tid).project_id
+                standard_task = project_id.task_ids.filtered('standard')
+                if standard_task:
+                    task_user = self.env['task.user'].search([('task_id', '=', standard_task.id), ('user_id', '=', uid)],
+                                                  limit=1)
+                    if task_user and task_user.fee_rate or task_user.product_id:
+                        fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
         if not fr :
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
