@@ -4,5 +4,11 @@
         <!--Monthly Revenue menu-->
         <menuitem id="crm_monthly_revenue_report_menu" name="Monthly Revenue"
             parent="sales_team.menu_sale_report" action="crm_monthly_revenue_report_action" sequence="10"/>
+	    	
+    	<!-- Link Tracker Menu -->
+     	<record id="utm.menu_link_tracker_root" model="ir.ui.menu">
+    		<field name="groups_id" eval="[(6,0,[ref('magnus_crm.group_link_tracker')])]"/>
+		</record>  
+			
     </data>
 </odoo>
