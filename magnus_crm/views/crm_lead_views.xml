@@ -123,7 +123,7 @@
                 <field name="next_activity_id" />
             </field>
             <field name="title_action" position="replace">
-                <field name="tag_ids" />
+                <field name="tag_ids" string="Proposition"/>
             </field>
         </field>
     </record>
