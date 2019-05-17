@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!--Add model_track_ids to hr.employee-->
+    <record id="view_hr_employee_form_tracker_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.tracker</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="model">hr.employee</field>
+        <field type="xml" name="arch">
+            <xpath expr="//page[@name='hr_settings']/group[last()]" position="after">
+                <group name="time_track" string="Fee rate history" >
+                    <field name="model_track_ids" readonly="1" context="{'active_model':'hr.employee', 'relation_ref':True}" nolabel="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!--Add model_track_ids to hr.employee.category-->
+    <record id="view_hr_employee_form_tracker_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.category.tracker</field>
+        <field name="inherit_id" ref="hr.view_employee_category_form"/>
+        <field name="model">hr.employee.category</field>
+        <field type="xml" name="arch">
+            <xpath expr="//group" position="after">
+                <group name="time_track" string="Category employee's history" >
+                    <field name="relation_track_ids" readonly="1" context="{'active_model':'hr.employee.category', 'relation_ref':False}" nolabel="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!--Add model_track_ids to hr.department-->
+    <record id="view_department_form_inherit" model="ir.ui.view">
+        <field name="name">hr.department.tracker</field>
+        <field name="inherit_id" ref="hr.view_department_form"/>
+        <field name="model">hr.department</field>
+        <field type="xml" name="arch">
+            <xpath expr="//group" position="after">
+                <div name="time_track" string="Employee's Department history" >
+                    <field name="relation_track_ids" readonly="1" context="{'active_model':'hr.department', 'relation_ref':False}" nolabel="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
