@@ -31,6 +31,17 @@ class Lead(models.Model):
     latest_revenue_date = fields.Date('Latest Revenue Date')
     partner_contact_id = fields.Many2one('res.partner', string='Contact Person')
 
+    
+
+    @api.model
+    def default_get(self, fields):
+        res = super(Lead, self).default_get(fields)
+        context = self._context
+        current_uid = context.get('uid')
+        user = self.env['res.users'].browse(current_uid)
+        res.update({'operating_unit_id':user.default_operating_unit_id.id})
+        return res
+    
     @api.model
     def create(self, vals):
         res = super(Lead, self).create(vals)
