@@ -22,10 +22,9 @@ class Lead(models.Model):
     end_date = fields.Date('End Date')
     project_id = fields.Many2one('project.project', string='Project')
     subject = fields.Char('Subject')
-    operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit')
-
+    operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', required=True)
     contract_signed = fields.Boolean(string='Contract Signed')
-    department_id = fields.Many2one('hr.department', string='Sales Team')
+    department_id = fields.Many2one('hr.department', string='Practice')
     expected_duration = fields.Integer(string='Expected Duration')
     monthly_revenue_ids = fields.One2many('crm.monthly.revenue', 'lead_id', string='Monthly Revenue')
     show_button = fields.Boolean(string='Show button')

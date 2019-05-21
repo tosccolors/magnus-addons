@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!--Add relation_track_ids to product.product-->
+    <record id="view_product_product_form_tracker_inherit" model="ir.ui.view">
+        <field name="name">product.product.tracker</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="model">product.product</field>
+        <field type="xml" name="arch">
+            <xpath expr="//page[last()]" position="after">
+                <page name="time_track" string="Consultant product history">
+                    <field name="relation_track_ids" readonly="1" context="{'active_model':'product.product', 'relation_ref':False}"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
