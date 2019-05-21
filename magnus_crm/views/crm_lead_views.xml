@@ -114,7 +114,6 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
         <field name="arch" type="xml">
-            <field name="country_id" position="replace"/>
             <field name="partner_id" position="replace">
                 <field name="partner_name" string="Customer name" />
                 <field name="partner_contact_id" />
@@ -123,7 +122,7 @@
                 <field name="next_activity_id" />
             </field>
             <field name="title_action" position="replace">
-                <field name="tag_ids" />
+                <field name="tag_ids" string="Proposition"/>
             </field>
         </field>
     </record>
@@ -145,7 +144,7 @@
         <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
         <field name="arch" type="xml">
             <xpath expr="//group/filter[2]" position="replace">
-                <filter string="Sales Team" context="{'group_by':'department_id'}"/>
+                <filter string="Practice" context="{'group_by':'department_id'}"/>
             </xpath>
             <filter name="stage" position="after">
                 <filter string="Customer" domain="[]" context="{'group_by': 'partner_id'}"/>
