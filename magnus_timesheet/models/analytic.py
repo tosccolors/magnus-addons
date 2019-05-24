@@ -306,6 +306,7 @@ class AccountAnalyticLine(models.Model):
     def _onchange_select_week(self):
         if self.select_week_id and self.select_week_id != self.week_id:
             self.week_id = self.select_week_id.id
+            self.date = self.select_week_id.date_start
 
     @api.model
     def create(self, vals):

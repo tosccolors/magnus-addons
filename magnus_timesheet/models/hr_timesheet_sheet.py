@@ -22,10 +22,16 @@ class HrTimesheetSheet(models.Model):
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
         date_range_type_cw_id = self.env.ref(
             'magnus_date_range_week.date_range_calender_week').id
+        past_week_domain = [('type_id', '=', date_range_type_cw_id), ('date_end', '<', dt - timedelta(days=dt.weekday()))]
+        if logged_weeks:
+            past_week_domain += [('id', 'not in', logged_weeks)]
+        past_weeks = self.env['date.range'].search(past_week_domain, limit=1, order='date_start')
         week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
                                                                                       dt-timedelta(days=dt.weekday()))], limit=1)
-        if week:
-            if week.id not in logged_weeks:
+        if week or past_weeks:
+            if past_weeks.id not in logged_weeks:
+                rec.update({'week_id': past_weeks.id})
+            elif week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
                 upcoming_week = self.env['date.range'].search([

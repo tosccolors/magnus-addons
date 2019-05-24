@@ -44,7 +44,8 @@ The extended date range validation process is:
                 'sale_timesheet',
                 'analytic_base_department',
                 'account_fiscal_month',
-                'account_fiscal_year'],
+                'account_fiscal_year',
+                'hr_timesheet_sheet_validators'],
 
     # always loaded
     'data': [
