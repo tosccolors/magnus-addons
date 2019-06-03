@@ -240,8 +240,9 @@ class HrTimesheetSheet(models.Model):
 
             uom = self.env.ref('product.product_uom_hour').id
             analytic_line = analytic_line.create({
-                'name':'/',
+                'name':'Overtime',
                 'account_id':overtime_project.analytic_account_id.id,
+                'project_id':overtime_project.id,
                 'date':self.date_to,
                 'unit_amount':self.overtime_hours,
                 'product_uom_id':uom,
