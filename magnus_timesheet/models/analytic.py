@@ -368,13 +368,21 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('unit_amount')
     def _get_qty(self):
+
+        company_id = self.company_id.id if self.company_id else self.employee_id.company_id.id
+        ott = self.env['project.project'].search([('company_id', '=', company_id), ('overtime_hrs', '=', True)])
+
         for line in self:
             if line.planned:
                 line.planned_qty = line.unit_amount
                 line.actual_qty = 0.0
             else:
-                line.actual_qty = line.unit_amount
-                line.planned_qty = 0.0
+                if ott:
+                    line.actual_qty = line.unit_amount * -1
+                    line.planned_qty = 0.0
+                else:
+                    line.actual_qty = line.unit_amount
+                    line.planned_qty = 0.0
 
     def _get_day(self):
         for line in self:
