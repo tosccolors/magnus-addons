@@ -246,6 +246,7 @@ class HrTimesheetSheet(models.Model):
                 'unit_amount':self.overtime_hours,
                 'product_uom_id':uom,
                 'ot':True,
+                'user_id':self.user_id.id,
             })
             self.overtime_analytic_line_id = analytic_line.id
         elif self.overtime_analytic_line_id:
