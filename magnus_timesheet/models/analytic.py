@@ -377,7 +377,7 @@ class AccountAnalyticLine(models.Model):
                 line.planned_qty = line.unit_amount
                 line.actual_qty = 0.0
             else:
-                if ott:
+                if line.project_id == ott:
                     line.actual_qty = line.unit_amount * -1
                     line.planned_qty = 0.0
                 else:
