@@ -235,7 +235,7 @@ class HrTimesheetSheet(models.Model):
         if self.overtime_hours and not self.overtime_analytic_line_id:
             company_id = self.company_id.id if self.company_id else self.employee_id.company_id.id
             overtime_project = self.env['project.project'].search([('company_id', '=', company_id), ('overtime_hrs', '=', True)])
-            overtime_project_task = self.env['project.task'].search([('project_id','=', overtime_project), ('default' '=', True)])
+            overtime_project_task = self.env['project.task'].search([('project_id','=', overtime_project), ('default', '=', True)])
             if not overtime_project:
                 raise ValidationError(_("Please define project with 'Overtime Hours'!"))
 
