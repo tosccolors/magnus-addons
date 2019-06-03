@@ -370,7 +370,7 @@ class AccountAnalyticLine(models.Model):
     def _get_qty(self):
 
         company_id = self.company_id.id if self.company_id else self.employee_id.company_id.id
-        ott = self.env['project.project'].search([('company_id', '=', company_id), ('overtime_hrs', '=', True)])
+        ott = self.env['project.project'].search([('company_id', '=', company_id), ('overtime', '=', True)])
 
         for line in self:
             if line.planned:
