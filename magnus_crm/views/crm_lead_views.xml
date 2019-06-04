@@ -297,7 +297,20 @@
             </xpath>
         </field>
       </record>
-
+      
+      
+      
+	<record model="ir.ui.view" id="view_create_opportunity_simplified_inherit">
+        <field name="name">crm.lead.quick.view</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_create_opportunity_simplified"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+               <field name="operating_unit_id"/>
+            </xpath>
+        </field>
+      </record>
+      
       <record model="ir.ui.view" id="crm_case_form_view_oppor_magnus">
         <field name="name">Update sector field</field>
         <field name="model">crm.lead</field>
