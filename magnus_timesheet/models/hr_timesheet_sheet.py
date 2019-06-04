@@ -246,7 +246,7 @@ class HrTimesheetSheet(models.Model):
                 'project_id':overtime_project.id,
                 'task_id':overtime_project_task.id,
                 'date':self.date_to,
-                'unit_amount':self.overtime_hours,
+                'unit_amount':-self.overtime_hours,
                 'product_uom_id':uom,
                 'ot':True,
                 'user_id':self.user_id.id,
@@ -254,7 +254,7 @@ class HrTimesheetSheet(models.Model):
             self.overtime_analytic_line_id = analytic_line.id
         elif self.overtime_analytic_line_id:
             if self.overtime_hours:
-                self.overtime_analytic_line_id.write({'unit_amount':self.overtime_hours})
+                self.overtime_analytic_line_id.write({'unit_amount':-self.overtime_hours})
             else:
                 self.overtime_analytic_line_id.unlink()
         return self.overtime_analytic_line_id
