@@ -53,6 +53,7 @@ The extended date range validation process is:
         'security/magnus_security.xml',
         'report/hr_chargeability_report.xml',
         'report/status_time_report.xml',
+        'report/overtime_balance_report.xml',
         'views/hr_timesheet_view.xml',
         'views/project_timesheet_view.xml',
         'views/project_view.xml',
