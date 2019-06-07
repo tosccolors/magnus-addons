@@ -112,13 +112,13 @@ class HrTimesheetSheet(models.Model):
     @api.multi
     @api.depends('timesheet_ids.kilometers')
     def _get_business_mileage(self):
-        for sheet in self:
+        for sheet in self.sudo():
             sheet.business_mileage = sum(sheet.timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
 
     @api.multi
     @api.depends('end_mileage','business_mileage','starting_mileage')
     def _get_private_mileage(self):
-        for sheet in self:
+        for sheet in self.sudo():
             m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
             sheet.private_mileage = m if m > 0 else 0
 
