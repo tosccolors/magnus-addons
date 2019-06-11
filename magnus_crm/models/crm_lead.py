@@ -32,6 +32,14 @@ class Lead(models.Model):
     partner_contact_id = fields.Many2one('res.partner', string='Contact Person')
     revenue_split_ids = fields.One2many('crm.revenue.split', 'lead_id', string='Revenue')
 
+        
+    @api.model
+    def _onchange_stage_id_values(self, stage_id):
+        """ returns the new values when stage_id has changed """
+        res = super(Lead,self)._onchange_stage_id_values(stage_id)
+        for rec in self.monthly_revenue_ids:
+            rec.update({'percentage':res.get('probability')})
+        return res
     
     @api.depends('operating_unit_id')
     @api.onchange('operating_unit_id')
