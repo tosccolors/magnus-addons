@@ -61,7 +61,7 @@
               </group>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="after">
-              <field name="department_id"/>
+              <field name="department_id" domain="[('operating_unit_id','=',operating_unit_id)]"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
               <attribute name="invisible">1</attribute>
