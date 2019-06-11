@@ -307,6 +307,12 @@ class CRMRevenueSplit(models.Model):
     
     lead_id = fields.Many2one('crm.lead', string='Opportunity', ondelete='cascade')
     
+    department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
+    partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
+    project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
+    user_id = fields.Many2one('res.users', related='lead_id.user_id', string='Salesperson', store=True)
+    name = fields.Char(related='lead_id.name',string="Opportunity",store=True)
+    operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
     month = fields.Char(string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')

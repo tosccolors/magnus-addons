@@ -336,10 +336,99 @@
         </field>
     </record>
 
+	
     <!--Monthly Revenue action-->
     <record id="crm_monthly_revenue_report_action" model="ir.actions.act_window">
         <field name="name">Monthly Revenue Analysis</field>
         <field name="res_model">crm.monthly.revenue</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">pivot,graph,tree,form</field>
+    </record>
+    
+    <!--Monthly Revenue split tree view-->
+    <record id="crm_monthly_revenue_split_tree_view" model="ir.ui.view">
+      <field name="name">crm.revenue.split.tree</field>
+      <field name="model">crm.revenue.split</field>
+      <field name="arch" type="xml">
+        <tree string="Monthly Revenue Split">
+          <field name="lead_id" />
+          <field name="month" />
+          <field name="total_revenue" />
+          <field name="total_revenue_per" />
+          <field name="mangnus_blue_bv_amount" />
+          <field name="mangnus_blue_bv_per" />
+          <field name="mangnus_red_bv_amount" />
+          <field name="mangnus_red_bv_per" />
+          <field name="mangnus_green_bv_amount" />
+          <field name="mangnus_green_bv_per" />
+          <field name="mangnus_black_bv_amount"/>
+          <field name="mangnus_black_bv_per"/>
+        </tree>
+      </field>
+    </record>
+    
+    <!-- Monthly Revenue split pivot View -->
+    <record id="crm_monthly_revenue_view_pivot" model="ir.ui.view">
+        <field name="name">crm.revenue.split.pivot</field>
+        <field name="model">crm.revenue.split</field>
+        <field name="arch" type="xml">
+            <pivot string="Monthly Revenue Analysis">
+                <field name="lead_id" type="row"/>
+                <field name="month" interval="month" type="col"/>
+                <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Monthly Revenue Split Graph View -->
+    <record id="crm_monthly_revenue_split_view_graph" model="ir.ui.view">
+        <field name="name">crm.revenue.split.graph</field>
+        <field name="model">crm.revenue.split</field>
+        <field name="arch" type="xml">
+            <graph string="Monthly Revenue Split Analysis" stacked="True">
+                <field name="lead_id" type="row"/>
+                <field name="month" interval="month" type="col"/>
+                <field name="total_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Monthly Revenue Search View -->
+    <record id="crm_monthly_revenue_split_search_view" model="ir.ui.view">
+        <field name="name">crm.revenue.split.search</field>
+        <field name="model">crm.revenue.split</field>
+        <field name="arch" type="xml">
+            <search string="Monthly Revenue Split Analysis">
+                <field name="lead_id"/>
+                <field name="month"/>
+                <field name="total_revenue" />
+                <field name="total_revenue_per" />
+                <field name="mangnus_blue_bv_amount" />
+                <field name="mangnus_blue_bv_per" />
+                <field name="mangnus_red_bv_amount" />
+                <field name="mangnus_red_bv_per" />
+                <field name="mangnus_green_bv_amount" />
+                <field name="mangnus_green_bv_per" />
+                <field name="mangnus_black_bv_amount" />
+                <field name="mangnus_black_bv_per" />
+                <field name="department_id"/>
+                <field name="operating_unit_id"/>
+                 <group expand="1" string="Group By">
+ 					<filter string="Operating Unit" name='operating_unit_id' context="{'group_by':'operating_unit_id'}"/>
+                	<filter string="Practice" name='department_id' context="{'group_by':'department_id'}"/>
+                	<filter string="Customer" name='partner_id' context="{'group_by':'partner_id'}"/>
+                	<filter string="Project" name='project_id' context="{'group_by':'project_id'}"/>
+                	<filter string="Opportunity" name='name' context="{'group_by':'name'}"/>
+                	<filter string="Salesperson" name='user_id' context="{'group_by':'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!--Monthly Revenue split action-->
+    <record id="crm_monthly_revenue_split_report_action" model="ir.actions.act_window">
+        <field name="name">Monthly Revenue Split Analysis</field>
+        <field name="res_model">crm.revenue.split</field>
         <field name="view_type">form</field>
         <field name="view_mode">pivot,graph,tree,form</field>
     </record>
