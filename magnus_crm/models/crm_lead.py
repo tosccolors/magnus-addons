@@ -269,7 +269,7 @@ class MonthlyRevenue(models.Model):
     project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     sector_id = fields.Many2one('res.partner.sector', related='lead_id.sector_id', string='Main Sector', store=True)
-    department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Sales Team', store=True)
+    department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
 
     @api.onchange('expected_revenue', 'percentage')
     def onchagne_expected_revenue(self):
