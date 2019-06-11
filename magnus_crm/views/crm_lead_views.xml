@@ -352,5 +352,28 @@
         <field name="context">{'default_type': 'opportunity', 'default_user_id': uid, 'search_default_assigned_to_me': 1, 'readonly_by_pass': True}</field>
       </record>
 
+		<record model="ir.ui.view" id="crm_lead_view_tree_activity_inherit">
+        <field name="name">Update sector field</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_tree_activity"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//tree" position="replace">
+	        	<tree string="Next Activity" decoration-danger="date_action and (date_action &lt; current_date)" default_order="date_action">
+	                    <field name="date_action"/>
+	                    <field name="next_activity_id"/>                    
+	                    <field name="name" string="Topic"/>
+	                    <field name="partner_id" string="Potential customer"/>
+	                    <field name="date_deadline"/>
+	                    <field name="planned_revenue"/>
+	                    <field name="priority"/>
+	                    <field name="probability"/>
+	                    <field name="user_id" string="Owner"/>
+	                    <field name="department_id" string="Practice"/>
+	                    <field name="tag_ids" string="Proposition"/>
+	                    <field name="stage_id"/>
+	                </tree>
+        	</xpath>
+        </field>
+        </record>
   </data>
 </odoo>
