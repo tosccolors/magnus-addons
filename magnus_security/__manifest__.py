@@ -19,12 +19,14 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['magnus_timesheet','hr_holidays'],
+    'depends': ['magnus_timesheet','hr_holidays', 'web_tree_many2one_clickable'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/hr_views.xml',
+        'views/analytic_views.xml',
+        'views/hr_timesheet_views.xml',
         'views/hr_timesheet_assets.xml',
     ],
     # only loaded in demonstration mode
