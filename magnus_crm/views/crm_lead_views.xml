@@ -61,7 +61,7 @@
               </group>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="after">
-              <field name="department_id"/>
+              <field name="department_id" domain="[('operating_unit_id','=',operating_unit_id)]"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
               <attribute name="invisible">1</attribute>
@@ -77,6 +77,25 @@
             <xpath expr="//sheet/group/group/field[@name='partner_id']" position="after" >
               <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}"
                    domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+            	<page string="Revenue Split">
+            		<field name="revenue_split_ids">
+            			<tree editable="bottom">
+            			<field name="month" readonly="1"/>
+            			<field name="total_revenue" readonly="1"/>
+            			<field name="total_revenue_per" readonly="1"/>
+            			<field name="mangnus_blue_bv_amount"/>
+            			<field name="mangnus_blue_bv_per"/>
+            			<field name="mangnus_red_bv_amount"/>
+            			<field name="mangnus_red_bv_per"/>
+            			<field name="mangnus_green_bv_amount"/>
+            			<field name="mangnus_green_bv_per"/>
+            			<field name="mangnus_black_bv_amount"/>
+            			<field name="mangnus_black_bv_per"/>
+            			</tree>
+            		</field>
+            	</page>
             </xpath>
           </data>
       </field>
@@ -297,7 +316,20 @@
             </xpath>
         </field>
       </record>
-
+      
+      
+      
+	<record model="ir.ui.view" id="view_create_opportunity_simplified_inherit">
+        <field name="name">crm.lead.quick.view</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_create_opportunity_simplified"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+               <field name="operating_unit_id"/>
+            </xpath>
+        </field>
+      </record>
+      
       <record model="ir.ui.view" id="crm_case_form_view_oppor_magnus">
         <field name="name">Update sector field</field>
         <field name="model">crm.lead</field>
@@ -320,5 +352,28 @@
         <field name="context">{'default_type': 'opportunity', 'default_user_id': uid, 'search_default_assigned_to_me': 1, 'readonly_by_pass': True}</field>
       </record>
 
+		<record model="ir.ui.view" id="crm_lead_view_tree_activity_inherit">
+        <field name="name">Update sector field</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_tree_activity"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//tree" position="replace">
+	        	<tree string="Next Activity" decoration-danger="date_action and (date_action &lt; current_date)" default_order="date_action">
+	                    <field name="date_action"/>
+	                    <field name="next_activity_id"/>                    
+	                    <field name="name" string="Topic"/>
+	                    <field name="partner_id" string="Potential customer"/>
+	                    <field name="date_deadline"/>
+	                    <field name="planned_revenue"/>
+	                    <field name="priority"/>
+	                    <field name="probability"/>
+	                    <field name="user_id" string="Owner"/>
+	                    <field name="department_id" string="Practice"/>
+	                    <field name="tag_ids" string="Proposition"/>
+	                    <field name="stage_id"/>
+	                </tree>
+        	</xpath>
+        </field>
+        </record>
   </data>
 </odoo>
