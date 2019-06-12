@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_overtime_balance_report_pivot" model="ir.ui.view">
+            <field name="name">overtime.balance.report.pivot</field>
+            <field name="model">overtime.balance.report</field>
+            <field name="arch" type="xml">
+                <pivot string="Overtime Report" disable_linking="True">
+                    <field name="user_id" type="row"/>
+                    <field name="date" interval="month" type="col"/>
+                    <field name="overtime_hrs" type="measure"/>
+                    <field name="overtime_taken" type="measure"/>
+                    <field name="overtime_balanced" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="view_overtime_balance_report_search" model="ir.ui.view">
+            <field name="name">overtime.balance.report.search</field>
+            <field name="model">overtime.balance.report</field>
+            <field name="arch" type="xml">
+                <search string="Overtime Balance Report Search">
+                    <field name="user_id"/>
+                    <field name="date"/>
+                    <group expand="0" string="Group By...">
+                        <filter name="group_user" string="User"
+                        icon="terp-personal" domain="[]" context="{'group_by':'user_id'}"/>
+                        <filter string="Year" icon="terp-go-today" domain="[]"
+                        context="{'group_by':'date:year'}" name="group_year"/>
+                        <filter string="Month" icon="terp-go-today" domain="[]"
+                        context="{'group_by':'date:month'}" name="group_month"/>
+                        <filter string="Week" icon="terp-go-today" domain="[]"
+                            context="{'group_by':'date:week'}" name="group_week"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_overtime_balance_report" model="ir.actions.act_window">
+            <field name="name">Overtime Balance Report Analysis</field>
+            <field name="res_model">overtime.balance.report</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">pivot</field>
+            <field name="help">Calculate overtime balance grouping by employee.</field>
+            <field name="search_view_id" ref="view_overtime_balance_report_search"/>
+            <field name="context">{'search_default_group_user':1, 'search_default_group_week':1}</field>
+        </record>
+
+        <menuitem id="menu_overtime_balance_report_analysis" parent="hr_timesheet.menu_timesheets_reports" action="action_overtime_balance_report"
+            name="Overtime Balance Report"/>
+
+</odoo>

@@ -233,7 +233,17 @@ class AccountAnalyticLine(models.Model):
         if task_id and user_id:
             taskUser = taskUserObj.search([('task_id', '=', task_id), ('user_id', '=', user_id)],
                                           limit=1)
-            product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+            if taskUser and taskUser.product_id:
+                product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+            else:
+                #check standard task for fee earners
+                project_id = self.env['project.task'].browse(task_id).project_id
+                standard_task = project_id.task_ids.filtered('standard')
+                if standard_task:
+                    taskUser = taskUserObj.search([('task_id', '=', standard_task.id), ('user_id', '=', user_id)],
+                                                  limit=1)
+                    product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
+
         if user_id and not product_id:
             user = self.env['res.users'].browse(user_id)
             employee = user._get_related_employees()
@@ -251,6 +261,15 @@ class AccountAnalyticLine(models.Model):
                 ('task_id', '=', tid)], limit=1)
             if task_user and task_user.fee_rate or task_user.product_id:
                 fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
+            # check standard task for fee earners
+            if not fr:
+                project_id = self.env['project.task'].browse(tid).project_id
+                standard_task = project_id.task_ids.filtered('standard')
+                if standard_task:
+                    task_user = self.env['task.user'].search([('task_id', '=', standard_task.id), ('user_id', '=', uid)],
+                                                  limit=1)
+                    if task_user and task_user.fee_rate or task_user.product_id:
+                        fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
         if not fr :
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
@@ -287,13 +306,14 @@ class AccountAnalyticLine(models.Model):
     def _onchange_select_week(self):
         if self.select_week_id and self.select_week_id != self.week_id:
             self.week_id = self.select_week_id.id
+            self.date = self.select_week_id.date_start
 
     @api.model
     def create(self, vals):
         if self.env.context.get('default_planned', False):
-            if vals.get['select_week_id', False] and vals['week_id'] != vals['select_week_id']:
+            if vals.get('select_week_id', False) and vals.get('week_id', False) and vals['week_id'] != vals['select_week_id']:
                 vals['week_id'] = vals['select_week_id']
-            if vals.get['project_id', False]:
+            if vals.get('project_id', False):
                 vals['planned'] = True
 
         task_id = vals.get('task_id', False)
@@ -301,12 +321,13 @@ class AccountAnalyticLine(models.Model):
 
         #some cases product id is missing
         product_id = self.get_task_user_product(task_id, user_id) or False
-        if not product_id:
+        if not product_id and user_id:
             user = self.env.user.browse(user_id)
             raise ValidationError(_(
                 'Please fill in Fee Rate Product in employee %s.\n '
                 ) % user.name)
-        vals['product_id'] = product_id
+        if product_id:
+            vals['product_id'] = product_id
 
         if vals.get('ts_line', False):
             unit_amount = vals.get('unit_amount', False)
@@ -319,7 +340,7 @@ class AccountAnalyticLine(models.Model):
             if 'select_week_id' in vals or 'planned' in vals:
                 if self.env.context.get('default_planned', False):
                     if vals.get('select_week_id', False):
-                        vals['week_id'] = vals('select_week_id')
+                        vals['week_id'] = vals['select_week_id']
                     if aal.project_id:
                         vals['planned'] = True
 

@@ -245,7 +245,7 @@
                                             <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
                                             <t t-if="proLines.invoice_properties.specs_type != 'both'">
                                                 <td style='border-top:none;' class="text-right" width="20%">
-                                                    <span t-esc="o.value_conversion(userLine_value['fee_rate'])"/>
+                                                    <span t-esc="o.value_conversion(userLine_value['amount'] / userLine_value['hours'])"/>
                                                 </td>
                                                 <td style='border-top:none;' class="text-right" width="20%">
                                                     <span t-esc="o.value_conversion(-userLine_value['amount'], monetary=True, currency_obj=o.company_currency_id)"/>
