@@ -32,6 +32,14 @@ class Lead(models.Model):
     partner_contact_id = fields.Many2one('res.partner', string='Contact Person')
     revenue_split_ids = fields.One2many('crm.revenue.split', 'lead_id', string='Revenue')
 
+        
+    @api.model
+    def _onchange_stage_id_values(self, stage_id):
+        """ returns the new values when stage_id has changed """
+        res = super(Lead,self)._onchange_stage_id_values(stage_id)
+        for rec in self.monthly_revenue_ids:
+            rec.update({'percentage':res.get('probability')})
+        return res
     
     @api.depends('operating_unit_id')
     @api.onchange('operating_unit_id')
@@ -261,7 +269,7 @@ class MonthlyRevenue(models.Model):
     project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     sector_id = fields.Many2one('res.partner.sector', related='lead_id.sector_id', string='Main Sector', store=True)
-    department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Sales Team', store=True)
+    department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
 
     @api.onchange('expected_revenue', 'percentage')
     def onchagne_expected_revenue(self):
@@ -299,6 +307,12 @@ class CRMRevenueSplit(models.Model):
     
     lead_id = fields.Many2one('crm.lead', string='Opportunity', ondelete='cascade')
     
+    department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
+    partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
+    project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
+    user_id = fields.Many2one('res.users', related='lead_id.user_id', string='Salesperson', store=True)
+    name = fields.Char(related='lead_id.name',string="Opportunity",store=True)
+    operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
     month = fields.Char(string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')

@@ -29,9 +29,9 @@ class HrTimesheetSheet(models.Model):
         week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
                                                                                       dt-timedelta(days=dt.weekday()))], limit=1)
         if week or past_weeks:
-            if past_weeks.id not in logged_weeks:
+            if past_weeks and past_weeks.id not in logged_weeks:
                 rec.update({'week_id': past_weeks.id})
-            elif week.id not in logged_weeks:
+            elif week and week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
                 upcoming_week = self.env['date.range'].search([
