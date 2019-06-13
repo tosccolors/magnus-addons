@@ -7,6 +7,11 @@
       <field name="model">crm.lead</field>
       <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
         <field name="arch" type="xml">
+            <field name="tag_ids" position="replace">
+            </field>
+            <field name="department_id" position="after">
+                <field name="tag_ids" string="Proposition"/>
+            </field>
           <data>
             <xpath expr="//group[1]" position="before">
                 <button name="recalculate_total" string="Re-calculate total" type="object" attrs="{'invisible': [('show_button', '=', False)]}"/>
@@ -502,7 +507,7 @@
 	                    <field name="department_id" string="Practice"/>
 	                    <field name="tag_ids" string="Proposition"/>
 	                    <field name="stage_id"/>
-	                </tree>
+                </tree>
         	</xpath>
         </field>
         </record>
