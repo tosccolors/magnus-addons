@@ -60,8 +60,11 @@
                 </div>
               </group>
             </xpath>
+            <field name="tag_ids" position="replace">
+            </field>
              <xpath expr="//field[@name='team_id']" position="after">
               <field name="department_id"/>
+              <field name="tag_ids" string="Proposition" widget="many2many_tags"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
               <attribute name="invisible">1</attribute>
