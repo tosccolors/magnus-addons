@@ -25,7 +25,7 @@ class Task(models.Model):
         if name:
             recs = self.search([('name', '=', name)] + args, limit=limit)
         if not recs:
-            recs = self.search(['!',('name', operator, name), ('jira_compound_key', operator, name)] + args, limit=limit)
+            recs = self.search(['|',('name', operator, name), ('jira_compound_key', operator, name)] + args, limit=limit)
         return recs.name_get()
 
 
