@@ -60,8 +60,8 @@
                 </div>
               </group>
             </xpath>
-            <xpath expr="//field[@name='team_id']" position="after">
-              <field name="department_id" domain="[('operating_unit_id','=',operating_unit_id)]"/>
+             <xpath expr="//field[@name='team_id']" position="after">
+              <field name="department_id"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
               <attribute name="invisible">1</attribute>
@@ -134,14 +134,55 @@
         <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
         <field name="arch" type="xml">
             <field name="partner_id" position="replace">
-                <field name="partner_name" string="Customer name" />
-                <field name="partner_contact_id" />
+                <field name="partner_name" string="Potential customer"/>
+                <field name="partner_contact_id" invisible="1"/>
             </field>
-            <field name="date_action" position="before">
-                <field name="next_activity_id" />
+            <!-- <field name="date_action" position="before">
+                <field name="next_activity_id" invisible="1"/>
             </field>
             <field name="title_action" position="replace">
                 <field name="tag_ids" string="Proposition"/>
+            </field>  -->
+            <field name="country_id" position="replace">
+            	<field name="country_id" invisible="1"/>
+            </field>
+            <field name="user_id" position="replace">
+            	<field name="user_id" invisible="1"/>
+            </field>
+            <field name="probability" position="replace">
+            <field name="probability" invisible="1"/>
+            </field>
+            <field name="stage_id" position="replace">
+            <field name="stage_id" invisible="1"/>
+            </field>
+            <field name="team_id" position="replace">
+            <field name="team_id" invisible="1"/>
+            </field>
+            <field name="planned_revenue" position="replace">
+            <field name="planned_revenue" invisible="1"/>
+            </field>
+            <field name="title_action" position="replace">
+            <field name="title_action" invisible="1"/>
+            </field>
+             <field name="date_action" position="replace">
+            <field name="date_action" invisible="1"/>
+            </field>
+            
+            <field name="name" position="replace">
+            	<field name="name" string="Topic"/>
+            </field>
+            <field name="partner_name" position="after">
+            	<field name="date_deadline"/>
+            	 <field name="priority"/>
+                 <field name="probability"/>
+                 <field name="user_id" string="Owner"/>
+                 <field name="department_id" string="Practice"/>
+                 <field name="tag_ids" string="Proposition"/>
+                 <field name="stage_id"/>
+            </field>
+            
+            <field name="create_date" position="replace">
+            	<field name="create_date" invisible="1"/>
             </field>
         </field>
     </record>
@@ -208,7 +249,7 @@
                 <field name="percentage" widget="percentpie" readonly="1"/>
                 <field name="company_currency" readonly="1" />
                 <field name="user_id" readonly="1"/>
-                  <field name="department_id" readonly="1" />
+                  <field name="department_id" readonly="1" string="Practice"/>
               </group>
             </group>
           </sheet>
@@ -229,7 +270,7 @@
           <field name="month" />
           <field name="no_of_days" />
           <field name="project_id" />
-          <field name="department_id" />
+          <field name="department_id" string="Practice"/>
           <field name="weighted_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
           <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
           <field name="percentage" widget="integer"/>
@@ -281,8 +322,9 @@
                 <field name="user_id" />
                 <field name="company_currency" />
                 <group expand="1" string="Group By">
+                	<filter string="Operating Unit" name='operating_unit_id' context="{'group_by':'operating_unit_id'}"/>
                     <filter string="Salesperson" name='user' context="{'group_by':'user_id'}"/>
-                    <filter string="Sales Team" name='sales_team' context="{'group_by':'department_id'}"/>
+                    <filter string="Practice" name='sales_team' context="{'group_by':'department_id'}"/>
                     <filter string="Opportunity" context="{'group_by':'lead_id'}"/>
                     <filter string="Customer" context="{'group_by': 'partner_id'}"/>
                     <filter string="Sector" context="{'group_by': 'sector_id'}"/>
@@ -295,10 +337,99 @@
         </field>
     </record>
 
+	
     <!--Monthly Revenue action-->
     <record id="crm_monthly_revenue_report_action" model="ir.actions.act_window">
         <field name="name">Monthly Revenue Analysis</field>
         <field name="res_model">crm.monthly.revenue</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">pivot,graph,tree,form</field>
+    </record>
+    
+    <!--Monthly Revenue split tree view-->
+    <record id="crm_monthly_revenue_split_tree_view" model="ir.ui.view">
+      <field name="name">crm.revenue.split.tree</field>
+      <field name="model">crm.revenue.split</field>
+      <field name="arch" type="xml">
+        <tree string="Monthly Revenue Split">
+          <field name="lead_id" />
+          <field name="month" />
+          <field name="total_revenue" />
+          <field name="total_revenue_per" />
+          <field name="mangnus_blue_bv_amount" />
+          <field name="mangnus_blue_bv_per" />
+          <field name="mangnus_red_bv_amount" />
+          <field name="mangnus_red_bv_per" />
+          <field name="mangnus_green_bv_amount" />
+          <field name="mangnus_green_bv_per" />
+          <field name="mangnus_black_bv_amount"/>
+          <field name="mangnus_black_bv_per"/>
+        </tree>
+      </field>
+    </record>
+    
+    <!-- Monthly Revenue split pivot View -->
+    <record id="crm_monthly_revenue_view_pivot" model="ir.ui.view">
+        <field name="name">crm.revenue.split.pivot</field>
+        <field name="model">crm.revenue.split</field>
+        <field name="arch" type="xml">
+            <pivot string="Monthly Revenue Analysis">
+                <field name="lead_id" type="row"/>
+                <field name="month" interval="month" type="col"/>
+                <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <!-- Monthly Revenue Split Graph View -->
+    <record id="crm_monthly_revenue_split_view_graph" model="ir.ui.view">
+        <field name="name">crm.revenue.split.graph</field>
+        <field name="model">crm.revenue.split</field>
+        <field name="arch" type="xml">
+            <graph string="Monthly Revenue Split Analysis" stacked="True">
+                <field name="lead_id" type="row"/>
+                <field name="month" interval="month" type="col"/>
+                <field name="total_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Monthly Revenue split Search View -->
+    <record id="crm_monthly_revenue_split_search_view" model="ir.ui.view">
+        <field name="name">crm.revenue.split.search</field>
+        <field name="model">crm.revenue.split</field>
+        <field name="arch" type="xml">
+            <search string="Monthly Revenue Split Analysis">
+                <field name="lead_id"/>
+                <field name="month"/>
+                <field name="total_revenue" />
+                <field name="total_revenue_per" />
+                <field name="mangnus_blue_bv_amount" />
+                <field name="mangnus_blue_bv_per" />
+                <field name="mangnus_red_bv_amount" />
+                <field name="mangnus_red_bv_per" />
+                <field name="mangnus_green_bv_amount" />
+                <field name="mangnus_green_bv_per" />
+                <field name="mangnus_black_bv_amount" />
+                <field name="mangnus_black_bv_per" />
+                <field name="department_id"/>
+                <field name="operating_unit_id"/>
+                 <group expand="1" string="Group By">
+ 					<filter string="Operating Unit" name='operating_unit_id' context="{'group_by':'operating_unit_id'}"/>
+                	<filter string="Practice" name='department_id' context="{'group_by':'department_id'}"/>
+                	<filter string="Customer" name='partner_id' context="{'group_by':'partner_id'}"/>
+                	<filter string="Project" name='project_id' context="{'group_by':'project_id'}"/>
+                	<filter string="Opportunity" name='name' context="{'group_by':'name'}"/>
+                	<filter string="Salesperson" name='user_id' context="{'group_by':'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!--Monthly Revenue split action-->
+    <record id="crm_monthly_revenue_split_report_action" model="ir.actions.act_window">
+        <field name="name">Monthly Revenue Split Analysis</field>
+        <field name="res_model">crm.revenue.split</field>
         <field name="view_type">form</field>
         <field name="view_mode">pivot,graph,tree,form</field>
     </record>
@@ -353,7 +484,7 @@
       </record>
 
 		<record model="ir.ui.view" id="crm_lead_view_tree_activity_inherit">
-        <field name="name">Update sector field</field>
+        <field name="name">crm.lead.tree</field>
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_tree_activity"/>
         <field name="arch" type="xml">
