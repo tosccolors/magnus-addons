@@ -60,8 +60,11 @@
                 </div>
               </group>
             </xpath>
+            <field name="tag_ids" position="replace">
+            </field>
              <xpath expr="//field[@name='team_id']" position="after">
               <field name="department_id"/>
+              <field name="tag_ids" string="Proposition" widget="many2many_tags"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
               <attribute name="invisible">1</attribute>
@@ -173,6 +176,7 @@
             </field>
             <field name="partner_name" position="after">
             	<field name="date_deadline"/>
+                <field name="planned_revenue"/>
             	 <field name="priority"/>
                  <field name="probability"/>
                  <field name="user_id" string="Owner"/>
