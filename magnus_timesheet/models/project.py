@@ -18,6 +18,16 @@ class Task(models.Model):
 
     standard = fields.Boolean(string='Standard')
 
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        args = args or []
+        recs = self.browse()
+        if name:
+            recs = self.search([('name', '=', name)] + args, limit=limit)
+        if not recs:
+            recs = self.search(['|',('name', operator, name), ('jira_compound_key', operator, name)] + args, limit=limit)
+        return recs.name_get()
+
 
 class Project(models.Model):
     _inherit = "project.project"

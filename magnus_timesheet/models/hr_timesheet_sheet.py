@@ -29,9 +29,9 @@ class HrTimesheetSheet(models.Model):
         week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
                                                                                       dt-timedelta(days=dt.weekday()))], limit=1)
         if week or past_weeks:
-            if past_weeks.id not in logged_weeks:
+            if past_weeks and past_weeks.id not in logged_weeks:
                 rec.update({'week_id': past_weeks.id})
-            elif week.id not in logged_weeks:
+            elif week and week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
                 upcoming_week = self.env['date.range'].search([
@@ -78,7 +78,7 @@ class HrTimesheetSheet(models.Model):
         if self.employee_id:
             user = self.employee_id.user_id or False
             if user:
-                dtt_vehicle = self.env['data.time.tracker'].search([
+                dtt_vehicle = self.env['data.time.tracker'].sudo().search([
                     ('model','=','fleet.vehicle'),
                     ('relation_model','=','res.partner'),
                     ('relation_ref', '=', user.partner_id.id),
@@ -88,18 +88,19 @@ class HrTimesheetSheet(models.Model):
                     vehicle = self.env['fleet.vehicle'].search([
                         ('id', '=', dtt_vehicle.model_ref)], limit=1)
                 else:
-                    vehicle = self.env['fleet.vehicle'].search([
+                    vehicle = self.env['fleet.vehicle'].sudo().search([
                     ('driver_id', '=', user.partner_id.id)], limit=1)
         return vehicle
 
     def _get_latest_mileage(self):
         vehicle = self._get_vehicle()
+        odoo_meter_sudo = self.env['fleet.vehicle.odometer'].sudo()
         if vehicle and self.week_id:
-            latest_mileage = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
+            latest_mileage = odoo_meter_sudo.search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
         elif vehicle:
-            latest_mileage = self.env['fleet.vehicle.odometer'].search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
+            latest_mileage = odoo_meter_sudo.search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
         else:
-            latest_mileage = self.starting_mileage_editable
+            latest_mileage = self.sudo().starting_mileage_editable
         return latest_mileage
 
     @api.multi
@@ -113,7 +114,7 @@ class HrTimesheetSheet(models.Model):
     @api.depends('timesheet_ids.kilometers')
     def _get_business_mileage(self):
         for sheet in self:
-            sheet.business_mileage = sum(sheet.timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
+            sheet.business_mileage = sum(sheet.sudo().timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
 
     @api.multi
     @api.depends('end_mileage','business_mileage','starting_mileage')
