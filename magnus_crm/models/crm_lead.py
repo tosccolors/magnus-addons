@@ -178,6 +178,8 @@ class Lead(models.Model):
 
     @api.onchange('start_date', 'end_date', 'planned_revenue', 'probability')
     def onchange_date(self):
+        if self.start_date and not self._origin.end_date and self.start_date > self.end_date:
+            self.end_date = self.start_date
         self.update_monthly_revenue()
 
     @api.onchange('partner_id')
@@ -271,8 +273,9 @@ class MonthlyRevenue(models.Model):
     sector_id = fields.Many2one('res.partner.sector', related='lead_id.sector_id', string='Main Sector', store=True)
     department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
 
-    @api.onchange('expected_revenue', 'percentage')
+    @api.onchange('expected_revenue', 'percentage', 'lead_id.probability')
     def onchagne_expected_revenue(self):
+        self.percentage = self.lead_id.probability
         if self.expected_revenue:
             self.weighted_revenue = self.expected_revenue*self.percentage/100
         else:
@@ -311,7 +314,7 @@ class CRMRevenueSplit(models.Model):
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
     user_id = fields.Many2one('res.users', related='lead_id.user_id', string='Salesperson', store=True)
-    name = fields.Char(related='lead_id.name',string="Opportunity",store=True)
+    name = fields.Char(related='lead_id.name',string="Opportunity Name",store=True)
     operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
     month = fields.Char(string='Month')
     total_revenue = fields.Float('Total Revenue')
