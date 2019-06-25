@@ -25,7 +25,6 @@
             <field name="business_mileage" />
             <field name="private_mileage" />
             <field name="end_mileage" attrs="{'readonly': [('state', 'not in', ['new','draft'])]}"/>
-            <field name="overtime_hours" widget="float_time"/>
           </group>
         </xpath>
         <xpath expr="//label[@for='date_from']" position="before">

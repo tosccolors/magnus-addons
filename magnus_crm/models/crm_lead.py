@@ -38,7 +38,8 @@ class Lead(models.Model):
         """ returns the new values when stage_id has changed """
         res = super(Lead,self)._onchange_stage_id_values(stage_id)
         for rec in self.monthly_revenue_ids:
-            rec.update({'percentage':res.get('probability')})
+            percentage = res.get('probability')
+            rec.update({'percentage': percentage, 'weighted_revenue': rec.calculate_weighted_revenue(percentage)})
         return res
     
     @api.depends('operating_unit_id')
@@ -178,6 +179,8 @@ class Lead(models.Model):
 
     @api.onchange('start_date', 'end_date', 'planned_revenue', 'probability')
     def onchange_date(self):
+        if self.start_date and not self._origin.end_date and self.start_date > self.end_date:
+            self.end_date = self.start_date
         self.update_monthly_revenue()
 
     @api.onchange('partner_id')
@@ -270,13 +273,19 @@ class MonthlyRevenue(models.Model):
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     sector_id = fields.Many2one('res.partner.sector', related='lead_id.sector_id', string='Main Sector', store=True)
     department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
+    operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
 
-    @api.onchange('expected_revenue', 'percentage')
-    def onchagne_expected_revenue(self):
+    def calculate_weighted_revenue(self, percentage):
+        self.ensure_one()
+        weighted_revenue = 0
         if self.expected_revenue:
-            self.weighted_revenue = self.expected_revenue*self.percentage/100
-        else:
-            self.weighted_revenue = 0
+            weighted_revenue = self.expected_revenue * percentage / 100
+        return weighted_revenue
+
+    @api.onchange('expected_revenue', 'percentage', 'lead_id.probability')
+    def onchagne_expected_revenue(self):
+        self.percentage = self.lead_id.probability
+        self.weighted_revenue = self.calculate_weighted_revenue(self.percentage)
 
     @api.onchange('date')
     def onchange_date(self):
@@ -311,13 +320,13 @@ class CRMRevenueSplit(models.Model):
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
     user_id = fields.Many2one('res.users', related='lead_id.user_id', string='Salesperson', store=True)
-    name = fields.Char(related='lead_id.name',string="Opportunity",store=True)
+    name = fields.Char(related='lead_id.name',string="Opportunity Name",store=True)
     operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
     month = fields.Char(string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')
-    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V')
-    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V %')
+    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V.')
+    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V. %')
     mangnus_red_bv_amount = fields.Float('Magnus Red B.V.')
     mangnus_red_bv_per = fields.Float('Magnus Red B.V. %')
     mangnus_green_bv_amount = fields.Float('Magnus Green B.V.')
@@ -340,8 +349,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_black_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        if self.mangnus_black_bv_per > 0.0:
-            self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
+        # if self.mangnus_black_bv_per > 0.0:
+        self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
               
     @api.onchange('mangnus_black_bv_amount')
     def onchange_magnus_black_amount(self):
@@ -356,8 +365,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_blue_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        if self.mangnus_blue_bv_per > 0:
-            self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
+        # if self.mangnus_blue_bv_per > 0:
+        self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
             
     @api.onchange('mangnus_blue_bv_amount')
     def onchange_magnus_blue_amount(self):
@@ -389,8 +398,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_green_bv_per = 0.0
             raise ValidationError(_("Total Percentage should be equal to 100"))
             
-        if self.mangnus_green_bv_per > 0.0:
-            self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
+        # if self.mangnus_green_bv_per > 0.0:
+        self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
             
     @api.onchange('mangnus_green_bv_amount')
     def onchange_magnus_green_amount(self):

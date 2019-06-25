@@ -88,13 +88,13 @@
             			<field name="month" readonly="1"/>
             			<field name="total_revenue" readonly="1"/>
             			<field name="total_revenue_per" readonly="1"/>
-            			<field name="mangnus_blue_bv_amount"/>
+            			<field name="mangnus_blue_bv_amount" readonly="1"/>
             			<field name="mangnus_blue_bv_per"/>
-            			<field name="mangnus_red_bv_amount"/>
+            			<field name="mangnus_red_bv_amount" readonly="1"/>
             			<field name="mangnus_red_bv_per"/>
-            			<field name="mangnus_green_bv_amount"/>
+            			<field name="mangnus_green_bv_amount" readonly="1"/>
             			<field name="mangnus_green_bv_per"/>
-            			<field name="mangnus_black_bv_amount"/>
+            			<field name="mangnus_black_bv_amount" readonly="1"/>
             			<field name="mangnus_black_bv_per"/>
             			</tree>
             		</field>
