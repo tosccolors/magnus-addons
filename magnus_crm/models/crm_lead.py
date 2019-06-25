@@ -272,6 +272,7 @@ class MonthlyRevenue(models.Model):
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     sector_id = fields.Many2one('res.partner.sector', related='lead_id.sector_id', string='Main Sector', store=True)
     department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
+    operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
 
     @api.onchange('expected_revenue', 'percentage', 'lead_id.probability')
     def onchagne_expected_revenue(self):
@@ -319,8 +320,8 @@ class CRMRevenueSplit(models.Model):
     month = fields.Char(string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')
-    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V')
-    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V %')
+    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V.')
+    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V. %')
     mangnus_red_bv_amount = fields.Float('Magnus Red B.V.')
     mangnus_red_bv_per = fields.Float('Magnus Red B.V. %')
     mangnus_green_bv_amount = fields.Float('Magnus Green B.V.')
@@ -343,8 +344,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_black_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        if self.mangnus_black_bv_per > 0.0:
-            self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
+        # if self.mangnus_black_bv_per > 0.0:
+        self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
               
     @api.onchange('mangnus_black_bv_amount')
     def onchange_magnus_black_amount(self):
@@ -359,8 +360,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_blue_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        if self.mangnus_blue_bv_per > 0:
-            self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
+        # if self.mangnus_blue_bv_per > 0:
+        self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
             
     @api.onchange('mangnus_blue_bv_amount')
     def onchange_magnus_blue_amount(self):
@@ -392,8 +393,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_green_bv_per = 0.0
             raise ValidationError(_("Total Percentage should be equal to 100"))
             
-        if self.mangnus_green_bv_per > 0.0:
-            self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
+        # if self.mangnus_green_bv_per > 0.0:
+        self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
             
     @api.onchange('mangnus_green_bv_amount')
     def onchange_magnus_green_amount(self):

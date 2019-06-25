@@ -33,8 +33,8 @@ Steps to generate monthly expected revenue:
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
         'security/crm_security.xml',
+        'security/ir.model.access.csv',
         'views/crm_lead_views.xml',
         'views/crm_menus.xml',
     ],

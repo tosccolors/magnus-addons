@@ -202,7 +202,7 @@
                 <span t-if="o.payment_term_id">
                     <br/>
                     <span style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                        <strong>Payment terms:</strong> Within <span t-field="o.payment_term_id.name"/> to <strong>
+                        <span t-field="o.payment_term_id.note"/>  <strong>
                         <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
                     </span>
                 </span>
