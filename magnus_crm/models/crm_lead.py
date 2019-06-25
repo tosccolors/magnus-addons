@@ -320,8 +320,8 @@ class CRMRevenueSplit(models.Model):
     month = fields.Char(string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')
-    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V')
-    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V %')
+    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V.')
+    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V. %')
     mangnus_red_bv_amount = fields.Float('Magnus Red B.V.')
     mangnus_red_bv_per = fields.Float('Magnus Red B.V. %')
     mangnus_green_bv_amount = fields.Float('Magnus Green B.V.')
@@ -344,8 +344,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_black_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        if self.mangnus_black_bv_per > 0.0:
-            self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
+        # if self.mangnus_black_bv_per > 0.0:
+        self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
               
     @api.onchange('mangnus_black_bv_amount')
     def onchange_magnus_black_amount(self):
@@ -360,8 +360,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_blue_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        if self.mangnus_blue_bv_per > 0:
-            self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
+        # if self.mangnus_blue_bv_per > 0:
+        self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
             
     @api.onchange('mangnus_blue_bv_amount')
     def onchange_magnus_blue_amount(self):
@@ -393,8 +393,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_green_bv_per = 0.0
             raise ValidationError(_("Total Percentage should be equal to 100"))
             
-        if self.mangnus_green_bv_per > 0.0:
-            self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
+        # if self.mangnus_green_bv_per > 0.0:
+        self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
             
     @api.onchange('mangnus_green_bv_amount')
     def onchange_magnus_green_amount(self):
