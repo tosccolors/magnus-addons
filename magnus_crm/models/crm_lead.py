@@ -6,6 +6,8 @@ from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
+import json
+
 
 class Lead(models.Model):
     _inherit = "crm.lead"
@@ -17,6 +19,42 @@ class Lead(models.Model):
         end_date = self.end_date
         if (start_date and end_date) and (start_date > end_date):
             raise ValidationError(_("End date should be greater than start date."))
+
+    @api.depends('operating_unit_id')
+    @api.one
+    def _compute_dept_ou_domain(self):
+        """
+        Compute the domain for the department domain.
+        """
+        department_ids = []
+        if self.operating_unit_id:
+            self.env.cr.execute("""
+                            SELECT id
+                            FROM hr_department
+                            WHERE operating_unit_id = %s 
+                            AND parent_id IS NULL
+                            """
+                            % (self.operating_unit_id.id))
+
+            result = self.env.cr.fetchall()
+            for res in result:
+                department_id = res[0]
+                self.env.cr.execute("""
+                    WITH RECURSIVE
+                        subordinates AS(
+                            SELECT id, parent_id  FROM hr_department WHERE id = %s
+                            UNION
+                            SELECT h.id, h.parent_id FROM hr_department h
+                            INNER JOIN subordinates s ON s.id = h.parent_id)
+                        SELECT  *  FROM subordinates"""
+                            % (department_id))
+                result2 = self.env.cr.fetchall()
+                for res2 in result2:
+                    department_ids.append(res2[0])
+        self.dept_ou_domain = json.dumps(
+            [('id', 'in', department_ids)]
+        )
+
 
     start_date = fields.Date('Start Date')
     end_date = fields.Date('End Date')
@@ -31,8 +69,9 @@ class Lead(models.Model):
     latest_revenue_date = fields.Date('Latest Revenue Date')
     partner_contact_id = fields.Many2one('res.partner', string='Contact Person')
     revenue_split_ids = fields.One2many('crm.revenue.split', 'lead_id', string='Revenue')
+    dept_ou_domain = fields.Char(compute=_compute_dept_ou_domain, readonly=True, store=False, )
 
-        
+
     @api.model
     def _onchange_stage_id_values(self, stage_id):
         """ returns the new values when stage_id has changed """
