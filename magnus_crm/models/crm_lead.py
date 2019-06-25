@@ -38,7 +38,8 @@ class Lead(models.Model):
         """ returns the new values when stage_id has changed """
         res = super(Lead,self)._onchange_stage_id_values(stage_id)
         for rec in self.monthly_revenue_ids:
-            rec.update({'percentage':res.get('probability')})
+            percentage = res.get('probability')
+            rec.update({'percentage': percentage, 'weighted_revenue': rec.calculate_weighted_revenue(percentage)})
         return res
     
     @api.depends('operating_unit_id')
@@ -274,13 +275,17 @@ class MonthlyRevenue(models.Model):
     department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
     operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
 
+    def calculate_weighted_revenue(self, percentage):
+        self.ensure_one()
+        weighted_revenue = 0
+        if self.expected_revenue:
+            weighted_revenue = self.expected_revenue * percentage / 100
+        return weighted_revenue
+
     @api.onchange('expected_revenue', 'percentage', 'lead_id.probability')
     def onchagne_expected_revenue(self):
         self.percentage = self.lead_id.probability
-        if self.expected_revenue:
-            self.weighted_revenue = self.expected_revenue*self.percentage/100
-        else:
-            self.weighted_revenue = 0
+        self.weighted_revenue = self.calculate_weighted_revenue(self.percentage)
 
     @api.onchange('date')
     def onchange_date(self):
