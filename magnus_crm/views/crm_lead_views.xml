@@ -63,7 +63,8 @@
             <field name="tag_ids" position="replace">
             </field>
              <xpath expr="//field[@name='team_id']" position="after">
-              <field name="department_id" domain="[('operating_unit_id','=',operating_unit_id)]"/>
+              <field name="dept_ou_domain" invisible="1"/>
+              <field name="department_id"  domain="dept_ou_domain"/>
               <field name="tag_ids" string="Proposition" widget="many2many_tags"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
