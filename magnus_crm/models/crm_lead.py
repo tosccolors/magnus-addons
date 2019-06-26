@@ -159,14 +159,25 @@ class Lead(models.Model):
             monthly_revenues = []
             monthly_revenues_split = []
             total_days = (ed-sd).days + 1
+            date_range = self.env['date.range']
+            company = self.company_id.id or self.env.user.company_id.id
+
             while True:
+                common_domain = [('date_start', '<=', month_end_date), ('date_end', '>=', month_end_date), ('company_id', '=', company)]
+                month = date_range.search(common_domain+[('type_id.fiscal_month', '=', True)])
+                year = date_range.search(common_domain + [('type_id.fiscal_year', '=', True)])
                 days_per_month = (month_end_date-sd).days + 1
                 expected_revenue_per_month = self.planned_revenue*days_per_month/total_days
                 weighted_revenue_per_month = (((float(days_per_month)/float(total_days))*self.planned_revenue)*(self.probability/100))
                 days = " days (" if days_per_month > 1 else " day ("
                 duration = str(days_per_month) + days + str(sd.day)+"-"+str(month_end_date.day)+" "+str(sd.strftime('%B'))+")"
-                monthly_revenues.append((0, 0, {'date': month_end_date, 'latest_revenue_date': month_end_date.replace(day=1) - timedelta(days=1), 'year': month_end_date.year, 'month': month_end_date.strftime('%B'),'no_of_days': duration,'weighted_revenue': weighted_revenue_per_month, 'expected_revenue': expected_revenue_per_month,'percentage': self.probability, 'computed_line': True, 'percentage': self.probability}))
-                
+                monthly_revenues.append((0, 0,
+                                         {'date': month_end_date, 'latest_revenue_date': month_end_date.replace(day=1) - timedelta(days=1),
+                                          'year': year.id, 'month': month.id,
+                                          'no_of_days': duration,'weighted_revenue': weighted_revenue_per_month,
+                                          'expected_revenue': expected_revenue_per_month,'percentage': self.probability,
+                                          'computed_line': True, 'percentage': self.probability}))
+
                 blue_per = 0.0
                 red_per = 0.0
                 green_per =0.0
@@ -187,8 +198,9 @@ class Lead(models.Model):
                 if self.operating_unit_id.name == 'Magnus Black B.V.':
                     black_per = 100
                     mangnus_black_bv_amount = expected_revenue_per_month
-                 
-                monthly_revenues_split.append((0,0,{'month': month_end_date.strftime('%B'),
+
+                monthly_revenues_split.append((0,0,{
+                                                    'month': month.id,
                                                     'total_revenue': expected_revenue_per_month,
                                                     'total_revenue_per':100,
                                                     'mangnus_blue_bv_per':blue_per,
@@ -297,8 +309,8 @@ class MonthlyRevenue(models.Model):
         return res
 
     date = fields.Date('Date', required=True)
-    year = fields.Char(string='Year')
-    month = fields.Char(string='Month')
+    year = fields.Many2one('date.range', string='Year')
+    month = fields.Many2one('date.range', string='Month')
     no_of_days = fields.Char(string='Duration')
     latest_revenue_date = fields.Date('Latest Revenue Date')
     weighted_revenue = fields.Float('Weighted Revenue', required=True)
@@ -331,6 +343,7 @@ class MonthlyRevenue(models.Model):
         ctx = self.env.context.copy()
         lead_id = ctx.get('default_lead_id')
         date = datetime.strptime(self.date, "%Y-%m-%d").date()
+        date_range = self.env['date.range']
 
         if date and self.latest_revenue_date:
             lrd = datetime.strptime(self.latest_revenue_date, "%Y-%m-%d").date()
@@ -340,8 +353,12 @@ class MonthlyRevenue(models.Model):
         if date:
             days = " days (" if date.day > 1 else " day ("
             self.no_of_days = str(date.day)+days+str(1)+"-"+str(date.day)+" "+str(date.strftime('%B'))+")"
-            self.month = date.strftime('%B')
-            self.year = date.year
+            company = self.lead_id.company_id.id or self.env.user.company_id.id
+            common_domian = [('date_start', '<=', self.date), ('date_end', '>=', self.date), ('company_id', '=', company)]
+            month = date_range.search(common_domian+[('type_id.fiscal_month', '=', True)])
+            self.month = month.id
+            year = date_range.search(common_domian+[('type_id.fiscal_year', '=', True)])
+            self.year = year.id
 
         if lead_id and date:
             lead = self.env['crm.lead'].browse([lead_id])
@@ -361,7 +378,7 @@ class CRMRevenueSplit(models.Model):
     user_id = fields.Many2one('res.users', related='lead_id.user_id', string='Salesperson', store=True)
     name = fields.Char(related='lead_id.name',string="Opportunity Name",store=True)
     operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
-    month = fields.Char(string='Month')
+    month = fields.Many2one('date.range', string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')
     mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V.')
