@@ -85,7 +85,7 @@ class HrTimesheetSheet(models.Model):
                     ('date_from', '<', self.date_from),
                     ('date_to', '>=', self.date_to)],limit=1)
                 if dtt_vehicle:
-                    vehicle = self.env['fleet.vehicle'].search([
+                    vehicle = self.env['fleet.vehicle'].sudo().search([
                         ('id', '=', dtt_vehicle.model_ref)], limit=1)
                 else:
                     vehicle = self.env['fleet.vehicle'].sudo().search([
@@ -96,9 +96,9 @@ class HrTimesheetSheet(models.Model):
         vehicle = self._get_vehicle()
         odoo_meter_sudo = self.env['fleet.vehicle.odometer'].sudo()
         if vehicle and self.week_id:
-            latest_mileage = odoo_meter_sudo.search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
+            latest_mileage = odoo_meter_sudo.sudo().search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
         elif vehicle:
-            latest_mileage = odoo_meter_sudo.search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
+            latest_mileage = odoo_meter_sudo.sudo().search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
         else:
             latest_mileage = self.sudo().starting_mileage_editable
         return latest_mileage
@@ -390,7 +390,7 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.odo_log_id:
-            self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
+            self.env['fleet.vehicle.odometer'].sudo().search([('id','=', self.odo_log_id.id)]).unlink()
             self.odo_log_id = False
         return res
 
