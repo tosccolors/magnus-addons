@@ -30,7 +30,7 @@ class FleetVehicleOdometer(models.Model):
             if odom.value_period_update > 0.0 and odom.value_update > 0.0:
                 raise UserError(_("You cannot enter both period value and "
                                   "ultimo value for %s!") % (odom.date))
-            older = self.search([
+            older = self.sudo().search([
                 ('vehicle_id', '=', odom.vehicle_id.id),
                 ('date', '<', odom.date)
             ], limit=1, order='date desc')
@@ -78,7 +78,7 @@ class FleetVehicleOdometer(models.Model):
     @api.model
     def odo_newer(self):
         self.ensure_one()
-        newer = self.search([
+        newer = self.sudo().search([
             ('vehicle_id', '=', self.vehicle_id.id),
             ('date','>', self.date)
             ], order='date asc')
@@ -97,7 +97,7 @@ class FleetVehicleOdometer(models.Model):
     @api.model
     def create(self, data):
         res = super(FleetVehicleOdometer, self).create(data)
-        if res.date < self.search([('vehicle_id', '=', res.vehicle_id.id)], limit=1, order='date desc').date:
+        if res.date < self.sudo().search([('vehicle_id', '=', res.vehicle_id.id)], limit=1, order='date desc').date:
             res.with_context(odo_newer=True).odo_newer()
         return res
 
@@ -105,7 +105,7 @@ class FleetVehicleOdometer(models.Model):
     def write(self, data):
         res = super(FleetVehicleOdometer, self).write(data)
         for record in self.filtered(lambda s: not s.env.context.get('odo_newer')):
-            if record.date < self.search([('vehicle_id', '=', record.vehicle_id.id)], limit=1, order='date desc').date:
+            if record.date < self.sudo().search([('vehicle_id', '=', record.vehicle_id.id)], limit=1, order='date desc').date:
                 record.with_context(odo_newer=True).odo_newer()
         return res
 
@@ -121,10 +121,10 @@ class FleetVehicleOdometer(models.Model):
             res[odom.id] = vals
         super(FleetVehicleOdometer, self).unlink()
         for key, value in res.items():
-            if value['gone_date'] < self.search([
+            if value['gone_date'] < self.sudo().search([
                 ('vehicle_id', '=', value['gone_vehicle'])
                 ], limit=1, order='date desc').date:
-                older = self.search([
+                older = self.sudo().search([
                     ('vehicle_id', '=', value['gone_vehicle']),
                     ('date', '<', value['gone_date'])
                 ], limit=1, order='date desc')
