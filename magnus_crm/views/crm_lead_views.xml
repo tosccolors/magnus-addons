@@ -63,7 +63,8 @@
             <field name="tag_ids" position="replace">
             </field>
              <xpath expr="//field[@name='team_id']" position="after">
-              <field name="department_id"/>
+              <field name="dept_ou_domain" invisible="1"/>
+              <field name="department_id"  domain="dept_ou_domain"/>
               <field name="tag_ids" string="Proposition" widget="many2many_tags"/>
             </xpath>
             <xpath expr="//field[@name='team_id']" position="attributes">
@@ -88,13 +89,13 @@
             			<field name="month" readonly="1"/>
             			<field name="total_revenue" readonly="1"/>
             			<field name="total_revenue_per" readonly="1"/>
-            			<field name="mangnus_blue_bv_amount"/>
+            			<field name="mangnus_blue_bv_amount" readonly="1"/>
             			<field name="mangnus_blue_bv_per"/>
-            			<field name="mangnus_red_bv_amount"/>
+            			<field name="mangnus_red_bv_amount" readonly="1"/>
             			<field name="mangnus_red_bv_per"/>
-            			<field name="mangnus_green_bv_amount"/>
+            			<field name="mangnus_green_bv_amount" readonly="1"/>
             			<field name="mangnus_green_bv_per"/>
-            			<field name="mangnus_black_bv_amount"/>
+            			<field name="mangnus_black_bv_amount" readonly="1"/>
             			<field name="mangnus_black_bv_per"/>
             			</tree>
             		</field>
@@ -379,7 +380,7 @@
         <field name="arch" type="xml">
             <pivot string="Monthly Revenue Analysis">
                 <field name="lead_id" type="row"/>
-                <field name="month" interval="month" type="col"/>
+                <field name="month" type="col"/>
                 <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </pivot>
         </field>
@@ -392,7 +393,7 @@
         <field name="arch" type="xml">
             <graph string="Monthly Revenue Split Analysis" stacked="True">
                 <field name="lead_id" type="row"/>
-                <field name="month" interval="month" type="col"/>
+                <field name="month" type="col"/>
                 <field name="total_revenue" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </graph>
         </field>

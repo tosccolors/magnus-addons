@@ -16,17 +16,23 @@ class HrTimesheetSheet(models.Model):
     def default_get(self, fields):
         rec = super(HrTimesheetSheet, self).default_get(fields)
         dt = datetime.now()
-        emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
-        emp_id = emp_id.id if emp_id else False
+        emp_obj = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
+        emp_id = emp_obj.id if emp_obj else False
         timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
+        date_range = self.env['date.range']
         date_range_type_cw_id = self.env.ref(
             'magnus_date_range_week.date_range_calender_week').id
+        employement_date = emp_obj.official_date_of_employment
+        employement_week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date), ('date_end', '>=', employement_date)])
         past_week_domain = [('type_id', '=', date_range_type_cw_id), ('date_end', '<', dt - timedelta(days=dt.weekday()))]
+        if employement_week:
+            past_week_domain += [('date_start', '>=', employement_week.date_start)]
+
         if logged_weeks:
             past_week_domain += [('id', 'not in', logged_weeks)]
-        past_weeks = self.env['date.range'].search(past_week_domain, limit=1, order='date_start')
-        week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
+        past_weeks = date_range.search(past_week_domain, limit=1, order='date_start')
+        week = date_range.search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
                                                                                       dt-timedelta(days=dt.weekday()))], limit=1)
         if week or past_weeks:
             if past_weeks and past_weeks.id not in logged_weeks:
@@ -34,7 +40,7 @@ class HrTimesheetSheet(models.Model):
             elif week and week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
-                upcoming_week = self.env['date.range'].search([
+                upcoming_week = date_range.search([
                     ('id', 'not in', logged_weeks),
                     ('type_id','=',date_range_type_cw_id),
                     ('date_start', '>', dt-timedelta(days=dt.weekday()))
@@ -85,7 +91,7 @@ class HrTimesheetSheet(models.Model):
                     ('date_from', '<', self.date_from),
                     ('date_to', '>=', self.date_to)],limit=1)
                 if dtt_vehicle:
-                    vehicle = self.env['fleet.vehicle'].search([
+                    vehicle = self.env['fleet.vehicle'].sudo().search([
                         ('id', '=', dtt_vehicle.model_ref)], limit=1)
                 else:
                     vehicle = self.env['fleet.vehicle'].sudo().search([
@@ -96,9 +102,9 @@ class HrTimesheetSheet(models.Model):
         vehicle = self._get_vehicle()
         odoo_meter_sudo = self.env['fleet.vehicle.odometer'].sudo()
         if vehicle and self.week_id:
-            latest_mileage = odoo_meter_sudo.search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
+            latest_mileage = odoo_meter_sudo.sudo().search([('vehicle_id', '=', vehicle.id), ('date', '<', self.week_id.date_start)], order='date desc', limit=1).value
         elif vehicle:
-            latest_mileage = odoo_meter_sudo.search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
+            latest_mileage = odoo_meter_sudo.sudo().search([('vehicle_id', '=', vehicle.id)], order='date desc', limit=1).value
         else:
             latest_mileage = self.sudo().starting_mileage_editable
         return latest_mileage
@@ -390,7 +396,7 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         if self.odo_log_id:
-            self.env['fleet.vehicle.odometer'].search([('id','=', self.odo_log_id.id)]).unlink()
+            self.env['fleet.vehicle.odometer'].sudo().search([('id','=', self.odo_log_id.id)]).unlink()
             self.odo_log_id = False
         return res
 
