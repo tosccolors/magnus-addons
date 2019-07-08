@@ -2,9 +2,9 @@
 <odoo>
     <data>
         <!--Monthly Revenue menu-->
-        <menuitem id="crm_monthly_revenue_report_menu" name="Monthly Revenue"
+        <!-- <menuitem id="crm_monthly_revenue_report_menu" name="Monthly Revenue"
             parent="sales_team.menu_sale_report" action="crm_monthly_revenue_report_action" sequence="10"/>
-	    	
+	    	 -->
 	    <!--Monthly Revenue Split menu-->
         <menuitem id="crm_monthly_revenue_split_report_menu" name="Monthly Revenue Split"
             parent="sales_team.menu_sale_report" action="crm_monthly_revenue_split_report_action" sequence="10"/>

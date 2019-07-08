@@ -146,8 +146,8 @@ class Lead(models.Model):
         if sd and ed:
             sd = datetime.strptime(sd, "%Y-%m-%d").date()
             ed = datetime.strptime(ed, "%Y-%m-%d").date()
-            if sd > ed:
-                raise ValidationError(_("End date should be greater than start date."))
+#             if sd > ed:
+#                 raise ValidationError(_("End date should be greater than start date."))
 
             for line in self.monthly_revenue_ids.filtered(lambda l: not l.computed_line):
                 manual_lines.append((4, line.id))
