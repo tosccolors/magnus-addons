@@ -80,7 +80,11 @@
                              <span t-field="o.partner_id.vat"/><br/>
                              <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
                                    t-field="o.operating_unit_id.partner_id.vat"/><br/>
-                             <span t-if="analytic_invoice_id and not sale_inv" t-esc="time.strftime('%B %Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/><br/>
+                             <t t-if="analytic_invoice_id and not sale_inv">
+                                 <span t-field="analytic_invoice_id[0].month_id.calender_name"/>
+                                <span t-esc="time.strftime('%Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/>
+                             </t>
+                             <br/>
                              <br/>
                          </div>
                     </div>
@@ -128,6 +132,11 @@
 
                     </t>
                     <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
+                         <tr>
+                            <td style='border-top:none' width="40%">
+                                <strong><span t-field="aaLines.name"/></strong>
+                            </td>
+                         </tr>
                         <tr t-foreach="aaLines_value" t-as="l">
                             <td style='border-top:none' width="40%"><span t-field="l.name"/></td>
                             <td style='border-top:none' width="20%"> </td>
