@@ -380,8 +380,12 @@
         <field name="arch" type="xml">
             <pivot string="Monthly Revenue Analysis">
                 <field name="lead_id" type="row"/>
-                <field name="month" type="col"/>
+                <!--<field name="month" type="col"/>-->
                 <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_blue_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_red_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_green_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_black_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </pivot>
         </field>
     </record>
