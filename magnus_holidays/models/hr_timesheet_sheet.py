@@ -69,7 +69,7 @@ class HrTimesheetSheet(models.Model):
                         # Update LR with date_from
                         leave_request.write({'date_from': date + timedelta(days=1)})
                         self.merge_leave_request(date, data)
-                    splitted_leave_request = leave_request.copy()
+                    splitted_leave_request = leave_request.copy(default={'state':leave_request.state})
                     # Update LR with date_to
                     splitted_leave_request.write({'date_to': date - timedelta(days=1), 'date_from': date_start})
         if not leave_request:
