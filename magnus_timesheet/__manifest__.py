@@ -45,7 +45,8 @@ The extended date range validation process is:
                 'analytic_base_department',
                 'account_fiscal_month',
                 'account_fiscal_year',
-                'hr_timesheet_sheet_validators'],
+                'hr_timesheet_sheet_validators',
+                'connector_jira'],
 
     # always loaded
     'data': [

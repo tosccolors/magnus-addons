@@ -16,25 +16,31 @@ class HrTimesheetSheet(models.Model):
     def default_get(self, fields):
         rec = super(HrTimesheetSheet, self).default_get(fields)
         dt = datetime.now()
-        emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
-        emp_id = emp_id.id if emp_id else False
+        emp_obj = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
+        emp_id = emp_obj.id if emp_obj else False
         timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
         logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
+        date_range = self.env['date.range']
         date_range_type_cw_id = self.env.ref(
             'magnus_date_range_week.date_range_calender_week').id
+        employement_date = emp_obj.official_date_of_employment
+        employement_week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date), ('date_end', '>=', employement_date)])
         past_week_domain = [('type_id', '=', date_range_type_cw_id), ('date_end', '<', dt - timedelta(days=dt.weekday()))]
+        if employement_week:
+            past_week_domain += [('date_start', '>=', employement_week.date_start)]
+
         if logged_weeks:
             past_week_domain += [('id', 'not in', logged_weeks)]
-        past_weeks = self.env['date.range'].search(past_week_domain, limit=1, order='date_start')
-        week = self.env['date.range'].search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
+        past_weeks = date_range.search(past_week_domain, limit=1, order='date_start')
+        week = date_range.search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
                                                                                       dt-timedelta(days=dt.weekday()))], limit=1)
         if week or past_weeks:
-            if past_weeks.id not in logged_weeks:
+            if past_weeks and past_weeks.id not in logged_weeks:
                 rec.update({'week_id': past_weeks.id})
-            elif week.id not in logged_weeks:
+            elif week and week.id not in logged_weeks:
                 rec.update({'week_id': week.id})
             else:
-                upcoming_week = self.env['date.range'].search([
+                upcoming_week = date_range.search([
                     ('id', 'not in', logged_weeks),
                     ('type_id','=',date_range_type_cw_id),
                     ('date_start', '>', dt-timedelta(days=dt.weekday()))

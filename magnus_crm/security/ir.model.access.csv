@@ -1,3 +1,36 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_crm_monthly_revenue_manager,crm.monthly.revenue.manager,model_crm_monthly_revenue,sales_team.group_sale_manager,1,1,1,1
 access_crm_monthly_revenue,crm.monthly.revenue,model_crm_monthly_revenue,sales_team.group_sale_salesman,1,1,1,1
+access_crm_revenue_split_manager,crm.revenue.split.manager,model_crm_revenue_split,sales_team.group_sale_manager,1,1,1,1
+access_crm_revenue_split,crm.revenue.split,model_crm_revenue_split,sales_team.group_sale_salesman,1,1,1,1
+access_sale_order_mgs,sale.order,sale.model_sale_order,magnus_crm.group_sale_regular_user,1,1,1,0
+access_sale_order_line_mgs,sale.order.line,sale.model_sale_order_line,magnus_crm.group_sale_regular_user,1,1,1,1
+access_account_invoice_tax_salesman_mgs,account_invoice_tax salesman,account.model_account_invoice_tax,magnus_crm.group_sale_regular_user,1,1,1,0
+access_account_invoice_salesman_mgs,account_invoice salesman,account.model_account_invoice,magnus_crm.group_sale_regular_user,1,1,1,0
+access_account_invoice_line_salesman_mgs,account_invoice.line salesman,account.model_account_invoice_line,magnus_crm.group_sale_regular_user,1,1,1,0
+access_account_payment_term_salesman_mgs,account_payment_term salesman,account.model_account_payment_term,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_analytic_tag_sale_salesman_mgs,account.analytic.tag.sale.salesman,analytic.model_account_analytic_tag,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_analytic_account_salesman_mgs,account_analytic_account salesman,analytic.model_account_analytic_account,magnus_crm.group_sale_regular_user,1,1,1,0
+access_sale_report_salesman,sale.report_mgs,sale.model_sale_report,magnus_crm.group_sale_regular_user,1,1,1,0
+access_ir_property_sales_mgs,ir.property.sales,base.model_ir_property,magnus_crm.group_sale_regular_user,1,1,1,1
+access_sale_account_journal_mgs,account.journal sale order.user,account.model_account_journal,magnus_crm.group_sale_regular_user,1,0,0,0
+access_res_partner_sale_user_mgs,res.partner.sale.user,base.model_res_partner,magnus_crm.group_sale_regular_user,1,0,0,0
+access_product_template_sale_user_mgs,product.template sale use,product.model_product_template,magnus_crm.group_sale_regular_user,1,0,0,0
+access_product_product_sale_user_mgs,product.product sale use,product.model_product_product,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_tax_user_mgs,account.tax.user,account.model_account_tax,magnus_crm.group_sale_regular_user,1,0,0,0
+access_ir_attachment_sales_mgs,ir.attachment.sales,base.model_ir_attachment,magnus_crm.group_sale_regular_user,1,1,1,0
+access_product_uom_user_mgs,product.uom.user,product.model_product_uom,magnus_crm.group_sale_regular_user,1,0,0,0
+access_product_pricelist_sale_user_mgs,product.pricelist.sale.user,product.model_product_pricelist,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_account_salesman_mgs,account_account salesman,account.model_account_account,magnus_crm.group_sale_regular_user,1,0,0,0
+access_product_supplierinfo_user_mgs,product.supplierinfo.user,product.model_product_supplierinfo,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_move_line_salesman_mgs,account.move.line invoice,account.model_account_move_line,magnus_crm.group_sale_regular_user,1,0,0,0
+report_layout_category_3_mgs,report_layout_category_3,sale.model_sale_layout_category,magnus_crm.group_sale_regular_user,1,1,1,0
+access_account_tax_sale_manager_mgs,account.tax sale manager,account.model_account_tax,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_journal_sale_manager_mgs,account.journal sale manager,account.model_account_journal,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_invoice_tax_sale_manager_mgs,account.invoice.tax  sale manager,account.model_account_invoice_tax,magnus_crm.group_sale_regular_user,1,0,0,0
+access_account_tax_group_sale_manager_mgs,account.tax.group sale manager,account.model_account_tax_group,magnus_crm.group_sale_regular_user,1,0,0,0
+access_crm_opportunity_report_user_mgs,crm.opportunity.report,crm.model_crm_opportunity_report,magnus_crm.group_sale_regular_user,1,0,0,0
+access_crm_monthly_revenue_reg_usr,crm.monthly.revenue.manager,model_crm_monthly_revenue,magnus_crm.group_sale_regular_user,1,1,1,1
+access_crm_revenue_split_reg_usr,crm.revenue.split,model_crm_revenue_split,magnus_crm.group_sale_regular_user,1,1,1,1
+access_crm_lead_mgs,sale.order,crm.model_crm_lead,magnus_crm.group_sale_regular_user,1,1,1,1
+

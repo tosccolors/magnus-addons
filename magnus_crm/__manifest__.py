@@ -29,12 +29,12 @@ Steps to generate monthly expected revenue:
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'crm', 'crm_sector', 'project', 'operating_unit', 'hr', 'web_readonly_bypass','utm','web_notify'],
+    'depends': ['base', 'crm', 'crm_sector', 'project', 'operating_unit', 'hr', 'web_readonly_bypass','utm', 'date_range','web_notify'],
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
         'security/crm_security.xml',
+        'security/ir.model.access.csv',
         'views/crm_lead_views.xml',
         'views/crm_menus.xml',
     ],
