@@ -7,6 +7,8 @@ from odoo import models, fields, api, _
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
 
+    current_leave_state = fields.Selection(selection_add=[('written', 'Written')])
+
     @api.multi
     def _compute_leaves_count(self):
         leaves = self.env['hr.holidays'].read_group([
