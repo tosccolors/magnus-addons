@@ -75,11 +75,17 @@ class Lead(models.Model):
     @api.model
     def _onchange_stage_id_values(self, stage_id):
         """ returns the new values when stage_id has changed """
+        crm_stage = self.env['crm.stage']
         res = super(Lead,self)._onchange_stage_id_values(stage_id)
         for rec in self.monthly_revenue_ids:
-            percentage = res.get('probability')
-            rec.update({'percentage': percentage, 'weighted_revenue': rec.calculate_weighted_revenue(percentage)})
+            rec.update({'percentage':res.get('probability')})
+        crm_stage_id = crm_stage.search([('id','=',stage_id)])
+        if crm_stage_id.name == "Qualified":
+            if crm_stage_id.requirements:
+                text = crm_stage_id.requirements
+                self.env.user.notify_info(message=text,sticky=True)
         return res
+
     
     @api.depends('operating_unit_id')
     @api.onchange('operating_unit_id')
@@ -130,6 +136,7 @@ class Lead(models.Model):
         if monthly_revenue_ids:
             res.write({'latest_revenue_date': monthly_revenue_ids.sorted('date')[-1].date})
         return res
+    
 
     @api.onchange('monthly_revenue_ids')
     def onchange_monthly_revenue_ids(self):
