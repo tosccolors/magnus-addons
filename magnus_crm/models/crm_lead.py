@@ -79,10 +79,11 @@ class Lead(models.Model):
         res = super(Lead,self)._onchange_stage_id_values(stage_id)
         for rec in self.monthly_revenue_ids:
             rec.update({'percentage':res.get('probability')})
-        crm_stage_id = crm_stage.search([('id','=',stage_id)])
-        if crm_stage_id.name == "Qualified":
-            if crm_stage_id.requirements:
-                text = crm_stage_id.requirements
+        print ("self.stage_id.show_when_chaing",self.stage_id.show_when_chaing)
+        print ("self.stage_id.requirements",self.stage_id.requirements)
+        if self.stage_id.show_when_chaing:
+            if self.stage_id.requirements:
+                text = self.stage_id.requirements
                 self.env.user.notify_info(message=text,sticky=True)
         return res
 
@@ -471,4 +472,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_green_bv_per = self.mangnus_green_bv_amount * (100/self.total_revenue)
             
     
+class CRMStage(models.Model):
+    _inherit = "crm.stage"
+    
+    show_when_chaing = fields.Boolean("Show when changing")
             
