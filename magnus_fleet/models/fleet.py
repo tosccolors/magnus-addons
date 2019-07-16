@@ -5,11 +5,46 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
-
+from datetime import datetime
 class FleetVehicleContract(models.Model):
 
     _inherit = 'fleet.vehicle.log.contract'
 
+    km_range_contract = fields.Integer("Kilometer Range Contract")
+    price_more_km = fields.Float("Price more km")
+    price_less_km = fields.Float("Price less km")
+    lease_period = fields.Integer("Lease Period")
+    
+    @api.model
+    def create(self,vals):
+        if vals.get('start_date') and (vals.get('lease_period') > 0):
+            start_date = datetime.strptime(vals.get('start_date'), '%Y-%m-%d')
+            end_date = start_date + relativedelta(months=vals.get('lease_period'))
+            vals.update({'expiration_date':end_date})
+        return super(FleetVehicleContract,self).create(vals)
+    
+    @api.multi
+    def write(self,vals):
+        if vals.get('lease_period') > 0:
+            start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
+            end_date = start_date + relativedelta(months=vals.get('lease_period'))
+            vals.update({'expiration_date':end_date})
+        return super(FleetVehicleContract,self).write(vals)
+        
+    @api.onchange('lease_period')
+    @api.depends('lease_period')
+    def _lease_priod_on_change(self):
+        if self.lease_period > 0:
+            if self.start_date:
+                start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
+                end_date = start_date + relativedelta(months=self.lease_period)
+                self.expiration_date = end_date
+    
+    @api.onchange('sum_cost')
+    @api.depends('sum_cost')
+    def _amount_on_change(self):
+        self.amount = self.sum_cost
+        
     @api.depends('log_contracts')
     def _compute_contract_reminder(self):
             for record in self:
@@ -83,3 +118,11 @@ class FleetVehicleContract(models.Model):
         for vehicle, value in res.items():
             Vehicle.browse(vehicle).message_post(body=_('%s contract(s) need(s) to be renewed and/or closed!') % value)
         return contracts.write({'state': 'toclose'})
+    
+class FleetVehicle(models.Model):
+    _inherit = 'fleet.vehicle'
+    
+    fiscal_addition = fields.Float("Fiscal Addition")
+    hoem_work_distance = fields.Integer("Home/Work Distance")
+    location = fields.Integer("Personal Contribution")
+#     driver_id = fields.Many2one("hr.employee","Driver")

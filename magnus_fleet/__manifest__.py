@@ -14,5 +14,6 @@
         'fleet',
     ],
     'data': [
+        'views/fleet_view.xml',
     ],
 }
