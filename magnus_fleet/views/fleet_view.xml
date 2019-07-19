@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+  	<record id="fleet_vehicle_view_form_inherit" model="ir.ui.view">
+      <field name="name">fleet.vehicle.form</field>
+      <field name="model">fleet.vehicle</field>
+      <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+        <field name="car_value" position="after">
+       	 	<label for="fiscal_addition"/>
+            <div class="o_row">
+                <field name="fiscal_addition"/><span>%%</span>
+            </div>
+        </field>
+        <field name="vin_sn" position="after">
+       	 	<label for="hoem_work_distance"/>
+            <div class="o_row">
+                <field name="hoem_work_distance"/><span>km</span>
+            </div>
+        </field>
+        </field>
+    </record>
+    
+    <record id="fleet_vehicle_log_contract_view_form_inherit" model="ir.ui.view">
+      <field name="name">fleet.vehicle.log.contract.form</field>
+      <field name="model">fleet.vehicle.log.contract</field>
+      <field name="inherit_id" ref="fleet.fleet_vehicle_log_contract_view_form"/>
+        <field name="arch" type="xml">
+        <xpath expr="//sheet/group[1]/group[2]" position="inside">
+        	<label for="km_range_contract"/>
+            <div class="o_row">
+                <field name="km_range_contract"/><span>Kilometers</span>
+            </div>
+            <field name="price_more_km"/>
+            <field name="price_less_km"/>
+        </xpath>
+        <field name="start_date" position="after">
+        	<field name="lease_period"/>
+        </field>
+        <field name="expiration_date" position="attributes">
+        	<attribute name="readonly">1</attribute>
+        </field>
+        </field>
+    </record>
+  </data>
+</odoo>
