@@ -61,7 +61,7 @@ class hr_employee_landing_page(models.TransientModel):
 
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True)
     next_week_id = fields.Char(string="Week To Submit")
-    vacation_balance = fields.Integer(compute='_compute_all', string="Vaction Balance")
+    vacation_balance = fields.Integer(compute='_compute_all', string="Vacation Balance")
     overtime_balance = fields.Integer(compute='_compute_all', string="Overtime Balance")
     private_km_balance = fields.Integer(compute='_compute_all', string="Private Mileage Balance")
     emp_timesheet_status_ids = fields.Many2many('hr_timesheet_sheet.sheet', compute='_compute_all', string="My Timesheet Status")
