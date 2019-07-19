@@ -84,3 +84,27 @@ class FleetVehicle(models.Model):
             record.contract_renewal_due_soon = due_soon
             record.contract_renewal_total = total - 1  # we remove 1 from the real total for display purposes
             record.contract_renewal_name = name
+            
+            
+    def _search_contract_renewal_due_soon(self, operator, value):
+        res = []
+        assert operator in ('=', '!=', '<>') and value in (True, False), 'Operation not supported'
+        if (operator == '=' and value is True) or (operator in ('<>', '!=') and value is False):
+            search_operator = 'in'
+        else:
+            search_operator = 'not in'
+        today = fields.Date.context_today(self)
+        datetime_today = fields.Datetime.from_string(today)
+        limit_date = fields.Datetime.to_string(datetime_today + relativedelta(days=+182))
+        self.env.cr.execute("""SELECT cost.vehicle_id,
+                        count(contract.id) AS contract_number
+                        FROM fleet_vehicle_cost cost
+                        LEFT JOIN fleet_vehicle_log_contract contract ON contract.cost_id = cost.id
+                        WHERE contract.expiration_date IS NOT NULL
+                          AND contract.expiration_date > %s
+                          AND contract.expiration_date < %s
+                          AND contract.state IN ('open', 'toclose')
+                        GROUP BY cost.vehicle_id""", (today, limit_date))
+        res_ids = [x[0] for x in self.env.cr.fetchall()]
+        res.append(('id', search_operator, res_ids))
+        return res
