@@ -27,7 +27,6 @@
                             <div t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
                         </t>
                     </strong>
-                     <br/>
                      <h2>
                          <span t-if="proforma_invoice"><strong>PROFORMA INVOICE</strong></span><br/>
                 <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Invoice</span>
@@ -37,14 +36,9 @@
                 <span t-if="o.type == 'out_refund'">Refund</span>
                 <span t-if="o.type == 'in_refund'">Vendor Refund</span>
                 <span t-if="o.type == 'in_invoice'">Vendor Bill</span>
-                <span t-field="o.number"/>
                 </h2>
                  </div>
             </div>
-
-            <br/>
-            <br/>
-            <br/>
 
             <t t-set="sale_inv" t-value="any([l.sale_line_ids for l in o.invoice_line_ids])"/>
             <t t-set="invoice_desc" t-value="o.parse_invoice_description()"/>
