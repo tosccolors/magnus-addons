@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 
 
@@ -32,13 +32,12 @@ class hr_employee_landing_page(models.TransientModel):
         self.overtime_balance = overtime_hrs - overtime_taken
 
         hr_timesheet = self.env['hr_timesheet_sheet.sheet']
-        employee_timesheet = hr_timesheet.search([('employee_id', '=', self.employee_id.id)])
 
         # compute private milage
-        self.private_km_balance = sum(employee_timesheet.mapped('private_mileage'))
+        self.private_km_balance = sum(hr_timesheet.search([('employee_id', '=', self.employee_id.id)]).mapped('private_mileage'))
 
         #my timesheet status
-        timesheet_ids = employee_timesheet.search([])
+        timesheet_ids = hr_timesheet.search([('employee_id', '=', self.employee_id.id), ('state', 'in', ('draft', 'new', 'confirm'))])
         self.emp_timesheet_status_ids = [(6, 0, timesheet_ids.ids)]
 
         #my to be approved timesheet
@@ -120,17 +119,39 @@ class hr_employee_landing_page(models.TransientModel):
     @api.multi
     def action_view_leaves_dashboard(self):
         self.ensure_one()
-        action = self.env.ref('hr_holidays.action_hr_holidays_dashboard')
+        ir_model_data = self.env['ir.model.data']
+        tree_res = ir_model_data.get_object_reference('hr_holidays', 'view_holiday_simple')
+        tree_id = tree_res and tree_res[1] or False
         return {
-            'name': action.name,
-            'help': action.help,
-            'type': action.type,
-            'view_type': 'form',
-            'view_mode': action.view_mode,
-            'target': action.target,
-            'res_model': action.res_model,
-            'domain': [('holiday_type','=','employee'), ('type', '=', 'remove'), ('state', '!=', 'refuse')],
+            'name': _('Leaves'),
+            'view_type': 'from',
+            'view_mode': 'tree',
+            'res_model': 'hr.holidays',
+            'view_id': False,
+            'views': [(tree_id, 'tree')],
+            'domain': [('employee_id', '=', self.employee_id.id), ('holiday_type','=','employee'), ('type', '=', 'remove'), ('state', '!=', 'refuse')],
             'context': {'search_default_year': 1, 'search_default_group_employee': 1},
+            'target':'current',
+            'type': 'ir.actions.act_window',
+        }
+
+
+    @api.multi
+    def action_view_timesheet_tree(self):
+        self.ensure_one()
+        ir_model_data = self.env['ir.model.data']
+        tree_res = ir_model_data.get_object_reference('hr_timesheet_sheet', 'hr_timesheet_sheet_tree_simplified')
+        tree_id = tree_res and tree_res[1] or False
+        return {
+            'name': _('Timesheet'),
+            'view_type': 'from',
+            'view_mode': 'tree',
+            'res_model': 'hr_timesheet_sheet.sheet',
+            'view_id': False,
+            'views': [(tree_id, 'tree')],
+            'domain': [('employee_id.user_id', '=', self.env.uid)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
         }
 
     @api.multi
