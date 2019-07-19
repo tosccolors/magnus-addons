@@ -110,5 +110,35 @@
             parent="hr_timesheet.timesheet_menu_root" sequence="99" groups="magnus_timesheet.group_magnus_reports"/>
 
 
+
+	<record id="hr_timesheet_sheet_calendar_view" model="ir.ui.view">
+      <field name="name">hr.timesheet.sheet.calendar</field>
+      <field name="model">hr_timesheet_sheet.sheet</field>
+      <field name="arch" type="xml">
+      	<calendar string="Planing" date_start="date_from"  color="employee_id" mode="month">
+                <field name="employee_id"/>
+                <field name="date_from"/>
+                 <field name="date_to"/>
+                <field name="department_id"/>
+            </calendar>
+      </field>
+     </record>
+	<record id="action_stand_by_planing" model="ir.actions.act_window">
+            <field name="name">Stand-by planning</field>
+            <field name="res_model">hr_timesheet_sheet.sheet</field>
+            <field name="view_mode">calendar,tree,form</field>
+            <field name="view_id" ref="hr_timesheet_sheet_calendar_view"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to record activities.
+              </p><p>
+                You can track Staffing Forecast.
+              </p>
+            </field>
+        </record>
+	
+	<menuitem id="stand_by_planing_menu" name="Stand-by planning"
+            parent="hr_timesheet.menu_hr_time_tracking" sequence="99" action="action_stand_by_planing"/>
+            
   </data>
 </odoo>
