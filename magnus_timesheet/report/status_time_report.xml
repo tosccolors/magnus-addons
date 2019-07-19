@@ -24,6 +24,7 @@
                     <filter string="Internal Employees"
                             domain="[('external','=',False)]"
                             name="internal_emp_filter"/>
+                    <separator/>
                     <filter string="Time Sheet Optional"
                             domain="[('ts_optional','=',True)]"
                             name="ts_optional_filter"/>
@@ -64,6 +65,7 @@
             <field name="context">{
                         'search_default_internal_emp_filter':1,
                         'search_default_not_submitted_filter':1,
+                        'search_default_ts_optional_filter':0,
                         'search_default_week_id_filter':1
                         }</field>
         </record>
