@@ -132,9 +132,12 @@ class HrTimesheetSheet(models.Model):
     @api.one
     @api.depends('timesheet_ids')
     def _get_overtime_hours(self):
-        aal = self.timesheet_ids.filtered(lambda a: not a.task_id.standby and not a.project_id.overtime)
-        working_hrs = sum(aal.mapped('unit_amount'))
-        self.overtime_hours = working_hrs - 40
+        aal_incl_ott = self.timesheet_ids.filtered(lambda a: not a.task_id.standby)
+        aal_ott = self.timesheet_ids.filtered('project_id.overtime')
+        working_hrs_incl_ott = sum(aal_incl_ott.mapped('unit_amount'))
+        ott = sum(aal_ott.mapped('unit_amount'))
+        self.overtime_hours = working_hrs_incl_ott - 40
+        self.overtime_hours_delta = working_hrs_incl_ott - ott - 40
 
 
 
@@ -146,7 +149,8 @@ class HrTimesheetSheet(models.Model):
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
     end_mileage = fields.Integer('End Mileage')
-    overtime_hours = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
+    overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
+    overtime_hours_delta = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
     odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
     overtime_analytic_line_id = fields.Many2one('account.analytic.line', string="Overtime Entry")
 
