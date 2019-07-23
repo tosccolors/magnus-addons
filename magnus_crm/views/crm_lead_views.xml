@@ -72,9 +72,9 @@
             </xpath>
             <xpath expr="//h2[@class='o_row']/div[2]" position="after">
               <div>
-                <label for="expected_duration" class="oe_edit_only"/>
+                <label for="expected_duration" class="oe_edit_only" invisible="1"/>
                 <div class="o_row">
-                  <field name="expected_duration"/>
+                  <field name="expected_duration" invisible="1"/>
                 </div>
               </div>
             </xpath>

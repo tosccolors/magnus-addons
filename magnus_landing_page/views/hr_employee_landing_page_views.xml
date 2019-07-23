@@ -8,10 +8,6 @@
             <field name="arch" type="xml">
                 <form create="false" edit="false" copy="false" delete="false">
                       <sheet>
-                          <div align="center">
-                              <h1 style='border:1px black solid; font-size:20px; width:fit-content; width:-webkit-fit-content; width:-moz-fit-content;padding: 20px;'>Magnus Employee Landing Page</h1>
-                          </div>
-                          <br/>
                           <field name="employee_id" readonly="1" invisible="1"/>
                           <div name="button_box">
                               <button class="oe_stat_button oe_highlight" name="action_view_timesheet"
@@ -45,7 +41,7 @@
                                         nolabel="1"
                                   /> Hours</strong>
                               </button>
-                              <button class="oe_stat_button oe_highlight" name="no_popup_window"
+                              <button class="oe_stat_button oe_highlight" name="action_view_timesheet_tree"
                                       type="object" style="width:23%;height:50px;">
                                   <label for="private_km_balance" string="Private Kilometers Balance: "/>
                                   <br/>
@@ -90,8 +86,7 @@
                               <seperator/>
                               <field name="emp_expense_status_ids" nolabel="1">
                                   <tree>
-                                      <field name="employee_id"/>
-                                      <!--<field name="week_id"/>-->
+                                      <field name="employee_id" string="Name"/>
                                       <field name="state"/>
                                   </tree>
                               </field>
@@ -106,7 +101,6 @@
                                   <field name="emp_expense_to_be_approved_ids" nolabel="1" groups="hr_expense.group_hr_expense_user">
                                       <tree>
                                           <field name="employee_id"/>
-                                          <!--<field name="week_id"/>-->
                                           <field name="state"/>
                                       </tree>
                                   </field>

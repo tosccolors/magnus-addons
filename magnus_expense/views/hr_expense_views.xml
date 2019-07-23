@@ -108,7 +108,7 @@
                     <attribute name="domain">[('linked_operating_unit','=',True)]</attribute>
                 </xpath>
                 <xpath expr="//field[@name='analytic_account_id']" position="after">
-                    <field name="customer_charge_expense"/>
+                    <field name="customer_charge_expense" groups="hr_expense.group_hr_expense_user,hr_expense.group_hr_expense_manager"/>
                 </xpath>
             </field>
         </record>

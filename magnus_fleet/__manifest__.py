@@ -12,6 +12,7 @@
     'website': 'https://www.magnus.nl',
     'depends': [
         'fleet',
+        'magnus_timesheet'
     ],
     'data': [
         'views/fleet_view.xml',
