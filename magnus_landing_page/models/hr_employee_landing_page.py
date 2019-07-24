@@ -11,48 +11,113 @@ class hr_employee_landing_page(models.TransientModel):
 
     @api.depends('employee_id')
     def _compute_all(self):
-
-        # compute timesheet week
         next_week_id = self.get_upcoming_week()
         if next_week_id:
             self.next_week_id = next_week_id.name
 
         #compute vaction balance
-        hr_holidays = self.env['hr.holidays']
-        emp_holidays = hr_holidays.search([('employee_id', '=', self.employee_id.id)])
-        allocated_leaves = sum(emp_holidays.filtered(lambda eh: eh.type == 'add').mapped('number_of_hours_temp'))
-        applied_leaves = sum(emp_holidays.filtered(lambda eh: eh.type == 'remove').mapped('number_of_hours_temp'))
-        self.vacation_balance = allocated_leaves - applied_leaves
+        self.env.cr.execute("""
+                SELECT allocated_leaves-leaves_taken FROM
+                    (SELECT 
+                        SUM(number_of_hours_temp) as allocated_leaves, employee_id
+                        FROM hr_holidays                               
+                        WHERE employee_id = %s
+                          AND type = %s
+                          AND state = %s
+                        GROUP BY employee_id) hr1
+                    JOIN (SELECT 
+                        SUM(number_of_hours_temp) as leaves_taken, employee_id
+                        FROM hr_holidays                               
+                        WHERE employee_id = %s
+                          AND type = %s
+                          AND state = %s
+                        GROUP BY employee_id ) hr2
+                    on hr1.employee_id = hr2.employee_id
+        """, (self.employee_id.id, 'add', 'validate', self.employee_id.id, 'remove', 'written'))
+        vacation_balance = 0
+        for x in self.env.cr.fetchall():
+            vacation_balance += x[0]
 
+        self.vacation_balance = vacation_balance
+
+        user_id = self.env.user.id
         # compute overtime balance
-        analytic_line = self.env['account.analytic.line']
-
-        overtime_hrs = sum(analytic_line.search([('ot', '=', True)]).mapped('unit_amount'))#overtime hrs entries isn't updated by any action
-        overtime_taken = sum(analytic_line.search([('project_id.overtime', '=', True), ('state', '!=', 'draft')]).mapped('unit_amount'))
-        self.overtime_balance = overtime_hrs - overtime_taken
+        self.env.cr.execute("""
+                SELECT overtime_hrs-overtime_taken FROM
+                    (SELECT 
+                        SUM(unit_amount) as overtime_hrs, user_id
+                        FROM account_analytic_line                               
+                        WHERE user_id = %s
+                          AND ot = true
+                        GROUP BY user_id) aa1
+                    JOIN (SELECT 
+                        SUM(unit_amount) as overtime_taken, user_id
+                        FROM account_analytic_line                               
+                        WHERE user_id = %s
+                          AND state != %s
+                          AND project_id IN (SELECT id FROM project_project WHERE overtime = true)
+                        GROUP BY user_id ) aa2
+                    on aa1.user_id = aa2.user_id
+                """, (user_id, user_id, 'draft'))
+        overtime_balance = 0
+        for x in self.env.cr.fetchall():
+            overtime_balance += x[0]
+        self.overtime_balance = overtime_balance
 
         hr_timesheet = self.env['hr_timesheet_sheet.sheet']
 
-        # compute private milage
+        # compute private milage, Note: private_mileage is an computed field can't be calulated through SQl
         self.private_km_balance = sum(hr_timesheet.search([('employee_id', '=', self.employee_id.id)]).mapped('private_mileage'))
 
         #my timesheet status
-        timesheet_ids = hr_timesheet.search([('employee_id', '=', self.employee_id.id), ('state', 'in', ('draft', 'new', 'confirm'))])
-        self.emp_timesheet_status_ids = [(6, 0, timesheet_ids.ids)]
+        self.env.cr.execute("""SELECT 
+                                    id
+                                    FROM hr_timesheet_sheet_sheet                               
+                                    WHERE employee_id = %s
+                                    AND state IN %s
+                                    ORDER BY id
+                                    LIMIT 10                                  
+                                        """, (self.employee_id.id, ('draft', 'new', 'confirm'),))
+        timesheet_ids = [x[0] for x in self.env.cr.fetchall()]
+        self.emp_timesheet_status_ids = [(6, 0, timesheet_ids)]
 
-        #my to be approved timesheet
-        to_be_approved_sheets = hr_timesheet.search([('state', '!=', 'done'), ('validator_user_ids', '=', self.env.uid)])
-        self.emp_timesheet_to_be_approved_ids = [(6, 0, to_be_approved_sheets.ids)]
-
-        hr_expense_sheet = self.env['hr.expense.sheet']
+        #to be approved timesheet
+        self.env.cr.execute("""SELECT 
+                                id
+                                FROM hr_timesheet_sheet_sheet                               
+                                WHERE
+                                 id IN 
+                                    (SELECT hr_timesheet_sheet_sheet_id 
+                                    FROM hr_timesheet_sheet_sheet_res_users_rel 
+                                    WHERE res_users_id = %s)
+                                 ORDER BY id
+                                  LIMIT 10 
+                                """, (user_id,))
+        to_be_approved_sheets = [x[0] for x in self.env.cr.fetchall()]
+        self.emp_timesheet_to_be_approved_ids = [(6, 0, to_be_approved_sheets)]
 
         # my expense status
-        expense_ids = hr_expense_sheet.search([('employee_id', '=', self.employee_id.id)])
-        self.emp_expense_status_ids = [(6, 0, expense_ids.ids)]
+        self.env.cr.execute("""SELECT 
+                    id
+                    FROM hr_expense_sheet                               
+                    WHERE employee_id = %s
+                    AND state NOT IN %s
+                    ORDER BY id
+                    LIMIT 10 
+                    """, (self.employee_id.id, ('post', 'done', 'cancel'),))
+        expense_ids = [x[0] for x in self.env.cr.fetchall()]
+        self.emp_expense_status_ids = [(6, 0, expense_ids)]
 
         # expense to be approved
-        to_be_approved_expense_ids = hr_expense_sheet.search([('state', '=', 'submit')])
-        self.emp_expense_to_be_approved_ids = [(6, 0, to_be_approved_expense_ids.ids)]
+        self.env.cr.execute("""SELECT 
+                            id
+                            FROM hr_expense_sheet                               
+                            WHERE state = 'submit'
+                            ORDER BY id
+                            LIMIT 10 
+                            """)
+        to_be_approved_expense_ids = [x[0] for x in self.env.cr.fetchall()]
+        self.emp_expense_to_be_approved_ids = [(6, 0, to_be_approved_expense_ids)]
 
 
     def _default_employee(self):
@@ -71,45 +136,11 @@ class hr_employee_landing_page(models.TransientModel):
 
 
     def get_upcoming_week(self):
-        date_range = self.env['date.range']
-        upcoming_week = date_range
-        dt = datetime.now()
-
-        emp_id = self.employee_id.id
-
-        timesheets = self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', emp_id)])
-        logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
-
-        date_range_type_cw_id = self.env.ref(
-            'magnus_date_range_week.date_range_calender_week').id
-        employement_date = self.employee_id.official_date_of_employment
-        employement_week = date_range.search(
-            [('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date),
-             ('date_end', '>=', employement_date)])
-        past_week_domain = [('type_id', '=', date_range_type_cw_id),
-                            ('date_end', '<', dt - timedelta(days=dt.weekday()))]
-        if employement_week:
-            past_week_domain += [('date_start', '>=', employement_week.date_start)]
-
-        if logged_weeks:
-            past_week_domain += [('id', 'not in', logged_weeks)]
-        past_weeks = date_range.search(past_week_domain, limit=1, order='date_start')
-        week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '=', dt - timedelta(days=dt.weekday()))],limit=1)
-        if week or past_weeks:
-            if past_weeks and past_weeks.id not in logged_weeks:
-                upcoming_week = past_weeks
-            elif week and week.id not in logged_weeks:
-                upcoming_week = week
-            else:
-                next_week = date_range.search([
-                    ('id', 'not in', logged_weeks),
-                    ('type_id', '=', date_range_type_cw_id),
-                    ('date_start', '>', dt - timedelta(days=dt.weekday()))
-                ], order='date_start', limit=1)
-                if next_week:
-                    upcoming_week = next_week
-
-        return upcoming_week
+        result = self.env['hr.timesheet.current.open'].open_timesheet()
+        hr_timesheet = self.env['hr_timesheet_sheet.sheet']
+        if 'res_id' in result:
+            return hr_timesheet.browse(result['res_id']).week_id
+        return hr_timesheet.get_week_to_submit()
 
     @api.multi
     def action_view_timesheet(self):
@@ -120,8 +151,19 @@ class hr_employee_landing_page(models.TransientModel):
     def action_view_leaves_dashboard(self):
         self.ensure_one()
         ir_model_data = self.env['ir.model.data']
-        tree_res = ir_model_data.get_object_reference('hr_holidays', 'view_holiday_simple')
+        tree_res = ir_model_data.get_object_reference('magnus_landing_page', 'view_holiday_landing_apge')
         tree_id = tree_res and tree_res[1] or False
+        self.env.cr.execute("""SELECT 
+                                    id
+                                    FROM hr_holidays                               
+                                    WHERE employee_id = %s
+                                    AND ((type = 'add'
+                                    AND state = 'validate' ) OR 
+                                    (type = 'remove'
+                            AND state = 'written'))                  
+                                    """, (self.employee_id.id,))
+
+        holidays = [x[0] for x in self.env.cr.fetchall()]
         return {
             'name': _('Leaves'),
             'view_type': 'from',
@@ -129,7 +171,7 @@ class hr_employee_landing_page(models.TransientModel):
             'res_model': 'hr.holidays',
             'view_id': False,
             'views': [(tree_id, 'tree')],
-            'domain': [('employee_id', '=', self.employee_id.id), ('holiday_type','=','employee'), ('type', '=', 'remove'), ('state', '!=', 'refuse')],
+            'domain': [('id', 'in', holidays)],
             'context': {'search_default_year': 1, 'search_default_group_employee': 1},
             'target':'current',
             'type': 'ir.actions.act_window',
@@ -153,6 +195,49 @@ class hr_employee_landing_page(models.TransientModel):
             'target': 'current',
             'type': 'ir.actions.act_window',
         }
+
+    @api.multi
+    def action_view_analytic_tree(self):
+        self.ensure_one()
+        ir_model_data = self.env['ir.model.data']
+        tree_res = ir_model_data.get_object_reference('analytic', 'view_account_analytic_line_tree')
+        tree_id = tree_res and tree_res[1] or False
+
+        user_id = self.env.user.id
+        self.env.cr.execute("""
+                    SELECT aa1.id, aa2.id FROM
+                        (SELECT 
+                            id, user_id
+                            FROM account_analytic_line                               
+                            WHERE user_id = %s
+                              AND ot = true
+                            ) aa1
+                        JOIN (SELECT id, user_id
+                            FROM account_analytic_line                               
+                            WHERE user_id = %s
+                              AND state != %s
+                              AND project_id IN (SELECT id FROM project_project WHERE overtime = true)
+                             ) aa2
+                        on aa1.user_id = aa2.user_id
+                    """, (user_id, user_id, 'draft'))
+
+        entries = [t for item in self.env.cr.fetchall() for t in item]
+        entries = list(set(entries))
+
+
+        return {
+            'name': _('Analytic Entries'),
+            'view_type': 'from',
+            'view_mode': 'tree',
+            'res_model': 'account.analytic.line',
+            'view_id': False,
+            'views': [(tree_id, 'tree')],
+            'domain': [('id', 'in', entries)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
+
+
 
     @api.multi
     def no_popup_window(self):
