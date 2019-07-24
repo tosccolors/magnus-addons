@@ -23,8 +23,10 @@
 
     # always loaded
     'data': [
+        'security/magnus_security.xml',
         'security/ir.model.access.csv',
         'views/hr_employee_landing_page_views.xml',
+        'views/hr_holidays_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

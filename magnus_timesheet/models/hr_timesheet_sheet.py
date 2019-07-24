@@ -12,9 +12,7 @@ class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
     _order = "week_id desc"
 
-    @api.model
-    def default_get(self, fields):
-        rec = super(HrTimesheetSheet, self).default_get(fields)
+    def get_week_to_submit(self):
         dt = datetime.now()
         emp_obj = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         emp_id = emp_obj.id if emp_obj else False
@@ -24,21 +22,24 @@ class HrTimesheetSheet(models.Model):
         date_range_type_cw_id = self.env.ref(
             'magnus_date_range_week.date_range_calender_week').id
         employement_date = emp_obj.official_date_of_employment
-        employement_week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date), ('date_end', '>=', employement_date)])
-        past_week_domain = [('type_id', '=', date_range_type_cw_id), ('date_end', '<', dt - timedelta(days=dt.weekday()))]
+        employement_week = date_range.search(
+            [('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date),
+             ('date_end', '>=', employement_date)])
+        past_week_domain = [('type_id', '=', date_range_type_cw_id),
+                            ('date_end', '<', dt - timedelta(days=dt.weekday()))]
         if employement_week:
             past_week_domain += [('date_start', '>=', employement_week.date_start)]
 
         if logged_weeks:
             past_week_domain += [('id', 'not in', logged_weeks)]
         past_weeks = date_range.search(past_week_domain, limit=1, order='date_start')
-        week = date_range.search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
-                                                                                      dt-timedelta(days=dt.weekday()))], limit=1)
+        week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '=', dt - timedelta(days=dt.weekday()))], limit=1)
+
         if week or past_weeks:
             if past_weeks and past_weeks.id not in logged_weeks:
-                rec.update({'week_id': past_weeks.id})
+                return past_weeks
             elif week and week.id not in logged_weeks:
-                rec.update({'week_id': week.id})
+                return week
             else:
                 upcoming_week = date_range.search([
                     ('id', 'not in', logged_weeks),
@@ -46,15 +47,22 @@ class HrTimesheetSheet(models.Model):
                     ('date_start', '>', dt-timedelta(days=dt.weekday()))
                 ], order='date_start', limit=1)
                 if upcoming_week:
-                    rec.update({'week_id': upcoming_week.id})
+                    return upcoming_week
                 else:
-                    rec.update({'week_id': False})
+                    return False
+        return False
+
+    @api.model
+    def default_get(self, fields):
+        rec = super(HrTimesheetSheet, self).default_get(fields)
+        week = self.get_week_to_submit()
+        if week:
+            rec.update({'week_id': week.id})
         else:
             if self._uid == SUPERUSER_ID:
                 raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
             else:
                 raise UserError(_('Please contact administrator.'))
-
         return rec
 
     @api.onchange('week_id')
