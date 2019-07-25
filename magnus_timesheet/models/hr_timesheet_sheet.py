@@ -12,9 +12,7 @@ class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
     _order = "week_id desc"
 
-    @api.model
-    def default_get(self, fields):
-        rec = super(HrTimesheetSheet, self).default_get(fields)
+    def get_week_to_submit(self):
         dt = datetime.now()
         emp_obj = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         emp_id = emp_obj.id if emp_obj else False
@@ -24,21 +22,24 @@ class HrTimesheetSheet(models.Model):
         date_range_type_cw_id = self.env.ref(
             'magnus_date_range_week.date_range_calender_week').id
         employement_date = emp_obj.official_date_of_employment
-        employement_week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date), ('date_end', '>=', employement_date)])
-        past_week_domain = [('type_id', '=', date_range_type_cw_id), ('date_end', '<', dt - timedelta(days=dt.weekday()))]
+        employement_week = date_range.search(
+            [('type_id', '=', date_range_type_cw_id), ('date_start', '<=', employement_date),
+             ('date_end', '>=', employement_date)])
+        past_week_domain = [('type_id', '=', date_range_type_cw_id),
+                            ('date_end', '<', dt - timedelta(days=dt.weekday()))]
         if employement_week:
             past_week_domain += [('date_start', '>=', employement_week.date_start)]
 
         if logged_weeks:
             past_week_domain += [('id', 'not in', logged_weeks)]
         past_weeks = date_range.search(past_week_domain, limit=1, order='date_start')
-        week = date_range.search([('type_id','=',date_range_type_cw_id), ('date_start', '=',
-                                                                                      dt-timedelta(days=dt.weekday()))], limit=1)
+        week = date_range.search([('type_id', '=', date_range_type_cw_id), ('date_start', '=', dt - timedelta(days=dt.weekday()))], limit=1)
+
         if week or past_weeks:
             if past_weeks and past_weeks.id not in logged_weeks:
-                rec.update({'week_id': past_weeks.id})
+                return past_weeks
             elif week and week.id not in logged_weeks:
-                rec.update({'week_id': week.id})
+                return week
             else:
                 upcoming_week = date_range.search([
                     ('id', 'not in', logged_weeks),
@@ -46,15 +47,22 @@ class HrTimesheetSheet(models.Model):
                     ('date_start', '>', dt-timedelta(days=dt.weekday()))
                 ], order='date_start', limit=1)
                 if upcoming_week:
-                    rec.update({'week_id': upcoming_week.id})
+                    return upcoming_week
                 else:
-                    rec.update({'week_id': False})
+                    return False
+        return False
+
+    @api.model
+    def default_get(self, fields):
+        rec = super(HrTimesheetSheet, self).default_get(fields)
+        week = self.get_week_to_submit()
+        if week:
+            rec.update({'week_id': week.id})
         else:
             if self._uid == SUPERUSER_ID:
                 raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
             else:
                 raise UserError(_('Please contact administrator.'))
-
         return rec
 
     @api.onchange('week_id')
@@ -132,13 +140,13 @@ class HrTimesheetSheet(models.Model):
     @api.one
     @api.depends('timesheet_ids')
     def _get_overtime_hours(self):
-        overtime_hours = 0.0
-        aal = self.timesheet_ids.filtered(lambda a: not a.task_id.standby and not a.project_id.overtime)
-        working_hrs = sum(aal.mapped('unit_amount'))
-        if working_hrs > 40:
-            overtime_hours = working_hrs - 40
+        aal_incl_ott = self.timesheet_ids.filtered(lambda a: not a.task_id.standby)
+        aal_ott = self.timesheet_ids.filtered('project_id.overtime')
+        working_hrs_incl_ott = sum(aal_incl_ott.mapped('unit_amount'))
+        ott = sum(aal_ott.mapped('unit_amount'))
+        self.overtime_hours = working_hrs_incl_ott - 40
+        self.overtime_hours_delta = working_hrs_incl_ott - ott - 40
 
-        self.overtime_hours = overtime_hours
 
 
     week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
@@ -150,6 +158,7 @@ class HrTimesheetSheet(models.Model):
     private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
     end_mileage = fields.Integer('End Mileage')
     overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
+    overtime_hours_delta = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
     odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
     overtime_analytic_line_id = fields.Many2one('account.analytic.line', string="Overtime Entry")
 
@@ -239,7 +248,7 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def create_overtime_entries(self):
         analytic_line = self.env['account.analytic.line']
-        if self.overtime_hours and not self.overtime_analytic_line_id:
+        if self.overtime_hours > 0 and not self.overtime_analytic_line_id:
             company_id = self.company_id.id if self.company_id else self.employee_id.company_id.id
             overtime_project = self.env['project.project'].search([('company_id', '=', company_id), ('overtime_hrs', '=', True)])
             overtime_project_task = self.env['project.task'].search([('project_id', '=', overtime_project.id), ('standard', '=', True)])
@@ -248,7 +257,7 @@ class HrTimesheetSheet(models.Model):
 
             uom = self.env.ref('product.product_uom_hour').id
             analytic_line = analytic_line.create({
-                'name':'Overtime',
+                'name':'Overtime line',
                 'account_id':overtime_project.analytic_account_id.id,
                 'project_id':overtime_project.id,
                 'task_id':overtime_project_task.id,
@@ -260,7 +269,7 @@ class HrTimesheetSheet(models.Model):
             })
             self.overtime_analytic_line_id = analytic_line.id
         elif self.overtime_analytic_line_id:
-            if self.overtime_hours:
+            if self.overtime_hours > 0:
                 self.overtime_analytic_line_id.write({'unit_amount':self.overtime_hours})
             else:
                 self.overtime_analytic_line_id.unlink()

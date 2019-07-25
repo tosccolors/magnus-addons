@@ -75,11 +75,18 @@ class Lead(models.Model):
     @api.model
     def _onchange_stage_id_values(self, stage_id):
         """ returns the new values when stage_id has changed """
+        crm_stage = self.env['crm.stage']
         res = super(Lead,self)._onchange_stage_id_values(stage_id)
         for rec in self.monthly_revenue_ids:
-            percentage = res.get('probability')
-            rec.update({'percentage': percentage, 'weighted_revenue': rec.calculate_weighted_revenue(percentage)})
+            rec.update({'percentage':res.get('probability')})
+        print ("self.stage_id.show_when_chaing",self.stage_id.show_when_chaing)
+        print ("self.stage_id.requirements",self.stage_id.requirements)
+        if self.stage_id.show_when_chaing:
+            if self.stage_id.requirements:
+                text = self.stage_id.requirements
+                self.env.user.notify_info(message=text,sticky=True)
         return res
+
     
     @api.depends('operating_unit_id')
     @api.onchange('operating_unit_id')
@@ -130,6 +137,7 @@ class Lead(models.Model):
         if monthly_revenue_ids:
             res.write({'latest_revenue_date': monthly_revenue_ids.sorted('date')[-1].date})
         return res
+    
 
     @api.onchange('monthly_revenue_ids')
     def onchange_monthly_revenue_ids(self):
@@ -146,8 +154,8 @@ class Lead(models.Model):
         if sd and ed:
             sd = datetime.strptime(sd, "%Y-%m-%d").date()
             ed = datetime.strptime(ed, "%Y-%m-%d").date()
-            if sd > ed:
-                raise ValidationError(_("End date should be greater than start date."))
+#             if sd > ed:
+#                 raise ValidationError(_("End date should be greater than start date."))
 
             for line in self.monthly_revenue_ids.filtered(lambda l: not l.computed_line):
                 manual_lines.append((4, line.id))
@@ -464,4 +472,8 @@ class CRMRevenueSplit(models.Model):
             self.mangnus_green_bv_per = self.mangnus_green_bv_amount * (100/self.total_revenue)
             
     
+class CRMStage(models.Model):
+    _inherit = "crm.stage"
+    
+    show_when_chaing = fields.Boolean("Show when changing")
             

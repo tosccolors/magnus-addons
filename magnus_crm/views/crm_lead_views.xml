@@ -72,9 +72,9 @@
             </xpath>
             <xpath expr="//h2[@class='o_row']/div[2]" position="after">
               <div>
-                <label for="expected_duration" class="oe_edit_only"/>
+                <label for="expected_duration" class="oe_edit_only" invisible="1"/>
                 <div class="o_row">
-                  <field name="expected_duration"/>
+                  <field name="expected_duration" invisible="1"/>
                 </div>
               </div>
             </xpath>
@@ -380,8 +380,12 @@
         <field name="arch" type="xml">
             <pivot string="Monthly Revenue Analysis">
                 <field name="lead_id" type="row"/>
-                <field name="month" type="col"/>
+                <!--<field name="month" type="col"/>-->
                 <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_blue_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_red_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_green_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="mangnus_black_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </pivot>
         </field>
     </record>
@@ -511,5 +515,17 @@
         	</xpath>
         </field>
         </record>
+        
+       <record model="ir.ui.view" id="crm_stage_form_inherit">
+        <field name="name">crm.stage</field>
+        <field name="model">crm.stage</field>
+        <field name="inherit_id" ref="crm.crm_stage_form"/>
+        <field name="arch" type="xml">
+        <field name="fold" position="after">
+        	<field name="show_when_chaing"/>
+        </field>
+        </field>
+      </record>
+        
   </data>
 </odoo>

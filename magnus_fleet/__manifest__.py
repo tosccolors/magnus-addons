@@ -12,9 +12,9 @@
     'website': 'https://www.magnus.nl',
     'depends': [
         'fleet',
+        'magnus_timesheet'
     ],
     'data': [
-        'xxx',
-        'yyy',
+        'views/fleet_view.xml',
     ],
 }

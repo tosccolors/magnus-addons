@@ -11,4 +11,10 @@ class HrTimesheetCurrentOpen(models.TransientModel):
     def open_timesheet(self):
         result = super(HrTimesheetCurrentOpen, self).open_timesheet()
         result['context'] = "{'readonly_by_pass': True}"
+        if 'res_id' not in result:
+            sheets = self.env['hr_timesheet_sheet.sheet'].search([('user_id', '=', self._uid),
+                                                                  ('state', 'in', ('draft', 'new', 'open')),
+                                                                  ], limit=1, order='week_id')
+            if len(sheets) == 1:
+                result['res_id'] = sheets.ids[0]
         return result
