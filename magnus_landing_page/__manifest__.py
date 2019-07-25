@@ -27,6 +27,7 @@
         'security/ir.model.access.csv',
         'views/hr_employee_landing_page_views.xml',
         'views/hr_holidays_views.xml',
+        'views/analytic_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
