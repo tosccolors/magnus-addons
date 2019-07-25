@@ -8,9 +8,20 @@
             <field name="arch" type="xml">
                 <form create="false" edit="false" copy="false" delete="false">
                       <sheet>
+                          <field name="current_week" invisible="1"/>
                           <div name="button_box" style="margin-left:45px;">
                               <button class="oe_stat_button oe_highlight" name="action_view_timesheet"
-                                      type="object" style="width:24%;height:50px;margin-right:5px;">
+                                      type="object" style="width:24%;height:50px;margin-right:5px;" attrs="{'invisible':[('current_week', '=', False)]}">
+                                  <label for="next_week_id1" string="Timesheet To Submit: "/>
+                                  <br/>
+                                  <strong><field
+                                        name="next_week_id1"
+                                        widget="statinfo"
+                                        nolabel="1"
+                                  /></strong>
+                              </button>
+                              <button class="oe_stat_button btn-danger" name="action_view_timesheet"
+                                      type="object" style="width:24%;height:50px;margin-right:5px;" attrs="{'invisible':[('current_week', '=', True)]}">
                                   <label for="next_week_id" string="Timesheet To Submit: "/>
                                   <br/>
                                   <strong><field
@@ -57,7 +68,7 @@
                           <div>
                               <seperator/>
                               <field name="emp_timesheet_status_ids" nolabel="1">
-                                  <tree>
+                                  <tree default_order='week_id'>
                                       <field name="week_id"/>
                                       <field name="state"/>
                                   </tree>

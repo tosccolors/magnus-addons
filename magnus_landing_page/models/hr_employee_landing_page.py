@@ -11,9 +11,25 @@ class hr_employee_landing_page(models.TransientModel):
 
     @api.depends('employee_id')
     def _compute_all(self):
+
+        #current week
+        self.env.cr.execute("""SELECT * FROM date_range 
+                                WHERE date_start <= NOW()::date 
+                                AND date_end >=NOW()::date
+                                AND type_id = (SELECT id FROM date_range_type WHERE calender_week = true)
+                                LIMIT 1
+                            """)
+        current_week_id = self.env.cr.fetchone()[0]
+
         next_week_id = self.get_upcoming_week()
+        if current_week_id == next_week_id.id or current_week_id < next_week_id.id:
+            self.current_week = True
+        else:
+            self.current_week = False
+
         if next_week_id:
             self.next_week_id = next_week_id.name
+            self.next_week_id1 = next_week_id.name
 
         #compute vaction balance
         self.env.cr.execute("""
@@ -75,7 +91,7 @@ class hr_employee_landing_page(models.TransientModel):
                                     FROM hr_timesheet_sheet_sheet                               
                                     WHERE employee_id = %s
                                     AND state IN %s
-                                    ORDER BY id
+                                    ORDER BY id DESC
                                     LIMIT 10                                  
                                         """, (self.employee_id.id, ('draft', 'new', 'confirm'),))
         timesheet_ids = [x[0] for x in self.env.cr.fetchall()]
@@ -86,11 +102,12 @@ class hr_employee_landing_page(models.TransientModel):
                                 id
                                 FROM hr_timesheet_sheet_sheet                               
                                 WHERE
+                                state != 'done' AND
                                  id IN 
                                     (SELECT hr_timesheet_sheet_sheet_id 
                                     FROM hr_timesheet_sheet_sheet_res_users_rel 
                                     WHERE res_users_id = %s)
-                                 ORDER BY id
+                                 ORDER BY id DESC
                                   LIMIT 10 
                                 """, (user_id,))
         to_be_approved_sheets = [x[0] for x in self.env.cr.fetchall()]
@@ -102,22 +119,24 @@ class hr_employee_landing_page(models.TransientModel):
                     FROM hr_expense_sheet                               
                     WHERE employee_id = %s
                     AND state NOT IN %s
-                    ORDER BY id
+                    ORDER BY id DESC
                     LIMIT 10 
                     """, (self.employee_id.id, ('post', 'done', 'cancel'),))
         expense_ids = [x[0] for x in self.env.cr.fetchall()]
         self.emp_expense_status_ids = [(6, 0, expense_ids)]
 
         # expense to be approved
-        self.env.cr.execute("""SELECT 
-                            id
-                            FROM hr_expense_sheet                               
-                            WHERE state = 'submit'
-                            ORDER BY id
-                            LIMIT 10 
-                            """)
-        to_be_approved_expense_ids = [x[0] for x in self.env.cr.fetchall()]
-        self.emp_expense_to_be_approved_ids = [(6, 0, to_be_approved_expense_ids)]
+        # self.env.cr.execute("""SELECT
+        #                     id
+        #                     FROM hr_expense_sheet
+        #                     WHERE state = 'submit'
+        #                     ORDER BY id
+        #                     LIMIT 10
+        #                     """)
+        # to_be_approved_expense_ids = [x[0] for x in self.env.cr.fetchall()]
+
+        to_be_approved_expense_ids = self.env['hr.expense.sheet'].search([('state', '=', 'submit')], order='id Desc', limit=10)
+        self.emp_expense_to_be_approved_ids = [(6, 0, to_be_approved_expense_ids.ids)]
 
 
     def _default_employee(self):
@@ -126,6 +145,7 @@ class hr_employee_landing_page(models.TransientModel):
 
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True)
     next_week_id = fields.Char(string="Week To Submit")
+    next_week_id1 = fields.Char(string="Week To Submit")
     vacation_balance = fields.Integer(compute='_compute_all', string="Vacation Balance")
     overtime_balance = fields.Integer(compute='_compute_all', string="Overtime Balance")
     private_km_balance = fields.Integer(compute='_compute_all', string="Private Mileage Balance")
@@ -133,6 +153,7 @@ class hr_employee_landing_page(models.TransientModel):
     emp_timesheet_to_be_approved_ids = fields.Many2many('hr_timesheet_sheet.sheet', compute='_compute_all', string="Timesheet To Be Approved")
     emp_expense_status_ids = fields.Many2many('hr.expense.sheet', compute='_compute_all', string="My Expense Status")
     emp_expense_to_be_approved_ids = fields.Many2many('hr.expense.sheet', compute='_compute_all', string="Expense To Be Approved")
+    current_week = fields.Boolean(compute='_compute_all')
 
 
     def get_upcoming_week(self):
@@ -200,7 +221,7 @@ class hr_employee_landing_page(models.TransientModel):
     def action_view_analytic_tree(self):
         self.ensure_one()
         ir_model_data = self.env['ir.model.data']
-        tree_res = ir_model_data.get_object_reference('analytic', 'view_account_analytic_line_tree')
+        tree_res = ir_model_data.get_object_reference('magnus_landing_page', 'view_account_analytic_line_landing_page_tree')
         tree_id = tree_res and tree_res[1] or False
 
         user_id = self.env.user.id
