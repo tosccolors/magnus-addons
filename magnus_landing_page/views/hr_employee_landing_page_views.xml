@@ -128,8 +128,8 @@
             groups="base.group_user"
             sequence="2"/>
 
-    <menuitem id="landing_page_root" name="Landing Page" sequence="1"/>
-    <menuitem id="landing_page_main_menu" name="Landing Page" parent="landing_page_root" sequence="1"/>
+    <menuitem id="landing_page_root" name="Magnus Landing Page" sequence="1"/>
+    <menuitem id="landing_page_main_menu" name="Magnus Landing Page" parent="landing_page_root" sequence="1"/>
 
 
     <menuitem name="Landing Page" id="magnus_landing_page.menu_1_list" parent="landing_page_main_menu"
