@@ -135,7 +135,7 @@ class hr_employee_landing_page(models.TransientModel):
         #                     """)
         # to_be_approved_expense_ids = [x[0] for x in self.env.cr.fetchall()]
 
-        to_be_approved_expense_ids = self.env['hr.expense.sheet'].search([('state', '=', 'submit')], order='id Desc', limit=10)
+        to_be_approved_expense_ids = self.env['hr.expense.sheet'].search([('employee_id', '!=', self.employee_id.id),('state', '=', 'submit')], order='id Desc', limit=10)
         self.emp_expense_to_be_approved_ids = [(6, 0, to_be_approved_expense_ids.ids)]
 
 
