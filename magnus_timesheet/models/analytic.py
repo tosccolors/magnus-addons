@@ -91,6 +91,10 @@ class AccountAnalyticLine(models.Model):
                 #         self.env.ref('product.product_uom_hour').id:
                 #     line.amount = line.unit_amount * - fee_rate
 
+            if line.planned:
+                if line.select_week_id:
+                    line.week_id = line.select_week_id.id
+
 
     def find_daterange_week(self, date):
         """
@@ -311,7 +315,7 @@ class AccountAnalyticLine(models.Model):
     @api.model
     def create(self, vals):
         if self.env.context.get('default_planned', False):
-            if vals.get('select_week_id', False) and vals.get('week_id', False) and vals['week_id'] != vals['select_week_id']:
+            if vals.get('select_week_id', False):
                 vals['week_id'] = vals['select_week_id']
             if vals.get('project_id', False):
                 vals['planned'] = True
