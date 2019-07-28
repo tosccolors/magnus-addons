@@ -41,22 +41,26 @@ class OvertimeBalanceReport(models.Model):
                             aal.user_id AS user_id,
                             SUM(CASE
                                 WHEN pp.overtime = 'true'
+                                AND product_uom_id = 5
                                 THEN aal.unit_amount
                                 ELSE 0
                                 END) AS overtime_taken,
                             SUM(CASE
                                 WHEN pp.overtime_hrs = 'true'
+                                AND product_uom_id = 5
                                 THEN aal.unit_amount
                                 ELSE 0
                                 END) AS overtime_hrs,                        
                             (
                               SUM(CASE
                                 WHEN pp.overtime_hrs = 'true'
+                                AND product_uom_id = 5
                                 THEN aal.unit_amount
                                 ELSE 0
                                 END) -
                               SUM(CASE
                                 WHEN pp.overtime = 'true'
+                                AND product_uom_id = 5
                                 THEN aal.unit_amount
                                 ELSE 0
                                 END)
