@@ -65,6 +65,7 @@ class hr_employee_landing_page(models.TransientModel):
                         FROM account_analytic_line                               
                         WHERE user_id = %s
                           AND ot = true
+                          AND product_uom_id = 5
                         GROUP BY user_id) aa1
                     JOIN (SELECT 
                         SUM(unit_amount) as overtime_taken, user_id
@@ -72,6 +73,7 @@ class hr_employee_landing_page(models.TransientModel):
                         WHERE user_id = %s
                           AND state != %s
                           AND project_id IN (SELECT id FROM project_project WHERE overtime = true)
+                          AND product_uom_id = 5
                         GROUP BY user_id ) aa2
                     on aa1.user_id = aa2.user_id
                 """, (user_id, user_id, 'draft'))
