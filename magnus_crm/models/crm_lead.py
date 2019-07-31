@@ -79,10 +79,14 @@ class Lead(models.Model):
         res = super(Lead,self)._onchange_stage_id_values(stage_id)
         for rec in self.monthly_revenue_ids:
             rec.update({'percentage':res.get('probability')})
-        print ("self.stage_id.show_when_chaing",self.stage_id.show_when_chaing)
-        print ("self.stage_id.requirements",self.stage_id.requirements)
         if self.stage_id.show_when_chaing:
             if self.stage_id.requirements:
+                result = text.split('\n')
+                if result:
+                    final_string = ''
+                    for str_val in result:
+                        final_string += str_val + "</br>"
+                    text = final_string
                 text = self.stage_id.requirements
                 self.env.user.notify_info(message=text,sticky=True)
         return res
