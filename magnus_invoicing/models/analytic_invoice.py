@@ -580,17 +580,6 @@ class AnalyticUserTotal(models.Model):
             self.fee_rate = fr = self.get_fee_rate(False, False)
             self.amount = - self.unit_amount * fr
 
-    def _compute_sheet(self):
-        """Override of method in account_analytic_line, which does nothing in this object.
-        Not sure if sheet_id filling is necessary.
-		"""
-#        for ts_line in self:
-    #        ts_line.sheet_id_computed = False
-#            ts_line.sheet_id = False
-
-    def _search_sheet(self, operator, value):
-        """Override of method in account_analytic_line, which does nothing in this object
-        """
 
     @api.one
     def _compute_analytic_line(self):
@@ -627,11 +616,3 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
-
-    @api.multi
-    def write(self, values):
-        return super(AnalyticUserTotal, self).write(values)
-
-    @api.multi
-    def unlink(self):
-        return super(AnalyticUserTotal, self).unlink()
