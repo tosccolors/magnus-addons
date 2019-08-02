@@ -138,6 +138,25 @@ class AccountAnalyticLine(models.Model):
             order='company_id asc'
         )
         return date_range
+    
+    @api.model
+    def default_get(self, fields):
+        import pdb;
+        # pdb.set_trace();
+        context = self._context
+        res = super(AccountAnalyticLine, self).default_get(fields)
+
+        if 'planning_lines' in context:
+            project = self.env['project.project']
+            project_id = context.get('default_project_id', project)
+            task_id = context.get('default_task_id', False)
+            project = project.browse(project_id)
+            account_id = project.analytic_account_id
+            operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
+            res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
+        # print '.......context...default_get........\n\n',context
+        # print '.......res...default_get........\n\n', res
+        return res
 
 
     kilometers = fields.Integer(
@@ -228,6 +247,7 @@ class AccountAnalyticLine(models.Model):
     ot = fields.Boolean(
         string='Overtime',
     )
+    planning_id = fields.Many2one('magnus.planning', string='Planning')
 
 
     @api.model
@@ -288,13 +308,13 @@ class AccountAnalyticLine(models.Model):
         amount = - unit_amount * fr
         return amount
 
-    def _fetch_emp_plan(self):
-        emp = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
-        return True if emp and emp.planning_week else False
-
-    @api.onchange('user_id')
-    def _onchange_users(self):
-        self.planned = self._fetch_emp_plan()
+    # def _fetch_emp_plan(self):
+    #     emp = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
+    #     return True if emp and emp.planning_week else False
+    #
+    # @api.onchange('user_id')
+    # def _onchange_users(self):
+    #     self.planned = self._fetch_emp_plan()
 
     @api.onchange('date')
     def _onchange_dates(self):
@@ -314,11 +334,14 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
+        # print '--------create--vals----111111111--',vals
+        # print '--------create----context--111111111--', self.env.context
         if self.env.context.get('default_planned', False):
             if vals.get('select_week_id', False) and not vals.get('week_id', False):
                 vals['week_id'] = vals['select_week_id']
-            if vals.get('project_id', False):
-                vals['planned'] = True
+                vals['task_id'] = self.env.context.get('default_task_id', False)
+            # if vals.get('project_id', False):
+            #     vals['planned'] = True
 
         task_id = vals.get('task_id', False)
         user_id = vals.get('user_id', False)
@@ -336,17 +359,19 @@ class AccountAnalyticLine(models.Model):
         if vals.get('ts_line', False):
             unit_amount = vals.get('unit_amount', False)
             vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
+        # print '--------create--------',vals
         return super(AccountAnalyticLine, self).create(vals)
 
     @api.multi
     def write(self, vals):
+        # print '--------write--vals----111111111--', vals
         for aal in self:
             if 'select_week_id' in vals or 'planned' in vals:
                 if self.env.context.get('default_planned', False):
                     if vals.get('select_week_id', False):
                         vals['week_id'] = vals['select_week_id']
-                    if aal.project_id:
-                        vals['planned'] = True
+                    # if aal.project_id:
+                    #     vals['planned'] = True
 
             task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
@@ -368,8 +393,6 @@ class AccountAnalyticLine(models.Model):
                 vals['amount'] = aal.get_fee_rate_amount(task_id, user_id, unit_amount)
         return super(AccountAnalyticLine, self).write(vals)
 
-
-
     @api.depends('unit_amount')
     def _get_qty(self):
         for line in self:
@@ -384,3 +407,6 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
 
+    @api.model
+    def get_week_read(self, date_start):
+        return self.env['date.range'].search([('date_start', '=', date_start)]).read(['date_start','name'])

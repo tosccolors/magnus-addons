@@ -62,8 +62,11 @@ The extended date range validation process is:
         'views/hr_view.xml',
         'views/analytic_view.xml',
         'views/fleet_view.xml',
+        'views/magnus_planning_views.xml',
+        'views/magnus_planning_templates.xml',
     ],
     'installable': True,
     # only loaded in demonstration mode
     'demo' : [],
+    'qweb': ['static/src/xml/planning.xml',],
 }
