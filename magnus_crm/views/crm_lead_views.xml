@@ -89,14 +89,14 @@
             			<field name="month" readonly="1"/>
             			<field name="total_revenue" readonly="1"/>
             			<field name="total_revenue_per" readonly="1"/>
-            			<field name="mangnus_blue_bv_amount" readonly="1"/>
-            			<field name="mangnus_blue_bv_per"/>
-            			<field name="mangnus_red_bv_amount" readonly="1"/>
-            			<field name="mangnus_red_bv_per"/>
-            			<field name="mangnus_green_bv_amount" readonly="1"/>
-            			<field name="mangnus_green_bv_per"/>
-            			<field name="mangnus_black_bv_amount" readonly="1"/>
-            			<field name="mangnus_black_bv_per"/>
+            			<field name="magnus_blue_bv_amount" readonly="1"/>
+            			<field name="magnus_blue_bv_per"/>
+            			<field name="magnus_red_bv_amount" readonly="1"/>
+            			<field name="magnus_red_bv_per"/>
+            			<field name="magnus_green_bv_amount" readonly="1"/>
+            			<field name="magnus_green_bv_per"/>
+            			<field name="magnus_black_bv_amount" readonly="1"/>
+            			<field name="magnus_black_bv_per"/>
             			</tree>
             		</field>
             	</page>
@@ -361,14 +361,14 @@
           <field name="month" />
           <field name="total_revenue" />
           <field name="total_revenue_per" />
-          <field name="mangnus_blue_bv_amount" />
-          <field name="mangnus_blue_bv_per" />
-          <field name="mangnus_red_bv_amount" />
-          <field name="mangnus_red_bv_per" />
-          <field name="mangnus_green_bv_amount" />
-          <field name="mangnus_green_bv_per" />
-          <field name="mangnus_black_bv_amount"/>
-          <field name="mangnus_black_bv_per"/>
+          <field name="magnus_blue_bv_amount" />
+          <field name="magnus_blue_bv_per" />
+          <field name="magnus_red_bv_amount" />
+          <field name="magnus_red_bv_per" />
+          <field name="magnus_green_bv_amount" />
+          <field name="magnus_green_bv_per" />
+          <field name="magnus_black_bv_amount"/>
+          <field name="magnus_black_bv_per"/>
         </tree>
       </field>
     </record>
@@ -382,10 +382,10 @@
                 <field name="lead_id" type="row"/>
                 <!--<field name="month" type="col"/>-->
                 <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                <field name="mangnus_blue_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                <field name="mangnus_red_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                <field name="mangnus_green_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-                <field name="mangnus_black_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="magnus_blue_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="magnus_red_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="magnus_green_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                <field name="magnus_black_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
             </pivot>
         </field>
     </record>
@@ -413,14 +413,14 @@
                 <field name="month"/>
                 <field name="total_revenue" />
                 <field name="total_revenue_per" />
-                <field name="mangnus_blue_bv_amount" />
-                <field name="mangnus_blue_bv_per" />
-                <field name="mangnus_red_bv_amount" />
-                <field name="mangnus_red_bv_per" />
-                <field name="mangnus_green_bv_amount" />
-                <field name="mangnus_green_bv_per" />
-                <field name="mangnus_black_bv_amount" />
-                <field name="mangnus_black_bv_per" />
+                <field name="magnus_blue_bv_amount" />
+                <field name="magnus_blue_bv_per" />
+                <field name="magnus_red_bv_amount" />
+                <field name="magnus_red_bv_per" />
+                <field name="magnus_green_bv_amount" />
+                <field name="magnus_green_bv_per" />
+                <field name="magnus_black_bv_amount" />
+                <field name="magnus_black_bv_per" />
                 <field name="department_id"/>
                 <field name="operating_unit_id"/>
                  <group expand="1" string="Group By">
