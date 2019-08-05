@@ -151,7 +151,6 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
             .groupBy("project_id").value();
 
             var project_ids = _.map(_.keys(projects), function(el) { return el === "false" ? false : Number(el); });
-            var week_names = {};
             projects = _(projects).chain().map(function(lines, project_id) {
                 var projects_defaults = _.extend({}, default_get, (projects[project_id] || {}).value || {});
 
@@ -164,28 +163,24 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                     var to_add = _.find(day.lines, function (line) {
                         return line.name === self.description_line;
                     });
-                    new Model("account.analytic.line").call("get_week_read", [time.date_to_str(date)]).then(function (result) {
-                        week_names[date] = result[0]['name'];
-                        if (to_add) {
-                            day.lines = _.without(day.lines, to_add);
-                            day.lines.unshift(to_add);
-                        } else {
-                            day.lines.unshift(_.extend(_.clone(projects_defaults), {
-                                name: self.description_line,
-                                unit_amount: 0,
-                                date: time.date_to_str(date),
-                                project_id: project_id,
-                                planned: true,
-                            }));
-                        }
-                    });
+                    if (to_add) {
+                        day.lines = _.without(day.lines, to_add);
+                        day.lines.unshift(to_add);
+                    } else {
+                        day.lines.unshift(_.extend(_.clone(projects_defaults), {
+                            name: self.description_line,
+                            unit_amount: 0,
+                            date: time.date_to_str(date),
+                            project_id: project_id,
+                            planned: true,
+                        }));
+                    }
+                    // });
                     return day;
                 });
-                console.log('week_names');
-                console.log(week_names);
-                return {project: project_id, days: days, projects_defaults: projects_defaults, week_names:week_names};
-            }).value();
 
+                return {project: project_id, days: days, projects_defaults: projects_defaults};
+            }).value();
             // we need the name_get of the projects
             return new Model("project.project").call("name_get", [_.pluck(projects, "project"),
                 new data.CompoundContext()]).then(function(result) {
