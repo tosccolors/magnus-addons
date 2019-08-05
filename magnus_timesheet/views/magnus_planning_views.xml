@@ -30,6 +30,10 @@
                     <button name="action_timesheet_draft" states="confirm" string="Refuse" type="object" groups="hr_timesheet.group_hr_timesheet_user"/>-->
                     <field name="state" widget="statusbar" statusbar_visible="new,confirm,done"/>
                 </header>
+                <style>.o_form_sheet{
+                    max-width: none !important;
+                    width:100% !important;
+                </style>
                 <sheet>
                     <div class="oe_title">
                         <label for="employee_id" class="oe_edit_only"/>
@@ -59,18 +63,20 @@
                                     <field name="date"/>
                                     <field name="select_week_id"/>
                                     <field name="name"/>
-                                    <field name="user_id" invisible="0"/>
                                     <field name="project_id" required="1"/>
-                                    <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>
+                                    <field name="employee_id" required="1"/>
+                                    <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>                                                              <field name="user_id" invisible="1"/>
                                 </tree>
                                 <form string="Planning Activities">
                                     <group>
                                         <field name="date"/>
                                         <field name="select_week_id"/>
                                         <field name="name"/>
-                                        <field name="user_id" invisible="0"/>
                                         <field name="project_id"/>
+                                        <field name="employee_id"/>
                                         <field name="unit_amount" widget="float_time" string="Hours"/>
+                                        <field name="user_id" invisible="1"/>
+
                                     </group>
                                 </form>
                             </field>

@@ -6,7 +6,7 @@
                 <tr>
                     <th class="oe_planning_first_col" colspan="2"/>
                     <t t-foreach="widget.dates" t-as="date">
-                        <th t-att-class="'oe_timesheet_weekly_date_head' + (moment().format('DD-MM-YYYY') === moment(date).format('DD-MM-YYYY') ? ' oe_timesheet_weekly_today' : '')">
+                        <th t-att-class="'oe_planning_weekly_date_head' + (moment().format('DD-MM-YYYY') === moment(date).format('DD-MM-YYYY') ? ' oe_planning_weekly_today' : '')">
                             Week <t t-esc="moment(date).week()"/>
                             <!--<br/><t t-esc="moment(date).format('MMM DD')"/>-->
                         </th>
@@ -14,18 +14,19 @@
                     <th class="oe_planning_weekly_date_head">Total</th>
                 </tr>
                 <tr t-foreach="widget.projects" t-as="project">
-                    <td class="oe_planning_weekly_account" colspan="2"><a href="javascript:void(0)" t-att-data-id="JSON.stringify(project.project)"><t t-esc="widget.project_names[project.project]"/></a></td>
+                    <td class="oe_planning_weekly_account" colspan="1"><a href="javascript:void(0)" t-att-data-id="JSON.stringify(project.project)"><t t-esc="widget.project_names[project.project]"/></a></td>
+                    <td class="oe_planning_weekly_account_employee" colspan="1"><a href="javascript:void(0)" t-att-data-id="JSON.stringify(project.employee)"><t t-esc="widget.employee_names[project.employee]"/></a></td>
                     <t t-set="day_count" t-value="0"/>
-                    <t t-foreach="project.days" t-as="day">
-                        <td t-att-class="moment().format('DD-MM-YYYY') === moment(day.day).format('DD-MM-YYYY') ? 'oe_planning_weekly_today' : ''">
-                            <input t-if="!widget.get('effective_readonly')" class="oe_planning_weekly_input" t-att-data-project="project.project"
-                                t-att-data-day-count="day_count" type="text"/>
-                            <span t-if="widget.get('effective_readonly')" t-att-data-project="project.project"
-                                t-att-data-day-count="day_count" class="oe_planning_weekly_box"/>
-                            <t t-set="day_count" t-value="day_count + 1"/>
-                        </td>
-                    </t>
-                    <td t-att-data-project-total="project.project" class="oe_planning_total"/>
+                        <t t-foreach="project.days" t-as="day">
+                            <td t-att-class="moment().format('DD-MM-YYYY') === moment(day.day).format('DD-MM-YYYY') ? 'oe_planning_weekly_today' : ''">
+                                <input t-if="!widget.get('effective_readonly')" class="oe_planning_weekly_input" t-att-data-project-employee="project.project_employee"
+                                       t-att-data-day-count="day_count" type="text"/>
+                                <span t-if="widget.get('effective_readonly')" t-att-data-project-employee="project.project_employee"
+                                      t-att-data-day-count="day_count" class="oe_planning_weekly_box"/>
+                                <t t-set="day_count" t-value="day_count + 1"/>
+                            </td>
+                        </t>
+                    <td t-att-data-project-employee-total="project.project_employee" class="oe_planning_total"/>
                 </tr>
                 <tr>
                     <td class="o_add_planning_line">
