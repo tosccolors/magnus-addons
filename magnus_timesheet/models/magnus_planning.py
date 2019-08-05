@@ -80,3 +80,9 @@ class MagnusPlanning(models.Model):
         self.date_to = self.week_to.date_end
 
 
+class AccountAnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+    _description = 'Analytic Line'
+
+    employee_id = fields.Many2one('hr.employee', string='Employee')
+
