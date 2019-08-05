@@ -407,6 +407,13 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
 
-    @api.model
-    def get_week_read(self, date_start):
-        return self.env['date.range'].search([('date_start', '=', date_start)]).read(['date_start','name'])
+
+    # def get_week_read(self, date_start_list):
+    #     print '>>>>>>>>>>date_start_list>>>111>>>',self,date_start_list
+    #     result = []
+    #     date_range = self.env['date.range']
+    #     for date_start in date_start_list:
+    #         dt_obj = date_range.search([('date_start', '=', str(date_start)), ('type_id.calender_week', '=', True)])
+    #         result.append((dt_obj.date_start, dt_obj.name))
+    #     print '>>>>>>>>>>date_start_list>>>>>>', result
+    #     return result
