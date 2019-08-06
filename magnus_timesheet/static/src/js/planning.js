@@ -53,14 +53,14 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
         this.description_line = _t("/");
     },
     go_to_employee: function(event) {
-            var id = JSON.parse($(event.target).data('id'));
-            this.do_action({
-                type: 'ir.actions.act_window',
-                res_model: 'hr.employee',
-                res_id: id,
-                views: [[false, 'form']],
-                target: 'current',
-            });
+        var id = JSON.parse($(event.target).data('id'));
+        this.do_action({
+            type: 'ir.actions.act_window',
+            res_model: 'hr.employee',
+            res_id: id,
+            views: [[false, 'form']],
+            target: 'current',
+        });
         },
     go_to: function(event) {
         var id = JSON.parse($(event.target).data("id"));
@@ -268,6 +268,9 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
         _.each(self.projects, function(project) {
             _.each(_.range(project.days.length), function(day_count) {
                 if (!self.get('effective_readonly')) {
+                    self.get_box(project, day_count).val(self.sum_box(project, day_count, true)).focus(function() {
+                        $(this).select();
+                    });
                     self.get_box(project, day_count).val(self.sum_box(project, day_count, true)).change(function() {
                         var num = $(this).val();
                         if (self.is_valid_value(num) && num !== 0) {
@@ -320,6 +323,7 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                 name: 'project',
                 type: 'many2one',
                 modifiers: '{"required": true}',
+                options: '{"no_create_edit":true, "create": false, "no_quick_create": true}'
             },
         });
 
@@ -328,10 +332,10 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                 name: 'employee',
                 type: 'many2one',
                 modifiers: '{"required": true}',
-                // domain: [
-                //     // at this moment, it is always an empty list
-                //     // ['project_id','=',self.project_m2o.get_value()]
-                // ],
+                options: '{"no_create_edit":true, "create": false, "no_quick_create": true}',
+                domain: [
+                    ['user_id', '!=', false]
+                ],
             },
         });
         self.employee_m2o.prependTo(this.$('.o_add_planning_line > div'));
