@@ -310,22 +310,14 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
         self.$('.oe_planning_weekly_add_row').show();
         self.dfm = new form_common.DefaultFieldManager(self);
         self.dfm.extend_field_desc({
-            project: {
-                relation: 'project.project',
-            },
             employee: {
                 relation: 'hr.employee',
             },
-        });
-        var FieldMany2One = core.form_widget_registry.get('many2one');
-        self.project_m2o = new FieldMany2One(self.dfm, {
-            attrs: {
-                name: 'project',
-                type: 'many2one',
-                modifiers: '{"required": true}',
-                options: '{"no_create_edit":true, "create": false, "no_quick_create": true}'
+            project: {
+                relation: 'project.project',
             },
         });
+        var FieldMany2One = core.form_widget_registry.get('many2one');
 
         self.employee_m2o = new FieldMany2One(self.dfm, {
             attrs: {
@@ -338,16 +330,24 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                 ],
             },
         });
-        self.employee_m2o.prependTo(this.$('.o_add_planning_line > div'));
+        self.project_m2o = new FieldMany2One(self.dfm, {
+            attrs: {
+                name: 'project',
+                type: 'many2one',
+                modifiers: '{"required": true}',
+                options: '{"no_create_edit":true, "create": false, "no_quick_create": true}'
+            },
+        });
+        self.project_m2o.prependTo(this.$('.o_add_planning_line > div'));
 
-        self.project_m2o.prependTo(this.$('.o_add_planning_line > div')).then(function() {
-            self.project_m2o.$el.addClass('oe_edit_only');
+        self.employee_m2o.prependTo(this.$('.o_add_planning_line > div')).then(function() {
+            self.employee_m2o.$el.addClass('oe_edit_only');
         });
 
         this.$(".oe_planning_button_add").click(function() {
-            var id = self.project_m2o.get_value();
             var employee_id = self.employee_m2o.get_value();
-            if (id === false) {
+            var id = self.project_m2o.get_value();
+            if (id === false || employee_id == false) {
                 self.dfm.set({display_invalid_fields: true});
                 return;
             }

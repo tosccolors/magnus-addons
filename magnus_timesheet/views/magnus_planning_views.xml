@@ -47,7 +47,7 @@
                         </page>
                         <page string="Details" class="o_hr_timesheet_sheet_details">
                             <field context="{'employee_id': employee_id, 'user_id':user_id, 'timesheet_date_from': date_from, 'timesheet_date_to': date_to}" name="planning_ids" nolabel="1">
-                                <tree editable="bottom" string="Timesheet Activities">
+                                <tree editable="bottom" string="Timesheet Activities" create="false" edit="false">
                                     <field name="id"/>
                                     <field name="date" invisible="1"/>
                                     <field name="week_id"/>
@@ -82,7 +82,6 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[('employee_id.user_id', '=', uid)]</field>
-            <!--<field name="search_view_id" ref="view_hr_timesheet_sheet_filter"/>-->
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 new timesheet.
@@ -97,7 +96,6 @@
             </field>
         </record>
 
-        <!--<menuitem name="My Current Timesheet" id="menu_act_hr_timesheet_sheet_form_my_current" parent="hr_timesheet.menu_hr_time_tracking" action="ir_actions_server_timesheet_sheet" sequence="2"/>-->
 
         <menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
              sequence="3"/>
