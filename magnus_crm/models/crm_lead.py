@@ -96,30 +96,30 @@ class Lead(models.Model):
             red_per = 0.0
             green_per =0.0
             black_per = 0.0
-            mangnus_blue_bv_amount = 0.0
-            mangnus_red_bv_amount = 0.0
-            mangnus_green_bv_amount = 0.0
-            mangnus_black_bv_amount = 0.0
-            rec.mangnus_blue_bv_per = 0.0
-            rec.mangnus_blue_bv_amount = 0.0
-            rec.mangnus_red_bv_amount = 0.0
-            rec.mangnus_red_bv_per = 0.0
-            rec.mangnus_green_bv_per = 0.0
-            rec.mangnus_green_bv_amount = 0.0
-            rec.mangnus_black_bv_per = 0.0
-            rec.mangnus_black_bv_amount = 0.0
+            magnus_blue_bv_amount = 0.0
+            magnus_red_bv_amount = 0.0
+            magnus_green_bv_amount = 0.0
+            magnus_black_bv_amount = 0.0
+            rec.magnus_blue_bv_per = 0.0
+            rec.magnus_blue_bv_amount = 0.0
+            rec.magnus_red_bv_amount = 0.0
+            rec.magnus_red_bv_per = 0.0
+            rec.magnus_green_bv_per = 0.0
+            rec.magnus_green_bv_amount = 0.0
+            rec.magnus_black_bv_per = 0.0
+            rec.magnus_black_bv_amount = 0.0
             if self.operating_unit_id.name == 'Magnus Blue B.V.':
-                rec.mangnus_blue_bv_per = 100
-                rec.mangnus_blue_bv_amount = rec.total_revenue
+                rec.magnus_blue_bv_per = 100
+                rec.magnus_blue_bv_amount = rec.total_revenue
             if self.operating_unit_id.name == 'Magnus Red B.V.':
-                rec.mangnus_red_bv_amount = rec.total_revenue
-                rec.mangnus_red_bv_per = 100
+                rec.magnus_red_bv_amount = rec.total_revenue
+                rec.magnus_red_bv_per = 100
             if self.operating_unit_id.name == 'Magnus Green B.V.':
-                rec.mangnus_green_bv_per = 100
-                rec.mangnus_green_bv_amount = rec.total_revenue
+                rec.magnus_green_bv_per = 100
+                rec.magnus_green_bv_amount = rec.total_revenue
             if self.operating_unit_id.name == 'Magnus Black B.V.':
-                rec.mangnus_black_bv_per = 100
-                rec.mangnus_black_bv_amount = rec.total_revenue
+                rec.magnus_black_bv_per = 100
+                rec.magnus_black_bv_amount = rec.total_revenue
             
     @api.model
     def default_get(self, fields):
@@ -190,35 +190,35 @@ class Lead(models.Model):
                 red_per = 0.0
                 green_per =0.0
                 black_per = 0.0
-                mangnus_blue_bv_amount = 0.0
-                mangnus_red_bv_amount = 0.0
-                mangnus_green_bv_amount = 0.0
-                mangnus_black_bv_amount = 0.0
+                magnus_blue_bv_amount = 0.0
+                magnus_red_bv_amount = 0.0
+                magnus_green_bv_amount = 0.0
+                magnus_black_bv_amount = 0.0
                 if self.operating_unit_id.name == 'Magnus Blue B.V.':
                     blue_per = 100
-                    mangnus_blue_bv_amount = expected_revenue_per_month
+                    magnus_blue_bv_amount = expected_revenue_per_month
                 if self.operating_unit_id.name == 'Magnus Red B.V.':
                     red_per = 100
-                    mangnus_red_bv_amount = expected_revenue_per_month
+                    magnus_red_bv_amount = expected_revenue_per_month
                 if self.operating_unit_id.name == 'Magnus Green B.V.':
                     green_per = 100
-                    mangnus_green_bv_amount = expected_revenue_per_month
+                    magnus_green_bv_amount = expected_revenue_per_month
                 if self.operating_unit_id.name == 'Magnus Black B.V.':
                     black_per = 100
-                    mangnus_black_bv_amount = expected_revenue_per_month
+                    magnus_black_bv_amount = expected_revenue_per_month
 
                 monthly_revenues_split.append((0,0,{
                                                     'month': month.id,
                                                     'total_revenue': expected_revenue_per_month,
                                                     'total_revenue_per':100,
-                                                    'mangnus_blue_bv_per':blue_per,
-                                                    'mangnus_red_bv_per':red_per,
-                                                    'mangnus_black_bv_per':black_per,
-                                                    'mangnus_green_bv_per':green_per,
-                                                    'mangnus_blue_bv_amount':mangnus_blue_bv_amount,
-                                                    'mangnus_red_bv_amount':mangnus_red_bv_amount,
-                                                    'mangnus_green_bv_amount':mangnus_green_bv_amount,
-                                                    'mangnus_black_bv_amount':mangnus_black_bv_amount,
+                                                    'magnus_blue_bv_per':blue_per,
+                                                    'magnus_red_bv_per':red_per,
+                                                    'magnus_black_bv_per':black_per,
+                                                    'magnus_green_bv_per':green_per,
+                                                    'magnus_blue_bv_amount':magnus_blue_bv_amount,
+                                                    'magnus_red_bv_amount':magnus_red_bv_amount,
+                                                    'magnus_green_bv_amount':magnus_green_bv_amount,
+                                                    'magnus_black_bv_amount':magnus_black_bv_amount,
                                                     
                                                     }))
                 sd = month_end_date + timedelta(days=1)
@@ -389,87 +389,87 @@ class CRMRevenueSplit(models.Model):
     month = fields.Many2one('date.range', string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')
-    mangnus_blue_bv_amount = fields.Float('Magnus Blue B.V.')
-    mangnus_blue_bv_per = fields.Float('Magnus Blue B.V. %')
-    mangnus_red_bv_amount = fields.Float('Magnus Red B.V.')
-    mangnus_red_bv_per = fields.Float('Magnus Red B.V. %')
-    mangnus_green_bv_amount = fields.Float('Magnus Green B.V.')
-    mangnus_green_bv_per = fields.Float('Magnus Green B.V. %')
-    mangnus_black_bv_amount = fields.Float('Magnus Black B.V.')
-    mangnus_black_bv_per = fields.Float('Magnus Black B.V. %')
+    magnus_blue_bv_amount = fields.Float(oldname='mangnus_blue_bv_amount', string='Magnus Blue B.V.')
+    magnus_blue_bv_per = fields.Float(oldname='mangnus_blue_bv_per', string='Magnus Blue B.V. %')
+    magnus_red_bv_amount = fields.Float(oldname='mangnus_red_bv_amount', string='Magnus Red B.V.')
+    magnus_red_bv_per = fields.Float(oldname='mangnus_red_bv_per', string='Magnus Red B.V. %')
+    magnus_green_bv_amount = fields.Float(oldname='mangnus_green_bv_amount', string='Magnus Green B.V.')
+    magnus_green_bv_per = fields.Float(oldname='mangnus_green_bv_per', string='Magnus Green B.V. %')
+    magnus_black_bv_amount = fields.Float(oldname='mangnus_black_bv_amount', string='Magnus Black B.V.')
+    magnus_black_bv_per = fields.Float(oldname='mangnus_black_bv_per', string='Magnus Black B.V. %')
     
     @api.one
-    @api.constrains('mangnus_blue_bv_per', 'mangnus_red_bv_per','mangnus_green_bv_per','mangnus_black_bv_per')
+    @api.constrains('magnus_blue_bv_per', 'magnus_red_bv_per','magnus_green_bv_per','magnus_black_bv_per')
     def _check_dates(self):
-        total_per = self.mangnus_blue_bv_per + self.mangnus_red_bv_per + self.mangnus_green_bv_per + self.mangnus_black_bv_per
+        total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per
         if int(total_per) > 100:
             raise ValidationError(_("Total Percentage should be equal to 100"))
         
-    @api.onchange('mangnus_black_bv_per')
+    @api.onchange('magnus_black_bv_per')
     def onchange_magnus_black_perc(self):
         """ Magnus Green B.V. """
-        total_per = self.mangnus_blue_bv_per + self.mangnus_red_bv_per + self.mangnus_green_bv_per + self.mangnus_black_bv_per
+        total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per
         if  int(total_per) > 100:
-            self.mangnus_black_bv_per = 0.0
+            self.magnus_black_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        # if self.mangnus_black_bv_per > 0.0:
-        self.mangnus_black_bv_amount = self.total_revenue * (self.mangnus_black_bv_per / 100)
+        # if self.magnus_black_bv_per > 0.0:
+        self.magnus_black_bv_amount = self.total_revenue * (self.magnus_black_bv_per / 100)
               
-    @api.onchange('mangnus_black_bv_amount')
+    @api.onchange('magnus_black_bv_amount')
     def onchange_magnus_black_amount(self):
         """ Magnus Green B.V. """
-        self.mangnus_black_bv_per = self.mangnus_black_bv_amount * (100/self.total_revenue)
+        self.magnus_black_bv_per = self.magnus_black_bv_amount * (100/self.total_revenue)
         
-    @api.onchange('mangnus_blue_bv_per')
+    @api.onchange('magnus_blue_bv_per')
     def onchange_magnus_blue_per(self):
         """ for Magnus Blue B.V """
-        total_per = self.mangnus_blue_bv_per + self.mangnus_red_bv_per + self.mangnus_green_bv_per + self.mangnus_black_bv_per
+        total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per
         if  int(total_per) > 100:
-            self.mangnus_blue_bv_per = 0.0
+            self.magnus_blue_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        # if self.mangnus_blue_bv_per > 0:
-        self.mangnus_blue_bv_amount = self.total_revenue * (self.mangnus_blue_bv_per / 100)
+        # if self.magnus_blue_bv_per > 0:
+        self.magnus_blue_bv_amount = self.total_revenue * (self.magnus_blue_bv_per / 100)
             
-    @api.onchange('mangnus_blue_bv_amount')
+    @api.onchange('magnus_blue_bv_amount')
     def onchange_magnus_blue_amount(self):
         """ for Magnus Blue B.V """
-        if self.mangnus_blue_bv_amount > 0.0:
-            self.mangnus_blue_bv_per = self.mangnus_blue_bv_amount * (100/self.total_revenue)
+        if self.magnus_blue_bv_amount > 0.0:
+            self.magnus_blue_bv_per = self.magnus_blue_bv_amount * (100/self.total_revenue)
         
             
-    @api.onchange('mangnus_red_bv_per')
+    @api.onchange('magnus_red_bv_per')
     def onchange_magnus_red_per(self):
-        total_per = self.mangnus_blue_bv_per + self.mangnus_red_bv_per + self.mangnus_green_bv_per + self.mangnus_black_bv_per
+        total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per
         if  int(total_per) > 100:
-            self.mangnus_red_bv_per = 0.0
+            self.magnus_red_bv_per = 0.0
             raise ValidationError(
                     _("Total Percentage should be equal to 100"))
-        self.mangnus_red_bv_amount = self.total_revenue * (self.mangnus_red_bv_per / 100)
+        self.magnus_red_bv_amount = self.total_revenue * (self.magnus_red_bv_per / 100)
             
-    @api.onchange('mangnus_red_bv_amount')
+    @api.onchange('magnus_red_bv_amount')
     def onchange_magnus_red_amount(self):
         """ for Magnus Red B.V """
-        if self.mangnus_red_bv_amount > 0:
-            self.mangnus_red_bv_per = self.mangnus_red_bv_amount * (100/self.total_revenue)
+        if self.magnus_red_bv_amount > 0:
+            self.magnus_red_bv_per = self.magnus_red_bv_amount * (100/self.total_revenue)
             
-    @api.onchange('mangnus_green_bv_per')
+    @api.onchange('magnus_green_bv_per')
     def onchange_magnus_green_per(self):
         """ Magnus Green B.V. """
-        total_per = self.mangnus_blue_bv_per + self.mangnus_red_bv_per + self.mangnus_green_bv_per + self.mangnus_black_bv_per
+        total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per
         if  int(total_per) > 100:
-            self.mangnus_green_bv_per = 0.0
+            self.magnus_green_bv_per = 0.0
             raise ValidationError(_("Total Percentage should be equal to 100"))
             
-        # if self.mangnus_green_bv_per > 0.0:
-        self.mangnus_green_bv_amount = self.total_revenue * (self.mangnus_green_bv_per / 100)
+        # if self.magnus_green_bv_per > 0.0:
+        self.magnus_green_bv_amount = self.total_revenue * (self.magnus_green_bv_per / 100)
             
-    @api.onchange('mangnus_green_bv_amount')
+    @api.onchange('magnus_green_bv_amount')
     def onchange_magnus_green_amount(self):
         """ Magnus Green B.V. """
-        if self.mangnus_green_bv_amount > 0:
-            self.mangnus_green_bv_per = self.mangnus_green_bv_amount * (100/self.total_revenue)
+        if self.magnus_green_bv_amount > 0:
+            self.magnus_green_bv_per = self.magnus_green_bv_amount * (100/self.total_revenue)
             
     
 class CRMStage(models.Model):

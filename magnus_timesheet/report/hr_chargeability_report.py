@@ -101,7 +101,8 @@ class HrChargeabilityReport(models.Model):
                 JOIN date_range dr 
                 ON (dr.id = aa.week_id)
                 WHERE aa.product_uom_id = %s 
-                    AND aa.planned = FALSE 
+                    AND aa.planned = FALSE
+                    AND (aa.ot = FALSE or aa.ot is null)
                     AND aa.project_id IS NOT NULL 
                 GROUP BY 
                     aa.operating_unit_id, 
