@@ -310,13 +310,14 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-
         task_id = vals.get('task_id', False)
         user_id = vals.get('user_id', False)
 
         #some cases product id is missing
         product_id = self.get_task_user_product(task_id, user_id) or False
-        if not product_id and user_id:
+
+        # for planning skip fee rate check
+        if not product_id and user_id and not vals.get('planned', False):
             user = self.env.user.browse(user_id)
             raise ValidationError(_(
                 'Please fill in Fee Rate Product in employee %s.\n '
@@ -335,12 +336,14 @@ class AccountAnalyticLine(models.Model):
 
             task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
+            #for planning skip fee rate check
+            planned = vals.get('planned', aal.planned)
 
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
                 if user_id and not vals.get('product_id', aal.product_id):
                     product_id = aal.get_task_user_product(task_id, user_id) or False
-                if not product_id:
+                if not product_id and not planned:
                     user = self.env.user.browse(user_id)
                     raise ValidationError(_(
                         'Please fill in Fee Rate Product in employee %s.\n '

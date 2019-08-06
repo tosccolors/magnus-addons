@@ -98,7 +98,7 @@
 
 
         <menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
-             sequence="3"/>
+             sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>
 
 
 
