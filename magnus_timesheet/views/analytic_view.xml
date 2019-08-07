@@ -6,54 +6,6 @@
             <field name="domain">[('project_id', '!=', False),('planned', '=', False)]</field>
         </record>
 
-        <record id="hr_timesheet_planning_line_tree" model="ir.ui.view">
-            <field name="name">account.analytic.line.tree.planning</field>
-            <field name="model">account.analytic.line</field>
-            <field name="arch" type="xml">
-                <tree editable="top" string="Timesheet Activities">
-                    <field name="user_id" invisible="1"/>
-                    <field name="week_id" string="Timesheet Week" invisible="1"/>
-                    <field name="select_week_id" string="Timesheet Week" options="{'no_create': True, 'no_create_edit':True}"/>
-                    <field name="date" invisible="1"/>
-                    <field name="project_id" required="1" options="{'no_create': True, 'no_create_edit':True}"/>
-                    <field name="task_id" context="{'default_project_id': project_id}" domain="[('project_id', '=', project_id)]" options="{'no_create': True, 'no_create_edit':True}"/>
-                    <field name="unit_amount" string="Duration" sum="Total time" widget="float_time"/>
-                </tree>
-            </field>
-        </record>
-
-        <record id="act_hr_timesheet_planning_line" model="ir.actions.act_window">
-            <field name="name">Planning</field>
-            <field name="res_model">account.analytic.line</field>
-            <field name="domain">[('project_id', '!=', False),('planned', '=', True)]</field>
-            <field name="context">{"search_default_today":1, 'default_planned':True, 'default_name':'/'}</field>
-            <field name="search_view_id" ref="hr_timesheet_sheet.hr_timesheet_line_search"/>
-            <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
-                Click to record activities.
-              </p><p>
-                You can register your planning activities.
-              </p>
-            </field>
-        </record>
-
-        <record model="ir.actions.act_window.view" id="act_hr_timesheet_planning_line_view_tree">
-            <field name="view_mode">tree</field>
-            <field name="sequence">1</field>
-            <field name="view_id" ref="hr_timesheet_planning_line_tree"/>
-            <field name="act_window_id" ref="act_hr_timesheet_planning_line"/>
-        </record>
-
-        <record model="ir.actions.act_window.view" id="act_hr_timesheet_planning_line_view_form">
-            <field name="view_mode">form</field>
-            <field name="sequence">2</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_form"/>
-            <field name="act_window_id" ref="act_hr_timesheet_planning_line"/>
-        </record>
-
-        <menuitem id="menu_hr_working_hours_planning" parent="hr_timesheet.menu_hr_time_tracking" action="act_hr_timesheet_planning_line"
-            name="Planning" sequence="10" groups="base.group_user"/>
-
         <record id="hr_timesheet_line_forecating_tree" model="ir.ui.view">
             <field name="name">Timesheet with lead/opportunity</field>
             <field name="model">account.analytic.line</field>

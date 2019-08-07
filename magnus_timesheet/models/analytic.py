@@ -92,8 +92,7 @@ class AccountAnalyticLine(models.Model):
                 #     line.amount = line.unit_amount * - fee_rate
 
             if line.planned:
-                if line.select_week_id:
-                    line.week_id = line.select_week_id.id
+                line.week_id = line.find_daterange_week(line.date)
 
 
     def find_daterange_week(self, date):
@@ -138,6 +137,21 @@ class AccountAnalyticLine(models.Model):
             order='company_id asc'
         )
         return date_range
+    
+    @api.model
+    def default_get(self, fields):
+        context = self._context
+        res = super(AccountAnalyticLine, self).default_get(fields)
+
+        if 'planning_lines' in context:
+            project = self.env['project.project']
+            project_id = context.get('default_project_id', project)
+            task_id = context.get('default_task_id', False)
+            project = project.browse(project_id)
+            account_id = project.analytic_account_id
+            operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
+            res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
+        return res
 
 
     kilometers = fields.Integer(
@@ -178,10 +192,6 @@ class AccountAnalyticLine(models.Model):
     task_id = fields.Many2one(
         'project.task', 'Task',
         ondelete='restrict'
-    )
-    select_week_id = fields.Many2one(
-        'date.range',
-        string='Week'
     )
     planned = fields.Boolean(
         string='Planned'
@@ -228,6 +238,7 @@ class AccountAnalyticLine(models.Model):
     ot = fields.Boolean(
         string='Overtime',
     )
+    planning_id = fields.Many2one('magnus.planning', string='Planning')
 
 
     @api.model
@@ -288,14 +299,6 @@ class AccountAnalyticLine(models.Model):
         amount = - unit_amount * fr
         return amount
 
-    def _fetch_emp_plan(self):
-        emp = self.env['hr.employee'].search([('user_id', '=', self.env.user.id)])
-        return True if emp and emp.planning_week else False
-
-    @api.onchange('user_id')
-    def _onchange_users(self):
-        self.planned = self._fetch_emp_plan()
-
     @api.onchange('date')
     def _onchange_dates(self):
         if self.planned or self.env.context.get('default_planned',False) :
@@ -304,28 +307,17 @@ class AccountAnalyticLine(models.Model):
             self.company_id = self.env.user.company_id
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
-            self.select_week_id = date.id
-
-    @api.onchange('select_week_id')
-    def _onchange_select_week(self):
-        if self.select_week_id and self.select_week_id != self.week_id:
-            self.week_id = self.select_week_id.id
-            self.date = self.select_week_id.date_start
 
     @api.model
     def create(self, vals):
-        if self.env.context.get('default_planned', False):
-            if vals.get('select_week_id', False) and not vals.get('week_id', False):
-                vals['week_id'] = vals['select_week_id']
-            if vals.get('project_id', False):
-                vals['planned'] = True
-
         task_id = vals.get('task_id', False)
         user_id = vals.get('user_id', False)
 
         #some cases product id is missing
         product_id = self.get_task_user_product(task_id, user_id) or False
-        if not product_id and user_id:
+
+        # for planning skip fee rate check
+        if not product_id and user_id and not vals.get('planned', False):
             user = self.env.user.browse(user_id)
             raise ValidationError(_(
                 'Please fill in Fee Rate Product in employee %s.\n '
@@ -341,21 +333,17 @@ class AccountAnalyticLine(models.Model):
     @api.multi
     def write(self, vals):
         for aal in self:
-            if 'select_week_id' in vals or 'planned' in vals:
-                if self.env.context.get('default_planned', False):
-                    if vals.get('select_week_id', False):
-                        vals['week_id'] = vals['select_week_id']
-                    if aal.project_id:
-                        vals['planned'] = True
 
             task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
+            #for planning skip fee rate check
+            planned = vals.get('planned', aal.planned)
 
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
                 if user_id and not vals.get('product_id', aal.product_id):
                     product_id = aal.get_task_user_product(task_id, user_id) or False
-                if not product_id:
+                if not product_id and not planned:
                     user = self.env.user.browse(user_id)
                     raise ValidationError(_(
                         'Please fill in Fee Rate Product in employee %s.\n '
@@ -367,8 +355,6 @@ class AccountAnalyticLine(models.Model):
                 unit_amount = vals.get('unit_amount', aal.unit_amount)
                 vals['amount'] = aal.get_fee_rate_amount(task_id, user_id, unit_amount)
         return super(AccountAnalyticLine, self).write(vals)
-
-
 
     @api.depends('unit_amount')
     def _get_qty(self):
@@ -383,4 +369,3 @@ class AccountAnalyticLine(models.Model):
     def _get_day(self):
         for line in self:
             line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
-
