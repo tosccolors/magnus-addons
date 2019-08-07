@@ -352,14 +352,19 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                 return;
             }
             var ops = self.generate_o2m_value();
-            ops.push(_.extend({}, self.default_get, {
-                name: self.description_line,
-                unit_amount: 0,
-                date: time.date_to_str(self.dates[0]),
-                project_id: id,
-                planned: true,
-                employee_id: employee_id,
-            }));
+
+            new Model('hr.employee').call('search_read', [[['id', '=', parseInt(employee_id)]], ["user_id"]]).then(function(result) {
+
+                ops.push(_.extend({}, self.default_get, {
+                    name: self.description_line,
+                    unit_amount: 0,
+                    date: time.date_to_str(self.dates[0]),
+                    project_id: id,
+                    planned: true,
+                    employee_id: employee_id,
+                    user_id: result[0]['user_id'][0],
+                }));
+            });
 
             self.set({sheets: ops});
             self.destroy_content();
