@@ -81,13 +81,13 @@ class Lead(models.Model):
             rec.update({'percentage':res.get('probability')})
         if self.stage_id.show_when_chaing:
             if self.stage_id.requirements:
+                text = self.stage_id.requirements
                 result = text.split('\n')
                 if result:
                     final_string = ''
                     for str_val in result:
                         final_string += str_val + "</br>"
                     text = final_string
-                text = self.stage_id.requirements
                 self.env.user.notify_info(message=text,sticky=True)
         return res
 
