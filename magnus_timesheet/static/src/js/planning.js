@@ -183,21 +183,26 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                     var day = {day: date, lines: index[time.date_to_str(date)] || []};
                     // add line where we will insert/remove hours
                     var to_add = _.find(day.lines, function(line) { return line.name === self.description_line; });
+
                     if (to_add) {
                         day.lines = _.without(day.lines, to_add);
                         day.lines.unshift(to_add);
                     } else {
+                        new Model('hr.employee').call('search_read', [[['id', '=', parseInt(lines[0].employee_id)]], ["user_id"]]).then(function(result) {
                         day.lines.unshift(_.extend(_.clone(project_defaults), {
-                            name: self.description_line,
-                            unit_amount: 0,
-                            date: time.date_to_str(date),
-                            project_id: project_id,
-                            planned: true,
-                            employee_id: lines[0].employee_id,
-                        }));
+                                user_id: result[0]['user_id'][0],
+                                name: self.description_line,
+                                unit_amount: 0,
+                                date: time.date_to_str(date),
+                                project_id: project_id,
+                                planned: true,
+                                employee_id: lines[0].employee_id,
+                            }));
+                        });
                     }
                     return day;
-                });
+                    });
+
 
                 var partner_id = undefined;
 
@@ -364,10 +369,12 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                     employee_id: employee_id,
                     user_id: result[0]['user_id'][0],
                 }));
+
+                self.set({sheets: ops});
             });
 
-            self.set({sheets: ops});
             self.destroy_content();
+
         });
     },
 
