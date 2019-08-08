@@ -36,7 +36,6 @@
                             <label for="week_from" string="Week Planning Period"/>
                             <div><field name="week_from" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/> to <field name="week_to" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/></div>
                             <field name="name" invisible="1"/>
-                            <field name="department_id" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                         </group>
                     </group>
@@ -48,7 +47,6 @@
                         <page string="Details" class="o_hr_timesheet_sheet_details">
                             <field context="{'employee_id': employee_id, 'user_id':user_id, 'timesheet_date_from': date_from, 'timesheet_date_to': date_to}" name="planning_ids" nolabel="1">
                                 <tree editable="bottom" string="Timesheet Activities" create="false" edit="false">
-                                    <field name="id"/>
                                     <field name="date" invisible="1"/>
                                     <field name="week_id"/>
                                     <field name="name"/>

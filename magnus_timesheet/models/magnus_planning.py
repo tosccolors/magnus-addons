@@ -59,8 +59,6 @@ class MagnusPlanning(models.Model):
     date_to = fields.Date(string='Date To', default=_default_date_to, required=True, index=True)
     planning_ids = fields.One2many('account.analytic.line', 'planning_id', string='Planning lines')
     company_id = fields.Many2one('res.company', string='Company')
-    department_id = fields.Many2one('hr.department', string='Department',
-        default=lambda self: self.env['res.company']._company_default_get())
     week_from = fields.Many2one('date.range', string='week from', required=True,index=True)
     week_to = fields.Many2one('date.range', string='week to', required=True,index=True)
 
@@ -86,10 +84,4 @@ class MagnusPlanning(models.Model):
         self.unlink_analytic_entries()
         return res
 
-
-class AccountAnalyticLine(models.Model):
-    _inherit = 'account.analytic.line'
-    _description = 'Analytic Line'
-
-    employee_id = fields.Many2one('hr.employee', string='Employee')
 
