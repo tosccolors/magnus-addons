@@ -238,7 +238,7 @@ class AccountAnalyticLine(models.Model):
     ot = fields.Boolean(
         string='Overtime',
     )
-    planning_id = fields.Many2one('magnus.planning', string='Planning')
+    employee_id = fields.Many2one('hr.employee', string='Employee')
 
 
     @api.model
