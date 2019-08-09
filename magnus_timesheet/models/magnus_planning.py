@@ -57,7 +57,8 @@ class MagnusPlanning(models.Model):
     user_id = fields.Many2one('res.users', related='employee_id.user_id', string='User', store=True, readonly=True)
     date_from = fields.Date(string='Date From', default=_default_date_from, required=True, index=True)
     date_to = fields.Date(string='Date To', default=_default_date_to, required=True, index=True)
-    planning_ids = fields.One2many('account.analytic.line', 'planning_id', string='Planning lines')
+    planning_ids = fields.Many2many('account.analytic.line', 'magnus_planning_analytic_line_rel', 'planning_id',
+                                    'analytic_line_id', string='Planning lines')
     company_id = fields.Many2one('res.company', string='Company')
     week_from = fields.Many2one('date.range', string='week from', required=True,index=True)
     week_to = fields.Many2one('date.range', string='week to', required=True,index=True)

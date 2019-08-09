@@ -9,7 +9,6 @@
                     <field name="employee_id"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
-                    <field name="department_id" invisible="1"/>
                 </tree>
             </field>
         </record>
