@@ -41,6 +41,7 @@
             <field name="official_date_of_employment" />
             <field name="temporary_contract" />
             <field name="end_date_of_employment" />
+            <field name="date_last_promotion"/>
           </xpath>
         </field>
     </record>
