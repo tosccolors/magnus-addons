@@ -17,6 +17,7 @@ class Task(models.Model):
             raise ValidationError(_('You can have only one task with the standard as true per project!'))
 
     standard = fields.Boolean(string='Standard')
+    my_wiz_id = fields.Many2one('my.wizard')
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
