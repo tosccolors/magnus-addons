@@ -101,7 +101,31 @@ class MagnusPlanning(models.Model):
                     aal_tables,
                     aal_where_clause
                 ))
+
         self.env.cr.execute(list_query, aal_where_clause_params)
+
+        rel_query = ("""
+                      INSERT INTO
+                           magnus_planning_analytic_line_rel
+                           (planning_id, analytic_line_id)
+                        SELECT
+                            mp.id as planning_id,
+                            {0}.id as analytic_line_id
+                            FROM {0}
+                            JOIN magnus_planning mp
+                            ON {0}.employee_id = mp.employee_id
+                            WHERE {1}
+                        EXCEPT
+                        SELECT
+                            planning_id, analytic_line_id
+                            FROM magnus_planning_analytic_line_rel
+                        """.format(
+                    aal_tables,
+                    aal_where_clause
+                ))
+
+        self.env.cr.execute(rel_query, aal_where_clause_params)
+
 
 
 
