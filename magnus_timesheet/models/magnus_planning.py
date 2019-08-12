@@ -127,8 +127,6 @@ class MagnusPlanning(models.Model):
         self.env.cr.execute(rel_query, aal_where_clause_params)
 
 
-
-
     def unlink_analytic_entries(self):
         analytic = self.planning_ids.filtered(lambda x: x.unit_amount == 0)
         analytic.unlink()
