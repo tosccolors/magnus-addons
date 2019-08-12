@@ -14,6 +14,7 @@ class HrExpense(models.Model):
 
     sheet_state = fields.Char(compute='_get_sheet_state', string='Sheet Status', help='Expense Report State', store=True)
     customer_charge_expense = fields.Boolean('Charge Expense To Customer', index=True)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='WKR')
     state = fields.Selection(selection_add=[('revise', 'To Be Revise')])
 
     @api.onchange('product_id')
@@ -67,6 +68,8 @@ class HrExpense(models.Model):
         move_line = super(HrExpense, self)._prepare_move_line(line)
         if move_line.get('analytic_account_id', False):
             move_line.update({'customer_charge_expense': self.customer_charge_expense})
+        if self.analytic_tag_ids:
+            move_line.update({'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)]})
         return move_line
 
     @api.multi
