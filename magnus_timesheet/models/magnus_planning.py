@@ -24,6 +24,10 @@ class MagnusPlanning(models.Model):
         end_date = self.week_to.date_start
         if (start_date and end_date) and (start_date > end_date):
             raise ValidationError(_("End week should be greater than start week."))
+        if self.week_from:
+            planning = self.search_count([('employee_id', '=', self.employee_id.id),('week_from', '<=', self.week_from.id),('week_to', '>=', self.week_from.id)])
+            if planning > 1:
+                raise ValidationError(_("Week range already exists."))
 
 
     def _default_date_from(self):
@@ -89,7 +93,9 @@ class MagnusPlanning(models.Model):
                         {5} AS week_to
                     FROM
                        {6}
-                    WHERE {7} AND {6}.employee_id NOT IN (select employee_id from magnus_planning)
+                    WHERE {7} AND 
+                        {6}.employee_id NOT IN
+                          (SELECT employee_id FROM magnus_planning WHERE week_from <= {4} AND week_to >= {4})
                     GROUP BY {6}.employee_id, {6}.user_id 
                     """.format(
                     self._uid,
@@ -115,13 +121,16 @@ class MagnusPlanning(models.Model):
                             JOIN magnus_planning mp
                             ON {0}.employee_id = mp.employee_id
                             WHERE {1}
+                            AND mp.week_from <= {2} AND mp.week_to >= {2}
                         EXCEPT
                         SELECT
                             planning_id, analytic_line_id
                             FROM magnus_planning_analytic_line_rel
                         """.format(
                     aal_tables,
-                    aal_where_clause
+                    aal_where_clause,
+                    self.week_from.id,
+                    self.week_to.id,
                 ))
 
         self.env.cr.execute(rel_query, aal_where_clause_params)
@@ -135,14 +144,14 @@ class MagnusPlanning(models.Model):
     @api.model
     def create(self ,vals):
         res = super(MagnusPlanning, self).create(vals)
-        res.unlink_analytic_entries()
+        # res.unlink_analytic_entries()
         res._create_planning()
         return res
 
     @api.multi
     def write(self, vals):
         res = super(MagnusPlanning, self).write(vals)
-        self.unlink_analytic_entries()
+        # self.unlink_analytic_entries()
         self._create_planning()
         return res
 
