@@ -34,7 +34,6 @@
                         <group>
                             <label for="week_from" string="Week Planning Period"/>
                             <div><field name="week_from" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/> to <field name="week_to" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/></div>
-                            <field name="name" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                         </group>
                     </group>
@@ -78,7 +77,6 @@
             <field name="res_model">magnus.planning</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[('employee_id.user_id', '=', uid)]</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 new timesheet.
