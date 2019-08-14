@@ -5,4 +5,4 @@ access_status_time_report_mgr,status_time_report mgr,model_status_time_report,ba
 access_status_time_report_user,status_time_report user,model_status_time_report,base.group_user,1,0,0,0
 
 access_magnus_planning_user,magnus_planning user,model_magnus_planning,magnus_timesheet.group_magnus_planning_user,1,1,1,0
-access_magnus_planning_officer,magnus_planning user,model_magnus_planning,magnus_timesheet.group_magnus_planning_officer,1,1,1,1
+access_magnus_planning_officer,magnus_planning officer,model_magnus_planning,magnus_timesheet.group_magnus_planning_officer,1,1,1,1
