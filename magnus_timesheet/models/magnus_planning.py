@@ -97,7 +97,7 @@ class MagnusPlanning(models.Model):
                     INNER JOIN subordinates s ON s.id = h.parent_id)
                 SELECT  *  FROM subordinates"""
                 % (self.employee_id.department_id.id))
-        dept_mgr_ids = [x[2] for x in self.env.cr.fetchall()]
+        dept_mgr_ids = [x[2] for x in self.env.cr.fetchall() if x[2]]
 
         # get employees list
         self.env.cr.execute("""
@@ -110,7 +110,7 @@ class MagnusPlanning(models.Model):
                 SELECT  *  FROM subordinates"""
                 % (self.employee_id.id))
 
-        employee_ids = [x[0] for x in self.env.cr.fetchall()]
+        employee_ids = [x[0] for x in self.env.cr.fetchall() if x[0]]
         child_ids = list(set(dept_mgr_ids+employee_ids))
         return child_ids
 
