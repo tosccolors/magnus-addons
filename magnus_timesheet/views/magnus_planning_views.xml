@@ -22,6 +22,9 @@
                     max-width: none !important;
                     width:100% !important;
                 </style>
+                <header>
+                        <button class="oe_stat_button" name="compute_planning_lines" type="object" string="Update Planning" />
+                </header>
                 <sheet>
                     <field name="planning_ids_compute" invisible="1"/>
                     <div class="oe_title">
