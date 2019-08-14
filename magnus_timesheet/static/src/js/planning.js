@@ -418,7 +418,9 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
     },
     //converts float value to hour
     format_client:function(value){
-        return formats.format_value(value, { type:"float_time" });
+        var val = formats.format_value(value, { type:"float_time" }).split(':');
+        return val[0];
+        // return formats.format_value(value, { type:"float_time" });
     },
     generate_o2m_value: function() {
         var ops = [];
