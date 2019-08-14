@@ -174,8 +174,9 @@ class MagnusPlanning(models.Model):
         else:
             self.get_planning_from_managers()
 
-
-
+    @api.one
+    def compute_planning_lines(self):
+        self._compute_planning_lines()
 
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True)
     user_id = fields.Many2one('res.users', related='employee_id.user_id', string='User', store=True, readonly=True)
