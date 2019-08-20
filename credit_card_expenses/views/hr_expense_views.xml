@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+		<record id="view_hr_expense_sheet_form_inherit" model="ir.ui.view">
+            <field name="name">hr.expense.sheet.form</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"></field>
+            <field eval="25" name="priority"/>
+            <field name="arch" type="xml">
+            	<field name="journal_id" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field>
+            	<field name="currency_id" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field> 
+            	<field name="bank_journal_id" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field> 
+            	<field name="payment_mode" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field>
+            </field>
+        </record>
+        
+        <record id="hr_expense_form_view_inherit" model="ir.ui.view">
+            <field name="name">hr.expense.form</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_form_view"></field>
+            <field eval="25" name="priority"/>
+            <field name="arch" type="xml">
+            	<field name="payment_mode" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field>
+            	<label for="payment_mode" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</label>
+            	<field name="currency_id" position="attributes">
+            		<attribute name="invisible">True</attribute>
+            	</field> 
+            	<field name='employee_id' position="replace">
+            		<field name="employee_id" groups="credit_card_expenses.group_expenses_superuser"></field>
+            	</field>
+            </field>
+        </record>
+        
+        <record id="view_hr_expense_filter_inherit" model="ir.ui.view">
+            <field name="name">hr.expense.filter.view</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref='hr_expense.view_hr_expense_filter'></field>
+            <field name="arch" type="xml">
+            <xpath expr="//search" postion='inside'>
+            <filter string="Payment Mode" name="payment_by_company"
+                            domain="[('payment_mode','=','company_account')]" invisible="not context.get('from_credi_card_expense',False)"/>
+            <filter string="Payment Mode" name="payment_by_own_account"
+                            domain="[('payment_mode','=','own_account')]" invisible="context.get('from_credi_card_expense',False)"/>
+            </xpath>
+             </field>
+         </record>
+        <record id="hr_expense_actions_my_unsubmitted_credit_card" model="ir.actions.act_window">
+		    <field name="name">My Expenses to Submit</field>
+		    <field name="res_model">hr.expense</field>
+		     <field name="search_view_id" ref="hr_expense.view_hr_expense_filter"/>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,kanban,form,graph,pivot</field>
+		    <field name="context" eval="{'from_credi_card_expense':True}" />
+		    <field name="help" type="html">
+              <p>
+                The steps to process expenses are:
+                <ol>
+                    <li>You record expenses,</li>
+                    <li>Periodically, you submit expenses report to your manager,</li>
+                    <li>Once approved, your expense report, goes to the accounting,</li>
+                    <li>The accountant validates entries and reimburse you.</li>
+                </ol>
+              </p>
+            </field>
+		</record>
+		
+		<record id="action_hr_expense_sheet_my_all_crdit_card" model="ir.actions.act_window">
+            <field name="name">My Reports</field>
+            <field name="res_model">hr.expense.sheet</field>
+            <field name="view_mode">tree,kanban,form,pivot,graph</field>
+            <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+            <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card', '=', True)]</field>
+             <field name="context" eval="{'from_credi_card_expense':True}" />
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click here to create a new expense report.
+              </p><p>
+                Once you have created your expense, submit it to your manager who will validate it.
+              </p>
+            </field>
+        </record>
+
+
+    <record id="action_hr_expense_refused_expenses" model="ir.actions.act_window">
+        <field name="name">Refused Expenses</field>
+        <field name="res_model">hr.expense</field>
+        <field name="view_mode">tree,kanban,form,graph,pivot</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_filter"/>
+        <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card', '=', True)]</field>
+        <field name="context">{'search_default_refused': 1, 'from_credi_card_expense':True}</field>
+        <field name="help" type="html">
+          <p>
+            The steps to process expenses are:
+            <ol>
+                <li>You record expenses,</li>
+                <li>Periodically, you submit expenses report to your manager,</li>
+                <li>Once approved, your expense report, goes to the accounting,</li>
+                <li>The accountant validates entries and reimburse you.</li>
+            </ol>
+          </p>
+        </field>
+    </record>
+
+    <record id="action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
+        <field name="name">Expense Reports to Approve</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="domain">[('is_from_crdit_card', '=', True)]</field>
+        <field name="context">{'search_default_submitted': 1, 'from_credi_card_expense':True}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click here to create a new expense report.
+          </p><p>
+            Once you have created your expense, submit it to your manager who will validate it.
+          </p>
+        </field>
+    </record>
+
+    <record id="action_hr_expense_sheet_all_to_post" model="ir.actions.act_window">
+        <field name="name">Expense Reports To Post</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="domain">[('is_from_crdit_card', '=', True)]</field>
+        <field name="context">{'search_default_to_post': 1, 'from_credi_card_expense':True}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click here to create a new expense report.
+          </p><p>
+            Once you have created your expense, submit it to your manager who will validate it.
+          </p>
+        </field>
+    </record>
+
+    <record id="action_hr_expense_sheet_all_to_pay" model="ir.actions.act_window">
+        <field name="name">Expense Reports To Pay</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="domain">[('is_from_crdit_card', '=', True)]</field>
+        <field name="context">{'search_default_approved': 1, 'from_credi_card_expense':True}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click here to create a new expense report.
+          </p><p>
+            Once you have created your expense, submit it to your manager who will validate it.
+          </p>
+        </field>
+    </record>
+
+    <record id="hr_expense_actions_all" model="ir.actions.act_window">
+        <field name="name">All Expenses</field>
+        <field name="res_model">hr.expense</field>
+        <field name="view_mode">pivot,graph,tree,kanban,form</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_filter"/>
+        <field name="domain">[('is_from_crdit_card', '=', True)]</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+              Create a new expense.<br/>
+              <!-- Or send receipts to .... -->
+          </p><p>
+              Expenses will go through these steps:
+          </p><ol>
+              <li>You record expenses</li>
+              <li>Periodically, you submit expenses report to your manager,</li>
+              <li>Once approved, your expenses report goes to the accounting,</li>
+              <li>The accountant validates journal entries and reimburse you.</li>
+          </ol>
+        </field>
+    </record>
+
+
+    <record id="action_hr_expense_sheet_all_all" model="ir.actions.act_window">
+        <field name="name">All Expense Reports</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">pivot,graph,tree,kanban,form</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="domain">[('is_from_crdit_card', '=', True)]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+          <p class="oe_view_nocontent_create">
+            Click here to create a new expense report.
+          </p><p>
+            Once you have created your expense, submit it to your manager who will validate it.
+          </p>
+        </field>
+    </record>
+
+    <record id="hr_expense.hr_expense_actions_my_unsubmitted" model="ir.actions.act_window">
+        <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.action_hr_expense_refused_expenses" model="ir.actions.act_window">
+        <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
+        <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
+        <field name="domain">[('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.action_hr_expense_sheet_all_to_post" model="ir.actions.act_window">
+        <field name="domain">[('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.action_hr_expense_sheet_all_to_pay" model="ir.actions.act_window">
+        <field name="domain">[('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.hr_expense_actions_all" model="ir.actions.act_window">
+        <field name="domain">[('is_from_crdit_card','=',False)]</field>
+    </record>
+    <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
+        <field name="domain">[('is_from_crdit_card','=',False)]</field>
+    </record>
+
+
+        
+</odoo>

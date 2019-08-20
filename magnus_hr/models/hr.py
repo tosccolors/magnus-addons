@@ -23,6 +23,7 @@ class Employee(models.Model):
     slamid = fields.Char('Slam ID')
     personnel_number = fields.Char('Personnel Number')
     employee_numbersid = fields.Char('Employee NMBRs ID')
+    date_last_promotion = fields.Date('Date of last Promotion')
 
     def validate_dates(self):
         start_date = self.official_date_of_employment

@@ -29,6 +29,7 @@
                     <attribute name="attrs">{'readonly':[('state','not in',('draft','refused','revise'))]}</attribute>
                 </xpath>
                 <xpath expr="//field[@name='analytic_account_id']" position="after">
+                    <field name="analytic_tag_ids"  widget="many2many_tags" options="{'no_create_edit': True}"/>
                     <field name="sheet_state" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='unit_amount']" position="attributes">
@@ -81,7 +82,6 @@
                 <xpath expr="//field[@name='expense_line_ids']/tree/field[@name='name']" position="after">
                     <field name="account_id"/>
                 </xpath>
-
                 <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
                     <button name="action_sheet_move_create" states="approve,revise" string="Post Journal Entries" type="object" groups="account.group_account_user" class="oe_highlight o_expense_sheet_post"/>
                 </xpath>

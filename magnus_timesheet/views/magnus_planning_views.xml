@@ -1,0 +1,105 @@
+<odoo>
+    <data>
+
+        <record id="view_magnus_planning_tree" model="ir.ui.view">
+            <field name="name">magnus.planning.tree</field>
+            <field name="model">magnus.planning</field>
+            <field name="arch" type="xml">
+                <tree string="Plannings">
+                    <field name="employee_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_magnus_planning_form" model="ir.ui.view">
+            <field name="name">magnus.planning.form</field>
+            <field name="model">magnus.planning</field>
+            <field name="arch" type="xml">
+                <form string="Planning">
+                <style>.o_form_sheet{
+                    max-width: none !important;
+                    width:100% !important;
+                </style>
+                <header>
+                        <button class="oe_stat_button" name="compute_planning_lines" type="object" string="Update Planning" />
+                </header>
+                <sheet>
+                    <field name="planning_ids_compute" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="employee_id" class="oe_edit_only" invisible="1"/>
+                        <h1><field name="employee_id" class="oe_inline" placeholder="Employee's Name" invisible="1"/></h1>
+                        <field name="user_id" invisible="1"/>
+                    </div>
+                    <field name="date_from" class="oe_inline" invisible="1"/>
+                    <field name="date_to" class="oe_inline" invisible="1"/>
+                    <group>
+                        <group>
+                            <label for="week_from" string="Week Planning Period"/>
+                            <div><field name="week_from" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/> to <field name="week_to" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/></div>
+                            <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Summary">
+                            <widget type="weekly_planning">
+                            </widget>
+                        </page>
+                        <page string="Details" class="o_hr_timesheet_sheet_details">
+                            <field context="{'employee_id': employee_id, 'user_id':user_id, 'timesheet_date_from': date_from, 'timesheet_date_to': date_to}" name="planning_ids" nolabel="1">
+                                <tree editable="bottom" string="Timesheet Activities" create="false" edit="false">
+                                    <field name="date" invisible="1"/>
+                                    <field name="week_id"/>
+                                    <field name="name"/>
+                                    <field name="project_id" required="1"/>
+                                    <field name="employee_id" required="1"/>
+                                    <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>                                                              <field name="user_id" invisible="1"/>
+                                </tree>
+                                <form string="Planning Activities">
+                                    <group>
+                                        <field name="date" invisible="1"/>
+                                        <field name="week_id"/>
+                                        <field name="name"/>
+                                        <field name="project_id"/>
+                                        <field name="employee_id"/>
+                                        <field name="unit_amount" widget="float_time" string="Hours"/>
+                                        <field name="user_id" invisible="1"/>
+
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="act_view_magnus_planning" model="ir.actions.act_window">
+            <field name="name">My Planning</field>
+            <field name="res_model">magnus.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                new timesheet.
+              </p><p>
+                You must record timesheets every day and confirm at the end
+                of the week. Once the timesheet is confirmed, it should be
+                validated by a manager.
+              </p><p>
+                Timesheets can also be invoiced to customers, depending on the
+                configuration of each project's related contract.
+              </p>
+            </field>
+        </record>
+
+
+        <menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
+             sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>
+
+
+
+    </data>
+</odoo>
