@@ -17,6 +17,6 @@ class HrTimesheetSheet(models.Model):
     def _get_private_mileage_new(self):
         for sheet in self:
             m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
-            sheet.private_mileage = m if m > 0 else 0
-            
+            sheet.private_mileage_new = m if m > 0 else 0
+
     private_mileage_new = fields.Integer(compute='_get_private_mileage_new', string='Private Mileage', store=True)
