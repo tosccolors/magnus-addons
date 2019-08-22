@@ -279,3 +279,37 @@ class MagnusPlanning(models.Model):
     #     return res
 
 
+class MagnusStandbyPlanning(models.Model):
+    _name = "magnus.standby.planning"
+    _description = "Stand-By Planning"
+    _rec_name = 'employee_id'
+
+    @api.constrains('date_from', 'date_to')
+    def _check_date(self):
+        for planning in self:
+            domain = [
+                ('date_from', '<=', planning.date_to),
+                ('date_to', '>=', planning.date_from),
+                ('employee_id', '=', planning.employee_id.id),
+                ('id', '!=', planning.id),
+            ]
+            nplanning = self.search_count(domain)
+            if nplanning:
+                raise ValidationError(_('%s can not have 2 planning that overlaps on same day!')%(planning.employee_id.name))
+
+    @api.model
+    def default_get(self, fields):
+        rec = super(MagnusStandbyPlanning, self).default_get(fields)
+        emp_ids = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
+        rec.update({'employee_id': emp_ids and emp_ids.id or False})
+        return rec
+
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
+    user_id = fields.Many2one('res.users', related='employee_id.user_id', string='User', store=True, readonly=True)
+    department_id = fields.Many2one('hr.department', related='employee_id.department_id', string='Department',
+                                    readonly=True, store=True)
+    date_from = fields.Date(string='Date From', required=True, index=True)
+    date_to = fields.Date(string='Date To', required=True, index=True)
+    note = fields.Text(string='Note')
+
+
