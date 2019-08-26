@@ -178,6 +178,13 @@ class MagnusPlanning(models.Model):
     def compute_planning_lines(self):
         self._compute_planning_lines()
 
+    @api.one
+    def _compute_emp_domain(self):
+        user = self.employee_id.user_id
+        domain = ['|','|','|',('department_id.manager_id.user_id','=',user.id),('department_id.parent_id.manager_id.user_id','=',user.id),('parent_id.user_id','=',user.id),('user_id','=',user.id)]
+        emp_list = self.env['hr.employee'].search(domain).ids
+        self.emp_domain_compute = ",".join(map(str, emp_list))
+
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True)
     user_id = fields.Many2one('res.users', related='employee_id.user_id', string='User', store=True, readonly=True)
     date_from = fields.Date(string='Date From', default=_default_date_from, required=True, index=True)
@@ -188,6 +195,7 @@ class MagnusPlanning(models.Model):
     week_from = fields.Many2one('date.range', string='week from', required=True, index=True)
     week_to = fields.Many2one('date.range', string='week to', required=True, index=True)
     planning_ids_compute = fields.Boolean(compute='_compute_planning_lines')
+    emp_domain_compute = fields.Char(compute='_compute_emp_domain')
 
     @api.onchange('week_from', 'week_to')
     def onchange_week(self):
