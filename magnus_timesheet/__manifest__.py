@@ -50,6 +50,7 @@ The extended date range validation process is:
 
     # always loaded
     'data': [
+        'data/data.xml',
         'security/magnus_security.xml',
         'security/ir.model.access.csv',
         'report/hr_chargeability_report.xml',
