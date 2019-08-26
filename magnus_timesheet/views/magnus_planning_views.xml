@@ -99,6 +99,73 @@
         <menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
              sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>
 
+        <record id="standby_planning_form_calender" model="ir.ui.view">
+            <field name="name">magnus.standby.planning.calender.form</field>
+            <field name="model">magnus.standby.planning</field>
+            <field eval="25" name="priority"/>
+            <field name="arch" type="xml">
+                <form string="Standby-Planing">
+                    <sheet>
+                        <group>
+                            <field name="employee_id" domain="[('external', '=', False), ('user_id', '!=', False)]"/>
+                            <field name="department_id"/>
+                            <label string="Date Range"/>
+                            <div>
+                                <div>
+                                    <field name="date_from" class="oe_inline"/>
+                                    <label string="-" class="oe_inline"/>
+                                    <field name="date_to" class="oe_inline"/>
+                                </div>
+                            </div>
+                            <label for="note" string="Summary"/>
+                            <field name="note" nolabel="1" placeholder="Add a note..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="standby_planning_calendar_view" model="ir.ui.view">
+            <field name="name">magnus.standby.planning.calendar</field>
+            <field name="model">magnus.standby.planning</field>
+            <field name="arch" type="xml">
+                <calendar string="Standby-Planing" color="employee_id" date_start="date_from" date_stop="date_to" mode="month"
+                              quick_add="False" avatar_model="hr.employee" event_open_popup="%(magnus_timesheet.standby_planning_form_calender)">
+                    <field name="display_name"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="view_magnus_standby_planning_tree" model="ir.ui.view">
+            <field name="name">magnus.standby.planning.tree</field>
+            <field name="model">magnus.standby.planning</field>
+            <field name="arch" type="xml">
+                <tree string="Plannings">
+                    <field name="employee_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_standby_planning" model="ir.actions.act_window">
+            <field name="name">Stand-By Planning</field>
+            <field name="res_model">magnus.standby.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar,tree</field>
+            <field name="view_id" ref="standby_planning_calendar_view"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to record activities.
+              </p><p>
+                You can track Standby Planning.
+              </p>
+            </field>
+        </record>
+
+
+        <menuitem id="stand_by_planing_menu" parent="hr_timesheet.menu_hr_time_tracking" sequence="99" action="action_standby_planning"
+                groups="hr.group_hr_user,hr.group_hr_manager"/>
 
 
     </data>
