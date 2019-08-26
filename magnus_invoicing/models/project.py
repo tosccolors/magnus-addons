@@ -45,7 +45,7 @@ class TaskUser(models.Model):
     @api.model
     def _get_category_domain(self):
         return [('categ_id','=', self.env.ref(
-            'magnus_invoicing.product_category_fee_rate').id)]
+            'magnus_timesheet.product_category_fee_rate').id)]
 
     task_id = fields.Many2one(
         'project.task',
