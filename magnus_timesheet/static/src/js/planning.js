@@ -323,7 +323,7 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
             },
         });
         var FieldMany2One = core.form_widget_registry.get('many2one');
-
+        var emp_domain = this.field_manager.get_field_value("emp_domain_compute");
         self.employee_m2o = new FieldMany2One(self.dfm, {
             attrs: {
                 name: 'employee',
@@ -331,7 +331,7 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                 modifiers: '{"required": true}',
                 options: '{"no_create_edit":true, "create": false, "no_quick_create": true}',
                 domain: [
-                    ['user_id', '!=', false]
+                    ['id', 'in', emp_domain.split(",")]
                 ],
             },
         });

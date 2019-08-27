@@ -19,7 +19,7 @@ class Employee(models.Model):
     @api.model
     def _get_category_domain(self):
         return [('categ_id','=', self.env.ref(
-            'magnus_invoicing.product_category_fee_rate').id)]
+            'magnus_timesheet.product_category_fee_rate').id)]
 
     @api.one
     def _get_overtime_hours(self):
