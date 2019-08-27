@@ -27,14 +27,18 @@
                             <div t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
                         </t>
                     </strong>
-                     <br/>
-                     <span t-if="proforma_invoice"><strong>PROFORMA INVOICE</strong></span><br/>
+                     <h2>
+                         <span t-if="proforma_invoice"><strong>PROFORMA INVOICE</strong></span><br/>
+                <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Invoice</span>
+                <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">PRO-FORMA</span>
+                <span t-if="o.type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>
+                <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>
+                <span t-if="o.type == 'out_refund'">Refund</span>
+                <span t-if="o.type == 'in_refund'">Vendor Refund</span>
+                <span t-if="o.type == 'in_invoice'">Vendor Bill</span>
+                </h2>
                  </div>
             </div>
-
-            <br/>
-            <br/>
-            <br/>
 
             <t t-set="sale_inv" t-value="any([l.sale_line_ids for l in o.invoice_line_ids])"/>
             <t t-set="invoice_desc" t-value="o.parse_invoice_description()"/>
@@ -80,7 +84,11 @@
                              <span t-field="o.partner_id.vat"/><br/>
                              <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
                                    t-field="o.operating_unit_id.partner_id.vat"/><br/>
-                             <span t-if="analytic_invoice_id and not sale_inv" t-esc="time.strftime('%B %Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/><br/>
+                             <t t-if="analytic_invoice_id and not sale_inv">
+                                 <span t-field="analytic_invoice_id[0].month_id.calender_name"/>
+                                <span t-esc="time.strftime('%Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/>
+                             </t>
+                             <br/>
                              <br/>
                          </div>
                     </div>
@@ -128,6 +136,11 @@
 
                     </t>
                     <t t-foreach="o.group_by_analytic_acc('project')" t-as="aaLines">
+                         <tr>
+                            <td style='border-top:none' width="40%">
+                                <strong><span t-field="aaLines.name"/></strong>
+                            </td>
+                         </tr>
                         <tr t-foreach="aaLines_value" t-as="l">
                             <td style='border-top:none' width="40%"><span t-field="l.name"/></td>
                             <td style='border-top:none' width="20%"> </td>
@@ -202,7 +215,7 @@
                 <span t-if="o.payment_term_id">
                     <br/>
                     <span style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                        <strong>Payment terms:</strong> Within <span t-field="o.payment_term_id.name"/> to <strong>
+                        <span t-field="o.payment_term_id.note"/>  <strong>
                         <span t-if="o.operating_unit_id" t-field="o.operating_unit_id.name"/></strong>
                     </span>
                 </span>
@@ -245,7 +258,7 @@
                                             <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
                                             <t t-if="proLines.invoice_properties.specs_type != 'both'">
                                                 <td style='border-top:none;' class="text-right" width="20%">
-                                                    <span t-esc="o.value_conversion(userLine_value['amount'] / userLine_value['hours'])"/>
+                                                    <span t-esc="o.value_conversion(-userLine_value['amount'] / userLine_value['hours'])"/>
                                                 </td>
                                                 <td style='border-top:none;' class="text-right" width="20%">
                                                     <span t-esc="o.value_conversion(-userLine_value['amount'], monetary=True, currency_obj=o.company_currency_id)"/>

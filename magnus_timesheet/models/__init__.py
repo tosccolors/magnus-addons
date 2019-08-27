@@ -6,3 +6,4 @@ from . import fleet
 from . import res_users
 from . import analytic
 from . import hr_employee
+from . import magnus_planning

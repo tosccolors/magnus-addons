@@ -2,17 +2,6 @@
 <odoo>
     <data noupdate="1">
         <!--
-        Resource: product.uom.categ
-        -->
-        <record id="product_category_fee_rate" model="product.category">
-            <field name="name">Fee Rate</field>
-        </record>
-
-
-    </data>
-
-    <data noupdate="1">
-        <!--
         Resource: account.journal
         -->
         <record id="wip_journal" model="account.journal">

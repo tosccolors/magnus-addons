@@ -25,7 +25,7 @@
             <field name="business_mileage" />
             <field name="private_mileage" />
             <field name="end_mileage" attrs="{'readonly': [('state', 'not in', ['new','draft'])]}"/>
-            <field name="overtime_hours" widget="float_time"/>
+            <field name="overtime_hours_delta" widget="float_time"/>
           </group>
         </xpath>
         <xpath expr="//label[@for='date_from']" position="before">
@@ -77,7 +77,7 @@
         <field name="date_to" position="after">
           <field name="private_mileage" sum="Total amount"/>
           <field name="business_mileage" sum="Total amount"/>
-          <field name="overtime_hours" widget="float_time" sum="Total amount"/>
+          <field name="overtime_hours_delta" widget="float_time" sum="Total amount"/>
         </field>
       </field>
     </record>
@@ -92,6 +92,7 @@
                 <field name="private_mileage" type="measure"/>
                 <field name="business_mileage" type="measure"/>
                 <field name="overtime_hours" widget="float_time" type="measure"/>
+                <field name="overtime_hours_delta" widget="float_time" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -109,7 +110,6 @@
 
     <menuitem id="hr_timesheet.menu_timesheets_reports" name="Reports"
             parent="hr_timesheet.timesheet_menu_root" sequence="99" groups="magnus_timesheet.group_magnus_reports"/>
-
 
   </data>
 </odoo>
