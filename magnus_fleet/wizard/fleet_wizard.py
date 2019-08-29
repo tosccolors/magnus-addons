@@ -53,7 +53,7 @@ class FleetWizard(models.TransientModel):
                        ('model_ref', '=', fleet.id), ('date_to', '=', '9999-12-31 00:00:00'),
                        ('type_many2many', '=', False)]
             trackObj = data_tracker.search(sdomain, limit=1)
-            fleet.write({'driver_id': self.driver_id.id, 'odometer_value':self.odometer_value})
+            fleet.write({'driver_id': self.driver_id.id, 'odometer':self.odometer_value})
             if trackObj.date_from < self.date:
                 trackObj.write({'date_to': self.date})
         return True
