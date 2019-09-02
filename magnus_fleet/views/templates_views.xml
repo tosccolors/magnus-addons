@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--add js to call add and remover driver buttons -->
+        <template id="assets_backend" name="magnus_fleet assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/magnus_fleet/static/src/js/kanban_view.js"></script>
+            </xpath>
+        </template>
+    </data>
+</odoo>
