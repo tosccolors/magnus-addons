@@ -124,11 +124,54 @@
                     </div>
                 </div>
             </xpath>
-            <xpath expr="//sheet/group/group/field[@name='partner_id']" position="after" >
-              <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}"
-                   domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
+            <xpath expr="//sheet/group/group/field[@name='partner_id']" position="replace">
+            </xpath>
+            <xpath expr="//sheet/group/group/field[@name='sector_id']" position="replace">
+            </xpath>
+            <xpath expr="//sheet/group/group/field[@name='secondary_sector_ids']" position="replace">
+            </xpath>
+            <xpath expr="//sheet/group/group/field[@name='user_id']" position="before">
+                <field name="partner_id" string="Customer" options="{&quot;create_name_field&quot;: &quot;name&quot;}" context="{'default_name': contact_name, 'default_street': street, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_function': function, 'default_phone': phone, 'default_mobile': mobile, 'default_fax': fax, 'default_email': email_from, 'default_user_id': user_id, 'default_team_id': team_id}" groups="base.group_no_one"/>
+                <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}" domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
+                <field name="sector_id" placeholder="Sector" options="{&quot;no_open&quot;: True}"/>
+                <field name="secondary_sector_ids" widget="many2many_tags"/>
+            </xpath>
+            <xpath expr="//sheet/group/group/field[@name='team_id']" position="after">
+                <field name="operating_unit_id"/>
+            </xpath>
+            <xpath expr="//sheet/group/group/field[@name='fax']" position="attributes">
+                <attribute name="invisible">1</attribute>
             </xpath>
         </field>
+    </record>
+      
+      <!-- Inherited crm.lead list view (as Lead) -->
+    <record id="crm_case_tree_view_leads_inherited_magnus" model="ir.ui.view">
+            <field name="name">crm.lead.tree.lead</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='contact_name']" position="before">
+                    <field name="partner_name" string="Bedrijfsnaam"/>
+                </xpath>
+                <xpath expr="//field[@name='contact_name']" position="after">
+                    <field name="next_activity_id"/>
+                    <field name="date_action"/>
+                </xpath>
+                <xpath expr="//field[@name='city']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='country_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='phone']" position="after">
+                    <field name="mobile"/>
+                    <field name="city"/>
+                    <field name="country_id"/>
+                    <field name="user_id"/>
+                </xpath>
+                <xpath expr="//field[@name='team_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
     </record>
 
     <!-- Inherited crm.lead list view (as Opportunity) -->
