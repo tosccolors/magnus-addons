@@ -16,6 +16,7 @@
                                     <tree string="Fee Earners" create="true"
                                           edit="true" delete="true" copy="false">
                                         <field name="user_id" />
+                                        <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
                                     </tree>
@@ -60,6 +61,7 @@
                 <tree>
                     <field name="user_id"/>
                     <field name="product_id"/>
+                    <field name="from_date"/>
                     <field name="fee_rate"/>
                     <field name="task_id"/>
                 </tree>
