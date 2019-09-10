@@ -557,6 +557,28 @@ class AnalyticInvoice(models.Model):
                     result[user_tot.project_id] = user_tot.detail_ids
         return result
 
+    @api.multi
+    def _get_specs_on_task(self):
+        self.ensure_one()
+        res = {}
+        # FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
+        user_total_objs = self.user_total_ids
+        if not user_total_objs:
+            usrTotIDS = self.read(['user_total_ids'])[0]['user_total_ids']
+            user_total_objs = self.user_total_ids.browse(usrTotIDS)
+
+        for user_tot in user_total_objs:
+            if user_tot.project_id.invoice_properties.specs_invoice_report and user_tot.project_id.invoice_properties.specs_on_task_level:
+                if user_tot.project_id in res:
+                    if user_tot.task_id in res[user_tot.project_id]:
+                        res[user_tot.project_id][user_tot.task_id]['unit_amount'] += user_tot.unit_amount
+                    else:
+                        res[user_tot.project_id][user_tot.task_id] = {'unit_amount': user_tot.unit_amount}
+                else:
+                    res[user_tot.project_id] = {}
+                    res[user_tot.project_id][user_tot.task_id] = {'unit_amount': user_tot.unit_amount}
+        return res
+
 
 
 class AnalyticUserTotal(models.Model):
