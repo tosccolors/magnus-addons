@@ -18,3 +18,4 @@ class ProjectInvoicingProperties(models.Model):
     custom_layout = fields.Boolean('Add Custom Header/Footer')
     custom_header = fields.Text('Custom Header')
     custom_footer = fields.Text('Custom Footer')
+    specs_on_task_level = fields.Boolean('Specification on task level')
