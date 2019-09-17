@@ -2,7 +2,11 @@
 
 from odoo import api, fields, models, _
 from datetime import datetime, timedelta
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+from odoo.addons.queue_job.job import job, related_action
+from odoo.addons.queue_job.exception import FailedJobError
+import logging
+_logger = logging.getLogger(__name__)
 
 class AnalyticLineStatus(models.TransientModel):
     _name = "analytic.line.status"
@@ -24,6 +28,30 @@ class AnalyticLineStatus(models.TransientModel):
     description = fields.Char(
         "Description"
     )
+
+    def validate_entries_month(self, analytic_ids):
+        fields_grouped = [
+            'id',
+            'month_id',
+            'company_id',
+        ]
+        grouped_by = [
+            'month_id',
+            'company_id',
+        ]
+        result = self.env['account.analytic.line'].read_group(
+            [('id', 'in', analytic_ids)],
+            fields_grouped,
+            grouped_by,
+            offset=0,
+            limit=None,
+            orderby=False,
+            lazy=False
+        )
+        if len(result) > 1:
+            raise ValidationError(
+                _("Entries must belongs to same month!"))
+        return True
 
     @api.one
     def analytic_invoice_lines(self):
@@ -49,10 +77,11 @@ class AnalyticLineStatus(models.TransientModel):
                 """ % (status, cond, rec))
             self.env.invalidate_all()
             if status == 'delayed' and self.wip_percentage > 0.0:
-                self.prepare_account_move()
+                self.validate_entries_month(analytic_ids)
+                self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
+                # self.create_wip_move(analytic_ids)
             if status == 'invoiceable':
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
-
         return True
 
 
@@ -222,27 +251,28 @@ class AnalyticLineStatus(models.TransientModel):
             'account_id': line.product_id.property_account_income_id.id,
         })
         res.append(move_line_credit)
-
         return res
 
+    @job
     @api.multi
-    def prepare_account_move(self):
+    def prepare_account_move(self, analytic_lines_ids):
         """ Creates analytics related financial move lines """
 
         acc_analytic_line = self.env['account.analytic.line']
         account_move = self.env['account.move']
 
-        analytic_lines_ids = self.env.context.get('active_ids', [])
 
         fields_grouped = [
             'id',
             'partner_id',
             'operating_unit_id',
+            'month_id',
             'company_id',
         ]
         grouped_by = [
             'partner_id',
             'operating_unit_id',
+            'month_id',
             'company_id',
         ]
 
@@ -256,54 +286,72 @@ class AnalyticLineStatus(models.TransientModel):
             lazy=False
         )
         narration = self.description if self.wip else ''
+        try:
+            if len(result) > 0:
+                wip_journal = self.env.ref('magnus_invoicing.wip_journal')
+                if not wip_journal.sequence_id:
+                    raise UserError(_('Please define sequence on the type WIP journal.'))
+                for item in result:
+                    partner_id = item['partner_id'][0]
+                    operating_unit_id = item['operating_unit_id'][0]
+                    month_id = item['month_id'][0]
+                    company_id = item['company_id'][0]
 
-        if len(result) > 0:
-            wip_journal = self.env.ref('magnus_invoicing.wip_journal')
-            if not wip_journal.sequence_id:
-                raise UserError(_('Please define sequence on the type WIP journal.'))
+                    date_end = self.env['date.range'].browse(month_id).date_end
 
-            for item in result:
-                partner_id = item['partner_id'][0]
-                operating_unit_id = item['operating_unit_id'][0]
-                company_id = item['company_id'][0]
+                    partner = self.env['res.partner'].browse(partner_id)
+                    if not partner.property_account_receivable_id:
+                        raise UserError(_('Please define receivable account for partner %s.') % (partner.name))
 
-                partner = self.env['res.partner'].browse(partner_id)
-                if not partner.property_account_receivable_id:
-                    raise UserError(_('Please define receivable account for partner %s.') % (partner.name))
+                    aml = []
+                    analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id)])
+                    for aal in analytic_line_obj:
+                        if not aal.product_id.property_account_wip_id:
+                            raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
+                        for ml in self._prepare_move_line(aal):
+                            aml.append(ml)
 
-                aml = []
-                analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id)])
-                for aal in analytic_line_obj:
-                    if not aal.product_id.property_account_wip_id:
-                        raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
-                    for ml in self._prepare_move_line(aal):
-                        aml.append(ml)
+                    line = [(0, 0, l) for l in aml]
 
-                line = [(0, 0, l) for l in aml]
+                    move_vals = {
+                        'type':'receivable',
+                        'ref': narration,
+                        'line_ids': line,
+                        'journal_id': wip_journal.id,
+                        'date': date_end,
+                        'narration': 'WIP move',
+                        'to_be_reversed': True,
+                    }
 
-                move_vals = {
-                    'type':'receivable',
-                    'ref': narration,
-                    'line_ids': line,
-                    'journal_id': wip_journal.id,
-                    'date': datetime.now().date(),
-                    'narration': 'WIP move',
-                    'to_be_reversed': True,
-                }
+                    ctx = dict(self._context, lang=partner.lang)
+                    ctx['company_id'] = company_id
+                    ctx_nolang = ctx.copy()
+                    ctx_nolang.pop('lang', None)
+                    move = account_move.with_context(ctx_nolang).create(move_vals)
+                    if move:
+                        move._post_validate()
+                        move.post()
+                    account_move |= move
 
-                ctx = dict(self._context, lang=partner.lang)
-                ctx['company_id'] = company_id
-                ctx_nolang = ctx.copy()
-                ctx_nolang.pop('lang', None)
-                move_id = account_move.with_context(ctx_nolang).create(move_vals)
+        except Exception, e:
+            raise FailedJobError(
+                _("The details of the error:'%s'") % (unicode(e)))
 
-                cond = '='
-                rec = analytic_line_obj.ids[0]
-                if len(analytic_line_obj) > 1:
-                    cond = 'IN'
-                    rec = tuple(analytic_line_obj.ids)
-                self.env.cr.execute("""
-                        UPDATE account_analytic_line SET write_off_move = %s WHERE id %s %s
-                """ % (move_id.id, cond, rec))
+        self.with_delay(eta=datetime.now(), description="WIP Reversal").wip_reversal(account_move)
 
-        return True
+        return "WIP moves successfully created. Reversal will be processed in separate jobs.\n "
+
+    @job
+    @api.multi
+    def wip_reversal(self, moves):
+        for move in moves:
+            try:
+                date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
+                move.create_reversals(
+                    date=date, journal=move.journal_id,
+                    move_prefix='WIP Reverse', line_prefix='WIP Reverse',
+                    reconcile=True)
+            except Exception, e:
+                raise FailedJobError(
+                    _("The details of the error:'%s'") % (unicode(e)))
+        return "WIP Reversal moves successfully created %s.\n "
