@@ -99,7 +99,7 @@ class AnalyticLineStatus(models.TransientModel):
                     ('partner_id', '=', partner_id),
                     ('account_analytic_ids', 'in', analytic_account_ids),
                     ('project_operating_unit_id', '=', project_operating_unit_id),
-                    ('state', '!=', 'invoiced'),
+                    ('state', 'not in', ('invoiced', 're_confirmed')),
                     ('month_id', '=', month_id)]
                 if link_project:
                     project_id = res[4]
