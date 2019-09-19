@@ -88,6 +88,56 @@ class AnalyticLineStatus(models.TransientModel):
 
 
     def prepare_analytic_invoice(self):
+        def analytic_invoice_create(result, link_project):
+            for res in result:
+                project_id = False
+                analytic_account_ids = res[0]
+                partner_id = res[1]
+                partner = self.env['res.partner'].browse(partner_id)
+                month_id = res[2]
+                project_operating_unit_id = res[3]
+
+                search_domain = [
+                    ('partner_id', '=', partner_id),
+                    ('account_analytic_ids', 'in', analytic_account_ids),
+                    ('project_operating_unit_id', '=', project_operating_unit_id),
+                    ('state', '!=', 'invoiced'),
+                    ('month_id', '=', month_id)]
+                if link_project:
+                    project_id = res[4]
+                    search_domain += [('project_id', '=', project_id)]
+                    search_domain += [('link_project', '=', True)]
+                else:
+                    search_domain += [('link_project', '=', False)]
+
+                analytic_invobj = analytic_invoice.search(search_domain, limit=1)
+                if analytic_invobj:
+                    ctx = self.env.context.copy()
+                    ctx.update({'active_invoice_id': analytic_invobj.id})
+                    analytic_invobj.with_context(ctx).partner_id = partner_id
+                    # analytic_invobj.with_context(ctx).month_id = month_id
+                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
+                else:
+                    data = {
+                        'partner_id': partner_id,
+                        'type': 'out_invoice',
+                        'account_id': partner.property_account_receivable_id.id,
+                        'month_id':month_id,
+                        'project_operating_unit_id':project_operating_unit_id,
+                        'operating_unit_id': project_operating_unit_id,
+                        'link_project': False,
+                        'payment_term_id': partner.property_payment_term_id.id or False,
+                        'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
+                        'fiscal_position_id': partner.property_account_position_id.id or False,
+                        'user_id': self.env.user.id,
+                        'company_id': self.env.user.company_id.id,
+                    }
+                    if link_project:
+                        data.update({'project_id': project_id, 'link_project': True})
+
+                    analytic_invoice.create(data)
+
+
         context = self.env.context.copy()
         entries_ids = context.get('active_ids', [])
         if len(self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable')) > 0:
@@ -109,98 +159,47 @@ class AnalyticLineStatus(models.TransientModel):
             self.env.cr.execute("""
                 SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id
                 FROM account_analytic_line
-                WHERE id %s %s
+                WHERE id %s %s AND date_of_last_wip IS NULL 
                 GROUP BY partner_id, month_id, project_operating_unit_id"""
                 % (cond, rec))
 
             result = self.env.cr.fetchall()
-            for res in result:
-                analytic_account_ids = res[0]
-                partner_id = res[1]
-                partner = self.env['res.partner'].browse(partner_id)
-                month_id = res[2]
-                project_operating_unit_id = res[3]
-                search_domain = [
-                    ('partner_id', '=', partner_id),
-                    ('account_analytic_ids', 'in', analytic_account_ids),
-                    ('project_operating_unit_id', '=', project_operating_unit_id),
-                    ('state', '!=', 'invoiced'),
-                    ('month_id', '=', month_id),
-                    ('link_project', '=', False)]
-                analytic_invobj = analytic_invoice.search(search_domain, limit=1)
-                if analytic_invobj:
-                    ctx = self.env.context.copy()
-                    ctx.update({'active_invoice_id': analytic_invobj.id})
-                    analytic_invobj.with_context(ctx).partner_id = partner_id
-                    # analytic_invobj.with_context(ctx).month_id = month_id
-                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
-                else:
-                    analytic_invoice.create({
-                        'partner_id': partner_id,
-                        'type': 'out_invoice',
-                        'account_id': partner.property_account_receivable_id.id,
-                        'month_id':month_id,
-                        'project_operating_unit_id':project_operating_unit_id,
-                        'operating_unit_id': project_operating_unit_id,
-                        'link_project': False,
-                        'payment_term_id': partner.property_payment_term_id.id or False,
-                        'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
-                        'fiscal_position_id': partner.property_account_position_id.id or False,
-                        'user_id': self.env.user.id,
-                        'company_id': self.env.user.company_id.id,
-                    })
+            analytic_invoice_create(result, False)
+
+            #reconfirmed seperate entries
+            self.env.cr.execute("""
+                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
+                            FROM account_analytic_line
+                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
+                                % (cond, rec))
+
+            reconfirm_res = self.env.cr.fetchall()
+            analytic_invoice_create(reconfirm_res, False)
 
         if sep_entries:
             cond1, rec1 = ("IN", tuple(sep_entries.ids)) if len(sep_entries) > 1 else ("=", sep_entries.id)
             self.env.cr.execute("""
                 SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id, project_id
                 FROM account_analytic_line
-                WHERE id %s %s
+                WHERE id %s %s AND date_of_last_wip IS NULL
                 GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
                         % (cond1, rec1))
 
             result1 = self.env.cr.fetchall()
-            for res in result1:
-                analytic_account_ids = res[0]
-                partner_id = res[1]
-                partner = self.env['res.partner'].browse(partner_id)
-                month_id = res[2]
-                project_operating_unit_id = res[3]
-                project_id = res[4]
+            analytic_invoice_create(result1, True)
 
-                search_domain = [
-                    ('partner_id', '=', partner_id),
-                    ('account_analytic_ids', 'in', analytic_account_ids),
-                    ('project_operating_unit_id', '=', project_operating_unit_id),
-                    ('state', '!=', 'invoiced'),
-                    ('month_id', '=', month_id),
-                    ('project_id', '=', project_id),
-                    ('link_project', '=', True)
-                ]
-                analytic_invobj = analytic_invoice.search(search_domain, limit=1)
-                if analytic_invobj:
-                    ctx = self.env.context.copy()
-                    ctx.update({'active_invoice_id': analytic_invobj.id})
-                    analytic_invobj.with_context(ctx).partner_id = partner_id
-                    # analytic_invobj.with_context(ctx).month_id = month_id
-                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
-                    # analytic_invobj.with_context(ctx).project_id = project_id
-                else:
-                    analytic_invoice.create({
-                        'partner_id': partner_id,
-                        'type': 'out_invoice',
-                        'account_id': partner.property_account_receivable_id.id,
-                        'month_id':month_id,
-                        'project_operating_unit_id': project_operating_unit_id,
-                        'operating_unit_id': project_operating_unit_id,
-                        'project_id': project_id,
-                        'link_project': True,
-                        'payment_term_id': partner.property_payment_term_id.id or False,
-                        'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
-                        'fiscal_position_id': partner.property_account_position_id.id or False,
-                        'user_id': self.env.user.id,
-                        'company_id': self.env.user.company_id.id,
-                    })
+            # reconfirmed grouping entries
+            self.env.cr.execute("""
+                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
+                            FROM account_analytic_line
+                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
+                                % (cond1, rec1))
+
+            reconfirm_res1 = self.env.cr.fetchall()
+            analytic_invoice_create(reconfirm_res1, True)
+
 
     @api.onchange('wip_percentage')
     def onchange_wip_percentage(self):
@@ -342,13 +341,15 @@ class AnalyticLineStatus(models.TransientModel):
                         cond = 'IN'
                         rec = tuple(analytic_line_obj.ids)
 
+                    wip_month_id = analytic_line_obj[0].find_daterange_month(datetime.now().strftime("%Y-%m-%d"))
+
                     line_query = ("""
                                     UPDATE
                                        account_analytic_line
-                                    SET date_of_last_wip = CURRENT_DATE
-                                    WHERE id {0} {1}
+                                    SET date_of_last_wip = CURRENT_DATE, month_of_last_wip = {0}
+                                    WHERE id {1} {2}
                                     """.format(
-                        cond, rec))
+                        wip_month_id.id or False, cond, rec))
 
                     self.env.cr.execute(line_query)
 
