@@ -50,8 +50,10 @@ class AccountInvoice(models.Model):
         # Analytic Invoice invoicing period is doesn't lies in same month update with property_account_wip_id
         if line.analytic_invoice_id and line.analytic_invoice_id.month_id:
             period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-            cur_date = datetime.now().date().strftime("%Y-%m")
-            if cur_date > period_date:
+            # cur_date = datetime.now().date().strftime("%Y-%m")
+            invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
+            inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m')
+            if inv_date != period_date:
                 fpos = invoice.fiscal_position_id
                 account = self.env['analytic.invoice'].get_product_wip_account(line.product_id, fpos)
                 invoice_line_vals.update({

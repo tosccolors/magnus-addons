@@ -35,6 +35,7 @@
         'security/ir.model.access.csv',
         'security/magnus_security.xml',
         'data/data.xml',
+        'data/cron_data.xml',
         'wizard/analytic_line_invoice_view.xml',
         'wizard/change_chargecode_view.xml',
         'views/task_view.xml',
