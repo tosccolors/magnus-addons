@@ -35,6 +35,7 @@ class AccountAnalyticLine(models.Model):
         index=True
     )
     date_of_last_wip = fields.Date("Date Of Last WIP")
+    month_of_last_wip = fields.Many2one("date.range", "Month Of Last WIP")
 
     @api.multi
     def write(self, vals):
