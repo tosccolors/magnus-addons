@@ -5,6 +5,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError
+import calendar
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -19,6 +20,7 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
         ('write-off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
+        ('re_confirmed', 'Re-Confirmed'),
     ],
         string='Status',
         readonly=True,
@@ -32,6 +34,7 @@ class AccountAnalyticLine(models.Model):
         string='Summary Reference',
         index=True
     )
+    date_of_last_wip = fields.Date("Date Of Last WIP")
 
     @api.multi
     def write(self, vals):
@@ -81,4 +84,27 @@ class AccountAnalyticLine(models.Model):
                 or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
+
+    @api.model
+    def run_reconfirmation_process(self):
+        current_date = datetime.now().date()
+        pre_month_start_date = current_date.replace(day=1, month=current_date.month - 1)
+        pre_month_days = calendar.monthrange(pre_month_start_date.year, pre_month_start_date.month)[1]
+        pre_month_end_date = pre_month_start_date.replace(day=pre_month_days)
+        
+        domain = [('date_of_last_wip', '>=', pre_month_start_date), ('date_of_last_wip', '<=', pre_month_end_date), ('state', '=', 'delayed')]
+        query_line = self._where_calc(domain)
+        self_tables, where_clause, where_clause_params = query_line.get_sql()
+
+        list_query = ("""                    
+            UPDATE {0}
+            SET state = 're_confirmed'
+            WHERE {1}                          
+                 """.format(
+            self_tables,
+            where_clause
+        ))
+        self.env.cr.execute(list_query, where_clause_params)
+        return True
+        
 

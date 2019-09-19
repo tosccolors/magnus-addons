@@ -331,7 +331,24 @@ class AnalyticLineStatus(models.TransientModel):
                     if move:
                         move._post_validate()
                         move.post()
+
                     account_move |= move
+
+                    cond = '='
+                    rec = analytic_line_obj.ids[0]
+                    if len(analytic_line_obj) > 1:
+                        cond = 'IN'
+                        rec = tuple(analytic_line_obj.ids)
+
+                    line_query = ("""
+                                    UPDATE
+                                       account_analytic_line
+                                    SET date_of_last_wip = CURRENT_DATE
+                                    WHERE id {0} {1}
+                                    """.format(
+                        cond, rec))
+
+                    self.env.cr.execute(line_query)
 
         except Exception, e:
             raise FailedJobError(
@@ -354,4 +371,4 @@ class AnalyticLineStatus(models.TransientModel):
             except Exception, e:
                 raise FailedJobError(
                     _("The details of the error:'%s'") % (unicode(e)))
-        return "WIP Reversal moves successfully created %s.\n "
+        return "WIP Reversal moves successfully created.\n "

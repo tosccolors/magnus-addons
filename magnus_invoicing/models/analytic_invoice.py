@@ -432,8 +432,10 @@ class AnalyticInvoice(models.Model):
 
         # if invoicing period doesn't lie in same month
         period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-        cur_date = datetime.now().date().strftime("%Y-%m")
-        if cur_date > period_date:
+        # cur_date = datetime.now().date().strftime("%Y-%m")
+        invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
+        inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m')
+        if inv_date != period_date:
             fpos = self.invoice_id.fiscal_position_id
             account = self.get_product_wip_account(line.product_id, fpos)
             invoice_line_vals.update({
