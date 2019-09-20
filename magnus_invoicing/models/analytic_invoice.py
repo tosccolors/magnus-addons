@@ -63,9 +63,12 @@ class AnalyticInvoice(models.Model):
                 ana_ids |= t.detail_ids
 
         partner_id = self.partner_id or False
+        if self.project_id and self.link_project:
+            partner_id = self.project_id.partner_id
+
         if partner_id and len(self.account_analytic_ids) == 0:
             account_analytic = self.env['account.analytic.account'].search([
-                ('partner_id', '=', self.partner_id.id)])
+                ('partner_id', '=', partner_id.id)])
             if len(account_analytic) > 0:
                 self.account_analytic_ids = \
                     [(6, 0, account_analytic.ids)]
