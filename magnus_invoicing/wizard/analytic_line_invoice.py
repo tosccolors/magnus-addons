@@ -95,6 +95,10 @@ class AnalyticLineStatus(models.TransientModel):
                 month_id = res[2]
                 project_operating_unit_id = res[3]
 
+                if link_project:
+                    project_id = res[4]
+                    partner_id = self.env['project.project'].browse(project_id).invoice_address.id
+
                 search_domain = [
                     ('partner_id', '=', partner_id),
                     ('account_analytic_ids', 'in', analytic_account_ids),
@@ -102,7 +106,6 @@ class AnalyticLineStatus(models.TransientModel):
                     ('state', 'not in', ('invoiced', 're_confirmed')),
                     ('month_id', '=', month_id)]
                 if link_project:
-                    project_id = res[4]
                     search_domain += [('project_id', '=', project_id)]
                     search_domain += [('link_project', '=', True)]
                 else:
@@ -132,7 +135,6 @@ class AnalyticLineStatus(models.TransientModel):
                     }
                     if link_project:
                         data.update({'project_id': project_id, 'link_project': True})
-
                     analytic_invoice.create(data)
 
 
