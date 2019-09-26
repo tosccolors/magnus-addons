@@ -57,6 +57,19 @@
         </xpath>
       </field>
     </record>
+    
+    <!-- Added employee wizard button on kanban view -->
+    <record id="hr_hr_employee_view_form2_inherited" model="ir.ui.view">
+      <field name="name">hr.hr.employee.view.form2</field>
+      <field name="model">hr.employee</field>
+      <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='vehicle_distance']" position="after">
+          <field name="parttime" />
+          <field name="allocated_leaves" />
+        </xpath>
+      </field>
+    </record>
 
   </data>
 </odoo>
