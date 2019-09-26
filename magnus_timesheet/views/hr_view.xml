@@ -9,8 +9,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='user_id']" position="after">
                     <field name="planning_week"/>
-                    <field name="product_id"/>
-                    <field name="fee_rate"/>
+<!--                     <field name="product_id"/>
+ -->                    <field name="fee_rate"/>
                 </xpath>
             </field>
         </record>
@@ -21,8 +21,8 @@
             <field name="inherit_id" ref="hr.view_employee_tree"/>
             <field name="arch" type="xml">
                 <field name="job_id" position="after">
-                    <field name="product_id" />
-                    <field name="fee_rate" />
+<!--                     <field name="product_id" />
+ -->                    <field name="fee_rate" />
                 </field>
             </field>
         </record>
