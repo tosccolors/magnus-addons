@@ -33,7 +33,7 @@ class AccountInvoice(models.Model):
         """
         self.ensure_one()
         self.sent = True
-        return self.env['report'].get_action(self, 'account.invoice.custom')
+        return self.env['report'].get_action(self, 'magnus_account.report_invoice_magnus_account')
 
     @api.multi
     def group_by_analytic_acc(self, type, uom_hrs=False):
