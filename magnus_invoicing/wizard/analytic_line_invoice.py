@@ -25,7 +25,8 @@ class AnalyticLineStatus(models.TransientModel):
         "WIP"
     )
     wip_percentage = fields.Float(
-        "WIP Percentage"
+        "WIP Percentage",
+        default=100,
     )
     description = fields.Char(
         "Description"
@@ -52,7 +53,7 @@ class AnalyticLineStatus(models.TransientModel):
         )
         if len(result) > 1:
             raise ValidationError(
-                _("Entries must belongs to same month!"))
+                _("Entries must belong to same month!"))
         return True
 
     @api.one
@@ -78,7 +79,7 @@ class AnalyticLineStatus(models.TransientModel):
                 UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
                 """ % (status, cond, rec))
             self.env.invalidate_all()
-            if status == 'delayed' and self.wip_percentage > 0.0:
+            if status == 'delayed' and self.wip and self.wip_percentage > 0.0:
                 self.validate_entries_month(analytic_ids)
                 self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
                 # self.create_wip_move(analytic_ids)
@@ -134,6 +135,7 @@ class AnalyticLineStatus(models.TransientModel):
                         'fiscal_position_id': partner.property_account_position_id.id or False,
                         'user_id': self.env.user.id,
                         'company_id': self.env.user.company_id.id,
+                        'date_invoice': datetime.now().date(),
                     }
                     if link_project:
                         data.update({'project_id': project_id, 'link_project': True})
