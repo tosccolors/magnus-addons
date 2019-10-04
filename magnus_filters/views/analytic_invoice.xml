@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_analytic_invoice_filter_ou" model="ir.ui.view">
+            <field name="name">analytic.invoice.filter</field>
+            <field name="model">analytic.invoice</field>
+            <field name="inherit_id" ref="magnus_invoicing.view_analytic_invoice_filter"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//group[@name='groupbyfilter']" position="before">
+                 <separator string="Operating Unit Project"/>
+                    <filter name="red" string="Red"
+                            domain="[('project_operating_unit_id','=',%(ou.magnus_red)d)]"/>
+                    <filter name="blue" string="Blue"
+                            domain="[('project_operating_unit_id','=',%(ou.magnus_blue)d)]"/>
+                    <filter name="green" string="Green"
+                            domain="[('project_operating_unit_id','=',%(ou.magnus_green)d)]"/>
+                    <filter name="black" string="Black"
+                            domain="[('project_operating_unit_id','=',%(ou.magnus_black)d)]"/>
+                    <filter name="bquind" string="bQuind"
+                            domain="[('project_operating_unit_id','=',%(ou.magnus_bquind)d)]"/>
+                 <separator />
+                 </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>
