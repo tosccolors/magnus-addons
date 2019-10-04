@@ -60,7 +60,7 @@ The extended date range validation process is:
         'views/project_timesheet_view.xml',
         'views/project_view.xml',
         'views/hr_timesheet_assets.xml',
-        'views/hr_view.xml',
+        # 'views/hr_view.xml',
         'views/analytic_view.xml',
         'views/fleet_view.xml',
         'views/magnus_planning_views.xml',

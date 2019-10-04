@@ -331,7 +331,7 @@
                                                 <span t-field="line.jira_issue_type"></span>
                                             </td>
                                             <td style='border-top:none;' class="text-right" width="30%">
-                                                <span t-field="line.jira_key"/>-<span t-field="line.name"/>
+                                                <span t-field="line.jira_compound_key"/>-<span t-field="line.name"/>
                                             </td>
                                             <td style='border-top:none;' class="text-right" width="29%">
                                                 <span t-esc="line_value['unit_amount']"/>
