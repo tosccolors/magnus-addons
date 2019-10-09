@@ -29,8 +29,8 @@
       				<field name="ref"/>
       				<field name="default_operating_unit_id"/>
       				<field name="operating_unit_ids" widget="many2many_tags"/>
-      				<field name="department_id"/>
-      				<field name="product_id"/>
+      				<field name="department_id" domain="[('operating_unit_id','=',default_operating_unit_id)]"/>
+      				<field name="product_id" domain="[('categ_id.name','=','Fee Rate')]"/>
       			</group>
       		</group>
       		<separator string="HR Settings" colspan="4"/>
@@ -41,17 +41,17 @@
       				<field name="place_of_birth"/>
       				<label for="street" string="Address"/>
                      <div class="o_address_format">
-                         <field name="street" placeholder="Street..." class="o_address_street" />
-                         <field name="city" placeholder="City" class="o_address_city"/>
-                         <field name="zip" placeholder="ZIP" class="o_address_zip" />
-                         <field name="country_id" placeholder="Country" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+                         <field name="street" placeholder="Street..." class="o_address_street" required="1"/>
+                         <field name="zip" placeholder="ZIP" class="o_address_zip" required="1"/>
+                          <field name="city" placeholder="City" class="o_address_city" required="1"/>
+                         <field name="country_id" placeholder="Country" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}" required="1"/>
                      </div>
       			</group>
       			<group cols="4">
       				<field name="initial_employment_date"/>
       				<field name="official_date_of_employment"/>
       				<field name="temporary_contract"/>
-      				<field name="allocated_leaves"/>
+      				<field name="parent_id" domain="[('external','=',False)]"/>
       				<field name="account_id"/>
       			</group>
       			
