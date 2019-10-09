@@ -37,7 +37,7 @@
             		<attribute name="invisible">True</attribute>
             	</field> 
             	<field name='employee_id' position="replace">
-            		<field name="employee_id" groups="credit_card_expenses.group_expenses_superuser"></field>
+            		<field name="employee_id" groups="magnus_credit_card_expenses.group_expenses_superuser"></field>
             	</field>
             </field>
         </record>
