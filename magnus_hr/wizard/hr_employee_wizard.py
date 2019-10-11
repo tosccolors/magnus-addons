@@ -23,7 +23,7 @@ class HREmployeeWizard(models.TransientModel):
     department_id = fields.Many2one("hr.department","Department")
     default_operating_unit_id = fields.Many2one("operating.unit","Default operating unit")
     operating_unit_ids = fields.Many2many("operating.unit",string="Operating unit")
-    allocated_leaves = fields.Integer("Allocated Leaves")
+#     allocated_leaves = fields.Integer("Allocated Leaves")
     product_id = fields.Many2one("product.product","Free rate product")
     #Address
     street = fields.Char("Street")
@@ -39,7 +39,18 @@ class HREmployeeWizard(models.TransientModel):
     external = fields.Boolean("External")
     
     role_line_ids = fields.One2many("users.role.wizard","user_role_id","Roles")
+    
+    parent_id = fields.Many2one("hr.employee","Manager")
 
+    @api.model
+    def default_get(self, field_list):
+        res = super(HREmployeeWizard, self).default_get(field_list)
+        operating_unit_ids = self.env['operating.unit'].search([])
+        res.update({
+           'operating_unit_ids':operating_unit_ids.ids
+        })
+        return res
+    
     @api.multi
     def create_employee(self):
         emp_dict = {}
@@ -61,7 +72,7 @@ class HREmployeeWizard(models.TransientModel):
         place_of_birth = self.place_of_birth
         bank_id = self.bank_name_id and self.bank_name_id.id
         department_id = self.department_id and self.department_id.id
-        allocated_leaves = self.allocated_leaves
+#         allocated_leaves = self.allocated_leaves
         account_id = self.account_id and self.account_id.id
         initial_employment_date = self.initial_employment_date
         official_date_of_employment = self.official_date_of_employment
@@ -78,7 +89,7 @@ class HREmployeeWizard(models.TransientModel):
         product_id = self.product_id and self.product_id.id
         default_operating_unit_id = self.default_operating_unit_id and self.default_operating_unit_id.id
         operating_unit_ids = self.operating_unit_ids and self.operating_unit_ids.ids
-        
+        parent_id = self.parent_id and self.parent_id.id
         full_name=''
         if firstname and lastname:
             full_name = firstname +' '+ lastname
@@ -109,10 +120,11 @@ class HREmployeeWizard(models.TransientModel):
         if res_partner_bank_id:
             res_partner_bank_id = res_partner_bank_id 
         else:
-            res_partner_bank_id = res_partner_bank.create({'acc_number':acc_number,
-                                     'bank_id':bank_id,
-                                     'partner_id':res_partner_id and res_partner_id.id
-                                     })
+            if acc_number:
+                res_partner_bank_id = res_partner_bank.create({'acc_number':acc_number,
+                                         'bank_id':bank_id,
+                                         'partner_id':res_partner_id and res_partner_id.id
+                                         })
         
         emp_dict.update({'name':full_name,
                          'firstname':firstname,
@@ -124,7 +136,6 @@ class HREmployeeWizard(models.TransientModel):
                          'place_of_birth':place_of_birth,
                          'bank_account_id':res_partner_bank_id and res_partner_bank_id.id,
                          'department_id':department_id,
-                         'allocated_leaves':allocated_leaves,
                          'account_id':account_id,
                          'initial_employment_date':initial_employment_date,
                          'official_date_of_employment':official_date_of_employment,
@@ -132,6 +143,7 @@ class HREmployeeWizard(models.TransientModel):
                          'category_ids':[(6, 0, category_ids)],
                          'external':external,
                           'product_id':product_id,
+                          'parent_id':parent_id,
                          })
         employee_id = hr_employee.create(emp_dict)
         
@@ -148,8 +160,13 @@ class HREmployeeWizard(models.TransientModel):
                            'user_id':hr_user_id and hr_user_id.id})
         
         list_role = []
+        data = {}
+        flag=False
+        list_role.append((6, 0, data))
+        hr_user_id.write({'role_line_ids':list_role})
+        list_role = []
         for role in self.role_line_ids:
-            data = {'role_id':role.id,
+            data = {'role_id':role.role_id.id,
                               'date_from':role.from_date,
                               'date_to':role.to_date,
                               'user_id':hr_user_id and hr_user_id.id}
@@ -169,11 +186,6 @@ class UsersRoleWizard(models.TransientModel):
     is_enable = fields.Boolean("Enabled")
     
 
-    
-    
-    
-    
-    
     
     
     
