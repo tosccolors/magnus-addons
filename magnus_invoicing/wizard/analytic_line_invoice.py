@@ -79,8 +79,8 @@ class AnalyticLineStatus(models.TransientModel):
             self.env.invalidate_all()
             if status == 'delayed' and self.wip and self.wip_percentage > 0.0:
                 self.validate_entries_month(analytic_ids)
-                # self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
-                self.prepare_account_move(analytic_ids)
+                self.with_delay(description="WIP Posting").prepare_account_move(analytic_ids)
+                # self.prepare_account_move(analytic_ids)
             if status == 'invoiceable':
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
@@ -256,7 +256,7 @@ class AnalyticLineStatus(models.TransientModel):
         res.append(move_line_credit)
         return res
 
-    # @job
+    @job
     @api.multi
     def prepare_account_move(self, analytic_lines_ids):
         """ Creates analytics related financial move lines """
@@ -359,12 +359,12 @@ class AnalyticLineStatus(models.TransientModel):
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
 
-        # self.with_delay(eta=datetime.now(), description="WIP Reversal").wip_reversal(account_move)
-        self.wip_reversal(account_move)
+        self.with_delay(description="WIP Reversal").wip_reversal(account_move)
+        # self.wip_reversal(account_move)
 
         return "WIP moves successfully created. Reversal will be processed in separate jobs.\n "
 
-    # @job
+    @job
     @api.multi
     def wip_reversal(self, moves):
         for move in moves:
