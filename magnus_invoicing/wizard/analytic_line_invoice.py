@@ -215,7 +215,7 @@ class AnalyticLineStatus(models.TransientModel):
     def _calculate_fee_rate(self, line):
         amount = line.get_fee_rate_amount(False, False)
         if self.wip and self.wip_percentage > 0:
-            amount = amount - (amount * (self.wip_percentage / 100))
+            amount = amount * (self.wip_percentage / 100)
         return amount
 
     @api.model
