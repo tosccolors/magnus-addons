@@ -31,6 +31,8 @@
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="month_id" attrs="{'invisible':[('month_id', '=', False)]}"/>
             </xpath>
+            <xpath expr="//field[@name='move_id']" position="after">
+                <field name="wip_move_id" groups="account.group_account_manager" attrs="{'invisible': [('wip_move_id', '=', False)]}"/>            </xpath>
         </field>
     </record>
       <!-- Update account invoice from sale module !-->
