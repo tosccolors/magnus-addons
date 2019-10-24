@@ -90,11 +90,11 @@ class AccountAnalyticLine(models.Model):
     @api.model
     def run_reconfirmation_process(self):
         current_date = datetime.now().date()
-        pre_month_start_date = current_date.replace(day=1, month=current_date.month - 1)
-        pre_month_days = calendar.monthrange(pre_month_start_date.year, pre_month_start_date.month)[1]
-        pre_month_end_date = pre_month_start_date.replace(day=pre_month_days)
+        # pre_month_start_date = current_date.replace(day=1, month=current_date.month - 1)
+        month_days = calendar.monthrange(current_date.year, current_date.month)[1]
+        month_end_date = current_date.replace(day=month_days)
         
-        domain = [('date_of_last_wip', '<=', pre_month_end_date), ('state', '=', 'delayed')]
+        domain = [('date_of_next_reconfirmation', '<=', month_end_date), ('state', '=', 'delayed')]
         query_line = self._where_calc(domain)
         self_tables, where_clause, where_clause_params = query_line.get_sql()
 
