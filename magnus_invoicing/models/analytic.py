@@ -37,7 +37,8 @@ class AccountAnalyticLine(models.Model):
         index=True
     )
     date_of_last_wip = fields.Date("Date Of Last WIP")
-    month_of_last_wip = fields.Many2one("date.range", "Month Of Last WIP")
+    date_of_next_reconfirmation = fields.Date("Date Of Next Reconfirmation")
+    month_of_last_wip = fields.Many2one("date.range", "Month Of Next Reconfirmation")
 
     @api.multi
     def write(self, vals):
@@ -95,7 +96,7 @@ class AccountAnalyticLine(models.Model):
         pre_month_days = calendar.monthrange(pre_month_start_date.year, pre_month_start_date.month)[1]
         pre_month_end_date = pre_month_start_date.replace(day=pre_month_days)
         
-        domain = [('date_of_last_wip', '>=', pre_month_start_date), ('date_of_last_wip', '<=', pre_month_end_date), ('state', '=', 'delayed')]
+        domain = [('date_of_last_wip', '<=', pre_month_end_date), ('state', '=', 'delayed')]
         query_line = self._where_calc(domain)
         self_tables, where_clause, where_clause_params = query_line.get_sql()
 

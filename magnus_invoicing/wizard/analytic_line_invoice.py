@@ -344,16 +344,20 @@ class AnalyticLineStatus(models.TransientModel):
                         cond = 'IN'
                         rec = tuple(analytic_line_obj.ids)
 
-                    wip_month_id = analytic_line_obj[0].find_daterange_month(datetime.now().strftime("%Y-%m-%d"))
+                    first_of_next_month_date = (datetime.strptime(date_end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+                    wip_month_id = analytic_line_obj[0].find_daterange_month(first_of_next_month_date)
 
                     line_query = ("""
                                     UPDATE
                                        account_analytic_line
-                                    SET date_of_last_wip = CURRENT_DATE, month_of_last_wip = {0}
-                                    WHERE id {1} {2}
+                                    SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}
+                                    WHERE id {3} {4}
                                     """.format(
-                        wip_month_id.id or False, cond, rec))
-
+                                    "'%s'" % date_end,
+                                    "'%s'" % first_of_next_month_date,
+                                    wip_month_id.id or False,
+                                    cond,
+                                    rec))
                     self.env.cr.execute(line_query)
 
         except Exception, e:
