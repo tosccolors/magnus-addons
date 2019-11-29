@@ -10,6 +10,16 @@ import calendar
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
+    @api.one
+#    @api.depends('month_of_last_wip')
+    def _compute_month_id(self):
+        if self.month_of_last_wip:
+            date_end = self.env['date.range'].browse(month_of_last_wip).date_end
+            first_of_next_month_date = (datetime.strptime(date_end, "%Y-%m-%d") + timedelta(days=1)).strftime(
+                "%Y-%m-%d")
+            self.wip_month_id = self.find_daterange_month(first_of_next_month_date)
+        else self.wip_month_id = self.month_id
+
     state = fields.Selection([
         ('draft', 'Draft'),
         ('open', 'Confirmed'),
@@ -35,12 +45,15 @@ class AccountAnalyticLine(models.Model):
         index=True
     )
     date_of_last_wip = fields.Date("Date Of Last WIP")
+    wip_month_id = fields.Many2one('date.range',
+        compute='_compute_month_id',
+        string="Month of Analytic Line or last Wip Posting")
     date_of_next_reconfirmation = fields.Date("Date Of Next Reconfirmation")
     month_of_last_wip = fields.Many2one("date.range", "Month Of Next Reconfirmation")
 
     @api.multi
     def write(self, vals):
-        #Condition to check if sheet_id is already exists!
+        #Condition to check if sheet_id already exists!
         if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
             raise ValidationError(_(
                 'Timesheet link can not be deleted for %s.\n '
@@ -100,7 +113,7 @@ class AccountAnalyticLine(models.Model):
 
         list_query = ("""                    
             UPDATE {0}
-            SET state = 're_confirmed'
+            SET state = 're_confirmed', date_of_next_reconfirmation = false
             WHERE {1}                          
                  """.format(
             self_tables,

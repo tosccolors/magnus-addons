@@ -264,17 +264,18 @@ class AnalyticLineStatus(models.TransientModel):
         account_move = self.env['account.move']
 
 
+
         fields_grouped = [
             'id',
             'partner_id',
             'operating_unit_id',
-            'month_id',
+            'wip_month_id',
             'company_id',
         ]
         grouped_by = [
             'partner_id',
             'operating_unit_id',
-            'month_id',
+            'wip_month_id',
             'company_id',
         ]
 
@@ -296,7 +297,7 @@ class AnalyticLineStatus(models.TransientModel):
                 for item in result:
                     partner_id = item['partner_id'][0]
                     operating_unit_id = item['operating_unit_id'][0]
-                    month_id = item['month_id'][0]
+                    month_id = item['wip_month_id'][0]
                     company_id = item['company_id'][0]
 
                     date_end = self.env['date.range'].browse(month_id).date_end
@@ -362,9 +363,9 @@ class AnalyticLineStatus(models.TransientModel):
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
 
-        self.with_delay(eta=datetime.now(), description="WIP Reversal").wip_reversal(account_move)
+        self.wip_reversal(account_move)
 
-        return "WIP moves successfully created. Reversal will be processed in separate jobs.\n "
+        return "WIP moves amd Reversals successfully created. \n "
 
     @job
     @api.multi
@@ -375,8 +376,8 @@ class AnalyticLineStatus(models.TransientModel):
                 move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
-                    reconcile=False)
+                    reconcile=True)
             except Exception, e:
                 raise FailedJobError(
                     _("The details of the error:'%s'") % (unicode(e)))
-        return "WIP Reversal moves successfully created.\n "
+        return True
