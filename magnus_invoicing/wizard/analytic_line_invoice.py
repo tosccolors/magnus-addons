@@ -259,12 +259,8 @@ class AnalyticLineStatus(models.TransientModel):
     @api.multi
     def prepare_account_move(self, analytic_lines_ids):
         """ Creates analytics related financial move lines """
-
         acc_analytic_line = self.env['account.analytic.line']
         account_move = self.env['account.move']
-
-
-
         fields_grouped = [
             'id',
             'partner_id',
@@ -278,7 +274,6 @@ class AnalyticLineStatus(models.TransientModel):
             'wip_month_id',
             'company_id',
         ]
-
         result = acc_analytic_line.read_group(
             [('id','in', analytic_lines_ids)],
             fields_grouped,
@@ -349,7 +344,7 @@ class AnalyticLineStatus(models.TransientModel):
                     line_query = ("""
                                     UPDATE
                                        account_analytic_line
-                                    SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}
+                                    SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}, wip_month_id = {2}
                                     WHERE id {3} {4}
                                     """.format(
                                     "'%s'" % date_end,
