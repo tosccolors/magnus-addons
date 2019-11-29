@@ -18,7 +18,8 @@ class AccountAnalyticLine(models.Model):
             first_of_next_month_date = (datetime.strptime(date_end, "%Y-%m-%d") + timedelta(days=1)).strftime(
                 "%Y-%m-%d")
             self.wip_month_id = self.find_daterange_month(first_of_next_month_date)
-        else self.wip_month_id = self.month_id
+        else:
+            self.wip_month_id = self.month_id
 
     state = fields.Selection([
         ('draft', 'Draft'),
