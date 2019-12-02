@@ -259,25 +259,21 @@ class AnalyticLineStatus(models.TransientModel):
     @api.multi
     def prepare_account_move(self, analytic_lines_ids):
         """ Creates analytics related financial move lines """
-
         acc_analytic_line = self.env['account.analytic.line']
         account_move = self.env['account.move']
-
-
         fields_grouped = [
             'id',
             'partner_id',
             'operating_unit_id',
-            'month_id',
+            'wip_month_id',
             'company_id',
         ]
         grouped_by = [
             'partner_id',
             'operating_unit_id',
-            'month_id',
+            'wip_month_id',
             'company_id',
         ]
-
         result = acc_analytic_line.read_group(
             [('id','in', analytic_lines_ids)],
             fields_grouped,
@@ -296,7 +292,7 @@ class AnalyticLineStatus(models.TransientModel):
                 for item in result:
                     partner_id = item['partner_id'][0]
                     operating_unit_id = item['operating_unit_id'][0]
-                    month_id = item['month_id'][0]
+                    month_id = item['wip_month_id'][0]
                     company_id = item['company_id'][0]
 
                     date_end = self.env['date.range'].browse(month_id).date_end
@@ -348,7 +344,7 @@ class AnalyticLineStatus(models.TransientModel):
                     line_query = ("""
                                     UPDATE
                                        account_analytic_line
-                                    SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}
+                                    SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}, wip_month_id = {2}
                                     WHERE id {3} {4}
                                     """.format(
                                     "'%s'" % date_end,
@@ -362,9 +358,9 @@ class AnalyticLineStatus(models.TransientModel):
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
 
-        self.with_delay(eta=datetime.now(), description="WIP Reversal").wip_reversal(account_move)
+        self.wip_reversal(account_move)
 
-        return "WIP moves successfully created. Reversal will be processed in separate jobs.\n "
+        return "WIP moves amd Reversals successfully created. \n "
 
     @job
     @api.multi
@@ -375,8 +371,8 @@ class AnalyticLineStatus(models.TransientModel):
                 move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
-                    reconcile=False)
+                    reconcile=True)
             except Exception, e:
                 raise FailedJobError(
                     _("The details of the error:'%s'") % (unicode(e)))
-        return "WIP Reversal moves successfully created.\n "
+        return True
