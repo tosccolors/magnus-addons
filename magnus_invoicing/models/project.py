@@ -3,7 +3,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api
-from datetime import datetime
 
 
 class Project(models.Model):
@@ -66,11 +65,6 @@ class TaskUser(models.Model):
         default=_default_fee_rate,
         string='Fee Rate',
     )
-    
-    from_date = fields.Date(
-        string='From Date',
-        default=datetime.today()
-    )
 
     @api.onchange('user_id')
     def onchange_user_id(self):
@@ -82,12 +76,6 @@ class TaskUser(models.Model):
                 product = emp.product_id
                 self.product_id = product.id
                 self.fee_rate = product.lst_price
-
-    @api.multi
-    def get_user_fee_rate(self, task_id, user_id):
-        date_now = fields.Date.today()
-        taskUserObj = self.search([('from_date', '<=', date_now), ('task_id', '=', task_id), ('user_id', '=', user_id)], order='from_date Desc', limit=1)
-        return taskUserObj
 
 class InvoiceScheduleLine(models.Model):
     _name = 'invoice.schedule.lines'

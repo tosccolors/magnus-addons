@@ -173,11 +173,8 @@ class AnalyticInvoice(models.Model):
                     vals['detail_ids'] = childData
 
                     userTotData.append((0, 0, vals))
-                    # task-358
-                    date_now = fields.Date.today()
-                    taskUser = taskUserObj.search(
-                        [('task_id', '=', vals['task_id']), ('from_date', '<=', date_now), ('user_id', '=', vals['user_id'])],
-                        limit=1, order='from_date Desc')
+
+                    taskUser = taskUserObj.search([('task_id', '=', vals['task_id']),('user_id', '=', vals['user_id'])], limit=1)
                     taskUserIds += taskUser.ids
 
                     if taskUserIds:
