@@ -112,8 +112,8 @@ class AccountInvoice(models.Model):
     @api.model
     def get_wip_default_account(self):
         if self.type in ('out_invoice', 'in_refund'):
-            return self.journal_id.default_credit_account_id.id
-        return self.journal_id.default_debit_account_id.id
+            return self.line.product_id.property_account_income_id.id
+        return self.line.product_id.property_account_wip_id.id
 
     @api.model
     def invoice_line_wip_move_line_get(self):
