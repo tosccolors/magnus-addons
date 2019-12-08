@@ -112,8 +112,8 @@ class AccountInvoice(models.Model):
     @api.model
     def get_wip_default_account(self):
         if self.type in ('out_invoice', 'in_refund'):
-            return self.line.product_id.property_account_income_id.id
-        return self.line.product_id.property_account_wip_id.id
+            return self.journal_id.default_credit_account_id.id
+        return self.journal_id.default_debit_account_id.id
 
     @api.model
     def invoice_line_wip_move_line_get(self):
@@ -142,7 +142,10 @@ class AccountInvoice(models.Model):
                 'uom_id': line.uom_id.id,
                 'account_analytic_id': line.account_analytic_id.id,
                 'tax_ids': tax_ids,
-                'analytic_tag_ids': analytic_tag_ids
+                'partner_id': line.partner_id.id or False,
+                'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
+                'user_id': line.user_id and line.user_id.id or False
+
             }
             if line['account_analytic_id']:
                 move_line_dict['analytic_line_ids'] = [(0, 0, line._get_analytic_line())]
