@@ -142,10 +142,7 @@ class AccountInvoice(models.Model):
                 'uom_id': line.uom_id.id,
                 'account_analytic_id': line.account_analytic_id.id,
                 'tax_ids': tax_ids,
-                'partner_id': line.partner_id.id or False,
-                'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
-                'user_id': line.user_id and line.user_id.id or False
-
+                'operating_unit_id': line.operating_unit_id.id,
             }
             if line['account_analytic_id']:
                 move_line_dict['analytic_line_ids'] = [(0, 0, line._get_analytic_line())]
