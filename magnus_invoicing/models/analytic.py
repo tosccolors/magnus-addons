@@ -106,7 +106,7 @@ class AccountAnalyticLine(models.Model):
         month_days = calendar.monthrange(current_date.year, current_date.month)[1]
         month_end_date = current_date.replace(day=month_days)
         
-        domain = [('date_of_next_reconfirmation', '<=', month_end_date), ('state', '=', 'delayed')]
+        domain = [('date_of_next_reconfirmation', '!=', False),('date_of_next_reconfirmation', '<=', month_end_date), ('state', '=', 'delayed')]
         query_line = self._where_calc(domain)
         self_tables, where_clause, where_clause_params = query_line.get_sql()
 
