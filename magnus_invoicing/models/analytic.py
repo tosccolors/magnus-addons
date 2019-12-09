@@ -112,7 +112,7 @@ class AccountAnalyticLine(models.Model):
 
         list_query = ("""                    
             UPDATE {0}
-            SET state = 're_confirmed', date_of_next_reconfirmation = false
+            SET state = 're_confirmed', date_of_next_reconfirmation = null
             WHERE {1}                          
                  """.format(
             self_tables,
