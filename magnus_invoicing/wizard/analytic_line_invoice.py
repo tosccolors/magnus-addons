@@ -12,7 +12,9 @@ class AnalyticLineStatus(models.TransientModel):
         ('invoiceable', 'To be invoiced'),
         ('delayed', 'Delayed'),
         ('write-off', 'Write-Off'),
-        ('open', 'Confirmed')
+        ('open', 'Confirmed'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
     ], string='Lines to be'
     )
     wip = fields.Boolean(

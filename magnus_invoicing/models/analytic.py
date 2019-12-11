@@ -19,6 +19,8 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
         ('write-off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
     ],
         string='Status',
         readonly=True,
