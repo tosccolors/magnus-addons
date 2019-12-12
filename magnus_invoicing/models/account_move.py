@@ -70,7 +70,8 @@ class AccountMove(models.Model):
         mls = wip_move.line_ids
         ## we filter all P&L lines out of all move lines, including AR line(s) and OU-clearing lines (which are not P&L).
         # All filtered out lines are unlinked. All except AR line will be kept unchanged. AR line will become wip line.
-        ids = accids = []
+        ids = []
+        accids = []
         ids.append(self.env.ref('account.data_account_type_other_income').id)
         ids.append(self.env.ref('account.data_account_type_revenue').id)
         ids.append(self.env.ref('account.data_account_type_depreciation').id)
