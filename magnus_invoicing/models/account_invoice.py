@@ -157,10 +157,14 @@ class AccountInvoice(models.Model):
             wip_journal = self.env.ref('magnus_invoicing.wip_journal')
             if not wip_journal.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
-            if inv.wip_move_id:
+            sequence = wip_journal.sequence_id
+            if inv.type in ['out_refund', 'in_invoice','in_refund'] or inv.wip_move_id:
                 continue
+            date_end = inv.month_id.date_end
+
+            new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
             if inv.move_id:
-                wip_move = account_move.wip_move_create(inv.move_id, wip_journal, inv.account_id.id)
+                wip_move = account_move.wip_move_create(inv.move_id, wip_journal, new_name, inv.account_id.id)
             wip_move.post()
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id
@@ -187,7 +191,7 @@ class AccountInvoice(models.Model):
         wip_moves = self.env['account.move']
         for inv in self:
             if inv.wip_move_id:
-                wip_moves += inv.move_id
+                wip_moves += inv.wip_move_id
 
         # First, set the invoices as cancelled and detach the move ids
         self.write({'wip_move_id': False})
