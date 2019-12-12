@@ -29,7 +29,7 @@
                 <field name="user_id"/>
             </xpath>
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="month_id" attrs="{'invisible':[('month_id', '=', False)]}"/>
+                <field name="month_id" />
             </xpath>
             <xpath expr="//field[@name='move_id']" position="after">
                 <field name="wip_move_id" groups="account.group_account_manager" attrs="{'invisible': [('wip_move_id', '=', False)]}"/>            </xpath>
