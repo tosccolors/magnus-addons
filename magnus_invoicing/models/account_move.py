@@ -89,7 +89,7 @@ class AccountMove(models.Model):
         bs_move_lines.unlink()
         ar_line.credit = amount if amount > 0 else 0
         ar_line.debit = -amount if amount < 0 else 0
-        ar_line.account_id = wip_journal.default_credit_account_id
+        ar_line.account_id = wip_journal.default_credit_account_id.id
         return wip_move
 
 
