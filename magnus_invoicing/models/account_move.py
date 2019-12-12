@@ -64,7 +64,6 @@ class AccountMove(models.Model):
             'journal_id': wip_journal.id,
             'date': last_day_month_before,
             'narration': 'WIP Invoicing Posting',
-         #   'name': "new_name",
             'to_be_reversed': True,
         }
         wip_move = self.copy(default)
@@ -90,6 +89,6 @@ class AccountMove(models.Model):
         ar_line.credit = -amount if amount < 0 else 0
         ar_line.debit = amount if amount > 0 else 0
         ar_line.account_id = wip_journal.default_credit_account_id.id
-
+        return wip_move
 
 
