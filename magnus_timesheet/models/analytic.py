@@ -67,10 +67,14 @@ class AccountAnalyticLine(models.Model):
                 if not line.planned:
                     if line.sheet_id.week_id and line.date:
                         line.week_id = line.sheet_id.week_id
-                        line.month_id = line.find_daterange_month(line.date)
+                        var_month_id = line.find_daterange_month(line.date)
                     elif line.date:
                         line.week_id = line.find_daterange_week(line.date)
-                        line.month_id = line.find_daterange_month(line.date)
+                        var_month_id = line.find_daterange_month(line.date)
+                    if line.month_of_last_wip:
+                        line.wip_month_id = self.month_of_last_wip
+                    else:
+                        line.wip_month_id = line.month_id = var_month_id
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
                 task = line.task_id
@@ -177,6 +181,16 @@ class AccountAnalyticLine(models.Model):
         string='Month',
         store=True,
     )
+    wip_month_id = fields.Many2one(
+        'date.range',
+        compute=_compute_analytic_line,
+        store=True,
+        string="Month of Analytic Line or last Wip Posting"
+    )
+    month_of_last_wip = fields.Many2one(
+        "date.range",
+        "Month Of Next Reconfirmation"
+    )
     operating_unit_id = fields.Many2one(
         'operating.unit',
         compute=_compute_analytic_line,
@@ -271,13 +285,14 @@ class AccountAnalyticLine(models.Model):
     def get_fee_rate(self, task_id=None, user_id=None):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
+        date = self.date or False
         amount, fr = 0.0, 0.0
-        if uid and tid:
+        if uid and tid and date:
             # task-358
             # task_user = self.env['task.user'].search([
             #     ('user_id', '=', uid),
             #     ('task_id', '=', tid)], limit=1)
-            task_user = self.env['task.user'].get_user_fee_rate(tid, uid)
+            task_user = self.env['task.user'].get_user_fee_rate(tid, uid, date)
             if task_user and task_user.fee_rate or task_user.product_id:
                 fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
             # check standard task for fee earners
@@ -286,7 +301,7 @@ class AccountAnalyticLine(models.Model):
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
                     # task-358
-                    task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid)
+                    task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid, date)
                     # task_user = self.env['task.user'].search([('task_id', '=', standard_task.id), ('user_id', '=', uid)],
                     #                               limit=1)
                     if task_user and task_user.fee_rate or task_user.product_id:

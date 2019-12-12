@@ -5,9 +5,21 @@
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError
+import calendar
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
+
+    # @api.one
+    # @api.depends('month_of_last_wip')
+    # def _compute_month_id(self):
+    #     if self.month_of_last_wip:
+    #         date_end = self.env['date.range'].browse(month_of_last_wip).date_end
+    #         first_of_next_month_date = (datetime.strptime(date_end, "%Y-%m-%d") + timedelta(days=1)).strftime(
+    #             "%Y-%m-%d")
+    #         self.wip_month_id = self.find_daterange_month(first_of_next_month_date)
+    #     else:
+    #         self.wip_month_id = self.month_id
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -19,6 +31,9 @@ class AccountAnalyticLine(models.Model):
         ('invoiced', 'Invoiced'),
         ('write-off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
+        ('re_confirmed', 'Re-Confirmed'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
     ],
         string='Status',
         readonly=True,
@@ -32,10 +47,12 @@ class AccountAnalyticLine(models.Model):
         string='Summary Reference',
         index=True
     )
+    date_of_last_wip = fields.Date("Date Of Last WIP")
+    date_of_next_reconfirmation = fields.Date("Date Of Next Reconfirmation")
 
     @api.multi
     def write(self, vals):
-        #Condition to check if sheet_id is already exists!
+        #Condition to check if sheet_id already exists!
         if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
             raise ValidationError(_(
                 'Timesheet link can not be deleted for %s.\n '
@@ -81,4 +98,27 @@ class AccountAnalyticLine(models.Model):
                 or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
+
+    @api.model
+    def run_reconfirmation_process(self):
+        current_date = datetime.now().date()
+        # pre_month_start_date = current_date.replace(day=1, month=current_date.month - 1)
+        month_days = calendar.monthrange(current_date.year, current_date.month)[1]
+        month_end_date = current_date.replace(day=month_days)
+        
+        domain = [('date_of_next_reconfirmation', '!=', False),('date_of_next_reconfirmation', '<=', month_end_date), ('state', '=', 'delayed')]
+        query_line = self._where_calc(domain)
+        self_tables, where_clause, where_clause_params = query_line.get_sql()
+
+        list_query = ("""                    
+            UPDATE {0}
+            SET state = 're_confirmed', date_of_next_reconfirmation = null
+            WHERE {1}                          
+                 """.format(
+            self_tables,
+            where_clause
+        ))
+        self.env.cr.execute(list_query, where_clause_params)
+        return True
+        
 

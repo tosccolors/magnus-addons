@@ -63,9 +63,12 @@ class AnalyticInvoice(models.Model):
                 ana_ids |= t.detail_ids
 
         partner_id = self.partner_id or False
+        if self.project_id and self.link_project:
+            partner_id = self.project_id.partner_id
+
         if partner_id and len(self.account_analytic_ids) == 0:
             account_analytic = self.env['account.analytic.account'].search([
-                ('partner_id', '=', self.partner_id.id)])
+                ('partner_id', '=', partner_id.id)])
             if len(account_analytic) > 0:
                 self.account_analytic_ids = \
                     [(6, 0, account_analytic.ids)]
@@ -431,14 +434,17 @@ class AnalyticInvoice(models.Model):
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
 
         # if invoicing period doesn't lie in same month
-        period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-        cur_date = datetime.now().date().strftime("%Y-%m")
-        if cur_date > period_date:
-            fpos = self.invoice_id.fiscal_position_id
-            account = self.get_product_wip_account(line.product_id, fpos)
-            invoice_line_vals.update({
-                    'account_id':account.id
-                })
+        # period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+        # cur_date = datetime.now().date().strftime("%Y-%m")
+        # invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
+        #
+        # inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
+        # if inv_date != period_date:
+        #     fpos = self.invoice_id.fiscal_position_id
+        #     account = self.get_product_wip_account(line.product_id, fpos)
+        #     invoice_line_vals.update({
+        #             'account_id':account.id
+        #         })
 
         invoice_line_vals.update({
             'account_analytic_id': line.account_id and line.account_id.id or False,
@@ -556,6 +562,28 @@ class AnalyticInvoice(models.Model):
                 else:
                     result[user_tot.project_id] = user_tot.detail_ids
         return result
+
+    @api.multi
+    def _get_specs_on_task(self):
+        self.ensure_one()
+        res = {}
+        # FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
+        user_total_objs = self.user_total_ids
+        if not user_total_objs:
+            usrTotIDS = self.read(['user_total_ids'])[0]['user_total_ids']
+            user_total_objs = self.user_total_ids.browse(usrTotIDS)
+
+        for user_tot in user_total_objs:
+            if user_tot.project_id.invoice_properties.specs_invoice_report and user_tot.project_id.invoice_properties.specs_on_task_level:
+                if user_tot.project_id in res:
+                    if user_tot.task_id in res[user_tot.project_id]:
+                        res[user_tot.project_id][user_tot.task_id]['unit_amount'] += user_tot.unit_amount
+                    else:
+                        res[user_tot.project_id][user_tot.task_id] = {'unit_amount': user_tot.unit_amount}
+                else:
+                    res[user_tot.project_id] = {}
+                    res[user_tot.project_id][user_tot.task_id] = {'unit_amount': user_tot.unit_amount}
+        return res
 
 
 

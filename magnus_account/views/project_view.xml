@@ -31,6 +31,9 @@
                         <field name="custom_footer" attrs="{'invisible':[('custom_layout', '=', False)],'required':[('custom_layout', '=', True)]}"/>
                     </group>
                 </xpath>
+                <xpath expr="//field[@name='specs_invoice_report']" position="after">
+                    <field name="specs_on_task_level"/>
+                </xpath>
             </field>
         </record>
 

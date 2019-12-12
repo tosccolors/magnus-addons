@@ -309,6 +309,41 @@
                             </table>
                         </t>
                     </div>
+
+                    <div style="padding-left:85px;padding-right:15px;page-break-inside:avoid;">
+                        <t t-foreach="analytic_invoice_id[0]._get_specs_on_task()" t-as="proLines">
+                            <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report and proLines.invoice_properties.specs_on_task_level">
+                                <table class="table table-condensed table-padding" style="border:none;width:85%;">
+                                    <br/>
+                                    <div><strong>Specification On Task Level</strong></div>
+                                    <thead>
+                                        <th style="font-weight:normal;" width="20%">Project</th>
+                                        <th style="font-weight:normal;" class="text-right" width="30%">Task type</th>
+                                        <th style="font-weight:normal;" class="text-right" width="30%">Jira Key</th>
+                                        <th style="font-weight:normal;" class="text-right" width="20%">Quantity</th>
+                                    </thead>
+                                    <t t-foreach="proLines_value" t-as="line">
+                                        <tr>
+                                            <td style='border-top:none;' width="20%">
+                                                <span t-field="proLines.analytic_account_related.name"/>
+                                            </td>
+                                            <td style='border-top:none;' class="text-right" width="30%">
+                                                <span t-field="line.jira_issue_type"></span>
+                                            </td>
+                                            <td style='border-top:none;' class="text-right" width="30%">
+                                                <span t-field="line.jira_compound_key"/>-<span t-field="line.name"/>
+                                            </td>
+                                            <td style='border-top:none;' class="text-right" width="29%">
+                                                <span t-esc="line_value['unit_amount']"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </table>
+
+                            </t>
+
+                        </t>
+                    </div>
                 </t>
             </t>
         </div>
