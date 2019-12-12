@@ -115,7 +115,7 @@ class AccountInvoice(models.Model):
             return self.journal_id.default_credit_account_id.id
         return self.journal_id.default_debit_account_id.id
 
-    @api.model
+    '''@api.model
     def invoice_line_wip_move_line_get(self):
         res = []
         for line in self.invoice_line_ids:
@@ -147,119 +147,37 @@ class AccountInvoice(models.Model):
             if line['account_analytic_id']:
                 move_line_dict['analytic_line_ids'] = [(0, 0, line._get_analytic_line())]
             res.append(move_line_dict)
-        return res
+        return res'''
 
     @api.multi
     def action_wip_move_create(self):
         """ Creates invoice related analytics and financial move lines """
         account_move = self.env['account.move']
-
         for inv in self:
             wip_journal = self.env.ref('magnus_invoicing.wip_journal')
             if not wip_journal.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
-
-            if inv.wip_move_id:
-                continue
-
-            ctx = dict(self._context, lang=inv.partner_id.lang)
-
-            if not inv.date_invoice:
-                inv.with_context(ctx).write({'date_invoice': fields.Date.context_today(self)})
-            company_currency = inv.company_id.currency_id
-
-            # create move lines (one per invoice line + eventual taxes and analytic lines)
-            iml = inv.invoice_line_wip_move_line_get()
-            iml += inv.tax_line_move_line_get()
-
-            diff_currency = inv.currency_id != company_currency
-            # create one move line for the total and possibly adjust the other lines amount
-            total, total_currency, iml = inv.with_context(ctx).compute_invoice_totals(company_currency, iml)
-
-            name = inv.name or '/'
-            date_end = self.month_id.date_end
-
-            if inv.payment_term_id:
-                totlines = inv.with_context(ctx).payment_term_id.with_context(currency_id=company_currency.id).compute(total, inv.date_invoice)[0]
-                res_amount_currency = total_currency
-
-                ctx['date'] = date_end
-
-                for i, t in enumerate(totlines):
-                    if inv.currency_id != company_currency:
-                        amount_currency = company_currency.with_context(ctx).compute(t[1], inv.currency_id)
-                    else:
-                        amount_currency = False
-
-                    # last line: add the diff
-                    res_amount_currency -= amount_currency or 0
-                    if i + 1 == len(totlines):
-                        amount_currency += res_amount_currency
-
-                    iml.append({
-                        'type': 'dest',
-                        'name': name,
-                        'price': t[1],
-                        # 'account_id': self.get_wip_default_account(),
-                        'account_id': inv.account_id.id,
-                        'date_maturity': t[0],
-                        'amount_currency': diff_currency and amount_currency,
-                        'currency_id': diff_currency and inv.currency_id.id,
-                    })
-            else:
-                iml.append({
-                    'type': 'dest',
-                    'name': name,
-                    'price': total,
-                    # 'account_id': self.get_wip_default_account(),
-                    'account_id': inv.account_id.id,
-                    'date_maturity': inv.date_due,
-                    'amount_currency': diff_currency and total_currency,
-                    'currency_id': diff_currency and inv.currency_id.id,
-                })
-            part = self.env['res.partner']._find_accounting_partner(inv.partner_id)
-            line = [(0, 0, self.line_get_convert(l, part.id)) for l in iml]
-            line = inv.group_lines(iml, line)
-
-            # journal = inv.journal_id.with_context(ctx)
-            # line = inv.finalize_invoice_move_lines(line)
-
             sequence = wip_journal.sequence_id
-            if self.type in ['in_refund'] and wip_journal.refund_sequence:
-                if not wip_journal.refund_sequence_id:
-                    raise UserError(_('Please define a sequence for the refunds'))
-                sequence = wip_journal.refund_sequence_id
+            if inv.type in ['out_refund', 'in_invoice','in_refund'] or inv.wip_move_id:
+                continue
+            date_end = inv.month_id.date_end
+
             new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
-
-            move_vals = {
-                'ref': 'WIP Invoicing Posting',
-                'line_ids': line,
-                'journal_id': wip_journal.id,
-                'date': date_end,
-                'narration': 'WIP Invoicing Posting',
-                'name':new_name,
-                'to_be_reversed': True,
-            }
-            ctx['company_id'] = inv.company_id.id
-            ctx['invoice'] = inv
-            ctx_nolang = ctx.copy()
-            ctx_nolang.pop('lang', None)
-
-            wip_move = account_move.with_context(ctx_nolang).create(move_vals)
-
+            if inv.move_id:
+                wip_move = account_move.wip_move_create(inv.move_id, wip_journal, new_name, inv.account_id.id)
             wip_move.post()
             # make the invoice point to that wip move
-            vals = {
-                'wip_move_id': wip_move.id,
-            }
-            inv.with_context(ctx).write(vals)
-
+            inv.wip_move_id = wip_move.id
+#            vals = {
+#                'wip_move_id': wip_move.id,
+#            }
+#            inv.with_context(ctx).write(vals)
             #wip reverse posting
             reverse_date = datetime.strptime(wip_move.date, "%Y-%m-%d") + timedelta(days=1)
             reverse_wip_move = wip_move.create_reversals(
                 date=reverse_date, journal=wip_journal,
                 move_prefix='WIP Invoicing Reverse', line_prefix='WIP Invoicing Reverse',
-                reconcile=False)
+                reconcile=True)
 
             if len(reverse_wip_move) == 1:
                 wip_nxt_seq = sequence.with_context(ir_sequence_date=reverse_wip_move.date).next_by_id()
@@ -273,7 +191,7 @@ class AccountInvoice(models.Model):
         wip_moves = self.env['account.move']
         for inv in self:
             if inv.wip_move_id:
-                wip_moves += inv.move_id
+                wip_moves += inv.wip_move_id
 
         # First, set the invoices as cancelled and detach the move ids
         self.write({'wip_move_id': False})
