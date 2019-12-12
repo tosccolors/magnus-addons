@@ -164,7 +164,7 @@ class AccountInvoice(models.Model):
 
             new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
             if inv.move_id:
-                wip_move = account_move.wip_move_create(inv.move_id, wip_journal, new_name, inv.account_id.id)
+                wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id)
             wip_move.post()
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id
