@@ -115,7 +115,7 @@ class AccountInvoice(models.Model):
             return self.journal_id.default_credit_account_id.id
         return self.journal_id.default_debit_account_id.id
 
-    @api.model
+    '''@api.model
     def invoice_line_wip_move_line_get(self):
         res = []
         for line in self.invoice_line_ids:
@@ -147,7 +147,7 @@ class AccountInvoice(models.Model):
             if line['account_analytic_id']:
                 move_line_dict['analytic_line_ids'] = [(0, 0, line._get_analytic_line())]
             res.append(move_line_dict)
-        return res
+        return res'''
 
     @api.multi
     def action_wip_move_create(self):
@@ -157,22 +157,17 @@ class AccountInvoice(models.Model):
             wip_journal = self.env.ref('magnus_invoicing.wip_journal')
             if not wip_journal.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
-
             if inv.wip_move_id:
                 continue
-
             if inv.move_id:
-                wip_move = account_move.wip_move_create(inv.move_id, wip_journal)
-                inv.wip_move_id = wip_move.id
-
-
+                wip_move = account_move.wip_move_create(inv.move_id, wip_journal, inv.account_id.id)
             wip_move.post()
             # make the invoice point to that wip move
-            vals = {
-                'wip_move_id': wip_move.id,
-            }
-            inv.with_context(ctx).write(vals)
-
+            inv.wip_move_id = wip_move.id
+#            vals = {
+#                'wip_move_id': wip_move.id,
+#            }
+#            inv.with_context(ctx).write(vals)
             #wip reverse posting
             reverse_date = datetime.strptime(wip_move.date, "%Y-%m-%d") + timedelta(days=1)
             reverse_wip_move = wip_move.create_reversals(

@@ -54,7 +54,7 @@ class AccountMove(models.Model):
         return res
 
     @api.multi
-    def wip_move_create(self, wip_journal):
+    def wip_move_create(self, wip_journal, ar_account_id):
         self.ensure_one()
         move_date = datetime.strptime(self.date, "%Y-%m-%d")
         last_day_month_before = (move_date - timedelta(days=move_date.day)).strftime("%Y-%m-%d")
@@ -74,22 +74,18 @@ class AccountMove(models.Model):
         ids.append(self.env.ref('account.account.data_account_type_depreciation').id)
         ids.append(self.env.ref('account.account.data_account_type_expenses').id)
         ids.append(self.env.ref('account.account.data_account_type_direct_costs').id)
+        ids.append(self.company_id.inter_ou_clearing_account_id.id)
+        ids.append(ar_account_id)
         bs_move_lines = mls.filtered(lambda r: r.account_id.type.id not in ids)
         pl_move_lines = mls - bs_move_lines
         amount = 0.0
         for line in pl_move_lines:
             amount += line.debit - line.credit
+        ar_line = mls.filtered(lambda r: r.account_id.id == ar_account_id)
         bs_move_lines.unlink()
-        ml_vals = {
-            'type': 'dest',
-            'name': name,
-            'price': total,
-            'account_id': self.env['account.invoice'].get_wip_default_account(),
-            'date_maturity': inv.date_due,
-            'amount_currency': diff_currency and total_currency,
-            'currency_id': diff_currency and inv.currency_id.id,
-        }
-        (0, 0, {values})
+        ar_line.credit = -amount if amount < 0 else 0
+        ar_line.debit = amount if amount > 0 else 0
+        ar_line.account_id = wip_journal.default_credit_account_id.id
 
 
 
