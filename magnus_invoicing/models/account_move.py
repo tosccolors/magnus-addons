@@ -70,15 +70,15 @@ class AccountMove(models.Model):
         mls = wip_move.line_ids
         ## we filter all P&L lines out of all move lines, including AR line(s) and OU-clearing lines (which are not P&L).
         # All filtered out lines are unlinked. All except AR line will be kept unchanged. AR line will become wip line.
-        ids = []
+        ids = accids = []
         ids.append(self.env.ref('account.data_account_type_other_income').id)
         ids.append(self.env.ref('account.data_account_type_revenue').id)
         ids.append(self.env.ref('account.data_account_type_depreciation').id)
         ids.append(self.env.ref('account.data_account_type_expenses').id)
         ids.append(self.env.ref('account.data_account_type_direct_costs').id)
-        ids.append(self.company_id.inter_ou_clearing_account_id.id)
-        ids.append(ar_account_id)
-        bs_move_lines = mls.filtered(lambda r: r.account_id.type.id not in ids)
+        accids.append(self.company_id.inter_ou_clearing_account_id.id)
+        accids.append(ar_account_id)
+        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids and r.account_id.id not in accids)
         pl_move_lines = mls - bs_move_lines
         amount = 0.0
         for line in pl_move_lines:
