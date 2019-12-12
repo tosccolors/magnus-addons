@@ -167,7 +167,7 @@ class AccountInvoice(models.Model):
                 wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id)
             wip_move.post()
             # make the invoice point to that wip move
-            inv.wip_move_id = wip_move
+            inv.wip_move_id = wip_move.id
 #            vals = {
 #                'wip_move_id': wip_move.id,
 #            }
