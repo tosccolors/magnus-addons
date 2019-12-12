@@ -72,10 +72,10 @@ class AccountMove(models.Model):
         # All filtered out lines are unlinked. All except AR line will be kept unchanged. AR line will become wip line.
         ids = []
         ids.append(self.env.ref('account.data_account_type_other_income').id)
-        ids.append(self.env.ref('account.account.data_account_type_revenue').id)
-        ids.append(self.env.ref('account.account.data_account_type_depreciation').id)
-        ids.append(self.env.ref('account.account.data_account_type_expenses').id)
-        ids.append(self.env.ref('account.account.data_account_type_direct_costs').id)
+        ids.append(self.env.ref('account.data_account_type_revenue').id)
+        ids.append(self.env.ref('account.data_account_type_depreciation').id)
+        ids.append(self.env.ref('account.data_account_type_expenses').id)
+        ids.append(self.env.ref('account.data_account_type_direct_costs').id)
         ids.append(self.company_id.inter_ou_clearing_account_id.id)
         ids.append(ar_account_id)
         bs_move_lines = mls.filtered(lambda r: r.account_id.type.id not in ids)
