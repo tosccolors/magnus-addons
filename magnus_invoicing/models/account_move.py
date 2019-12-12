@@ -84,7 +84,7 @@ class AccountMove(models.Model):
         amount = 0.0
         for line in pl_move_lines:
             amount += line.debit - line.credit
-        ar_line = mls.filtered(lambda r: r.account_id.id == ar_account_id)
+        ar_line = pl_move_lines.filtered(lambda r: r.account_id.id == ar_account_id)
         amount -= ar_line.debit - ar_line.credit
         bs_move_lines.unlink()
         ar_line.credit = amount if amount > 0 else 0

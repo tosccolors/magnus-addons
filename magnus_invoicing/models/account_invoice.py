@@ -115,44 +115,9 @@ class AccountInvoice(models.Model):
             return self.journal_id.default_credit_account_id.id
         return self.journal_id.default_debit_account_id.id
 
-    '''@api.model
-    def invoice_line_wip_move_line_get(self):
-        res = []
-        for line in self.invoice_line_ids:
-            if line.quantity == 0:
-                continue
-            tax_ids = []
-            for tax in line.invoice_line_tax_ids:
-                tax_ids.append((4, tax.id, None))
-                for child in tax.children_tax_ids:
-                    if child.type_tax_use != 'none':
-                        tax_ids.append((4, child.id, None))
-            analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.analytic_tag_ids]
-            fpos = self.fiscal_position_id
-            account = self.env['analytic.invoice'].get_product_wip_account(line.product_id, fpos)
-
-            move_line_dict = {
-                'type': 'src',
-                'name': line.name.split('\n')[0][:64],
-                'price_unit': line.price_unit,
-                'quantity': line.quantity,
-                'price': line.price_subtotal,
-                'account_id': account.id,
-                'product_id': line.product_id.id,
-                'uom_id': line.uom_id.id,
-                'account_analytic_id': line.account_analytic_id.id,
-                'tax_ids': tax_ids,
-                'operating_unit_id': line.operating_unit_id.id,
-            }
-            if line['account_analytic_id']:
-                move_line_dict['analytic_line_ids'] = [(0, 0, line._get_analytic_line())]
-            res.append(move_line_dict)
-        return res'''
-
     @api.multi
     def action_wip_move_create(self):
         """ Creates invoice related analytics and financial move lines """
-        account_move = self.env['account.move']
         for inv in self:
             wip_journal = self.env.ref('magnus_invoicing.wip_journal')
             if not wip_journal.sequence_id:
@@ -161,17 +126,12 @@ class AccountInvoice(models.Model):
             if inv.type in ['out_refund', 'in_invoice','in_refund'] or inv.wip_move_id:
                 continue
             date_end = inv.month_id.date_end
-
             new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
             if inv.move_id:
                 wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id)
             wip_move.post()
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id
-#            vals = {
-#                'wip_move_id': wip_move.id,
-#            }
-#            inv.with_context(ctx).write(vals)
             #wip reverse posting
             reverse_date = datetime.strptime(wip_move.date, "%Y-%m-%d") + timedelta(days=1)
             reverse_wip_move = wip_move.create_reversals(
