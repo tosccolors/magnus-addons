@@ -54,11 +54,12 @@ class AccountMove(models.Model):
         return res
 
     @api.multi
-    def wip_move_create(self, wip_journal, ar_account_id):
+    def wip_move_create(self, wip_journal, name, ar_account_id):
         self.ensure_one()
         move_date = datetime.strptime(self.date, "%Y-%m-%d")
         last_day_month_before = (move_date - timedelta(days=move_date.day)).strftime("%Y-%m-%d")
         default = {
+            'name': name,
             'ref': 'WIP Invoicing Posting',
             'journal_id': wip_journal.id,
             'date': last_day_month_before,
@@ -68,6 +69,8 @@ class AccountMove(models.Model):
         }
         wip_move = self.copy(default)
         mls = wip_move.line_ids
+        ## we filter all P&L lines out of all move lines, including AR line(s) and OU-clearing lines (which are not P&L).
+        # All filtered out lines are unlinked. All except AR line will be kept unchanged. AR line will become wip line.
         ids = []
         ids.append(self.env.ref('account.data_account_type_other_income').id)
         ids.append(self.env.ref('account.account.data_account_type_revenue').id)
@@ -82,6 +85,7 @@ class AccountMove(models.Model):
         for line in pl_move_lines:
             amount += line.debit - line.credit
         ar_line = mls.filtered(lambda r: r.account_id.id == ar_account_id)
+        amount -= ar_line.debit - ar_line.credit
         bs_move_lines.unlink()
         ar_line.credit = -amount if amount < 0 else 0
         ar_line.debit = amount if amount > 0 else 0
