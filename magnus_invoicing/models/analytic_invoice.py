@@ -16,7 +16,7 @@ class AnalyticInvoice(models.Model):
 
 
     @api.one
-    @api.depends('partner_id','account_analytic_ids', 'month_id')
+    @api.depends('partner_id', 'account_analytic_ids', 'month_id')
     def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
