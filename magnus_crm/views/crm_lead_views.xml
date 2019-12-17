@@ -152,7 +152,7 @@
             <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='contact_name']" position="before">
-                    <field name="partner_name" string="Bedrijfsnaam"/>
+                    <field name="partner_name" string="Company Name"/>
                 </xpath>
                 <xpath expr="//field[@name='contact_name']" position="after">
                     <field name="next_activity_id"/>

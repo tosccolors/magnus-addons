@@ -32,6 +32,8 @@ class AccountAnalyticLine(models.Model):
         ('write-off', 'Write-Off'),
         ('change-chargecode', 'Change-Chargecode'),
         ('re_confirmed', 'Re-Confirmed'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
     ],
         string='Status',
         readonly=True,
@@ -104,13 +106,13 @@ class AccountAnalyticLine(models.Model):
         month_days = calendar.monthrange(current_date.year, current_date.month)[1]
         month_end_date = current_date.replace(day=month_days)
         
-        domain = [('date_of_next_reconfirmation', '<=', month_end_date), ('state', '=', 'delayed')]
+        domain = [('date_of_next_reconfirmation', '!=', False),('date_of_next_reconfirmation', '<=', month_end_date), ('state', '=', 'delayed')]
         query_line = self._where_calc(domain)
         self_tables, where_clause, where_clause_params = query_line.get_sql()
 
         list_query = ("""                    
             UPDATE {0}
-            SET state = 're_confirmed', date_of_next_reconfirmation = false
+            SET state = 're_confirmed', date_of_next_reconfirmation = null
             WHERE {1}                          
                  """.format(
             self_tables,
