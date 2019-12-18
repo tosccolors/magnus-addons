@@ -69,6 +69,9 @@ class AnalyticInvoice(models.Model):
         if partner_id and len(self.account_analytic_ids) == 0:
             account_analytic = self.env['account.analytic.account'].search([
                 ('partner_id', '=', partner_id.id)])
+            if len(account_analytic) == 0:
+                account_analytic = self.env['account.analytic.account'].search([
+                ('partner_id', '=', self.project_id.partner_id.id)])
             if len(account_analytic) > 0:
                 self.account_analytic_ids = \
                     [(6, 0, account_analytic.ids)]
@@ -174,9 +177,16 @@ class AnalyticInvoice(models.Model):
 
                     userTotData.append((0, 0, vals))
                     # task-358
-                    date_now = fields.Date.today()
+                    month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
+                    if month_id:
+                        month = self.env['date.range'].browse([month_id])
+                        date_start = month.date_start
+                        date_end = month.date_end
                     taskUser = taskUserObj.search(
-                        [('task_id', '=', vals['task_id']), ('from_date', '<=', date_now), ('user_id', '=', vals['user_id'])],
+                        [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start), ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
+                    if len(taskUser) == 0:
+                        taskUser = taskUserObj.search(
+                        [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()), ('user_id', '=', vals['user_id'])],
                         limit=1, order='from_date Desc')
                     taskUserIds += taskUser.ids
 
