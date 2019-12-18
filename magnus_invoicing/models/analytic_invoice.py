@@ -189,7 +189,10 @@ class AnalyticInvoice(models.Model):
                         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()), ('user_id', '=', vals['user_id'])],)
                     date_now = fields.Date.today()
                     taskUser = taskUserObj.search(
-                        [('task_id', '=', vals['task_id']), ('from_date', '<=', date_now), ('user_id', '=', vals['user_id'])],
+                        [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start), ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
+                    if len(taskUser) == 0:
+                        taskUser = taskUserObj.search(
+                        [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()), ('user_id', '=', vals['user_id'])],
                         limit=1, order='from_date Desc')
                     taskUserIds += taskUser.ids
 
