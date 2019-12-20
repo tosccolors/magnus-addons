@@ -10,7 +10,7 @@ class HrExpense(models.Model):
     @api.model
     def update_expense(self):
         expense_obj = self.env['hr.expense']
-        for expense in expense_obj.search([('state', '=', 'draft')]):
+        for expense in expense_obj.search([('state', '=', 'draft'), 'operating_unit_id', '=', False]):
             expense.submit_expenses()
 
         for expense in expense_obj.search([('operating_unit_id', '=', False), ('analytic_account_id', '!=', False)]):
