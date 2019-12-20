@@ -22,7 +22,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['hr_expense'],
+    'depends': ['magnus_expense'],
 
     # always loaded
     'data': [
