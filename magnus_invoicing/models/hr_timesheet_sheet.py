@@ -42,6 +42,10 @@ class HrTimesheetSheet(models.Model):
                 ts_line,
                 so_line,
                 user_total_id,
+<<<<<<< HEAD
+=======
+                invoiceable,
+>>>>>>> 10.0-prod
                 month_id,
                 week_id,
                 account_department_id,               
@@ -83,6 +87,10 @@ class HrTimesheetSheet(models.Model):
                 NULL as ts_line,
                 aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
+<<<<<<< HEAD
+=======
+                aal.invoiceable as invoiceable,
+>>>>>>> 10.0-prod
                 aal.month_id as month_id,
                 aal.week_id as week_id,
                 aal.account_department_id as account_department_id,

@@ -187,6 +187,9 @@ class AnalyticInvoice(models.Model):
                     if len(taskUser) == 0:
                         taskUser = taskUserObj.search(
                         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()), ('user_id', '=', vals['user_id'])],
+                    date_now = fields.Date.today()
+                    taskUser = taskUserObj.search(
+                        [('task_id', '=', vals['task_id']), ('from_date', '<=', date_now), ('user_id', '=', vals['user_id'])],
                         limit=1, order='from_date Desc')
                     taskUserIds += taskUser.ids
 
@@ -444,6 +447,16 @@ class AnalyticInvoice(models.Model):
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
 
         # if invoicing period doesn't lie in same month
+        period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+        # cur_date = datetime.now().date().strftime("%Y-%m")
+        invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
+        inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m')
+        if inv_date != period_date:
+            fpos = self.invoice_id.fiscal_position_id
+            account = self.get_product_wip_account(line.product_id, fpos)
+            invoice_line_vals.update({
+                    'account_id':account.id
+                })
         # period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
         # cur_date = datetime.now().date().strftime("%Y-%m")
         # invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
