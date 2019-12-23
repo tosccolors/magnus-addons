@@ -97,6 +97,17 @@
         </field>
     </record>
 
+    <record id="view_hr_timesheet_line_pivot_inherited" model="ir.ui.view">
+        <field name="name">account.analytic.line.pivot</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.view_hr_timesheet_line_pivot"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='unit_amount']" position="replace">
+                <field name="actual_qty" type="measure"/>
+            </xpath>
+        </field>
+    </record>
+
     <!--My Timesheets action inherited-->
     <record id="hr_timesheet_sheet.act_hr_timesheet_sheet_my_timesheets" model="ir.actions.act_window">
       <field name="context">{'readonly_by_pass': True}</field>
