@@ -97,7 +97,7 @@
         </field>
     </record>
 
-    <record id="view_hr_timesheet_line_pivot_inherited" model="ir.ui.view">
+    <!--<record id="view_hr_timesheet_line_pivot_inherited" model="ir.ui.view">
         <field name="name">account.analytic.line.pivot</field>
         <field name="model">account.analytic.line</field>
         <field name="inherit_id" ref="hr_timesheet.view_hr_timesheet_line_pivot"/>
@@ -106,7 +106,7 @@
                 <field name="actual_qty" type="measure"/>
             </xpath>
         </field>
-    </record>
+    </record>-->
 
     <!--My Timesheets action inherited-->
     <record id="hr_timesheet_sheet.act_hr_timesheet_sheet_my_timesheets" model="ir.actions.act_window">
@@ -116,6 +116,19 @@
 
     <record id="hr_timesheet.act_hr_timesheet_report" model="ir.actions.act_window">
       <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)')]</field>
+        <field name="context">{"search_default_today":1, "search_default_filter_not_planned":1}</field>
+    </record>
+
+    <record id="hr_timesheet_line_search" model="ir.ui.view">
+        <field name="name">account.analytic.line.search</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='department_id']" position="after">
+                <separator/>
+                <filter string="Not Planned" name="filter_not_planned" domain="[('planned','=',False)]"/>
+            </xpath>
+        </field>
     </record>
 
 
