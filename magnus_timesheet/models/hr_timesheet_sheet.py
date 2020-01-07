@@ -296,7 +296,7 @@ class HrTimesheetSheet(models.Model):
         self.copy_wih_query(False)
         return res
 
-    def copy_wih_query(self, copy_last_week, last_week_timesheet_id):
+    def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
         query = """
         INSERT INTO
         account_analytic_line
