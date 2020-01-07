@@ -385,9 +385,9 @@ class HrTimesheetSheet(models.Model):
              """CASE
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
-                END AS non_invoiceable_mileage,
-                %(uom)s as product_uom_id      
-        FROM
+                END AS non_invoiceable_mileage,""" + \
+                ("%(uom)s as product_uom_id" if not copy_last_week else "aal.product_uom_id as product_uom_id") + \
+      """FROM
          account_analytic_line aal
          LEFT JOIN project_project pp 
          ON pp.id = aal.project_id
@@ -401,17 +401,12 @@ class HrTimesheetSheet(models.Model):
         AND aal.ref_id IS NULL
         AND aal.kilometers > 0       
         ;"""
-        km_id = self.env.ref('product.product_uom_km').id if not copy_last_week else "aal.product_uom_id"
-        heden = str(fields.Datetime.to_string(fields.datetime.now()))
-        week_id_aal = self.week_id.id
-        sheet_aal = self.id
-        sheet_select = self.id if not copy_last_week else last_week_timesheet_id
 
-        self.env.cr.execute(query, {'create': heden,
-                                    'week_id_aal': week_id_aal,
-                                    'uom': km_id,
-                                    'sheet_select': sheet_select,
-                                    'sheet_aal':sheet_aal,
+        self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
+                                    'week_id_aal': self.week_id.id,
+                                    'uom': self.env.ref('product.product_uom_km').id,
+                                    'sheet_select': self.id if not copy_last_week else last_week_timesheet_id,
+                                    'sheet_aal': self.id,
                                     }
                             )
         self.env.invalidate_all()
