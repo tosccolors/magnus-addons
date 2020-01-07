@@ -192,31 +192,39 @@ class HrTimesheetSheet(models.Model):
                     ('employee_id', '=', self.employee_id.id),
                     ('week_id', '=', last_week.id)
                 ], limit=1)
-                current_week_lines = [(0, 0, {
-                    'date': l.date,
-                    'name': l.name,
-                    'project_id': l.project_id.id,
-                    'task_id': l.task_id.id,
-                    'user_id': l.user_id.id,
-                    'unit_amount': l.unit_amount
-                }) for l in self.timesheet_ids] if self.timesheet_ids else []
-                if last_week_timesheet:
-                    self.timesheet_ids.unlink()
-                    last_week_lines = [(0, 0, {
-                        'date': datetime.strptime(l.date, "%Y-%m-%d") +
-                                timedelta(days=7),
-                        'name': '/',
-                        'project_id': l.project_id.id,
-                        'task_id': l.task_id.id,
-                        'user_id': l.user_id.id
-                    }) for l in last_week_timesheet.timesheet_ids]
-                    self.timesheet_ids = current_week_lines + last_week_lines
-                else:
+                if not last_week_timesheet:
                     raise UserError(_(
                         "You have no timesheet logged for last week. "
                         "Duration: %s to %s"
-                    ) %(datetime.strftime(date_start, "%d-%b-%Y"),
-                        datetime.strftime(date_end, "%d-%b-%Y")))
+                    ) % (datetime.strftime(date_start, "%d-%b-%Y"),
+                         datetime.strftime(date_end, "%d-%b-%Y")))
+
+                # elif self.employee_id.department_id != last_week_timesheet.employee_id.department_id \
+                #     or self.employee_id.product_id != last_week_timesheet.employee_id.product_id \
+                #     or self.employee_id.operating_unit_id != last_week_timesheet.employee_id.operating_unit_id:
+                #     current_week_lines = [(0, 0, {
+                #         'date': l.date,
+                #         'name': l.name,
+                #         'project_id': l.project_id.id,
+                #         'task_id': l.task_id.id,
+                #         'user_id': l.user_id.id,
+                #         'unit_amount': l.unit_amount
+                #     }) for l in self.timesheet_ids] if self.timesheet_ids else []
+                #     if last_week_timesheet:
+                #         self.timesheet_ids.unlink()
+                #         last_week_lines = [(0, 0, {
+                #             'date': datetime.strptime(l.date, "%Y-%m-%d") +
+                #                     timedelta(days=7),
+                #             'name': '/',
+                #             'project_id': l.project_id.id,
+                #             'task_id': l.task_id.id,
+                #             'user_id': l.user_id.id
+                #         }) for l in last_week_timesheet.timesheet_ids]
+                #         self.timesheet_ids = current_week_lines + last_week_lines
+
+                else:
+                    self.copy_wih_query(True, last_week_timesheet.id)
+
 
     def _check_end_mileage(self):
         total = self.starting_mileage + self.business_mileage
@@ -284,10 +292,10 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         self.create_overtime_entries()
-        self.copy_wih_query()
+        self.copy_wih_query(False)
         return res
 
-    def copy_wih_query(self):
+    def copy_wih_query(self, copy_last_week, last_week_timesheet_id):
         query = """
         INSERT INTO
         account_analytic_line
@@ -339,38 +347,38 @@ class HrTimesheetSheet(models.Model):
                 aal.account_id as account_id,
                 aal.company_id as company_id,
                 aal.write_uid as write_uid,
-                aal.amount as amount,
-                aal.kilometers as unit_amount,
-                aal.date as date,
+                %(amount_aal)s as amount,
+                %(unit_amount_aal)s as unit_amount,
+                %(date_aal)s as date,
                 %(create)s as create_date,
                 %(create)s as write_date,
                 aal.partner_id as partner_id,
-                aal.name as name,
+                %(name_aal)s as name,
                 aal.code as code,
                 aal.currency_id as currency_id,
                 aal.ref as ref,
                 aal.general_account_id as general_account_id,
                 aal.move_id as move_id,
                 aal.product_id as product_id,
-                aal.amount_currency as amount_currency,
+                %(amount_currency_aal)s as amount_currency,
                 aal.project_id as project_id,
                 aal.department_id as department_id,
                 aal.task_id as task_id,
-                NULL as sheet_id,
-                NULL as ts_line,
+                %(sheet_aal)s as sheet_id,
+                %(ts_line_aal)s as ts_line,
                 aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
-                aal.month_id as month_id,
-                aal.week_id as week_id,
+                %(month_id_aal)s as month_id,
+                %(week_id_aal)s as week_id,
                 aal.account_department_id as account_department_id,
                 aal.expenses as expenses,
                 aal.chargeable as chargeable,
                 aal.operating_unit_id as operating_unit_id,
                 aal.correction_charge as correction_charge,
                 aal.write_off_move as write_off_move,              
-                aal.id as ref_id,
-                aal.actual_qty as actual_qty,
-                aal.planned_qty as planned_qty,
+                %(ref_id_aal)s as ref_id,
+                %(actual_qty_aal)s as actual_qty,
+                %(planned_qty_aal)s as planned_qty,
                 aal.planned as planned,
                 aal.select_week_id as select_week_id,
                 0 as kilometers,
@@ -378,7 +386,7 @@ class HrTimesheetSheet(models.Model):
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage,
-                %(km)s as product_uom_id      
+                %(uom)s as product_uom_id      
         FROM
          account_analytic_line aal
          LEFT JOIN project_project pp 
@@ -387,13 +395,43 @@ class HrTimesheetSheet(models.Model):
          ON ip.id = pp.invoice_properties
          RIGHT JOIN hr_timesheet_sheet_sheet hss
          ON hss.id = aal.sheet_id
-        WHERE hss.id = %(sheet)s
+        WHERE hss.id = %(sheet_select)s
         AND aal.ref_id IS NULL
         AND aal.kilometers > 0       
         ;"""
-        km_id = self.env.ref('product.product_uom_km').id
+        km_id = self.env.ref('product.product_uom_km').id if not copy_last_week else "aal.product_uom_id"
         heden = str(fields.Datetime.to_string(fields.datetime.now()))
-        self.env.cr.execute(query, {'create': heden,'km': km_id, 'sheet':self.id})
+        name_aal = "aal.name" if not copy_last_week else "/"
+        amount_currency_aal = "aal.amount_currency" if not copy_last_week else "NULL"
+        month_id_aal = "aal.month_id" if not copy_last_week else self.month_id.id
+        week_id_aal = "aal.week_id" if not copy_last_week else self.week_id.id
+        ref_id_aal = "aal.id" if not copy_last_week else "NULL"
+        actual_qty_aal = "aal.actual_qty" if not copy_last_week else "NULL"
+        planned_qty_aal = "aal.planned_qty" if not copy_last_week else "NULL"
+        date_aal = "aal.date" if not copy_last_week else "aal.date + 7"
+        amount_aal = "aal.amount" if not copy_last_week else "NULL"
+        unit_amount_aal = "aal.kilometers" if not copy_last_week else "aal.unit_amount"
+        sheet_aal = "NULL" if not copy_last_week else self.id
+        ts_line_aal = "NULL" if not copy_last_week else "aal.ts_line"
+        sheet_select = self.id if not copy_last_week else last_week_timesheet_id
+
+        self.env.cr.execute(query, {'amount_aal': amount_aal,
+                                    'unit_amount_aal': unit_amount_aal,
+                                    'date_aal': date_aal,
+                                    'create': heden,
+                                    'name_aal': name_aal,
+                                    'amount_currency_aal': amount_currency_aal,
+                                    'month_id_aal': month_id_aal,
+                                    'week_id_aal': week_id_aal,
+                                    'ref_id_aal': ref_id_aal,
+                                    'actual_qty_aal': actual_qty_aal,
+                                    'planned_qty_aal': planned_qty_aal,
+                                    'uom': km_id,
+                                    'sheet_select': sheet_select,
+                                    'sheet_aal':sheet_aal,
+                                    'ts_line_aal': ts_line_aal
+                                    }
+                            )
         self.env.invalidate_all()
         return True
 
