@@ -381,7 +381,7 @@ class HrTimesheetSheet(models.Model):
                 "aal.planned_qty as planned_qty," if not copy_last_week else "0 as planned_qty," + \
              """aal.planned as planned,
                 0 as kilometers,""" + \
-                "'open' as state," if not copy_last_week else "'draft' as state, " + \
+                "'open' as state," + \
              """CASE
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
