@@ -348,7 +348,7 @@ class HrTimesheetSheet(models.Model):
                 aal.company_id as company_id,
                 aal.write_uid as write_uid,
                 %(amount_aal)s as amount,
-                %(unit_amount_aal)s as unit_amount,
+                "%(unit_amount_aal)s" as unit_amount,
                 %(date_aal)s as date,
                 %(create)s as create_date,
                 %(create)s as write_date,
