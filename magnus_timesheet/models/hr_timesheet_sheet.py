@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError
 from dateutil.rrule import (rrule)
 from dateutil.relativedelta import relativedelta
+from openerp.tools.float_utils import float_compare
 
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
@@ -240,7 +241,7 @@ class HrTimesheetSheet(models.Model):
             if hour < 0 or hour > 24:
                 raise UserError(_('Logged hours should be 0 to 24.'))
             if not self.employee_id.timesheet_no_8_hours_day:
-                if i < 5 and hour < 8:
+                if i < 5 and float_compare(hour, 8, precision_digits=3, precision_rounding=None) < 0:
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
