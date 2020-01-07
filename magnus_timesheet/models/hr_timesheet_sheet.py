@@ -293,7 +293,7 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         self.create_overtime_entries()
-        self.copy_wih_query(False)
+        self.copy_wih_query(False, None)
         return res
 
     def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
