@@ -349,40 +349,40 @@ class HrTimesheetSheet(models.Model):
                 aal.write_uid as write_uid,
                 %(amount_aal)s as amount,""" + \
                 ("aal.kilometers " if not copy_last_week else "aal.unit_amount ") + "as unit_amount," + \
-                """%(date_aal)s as date,
-                %(create)s as create_date,
+                "aal.date as date" if not copy_last_week else "aal.date + 7 as date," + \
+             """%(create)s as create_date,
                 %(create)s as write_date,
-                aal.partner_id as partner_id,
-                %(name_aal)s as name,
-                aal.code as code,
+                aal.partner_id as partner_id,""" + \
+                "aal.name as name," if not copy_last_week else "'/' as name," + \
+             """aal.code as code,
                 aal.currency_id as currency_id,
                 aal.ref as ref,
                 aal.general_account_id as general_account_id,
                 aal.move_id as move_id,
-                aal.product_id as product_id,
-                %(amount_currency_aal)s as amount_currency,
-                aal.project_id as project_id,
+                aal.product_id as product_id,""" + \
+                "aal.amount_currency as amount_currency," if not copy_last_week else "0 as amount_currency," + \
+             """aal.project_id as project_id,
                 aal.department_id as department_id,
-                aal.task_id as task_id,
-                %(sheet_aal)s as sheet_id,
-                %(ts_line_aal)s as ts_line,
-                aal.so_line as so_line,
+                aal.task_id as task_id,""" + \
+                "NULL as sheet_id," if not copy_last_week else "%(sheet_aal)s as sheet_id," + \
+                "NULL as ts_line," if not copy_last_week else "aal.ts_line as ts_line," + \
+             """aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
-                aal.invoiceable as invoiceable,
-                %(month_id_aal)s as month_id,
-                %(week_id_aal)s as week_id,
-                aal.account_department_id as account_department_id,
+                aal.invoiceable as invoiceable,""" + \
+                "aal.month_id as month_id," if not copy_last_week else "dr.id as month_id," + \
+                "aal.week_id" if not copy_last_week else "%(week_id_aal)s as week_id," + \
+             """aal.account_department_id as account_department_id,
                 aal.chargeable as chargeable,
                 aal.operating_unit_id as operating_unit_id,
                 aal.project_operating_unit_id as project_operating_unit_id,
-                aal.correction_charge as correction_charge,              
-                %(ref_id_aal)s as ref_id,
-                %(actual_qty_aal)s as actual_qty,
-                %(planned_qty_aal)s as planned_qty,
-                aal.planned as planned,
-                0 as kilometers,
-                'open' as state,
-                CASE
+                aal.correction_charge as correction_charge,""" + \
+                "aal.id as ref_id," if not copy_last_week else "NULL as ref_id," + \
+                "aal.actual_qty as actual_qty," if not copy_last_week else "0 as actual_qty," + \
+                "aal.planned_qty as planned_qty," if not copy_last_week else "0 as planned_qty," + \
+            """aal.planned as planned,
+                0 as kilometers,""" + \
+                "'open' as state," if not copy_last_week else "'draft' as state," + \
+            """CASE
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage,
@@ -403,35 +403,15 @@ class HrTimesheetSheet(models.Model):
         ;"""
         km_id = self.env.ref('product.product_uom_km').id if not copy_last_week else "aal.product_uom_id"
         heden = str(fields.Datetime.to_string(fields.datetime.now()))
-        name_aal = "aal.name" if not copy_last_week else "/"
-        amount_currency_aal = "aal.amount_currency" if not copy_last_week else 0
-        month_id_aal = "aal.month_id" if not copy_last_week else "dr.id"
-        week_id_aal = "aal.week_id" if not copy_last_week else self.week_id.id
-        ref_id_aal = "aal.id" if not copy_last_week else 'NULL'
-        actual_qty_aal = "aal.actual_qty" if not copy_last_week else 0
-        planned_qty_aal = "aal.planned_qty" if not copy_last_week else 0
-        date_aal = "aal.date" if not copy_last_week else "aal.date + 7"
-        amount_aal = "aal.amount" if not copy_last_week else 0
-        # unit_amount_aal =
-        sheet_aal = 'NULL' if not copy_last_week else self.id
-        ts_line_aal = 'NULL' if not copy_last_week else "aal.ts_line"
+        week_id_aal = self.week_id.id
+        sheet_aal = self.id
         sheet_select = self.id if not copy_last_week else last_week_timesheet_id
 
-        self.env.cr.execute(query, {'amount_aal': amount_aal,
-                                    # 'unit_amount_aal': unit_amount_aal,
-                                    'date_aal': date_aal,
-                                    'create': heden,
-                                    'name_aal': name_aal,
-                                    'amount_currency_aal': amount_currency_aal,
-                                    'month_id_aal': month_id_aal,
+        self.env.cr.execute(query, {'create': heden,
                                     'week_id_aal': week_id_aal,
-                                    'ref_id_aal': ref_id_aal,
-                                    'actual_qty_aal': actual_qty_aal,
-                                    'planned_qty_aal': planned_qty_aal,
                                     'uom': km_id,
                                     'sheet_select': sheet_select,
                                     'sheet_aal':sheet_aal,
-                                    'ts_line_aal': ts_line_aal
                                     }
                             )
         self.env.invalidate_all()
