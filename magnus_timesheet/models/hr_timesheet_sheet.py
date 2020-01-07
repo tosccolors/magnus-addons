@@ -412,7 +412,7 @@ class HrTimesheetSheet(models.Model):
         planned_qty_aal = "aal.planned_qty" if not copy_last_week else 0
         date_aal = "aal.date" if not copy_last_week else "aal.date + 7"
         amount_aal = "aal.amount" if not copy_last_week else 0
-        unit_amount_aal = '"aal.kilometers"' if not copy_last_week else '"aal.unit_amount"'
+        unit_amount_aal = str("aal.kilometers") if not copy_last_week else str("aal.unit_amount")
         sheet_aal = 'NULL' if not copy_last_week else self.id
         ts_line_aal = 'NULL' if not copy_last_week else "aal.ts_line"
         sheet_select = self.id if not copy_last_week else last_week_timesheet_id
