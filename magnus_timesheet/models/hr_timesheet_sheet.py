@@ -347,8 +347,8 @@ class HrTimesheetSheet(models.Model):
                 aal.account_id as account_id,
                 aal.company_id as company_id,
                 aal.write_uid as write_uid,
-                %(amount_aal)s as amount,
-                "%(unit_amount_aal)s" as unit_amount,
+                %(amount_aal)s as amount,""" + \
+                "aal.kilometers " if not copy_last_week else "aal.unit_amount " + """as unit_amount,
                 %(date_aal)s as date,
                 %(create)s as create_date,
                 %(create)s as write_date,
@@ -412,7 +412,7 @@ class HrTimesheetSheet(models.Model):
         planned_qty_aal = "aal.planned_qty" if not copy_last_week else 0
         date_aal = "aal.date" if not copy_last_week else "aal.date + 7"
         amount_aal = "aal.amount" if not copy_last_week else 0
-        unit_amount_aal = "aal.kilometers" if not copy_last_week else "aal.unit_amount"
+        # unit_amount_aal =
         sheet_aal = 'NULL' if not copy_last_week else self.id
         ts_line_aal = 'NULL' if not copy_last_week else "aal.ts_line"
         sheet_select = self.id if not copy_last_week else last_week_timesheet_id
