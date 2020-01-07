@@ -404,17 +404,17 @@ class HrTimesheetSheet(models.Model):
         km_id = self.env.ref('product.product_uom_km').id if not copy_last_week else "aal.product_uom_id"
         heden = str(fields.Datetime.to_string(fields.datetime.now()))
         name_aal = "aal.name" if not copy_last_week else "/"
-        amount_currency_aal = "aal.amount_currency" if not copy_last_week else "NULL"
+        amount_currency_aal = "aal.amount_currency" if not copy_last_week else 'NULL'
         month_id_aal = "aal.month_id" if not copy_last_week else "dr.id"
         week_id_aal = "aal.week_id" if not copy_last_week else self.week_id.id
-        ref_id_aal = "aal.id" if not copy_last_week else "NULL"
-        actual_qty_aal = "aal.actual_qty" if not copy_last_week else "NULL"
-        planned_qty_aal = "aal.planned_qty" if not copy_last_week else "NULL"
+        ref_id_aal = "aal.id" if not copy_last_week else 'NULL'
+        actual_qty_aal = "aal.actual_qty" if not copy_last_week else 'NULL'
+        planned_qty_aal = "aal.planned_qty" if not copy_last_week else 'NULL'
         date_aal = "aal.date" if not copy_last_week else "aal.date + 7"
-        amount_aal = "aal.amount" if not copy_last_week else "NULL"
+        amount_aal = "aal.amount" if not copy_last_week else 'NULL'
         unit_amount_aal = "aal.kilometers" if not copy_last_week else "aal.unit_amount"
-        sheet_aal = "NULL" if not copy_last_week else self.id
-        ts_line_aal = "NULL" if not copy_last_week else "aal.ts_line"
+        sheet_aal = 'NULL' if not copy_last_week else self.id
+        ts_line_aal = 'NULL' if not copy_last_week else "aal.ts_line"
         sheet_select = self.id if not copy_last_week else last_week_timesheet_id
 
         self.env.cr.execute(query, {'amount_aal': amount_aal,
