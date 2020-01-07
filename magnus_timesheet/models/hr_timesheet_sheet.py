@@ -395,6 +395,8 @@ class HrTimesheetSheet(models.Model):
          ON ip.id = pp.invoice_properties
          RIGHT JOIN hr_timesheet_sheet_sheet hss
          ON hss.id = aal.sheet_id
+         LEFT JOIN date_range dr 
+         on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
         WHERE hss.id = %(sheet_select)s
         AND aal.ref_id IS NULL
         AND aal.kilometers > 0       
@@ -403,7 +405,7 @@ class HrTimesheetSheet(models.Model):
         heden = str(fields.Datetime.to_string(fields.datetime.now()))
         name_aal = "aal.name" if not copy_last_week else "/"
         amount_currency_aal = "aal.amount_currency" if not copy_last_week else "NULL"
-        month_id_aal = "aal.month_id" if not copy_last_week else self.month_id.id
+        month_id_aal = "aal.month_id" if not copy_last_week else "dr.id"
         week_id_aal = "aal.week_id" if not copy_last_week else self.week_id.id
         ref_id_aal = "aal.id" if not copy_last_week else "NULL"
         actual_qty_aal = "aal.actual_qty" if not copy_last_week else "NULL"
