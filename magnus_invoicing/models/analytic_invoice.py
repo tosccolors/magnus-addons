@@ -637,6 +637,11 @@ class AnalyticUserTotal(models.Model):
             self.fee_rate = fr = self.get_fee_rate(False, False)
             self.amount = - self.unit_amount * fr
 
+    @api.one
+    def _compute_sheet(self):
+        """Override because this object is not related to sheets
+        """
+
 
     @api.one
     def _compute_analytic_line(self):
@@ -673,3 +678,7 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
+
+    @api.multi
+    def write(self, vals):
+        return super(AnalyticUserTotal, self).write(vals)
