@@ -418,7 +418,7 @@ class HrTimesheetSheet(models.Model):
         sheet_select = self.id if not copy_last_week else last_week_timesheet_id
 
         self.env.cr.execute(query, {'amount_aal': amount_aal,
-                                    'unit_amount_aal': unit_amount_aal,
+                                    # 'unit_amount_aal': unit_amount_aal,
                                     'date_aal': date_aal,
                                     'create': heden,
                                     'name_aal': name_aal,
