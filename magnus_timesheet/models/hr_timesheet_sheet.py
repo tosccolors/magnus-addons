@@ -349,7 +349,7 @@ class HrTimesheetSheet(models.Model):
                 aal.write_uid as write_uid,""" + \
                 ("aal.amount as amount," if not copy_last_week else "0 as amount,") + \
                 ("aal.kilometers as unit_amount," if not copy_last_week else "aal.unit_amount as unit_amount,") + \
-                ("aal.date as date" if not copy_last_week else "aal.date + 7 as date,") + \
+                ("aal.date as date," if not copy_last_week else "aal.date + 7 as date,") + \
              """%(create)s as create_date,
                 %(create)s as write_date,
                 aal.partner_id as partner_id,""" + \
@@ -386,21 +386,20 @@ class HrTimesheetSheet(models.Model):
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage,""" + \
-                ("%(uom)s as product_uom_id" if not copy_last_week else "aal.product_uom_id as product_uom_id") + \
-      """FROM
-         account_analytic_line aal
-         LEFT JOIN project_project pp 
-         ON pp.id = aal.project_id
-         LEFT JOIN project_invoicing_properties ip
-         ON ip.id = pp.invoice_properties
-         RIGHT JOIN hr_timesheet_sheet_sheet hss
-         ON hss.id = aal.sheet_id
-         LEFT JOIN date_range dr 
-         on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
-        WHERE hss.id = %(sheet_select)s
-        AND aal.ref_id IS NULL
-        AND aal.kilometers > 0       
-        ;"""
+                ("%(uom)s as product_uom_id" if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
+          """FROM account_analytic_line aal
+                 LEFT JOIN project_project pp 
+                 ON pp.id = aal.project_id
+                 LEFT JOIN project_invoicing_properties ip
+                 ON ip.id = pp.invoice_properties
+                 RIGHT JOIN hr_timesheet_sheet_sheet hss
+                 ON hss.id = aal.sheet_id
+                 LEFT JOIN date_range dr 
+                 on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
+             WHERE hss.id = %(sheet_select)s
+             AND aal.ref_id IS NULL
+             AND aal.kilometers > 0       
+             ;"""
 
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
                                     'week_id_aal': self.week_id.id,
