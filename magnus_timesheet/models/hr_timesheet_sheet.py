@@ -346,46 +346,46 @@ class HrTimesheetSheet(models.Model):
                 aal.user_id as user_id,
                 aal.account_id as account_id,
                 aal.company_id as company_id,
-                aal.write_uid as write_uid,""" + \
-                ("aal.amount as amount," if not copy_last_week else "0 as amount,") + \
-                ("aal.kilometers as unit_amount," if not copy_last_week else "aal.unit_amount as unit_amount,") + \
-                ("aal.date as date," if not copy_last_week else "aal.date + 7 as date,") + \
+                aal.write_uid as write_uid, """ + \
+                ("aal.amount as amount, " if not copy_last_week else "0 as amount, ") + \
+                ("aal.kilometers as unit_amount, " if not copy_last_week else "aal.unit_amount as unit_amount, ") + \
+                ("aal.date as date, " if not copy_last_week else "aal.date + 7 as date, ") + \
              """%(create)s as create_date,
                 %(create)s as write_date,
-                aal.partner_id as partner_id,""" + \
-                ("aal.name as name," if not copy_last_week else "'/' as name,") + \
+                aal.partner_id as partner_id, """ + \
+                ("aal.name as name, " if not copy_last_week else "'/' as name, ") + \
              """aal.code as code,
                 aal.currency_id as currency_id,
                 aal.ref as ref,
                 aal.general_account_id as general_account_id,
                 aal.move_id as move_id,
                 aal.product_id as product_id,""" + \
-                ("aal.amount_currency as amount_currency," if not copy_last_week else "0 as amount_currency,") + \
+                ("aal.amount_currency as amount_currency, " if not copy_last_week else "0 as amount_currency, ") + \
              """aal.project_id as project_id,
                 aal.department_id as department_id,
-                aal.task_id as task_id,""" + \
-                ("NULL as sheet_id," if not copy_last_week else "%(sheet_aal)s as sheet_id,") + \
-                ("NULL as ts_line," if not copy_last_week else "aal.ts_line as ts_line,") + \
+                aal.task_id as task_id, """ + \
+                ("NULL as sheet_id, " if not copy_last_week else "%(sheet_aal)s as sheet_id, ") + \
+                ("NULL as ts_line, " if not copy_last_week else "aal.ts_line as ts_line, ") + \
              """aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
-                aal.invoiceable as invoiceable,""" + \
-                ("aal.month_id as month_id," if not copy_last_week else "dr.id as month_id,") + \
-                ("aal.week_id" if not copy_last_week else "%(week_id_aal)s as week_id,") + \
+                aal.invoiceable as invoiceable, """ + \
+                ("aal.month_id as month_id, " if not copy_last_week else "dr.id as month_id, ") + \
+                ("aal.week_id as week_id, " if not copy_last_week else "%(week_id_aal)s as week_id, ") + \
              """aal.account_department_id as account_department_id,
                 aal.chargeable as chargeable,
                 aal.operating_unit_id as operating_unit_id,
                 aal.project_operating_unit_id as project_operating_unit_id,
-                aal.correction_charge as correction_charge,""" + \
-                ("aal.id as ref_id," if not copy_last_week else "NULL as ref_id,") + \
-                ("aal.actual_qty as actual_qty," if not copy_last_week else "0 as actual_qty,") + \
-                ("aal.planned_qty as planned_qty," if not copy_last_week else "0 as planned_qty,") + \
+                aal.correction_charge as correction_charge, """ + \
+                ("aal.id as ref_id, " if not copy_last_week else "NULL as ref_id, ") + \
+                ("aal.actual_qty as actual_qty, " if not copy_last_week else "0 as actual_qty, ") + \
+                ("aal.planned_qty as planned_qty, " if not copy_last_week else "0 as planned_qty, ") + \
              """aal.planned as planned,
-                0 as kilometers,""" + \
-                ("'open' as state," if not copy_last_week else "'draft' as state,") + \
+                0 as kilometers, """ + \
+                ("'open' as state," if not copy_last_week else "'draft' as state, ") + \
              """CASE
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
-                END AS non_invoiceable_mileage,""" + \
+                END AS non_invoiceable_mileage, """ + \
                 ("%(uom)s as product_uom_id " if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
           """FROM account_analytic_line aal
                  LEFT JOIN project_project pp 
