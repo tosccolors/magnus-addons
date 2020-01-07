@@ -386,7 +386,7 @@ class HrTimesheetSheet(models.Model):
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage,""" + \
-                ("%(uom)s as product_uom_id" if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
+                ("%(uom)s as product_uom_id " if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
           """FROM account_analytic_line aal
                  LEFT JOIN project_project pp 
                  ON pp.id = aal.project_id
