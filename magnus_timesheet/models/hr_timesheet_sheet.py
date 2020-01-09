@@ -298,6 +298,11 @@ class HrTimesheetSheet(models.Model):
 
     def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
         query = """
+        WITH existing_aal AS (
+        SELECT DISTINCT(task_id)
+        FROM account_analytic_line
+        WHERE sheet_id = %(sheet_aal)s
+        ),
         INSERT INTO
         account_analytic_line
         (       create_uid,
@@ -387,7 +392,8 @@ class HrTimesheetSheet(models.Model):
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage, """ + \
                 ("%(uom)s as product_uom_id " if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
-          """FROM account_analytic_line aal
+          """FROM 
+             account_analytic_line aal
                  LEFT JOIN project_project pp 
                  ON pp.id = aal.project_id
                  LEFT JOIN project_invoicing_properties ip
@@ -398,8 +404,9 @@ class HrTimesheetSheet(models.Model):
                  on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
              WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL
-             AND aal.kilometers > 0       
-             ;"""
+             AND aal.task_id IS NOT IN (existing_aal)
+             AND""" + \
+             " aal.kilometers > 0 ;" if not copy_last_week else ";"
 
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
                                     'week_id_aal': self.week_id.id,
@@ -454,7 +461,8 @@ class DateRangeGenerator(models.TransientModel):
     @api.multi
     def _compute_date_ranges(self):
         self.ensure_one()
-        vals = rrule(freq=self.unit_of_time, interval=self.duration_count,
+        vals = rrule(freq=self.unit_of_time,
+                     interval=self.duration_count,
                      dtstart=fields.Date.from_string(self.date_start),
                      count=self.count+1)
         vals = list(vals)
