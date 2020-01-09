@@ -342,7 +342,7 @@ class HrTimesheetSheet(models.Model):
                 state,
                 non_invoiceable_mileage,
                 product_uom_id )
-        SELECT  DISTINCT ON (task_id),
+        SELECT  DISTINCT ON (task_id)
                 aal.create_uid as create_uid,
                 aal.user_id as user_id,
                 aal.account_id as account_id,
