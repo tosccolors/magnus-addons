@@ -298,11 +298,6 @@ class HrTimesheetSheet(models.Model):
 
     def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
         query = """
-        WITH existing_aal AS (
-        SELECT DISTINCT(task_id)
-        FROM account_analytic_line
-        WHERE sheet_id = %(sheet_aal)s
-        ),
         INSERT INTO
         account_analytic_line
         (       create_uid,
@@ -404,7 +399,11 @@ class HrTimesheetSheet(models.Model):
                  on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
              WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL
-             AND aal.task_id IS NOT IN (existing_aal)
+             AND aal.task_id IS NOT IN (
+                    SELECT DISTINCT(task_id)
+                    FROM account_analytic_line
+                    WHERE sheet_id = %(sheet_aal)s
+             )
              AND""" + \
              " aal.kilometers > 0 ;" if not copy_last_week else ";"
 
