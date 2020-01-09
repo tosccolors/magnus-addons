@@ -348,7 +348,7 @@ class HrTimesheetSheet(models.Model):
                 aal.company_id as company_id,
                 aal.write_uid as write_uid, """ + \
                 ("aal.amount as amount, " if not copy_last_week else "0 as amount, ") + \
-                ("aal.kilometers as unit_amount, " if not copy_last_week else "aal.unit_amount as unit_amount, ") + \
+                ("aal.kilometers as unit_amount, " if not copy_last_week else "0 as unit_amount, ") + \
                 ("aal.date as date, " if not copy_last_week else "aal.date + 7 as date, ") + \
              """%(create)s as create_date,
                 %(create)s as write_date,
