@@ -342,7 +342,8 @@ class HrTimesheetSheet(models.Model):
                 state,
                 non_invoiceable_mileage,
                 product_uom_id )
-        SELECT  aal.create_uid as create_uid,
+        SELECT  DISTINCT ON (task_id),
+                aal.create_uid as create_uid,
                 aal.user_id as user_id,
                 aal.account_id as account_id,
                 aal.company_id as company_id,
@@ -401,14 +402,11 @@ class HrTimesheetSheet(models.Model):
              AND aal.ref_id IS NULL             
              AND aal.task_id NOT IN 
              (
-             SELECT DISTINCT(task_id)
+             SELECT DISTINCT task_id
              FROM account_analytic_line
              WHERE sheet_id = %(sheet_aal)s
              )
-             AND NOT EXISTS (
-             SELECT task_id FROM account_analytic_line 
-             WHERE sheet_id = %(sheet_aal)s
-             )""" + \
+             """ + \
              ("AND aal.kilometers > 0 ;" if not copy_last_week else ";")
 
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
