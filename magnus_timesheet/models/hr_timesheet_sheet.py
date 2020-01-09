@@ -409,12 +409,12 @@ class HrTimesheetSheet(models.Model):
              SELECT DISTINCT(task_id)
              FROM account_analytic_line
              WHERE sheet_id = %(sheet_aal)s
-             ))
+             )
              OR NOT EXISTS (
              SELECT DISTINCT(task_id)
              FROM account_analytic_line
              WHERE sheet_id = %(sheet_aal)s
-             )
+             ))
              AND""" + \
              " aal.kilometers > 0 ;" if not copy_last_week else ";"
 
