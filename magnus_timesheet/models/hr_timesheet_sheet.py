@@ -364,7 +364,7 @@ class HrTimesheetSheet(models.Model):
                 ("aal.amount_currency as amount_currency, " if not copy_last_week else "0 as amount_currency, ") + \
              """aal.project_id as project_id,
                 aal.department_id as department_id,
-                DISTINCT(aal.task_id) as task_id, """ + \
+                aal.task_id as task_id, """ + \
                 ("NULL as sheet_id, " if not copy_last_week else "%(sheet_aal)s as sheet_id, ") + \
                 ("NULL as ts_line, " if not copy_last_week else "aal.ts_line as ts_line, ") + \
              """aal.so_line as so_line,
