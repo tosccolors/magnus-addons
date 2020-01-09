@@ -399,11 +399,20 @@ class HrTimesheetSheet(models.Model):
                  on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
              WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL
-             AND aal.task_id IS NOT IN (
+             CASE
+                WHEN EXISTS (
                     SELECT DISTINCT(task_id)
                     FROM account_analytic_line
                     WHERE sheet_id = %(sheet_aal)s
              )
+                THEN 
+                    AND aal.task_id IS NOT IN (
+                    SELECT DISTINCT(task_id)
+                    FROM account_analytic_line
+                    WHERE sheet_id = %(sheet_aal)s
+             )
+                ELSE false
+             END 
              AND""" + \
              " aal.kilometers > 0 ;" if not copy_last_week else ";"
 
