@@ -399,22 +399,13 @@ class HrTimesheetSheet(models.Model):
                  on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
              WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL             
-             AND (EXISTS (
-             SELECT DISTINCT(task_id)
-             FROM account_analytic_line
-             WHERE sheet_id = %(sheet_aal)s
-             )
              AND aal.task_id NOT IN 
              (
              SELECT DISTINCT(task_id)
              FROM account_analytic_line
              WHERE sheet_id = %(sheet_aal)s
              )
-             OR NOT EXISTS (
-             SELECT DISTINCT(task_id)
-             FROM account_analytic_line
-             WHERE sheet_id = %(sheet_aal)s
-             )) """ + \
+             """ + \
              ("AND aal.kilometers > 0 ;" if not copy_last_week else ";")
 
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
