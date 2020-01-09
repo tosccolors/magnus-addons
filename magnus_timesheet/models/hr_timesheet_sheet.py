@@ -406,7 +406,7 @@ class HrTimesheetSheet(models.Model):
                     WHERE sheet_id = %(sheet_aal)s
              )
                 THEN 
-                    AND aal.task_id IS NOT IN (
+                    AND aal.task_id NOT IN (
                     SELECT DISTINCT(task_id)
                     FROM account_analytic_line
                     WHERE sheet_id = %(sheet_aal)s
