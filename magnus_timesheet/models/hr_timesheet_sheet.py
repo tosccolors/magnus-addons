@@ -414,9 +414,8 @@ class HrTimesheetSheet(models.Model):
              SELECT DISTINCT(task_id)
              FROM account_analytic_line
              WHERE sheet_id = %(sheet_aal)s
-             ))
-             AND""" + \
-             " aal.kilometers > 0 ;" if not copy_last_week else ";"
+             )) """ + \
+             "AND aal.kilometers > 0 ;" if not copy_last_week else ";"
 
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
                                     'week_id_aal': self.week_id.id,
