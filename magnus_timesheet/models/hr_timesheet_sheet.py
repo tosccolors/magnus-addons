@@ -199,7 +199,7 @@ class HrTimesheetSheet(models.Model):
                         "Duration: %s to %s"
                     ) % (datetime.strftime(date_start, "%d-%b-%Y"),
                          datetime.strftime(date_end, "%d-%b-%Y")))
-
+                ## todo What if during last week department_id and/or operating_unit_id and/or product_id has changed?
                 # elif self.employee_id.department_id != last_week_timesheet.employee_id.department_id \
                 #     or self.employee_id.product_id != last_week_timesheet.employee_id.product_id \
                 #     or self.employee_id.operating_unit_id != last_week_timesheet.employee_id.operating_unit_id:
@@ -392,6 +392,8 @@ class HrTimesheetSheet(models.Model):
              account_analytic_line aal
                  LEFT JOIN project_project pp 
                  ON pp.id = aal.project_id
+                 LEFT JOIN account_analytic_account aaa
+                 ON aaa.id = aal.account_id
                  LEFT JOIN project_invoicing_properties ip
                  ON ip.id = pp.invoice_properties
                  RIGHT JOIN hr_timesheet_sheet_sheet hss
