@@ -54,12 +54,13 @@ class StatusTimeReport(models.Model):
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW status_time_report AS (
             SELECT
-                CASE WHEN hrc.id < dr.id 
+                CAST(
+					CASE WHEN hrc.id < dr.id 
                         THEN hrc.id + dr.id^2
-                     ELSE hrc.id^2 + hrc.id + dr.id
-                END as id,
-                hrc.id * 100 + dr.id as id,
-                dr.id as week_id, 
+                        ELSE hrc.id^2 + hrc.id + dr.id
+                    END
+					as INTEGER) as id,
+                dr.id as week_id,
                 hrc.id as employee_id, 
                 hrc.department_id as department_id,  
                 hrc.external as external,
