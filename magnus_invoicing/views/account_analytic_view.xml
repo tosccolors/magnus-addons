@@ -39,7 +39,7 @@
                         <field name="operating_unit_id" />
                         <field name="project_id" />
                         <field name="task_id" />
-
+                        <field name="date_of_last_wip"/>
                     </xpath>
                     <xpath expr="//field[@name='unit_amount']" position="after">
                         <field name="product_uom_id" />
