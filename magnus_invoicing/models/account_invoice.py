@@ -100,6 +100,8 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).action_invoice_open()
         if self.type in ('out_invoice'):
             analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
+            if not analytic_invoice_id:
+                return res
             # if invoicing period doesn't lie in same month
             period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
             cur_date = datetime.now().date().strftime("%Y-%m")
