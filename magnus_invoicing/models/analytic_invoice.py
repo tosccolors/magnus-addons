@@ -73,6 +73,7 @@ class AnalyticInvoice(models.Model):
                         'product_id': item.get('product_id'),
                         'operating_unit_id': item.get('operating_unit_id'),
                         'project_operating_unit_id': item.get('project_operating_unit_id'),
+                        'line_fee_rate': item.get('line_fee_rate'),
                     }
 
                     if reconfirmed_entires:
@@ -90,6 +91,7 @@ class AnalyticInvoice(models.Model):
                         ('user_id', '=', vals['user_id']),
                         ('task_id', '=', vals['task_id']),
                         ('account_id', '=', vals['account_id']),
+                        ('line_fee_rate', '=', vals['line_fee_rate']),
                         # ('month_id', '=', vals['gb_month_id']),
                     ]
                     if reconfirmed_entires:
@@ -200,6 +202,7 @@ class AnalyticInvoice(models.Model):
                 'account_id',
                 'product_id',
                 'unit_amount',
+                'line_fee_rate',
                 'project_operating_unit_id'
             ]
 
@@ -210,6 +213,7 @@ class AnalyticInvoice(models.Model):
                 'task_id',
                 'account_id',
                 'product_id',
+                'line_fee_rate',
                 'project_operating_unit_id'
             ]
 
@@ -840,12 +844,18 @@ class AnalyticUserTotal(models.Model):
             Else, get fee rate from method get_fee_rate()
         :return:
         """
-        task_user = self.analytic_invoice_id.task_user_ids.filtered(
-            lambda line: line.user_id == self.user_id
-                    and line.task_id == self.task_id
-        )
+        # task_user = self.analytic_invoice_id.task_user_ids.filtered(
+        #     lambda line: line.user_id == self.user_id
+        #             and line.task_id == self.task_id
+        # )
+        task_user = self.env['task.user']
+        for aaline in self.detail_ids:
+            task_user |= task_user.search(
+                [('id', 'in', self.analytic_invoice_id.task_user_ids.ids),('task_id', '=', self.task_id.id),
+                 ('from_date', '<=', aaline.date), ('user_id', '=', self.user_id.id)])
         if task_user:
-            self.fee_rate = fr = task_user[0].fee_rate
+            task_user = task_user.search([('id', 'in', task_user.ids)], limit = 1, order = 'from_date Desc')
+            self.fee_rate = fr = task_user.fee_rate
             self.amount = - self.unit_amount * fr
         else:
             self.fee_rate = fr = self.get_fee_rate(False, False)
