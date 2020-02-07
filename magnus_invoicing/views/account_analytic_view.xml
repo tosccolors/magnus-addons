@@ -53,6 +53,9 @@
             <field name="inherit_id" ref="analytic.view_account_analytic_line_filter"/>
             <field name="arch" type="xml">
                 <data>
+                    <xpath expr="//field[@name='account_id']" position="replace">
+                    </xpath>
+
                     <xpath expr="//field[@name='name']" position="before">
                         <filter string="My Projects"
                                 domain="[
@@ -93,7 +96,7 @@
                         <filter name="draft" string="Draft"
                                 domain="[('state','=','draft')]"/>
                         <filter name="open" string="Confirmed"
-                                domain="[('state','=','open')]"/>
+                                domain="[('state', 'in', ['open','re_confirmed'])]"/>
                         <filter name="progress" string="In progress"
                                 domain="[('state','=','progress')]"/>
                         <filter name="invoiceable" string="To Be Invoiced"
@@ -106,6 +109,7 @@
                                 domain="[('state','=','write_off')]"/>
                         <filter name="change-chargecode" string="Correcties"
                                 domain="[('state','=','change-chargecode')]"/>
+                        <field name="account_id" />
                         <field name="project_mgr" />
                     </xpath>
                     <xpath expr="//field[@name='date']" position="after">
