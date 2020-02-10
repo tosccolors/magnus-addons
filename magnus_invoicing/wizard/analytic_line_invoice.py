@@ -31,6 +31,10 @@ class AnalyticLineStatus(models.TransientModel):
     description = fields.Char(
         "Description"
     )
+    wip_month_ids = fields.Many2many(
+        'date.range',
+        string="Month of Analytic Line or last Wip Posting"
+    )
 
     def validate_entries_month(self, analytic_ids):
         fields_grouped = [
@@ -223,6 +227,10 @@ class AnalyticLineStatus(models.TransientModel):
     def onchange_name(self):
         if self.name == 'delayed':
             self.wip = True
+            context = self.env.context.copy()
+            entries_ids = context.get('active_ids', [])
+            wip_months = self.env['account.analytic.line'].browse(entries_ids).mapped('wip_month_id')
+            self.wip_month_ids = [(6, 0, wip_months.ids)]
         else:
             self.wip = False
 

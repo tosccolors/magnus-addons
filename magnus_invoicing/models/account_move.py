@@ -54,13 +54,13 @@ class AccountMove(models.Model):
         return res
 
     @api.multi
-    def wip_move_create(self, wip_journal, name, ar_account_id):
+    def wip_move_create(self, wip_journal, name, ar_account_id, ref=None):
         self.ensure_one()
         move_date = datetime.strptime(self.date, "%Y-%m-%d")
         last_day_month_before = (move_date - timedelta(days=move_date.day)).strftime("%Y-%m-%d")
         default = {
             'name': name,
-            'ref': 'WIP Invoicing Posting',
+            'ref':  ref if ref else 'WIP Invoicing Posting',
             'journal_id': wip_journal.id,
             'date': last_day_month_before,
             'narration': 'WIP Invoicing Posting',

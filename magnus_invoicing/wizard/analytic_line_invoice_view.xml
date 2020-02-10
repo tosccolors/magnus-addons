@@ -12,13 +12,14 @@
                     <field name="name" col="4" colspan="6" required="True"/>
                     <group attrs="{'invisible':[('name','!=','delayed')]}">
                         <field name="wip"/>
+                        <field name="wip_month_ids" widget="many2many_tags" readonly="1"/>
                         <field name="wip_percentage" attrs="{'invisible':[('wip','=',False)], 'required':[('wip','=',True)]}"/>
                         <field name="description" attrs="{'invisible':[('wip','=',False)], 'required':[('wip','=',True)]}"/>
                     </group>
                     <footer>
                         <button name="analytic_invoice_lines" string="Update Entries" type="object" class="oe_highlight"/>
                         <button name="prepare_analytic_invoice" string="Make Analytic invoice" type="object"
-                                class="oe_highlight"/>
+                                class="oe_highlight" attrs="{'invisible':[('name','=','delayed')]}"/>
                         <button string="Cancel" class="oe_link" special="cancel" />
                     </footer>
                 </form>
