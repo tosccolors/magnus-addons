@@ -28,6 +28,7 @@
                             <field name="month_id" string="Invoicing Period" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
                             <field name="link_project" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
                             <field name="project_id" string="Project" attrs="{'required': [('link_project', '=', True)],'invisible': [('link_project', '=', False)], 'readonly': [('state','in',('open','invoiced'))]}"/>
+                            <field name="invoice_properties" attrs="{'invisible': [('invoice_properties', '=', False)]}"/>
                      </group>
                     <separator string="Fee Rates"/>
                     <field name="task_user_ids_domain"

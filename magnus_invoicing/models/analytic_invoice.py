@@ -498,6 +498,12 @@ class AnalyticInvoice(models.Model):
                                 ]}
         return res
 
+    @api.one
+    @api.depends('account_analytic_ids', 'project_id')
+    def _compute_invoice_properties(self):
+        if len(self.account_analytic_ids.ids) == 1 and self.project_id:
+            self.invoice_properties = self.project_id.invoice_properties and self.project_id.invoice_properties.id
+
     account_analytic_ids = fields.Many2many(
         'account.analytic.account',
         compute='_compute_objects',
@@ -592,6 +598,11 @@ class AnalyticInvoice(models.Model):
     project_id = fields.Many2one(
         'project.project',
         domain=[('invoice_properties.group_invoice', '=', False)]
+    )
+    invoice_properties = fields.Many2one('project.invoicing.properties',
+        compute='_compute_invoice_properties',
+        string='Invoice Properties',
+        store=True,
     )
 
     def unlink_rec(self):
