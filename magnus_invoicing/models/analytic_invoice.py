@@ -102,35 +102,59 @@ class AnalyticInvoice(models.Model):
                             aal_domain += [('week_id', '=', vals['gb_week_id'])]
 
                     childData = []
-                    for aal in self.env['account.analytic.line'].search(aal_domain):
-                        childData.append((4, aal.id))
-                    vals['detail_ids'] = childData
 
-                    userTotData.append((0, 0, vals))
                     # task-358
                     month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
                     if month_id:
                         month = self.env['date.range'].browse([month_id])
                         date_start = month.date_start
                         date_end = month.date_end
-                    taskUser = taskUserObj.search(
+                    defTaskUser = taskUserObj.search(
                         [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
                          ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-                    if len(taskUser) == 0:
-                        taskUser = taskUserObj.search(
+                    if len(defTaskUser) == 0:
+                        defTaskUser = taskUserObj.search(
                             [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
                              ('user_id', '=', vals['user_id'])], )
-                    date_now = fields.Date.today()
-                    taskUser = taskUserObj.search(
-                        [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
-                         ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-                    if len(taskUser) == 0:
-                        taskUser = taskUserObj.search(
-                            [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
-                             ('user_id', '=', vals['user_id'])],
-                            limit=1, order='from_date Desc')
-                    tskUserIds += taskUser.ids
-            return tskUserIds
+                    # tskUserIds += taskUser.ids
+                    for aal in self.env['account.analytic.line'].search(aal_domain):
+                        taskobj = taskUserObj.search(
+                            [('task_id', '=', aal.task_id.id),
+                             ('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)])
+                        if not taskobj:
+                            tskUserIds +=defTaskUser.ids
+                        else:
+                            tskUserIds += taskobj.ids
+
+                        childData.append((4, aal.id))
+                    vals['detail_ids'] = childData
+
+                    userTotData.append((0, 0, vals))
+                    # task-358
+                    # month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
+                    # if month_id:
+                    #     month = self.env['date.range'].browse([month_id])
+                    #     date_start = month.date_start
+                    #     date_end = month.date_end
+                    # taskUser = taskUserObj.search(
+                    #     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
+                    #      ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
+                    # if len(taskUser) == 0:
+                    #     taskUser = taskUserObj.search(
+                    #         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
+                    #          ('user_id', '=', vals['user_id'])], )
+                    # # date_now = fields.Date.today()
+                    # taskUser = taskUserObj.search(
+                    #     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
+                    #      ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
+                    # if len(taskUser) == 0:
+                    #     taskUser = taskUserObj.search(
+                    #         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
+                    #          ('user_id', '=', vals['user_id'])],
+                    #           limit=1, order='from_date Desc')
+                    # tskUserIds += taskUser.ids
+
+            return list(set(tskUserIds))
 
 
         ctx = self.env.context.copy()
