@@ -95,6 +95,7 @@ class AnalyticLineStatus(models.TransientModel):
                 self.update_line_fee_rates(analytic_ids)
                 self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
             if status == 'invoiceable':
+                self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
 
