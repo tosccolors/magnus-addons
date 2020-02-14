@@ -800,7 +800,7 @@ class AnalyticInvoice(models.Model):
     @api.multi
     def _get_user_per_month(self):
         self.ensure_one()
-        res = {}
+        result = {}
 
         #FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
         user_total_objs = self.user_total_ids
@@ -808,26 +808,86 @@ class AnalyticInvoice(models.Model):
             usrTotIDS = self.read(['user_total_ids'])[0]['user_total_ids']
             user_total_objs = self.user_total_ids.browse(usrTotIDS)
 
-        for user_tot in user_total_objs:
-            if user_tot.project_id.invoice_properties.specs_invoice_report:
-                if user_tot.project_id in res:
-                    if user_tot.user_id in res[user_tot.project_id]:
-                        res[user_tot.project_id][user_tot.user_id]['hours'] += user_tot.unit_amount
-                        res[user_tot.project_id][user_tot.user_id]['fee_rate'] += user_tot.fee_rate
-                        res[user_tot.project_id][user_tot.user_id]['amount'] += user_tot.amount
-                    else:
-                        res[user_tot.project_id][user_tot.user_id] = {'hours': user_tot.unit_amount,
-                                                                      'fee_rate': user_tot.fee_rate,
-                                                                      'amount': user_tot.amount}
-                    res[user_tot.project_id]['hrs_tot'] += user_tot.unit_amount
-                    res[user_tot.project_id]['amt_tot'] += user_tot.amount
-                else:
-                    res[user_tot.project_id] = {}
-                    res[user_tot.project_id][user_tot.user_id] = {'hours':user_tot.unit_amount, 'fee_rate':user_tot.fee_rate, 'amount': user_tot.amount}
-                    res[user_tot.project_id]['hrs_tot'] = user_tot.unit_amount
-                    res[user_tot.project_id]['amt_tot'] = user_tot.amount
+        project = self.env['project.project']
+        user = self.env['res.users']
 
-        return res
+        analytic_obj = user_total_objs.mapped('detail_ids')
+        cond = '='
+        rec = analytic_obj.ids[0]
+        if len(analytic_obj) > 1:
+            cond = 'IN'
+            rec = tuple(analytic_obj.ids)
+
+        self.env.cr.execute("""
+                               SELECT pp.id AS project_id, prop.group_by_month, prop.group_by_fee_rate
+                               FROM project_invoicing_properties prop
+                               JOIN project_project pp ON pp.invoice_properties = prop.id
+                               JOIN 
+                                   (SELECT project_id FROM account_analytic_line aal WHERE aal.id %s %s GROUP BY project_id) AS temp 
+                                   ON temp.project_id = pp.id
+                               WHERE prop.specs_invoice_report = TRUE
+                               """ % (cond, rec))
+
+        grp_data = self.env.cr.fetchall()
+        for data in grp_data:
+            fields_grouped = [
+                'id',
+                'project_id',
+                'user_id',
+                'month_id',
+                'line_fee_rate',
+                'unit_amount',
+                'amount',
+            ]
+            grouped_by = [
+                'project_id',
+                'user_id',
+            ]
+
+            if data[1]:
+                grouped_by += [
+                    'month_id', ]
+            if data[2]:
+                grouped_by += [
+                    'line_fee_rate', ]
+
+            aal_grp_data = self.env['account.analytic.line'].read_group(
+                [('id', 'in', analytic_obj.ids), ('project_id', '=', data[0])],
+                fields_grouped,
+                grouped_by,
+                offset=0,
+                limit=None,
+                orderby=False,
+                lazy=False
+            )
+
+            res = {}
+            for item in aal_grp_data:
+                project_obj = project.browse(item.get('project_id')[0])
+                user_obj = user.browse(item.get('user_id')[0])
+                unit_amount = item.get('unit_amount')
+                fee_rate = item.get('line_fee_rate')
+                amount = item.get('amount')
+                month = self.env['date.range'].browse(item.get('month_id')[0]) if item.has_key('month_id') else 'null'
+
+                res[project_obj] = {}
+                res[project_obj][user_obj] = {'hours': unit_amount, 'fee_rate': fee_rate, 'amount': amount}
+                res[project_obj]['hrs_tot'] = unit_amount
+                res[project_obj]['amt_tot'] = amount
+                # res[project_obj]['gb_month'] = month
+                gb_fee_rate = abs(fee_rate) if data[2] else 'null'
+                # res[project_obj]['gb_fee_rate'] = gb_fee_rate
+                if month in result:
+                    if gb_fee_rate in result[month]:
+                        result[month][gb_fee_rate].update(res)
+                    else:
+                        result[month][gb_fee_rate]={}
+                        result[month][gb_fee_rate].update(res)
+                else:
+                    result[month]={}
+                    result[month][gb_fee_rate] = {}
+                    result[month][gb_fee_rate].update(res)
+        return result
 
     @api.multi
     def _get_user_per_day(self):
@@ -845,25 +905,88 @@ class AnalyticInvoice(models.Model):
     @api.multi
     def _get_specs_on_task(self):
         self.ensure_one()
-        res = {}
+        result = {}
+
         # FIX:on invoice send by mail action, self.user_total_ids is returning as empty set
         user_total_objs = self.user_total_ids
         if not user_total_objs:
             usrTotIDS = self.read(['user_total_ids'])[0]['user_total_ids']
             user_total_objs = self.user_total_ids.browse(usrTotIDS)
 
-        for user_tot in user_total_objs:
-            if user_tot.project_id.invoice_properties.specs_invoice_report and user_tot.project_id.invoice_properties.specs_on_task_level:
-                if user_tot.project_id in res:
-                    if user_tot.task_id in res[user_tot.project_id]:
-                        res[user_tot.project_id][user_tot.task_id]['unit_amount'] += user_tot.unit_amount
-                    else:
-                        res[user_tot.project_id][user_tot.task_id] = {'unit_amount': user_tot.unit_amount}
-                else:
-                    res[user_tot.project_id] = {}
-                    res[user_tot.project_id][user_tot.task_id] = {'unit_amount': user_tot.unit_amount}
-        return res
+        project = self.env['project.project']
+        task = self.env['project.task']
 
+        analytic_obj = user_total_objs.mapped('detail_ids')
+        cond = '='
+        rec = analytic_obj.ids[0]
+        if len(analytic_obj) > 1:
+            cond = 'IN'
+            rec = tuple(analytic_obj.ids)
+
+        self.env.cr.execute("""
+                                       SELECT pp.id AS project_id, prop.group_by_month, prop.group_by_fee_rate
+                                       FROM project_invoicing_properties prop
+                                       JOIN project_project pp ON pp.invoice_properties = prop.id
+                                       JOIN 
+                                           (SELECT project_id FROM account_analytic_line aal WHERE aal.id %s %s GROUP BY project_id) AS temp 
+                                           ON temp.project_id = pp.id
+                                       WHERE prop.specs_invoice_report = TRUE AND prop.specs_on_task_level = TRUE
+                                       """ % (cond, rec))
+
+        grp_data = self.env.cr.fetchall()
+        for data in grp_data:
+            fields_grouped = [
+                'id',
+                'project_id',
+                'task_id',
+                'month_id',
+                'line_fee_rate',
+                'unit_amount',
+            ]
+            grouped_by = [
+                'project_id',
+                'task_id',
+            ]
+
+            if data[1]:
+                grouped_by += [
+                    'month_id', ]
+            if data[2]:
+                grouped_by += [
+                    'line_fee_rate', ]
+
+            aal_grp_data = self.env['account.analytic.line'].read_group(
+                [('id', 'in', analytic_obj.ids), ('project_id', '=', data[0])],
+                fields_grouped,
+                grouped_by,
+                offset=0,
+                limit=None,
+                orderby=False,
+                lazy=False
+            )
+
+            res = {}
+            for item in aal_grp_data:
+                project_obj = project.browse(item.get('project_id')[0])
+                task_obj = task.browse(item.get('task_id')[0])
+                unit_amount = item.get('unit_amount')
+                fee_rate = item.get('line_fee_rate')
+                month = self.env['date.range'].browse(item.get('month_id')[0]) if item.has_key('month_id') else 'null'
+
+                res[project_obj] = {}
+                res[project_obj][task_obj] = {'unit_amount': unit_amount}
+                gb_fee_rate = abs(fee_rate) if data[2] else 'null'
+                if month in result:
+                    if gb_fee_rate in result[month]:
+                        result[month][gb_fee_rate].update(res)
+                    else:
+                        result[month][gb_fee_rate] = {}
+                        result[month][gb_fee_rate].update(res)
+                else:
+                    result[month] = {}
+                    result[month][gb_fee_rate] = {}
+                    result[month][gb_fee_rate].update(res)
+        return result
 
 
 class AnalyticUserTotal(models.Model):
