@@ -668,17 +668,17 @@ class AnalyticInvoice(models.Model):
             analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()
 
-    @api.multi
-    def get_product_wip_account(self, product, fiscal_pos=None):
-        account = product.property_account_wip_id
-        if not account and product:
-            raise UserError(
-                _('Please define WIP account for this product: "%s" (id:%d).') %
-                (product.name, product.id))
-
-        if not fiscal_pos:
-            fiscal_pos = self.env['account.fiscal.position']
-        return fiscal_pos.map_account(account)
+    # @api.multi
+    # def get_product_wip_account(self, product, fiscal_pos=None):
+    #     account = product.property_account_wip_id
+    #     if not account and product:
+    #         raise UserError(
+    #             _('Please define WIP account for this product: "%s" (id:%d).') %
+    #             (product.name, product.id))
+    #
+    #     if not fiscal_pos:
+    #         fiscal_pos = self.env['account.fiscal.position']
+    #     return fiscal_pos.map_account(account)
 
     @api.model
     def _prepare_invoice_line(self, line, invoice_id):
@@ -701,29 +701,6 @@ class AnalyticInvoice(models.Model):
         # Get other invoice line values from product onchange
         invoice_line._onchange_product_id()
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
-
-        # if invoicing period doesn't lie in same month
-        period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-        # cur_date = datetime.now().date().strftime("%Y-%m")
-        invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
-        inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m')
-        if inv_date != period_date:
-            fpos = self.invoice_id.fiscal_position_id
-            account = self.get_product_wip_account(line.product_id, fpos)
-            invoice_line_vals.update({
-                    'account_id':account.id
-                })
-        # period_date = datetime.strptime(line.analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-        # cur_date = datetime.now().date().strftime("%Y-%m")
-        # invoice_date = line.analytic_invoice_id.invoice_id.date or line.analytic_invoice_id.invoice_id.date_invoice
-        #
-        # inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
-        # if inv_date != period_date:
-        #     fpos = self.invoice_id.fiscal_position_id
-        #     account = self.get_product_wip_account(line.product_id, fpos)
-        #     invoice_line_vals.update({
-        #             'account_id':account.id
-        #         })
 
         invoice_line_vals.update({
             'account_analytic_id': line.account_id and line.account_id.id or False,
