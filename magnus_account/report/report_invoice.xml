@@ -240,10 +240,10 @@
                             <t t-foreach="monthLines_value" t-as="feeLines">
                                 <div width="85%">
                                     <t t-if="monthLines != 'null'">
-                                        Month:<strong><span t-field="monthLines.name"/></strong>
+                                         Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(monthLines.date_start,'%Y-%m-%d'))"/></strong>
                                     </t>
                                     <t t-if="feeLines != 'null'">
-                                        Fee Rate:<strong><span t-esc="feeLines"/></strong>
+                                        Fee Rate: <strong><span t-esc="feeLines"/></strong>
                                     </t>
 
                                 </div>
@@ -328,10 +328,10 @@
                             <t t-foreach="monthLines_value" t-as="feeLines">
                                 <div width="85%">
                                     <t t-if="monthLines != 'null'">
-                                        Month:<strong><span t-field="monthLines.name"/></strong>
-                                    </t>
-                                    <t t-if="feeLines != 'null'">
-                                        Fee Rate:<strong><span t-esc="feeLines"/></strong>
+                                        Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(monthLines.date_start,'%Y-%m-%d'))"/></strong>
+                                        <t t-if="feeLines != 'null'">
+                                            Fee Rate: <strong><span t-esc="feeLines"/></strong>
+                                        </t>
                                     </t>
                                 </div>
                                  <t t-foreach="feeLines_value" t-as="proLines">
