@@ -838,7 +838,6 @@ class AnalyticInvoice(models.Model):
                 lazy=False
             )
 
-            res = {}
             for item in aal_grp_data:
                 project_obj = project.browse(item.get('project_id')[0])
                 user_obj = user.browse(item.get('user_id')[0])
@@ -846,24 +845,37 @@ class AnalyticInvoice(models.Model):
                 fee_rate = item.get('line_fee_rate')
                 amount = item.get('amount')
                 month = self.env['date.range'].browse(item.get('month_id')[0]) if item.has_key('month_id') else 'null'
-
-                res[project_obj] = {}
-                res[project_obj][user_obj] = {'hours': unit_amount, 'fee_rate': fee_rate, 'amount': amount}
-                res[project_obj]['hrs_tot'] = unit_amount
-                res[project_obj]['amt_tot'] = amount
-                # res[project_obj]['gb_month'] = month
                 gb_fee_rate = abs(fee_rate) if data[2] else 'null'
-                # res[project_obj]['gb_fee_rate'] = gb_fee_rate
+
                 if month in result:
                     if gb_fee_rate in result[month]:
-                        result[month][gb_fee_rate].update(res)
+                        if project_obj in result[month][gb_fee_rate]:
+                            if user_obj in result[month][gb_fee_rate][project_obj]:
+                                result[month][gb_fee_rate][project_obj][user_obj]['hours'] += unit_amount
+                                result[month][gb_fee_rate][project_obj][user_obj]['fee_rate'] += fee_rate
+                                result[month][gb_fee_rate][project_obj][user_obj]['amount'] += amount
+                            else:
+                                result[month][gb_fee_rate][project_obj][user_obj] = {'hours': unit_amount,
+                                                                                     'fee_rate': fee_rate,
+                                                                                     'amount': amount}
+                            result[month][gb_fee_rate][project_obj]['hrs_tot'] += unit_amount
+                            result[month][gb_fee_rate][project_obj]['amt_tot'] += amount
+                        else:
+                            result[month][gb_fee_rate][project_obj] = {'hrs_tot':unit_amount, 'amt_tot':amount}
+                            result[month][gb_fee_rate][project_obj][user_obj] = {'hours': unit_amount,
+                                                                                 'fee_rate': fee_rate, 'amount': amount}
+
                     else:
-                        result[month][gb_fee_rate]={}
-                        result[month][gb_fee_rate].update(res)
+                        result[month][gb_fee_rate] = {}
+                        result[month][gb_fee_rate][project_obj] = {'hrs_tot':unit_amount, 'amt_tot':amount}
+                        result[month][gb_fee_rate][project_obj][user_obj] = {'hours': unit_amount, 'fee_rate': fee_rate,
+                                                                             'amount': amount}
                 else:
-                    result[month]={}
+                    result[month] = {}
                     result[month][gb_fee_rate] = {}
-                    result[month][gb_fee_rate].update(res)
+                    result[month][gb_fee_rate][project_obj] = {'hrs_tot': unit_amount, 'amt_tot': amount}
+                    result[month][gb_fee_rate][project_obj][user_obj] = {'hours': unit_amount, 'fee_rate': fee_rate,
+                                                                         'amount': amount}
         return result
 
     @api.multi
@@ -942,7 +954,6 @@ class AnalyticInvoice(models.Model):
                 lazy=False
             )
 
-            res = {}
             for item in aal_grp_data:
                 project_obj = project.browse(item.get('project_id')[0])
                 task_obj = task.browse(item.get('task_id')[0])
@@ -950,19 +961,26 @@ class AnalyticInvoice(models.Model):
                 fee_rate = item.get('line_fee_rate')
                 month = self.env['date.range'].browse(item.get('month_id')[0]) if item.has_key('month_id') else 'null'
 
-                res[project_obj] = {}
-                res[project_obj][task_obj] = {'unit_amount': unit_amount}
                 gb_fee_rate = abs(fee_rate) if data[2] else 'null'
                 if month in result:
                     if gb_fee_rate in result[month]:
-                        result[month][gb_fee_rate].update(res)
+                        if project_obj in result[month][gb_fee_rate]:
+                            if task_obj in result[month][gb_fee_rate][project_obj]:
+                                result[month][gb_fee_rate][project_obj][task_obj]['unit_amount'] += unit_amount
+                            else:
+                                result[month][gb_fee_rate][project_obj][task_obj] = {'unit_amount': unit_amount}
+                        else:
+                            result[month][gb_fee_rate][project_obj] = {}
+                            result[month][gb_fee_rate][project_obj][task_obj] = {'unit_amount': unit_amount}
                     else:
                         result[month][gb_fee_rate] = {}
-                        result[month][gb_fee_rate].update(res)
+                        result[month][gb_fee_rate][project_obj] = {}
+                        result[month][gb_fee_rate][project_obj][task_obj] = {'unit_amount': unit_amount}
                 else:
                     result[month] = {}
                     result[month][gb_fee_rate] = {}
-                    result[month][gb_fee_rate].update(res)
+                    result[month][gb_fee_rate][project_obj] = {}
+                    result[month][gb_fee_rate][project_obj][task_obj] = {'unit_amount': unit_amount}
         return result
 
 
