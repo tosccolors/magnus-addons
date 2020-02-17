@@ -104,27 +104,29 @@ class AnalyticInvoice(models.Model):
                     childData = []
 
                     # task-358
-                    month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
-                    if month_id:
-                        month = self.env['date.range'].browse([month_id])
-                        date_start = month.date_start
-                        date_end = month.date_end
-                    defTaskUser = taskUserObj.search(
-                        [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
-                         ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-                    if len(defTaskUser) == 0:
-                        defTaskUser = taskUserObj.search(
-                            [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
-                             ('user_id', '=', vals['user_id'])], )
+                    # month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
+                    # if month_id:
+                    #     month = self.env['date.range'].browse([month_id])
+                    #     date_start = month.date_start
+                    #     date_end = month.date_end
+                    # defTaskUser = taskUserObj.search(
+                    #     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
+                    #      ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
+                    # if len(defTaskUser) == 0:
+                    #     defTaskUser = taskUserObj.search(
+                    #         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
+                    #          ('user_id', '=', vals['user_id'])], )
                     # tskUserIds += taskUser.ids
                     for aal in self.env['account.analytic.line'].search(aal_domain):
                         taskobj = taskUserObj.search(
                             [('task_id', '=', aal.task_id.id),
                              ('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)])
-                        if not taskobj:
-                            tskUserIds +=defTaskUser.ids
-                        else:
+                        if taskobj:
                             tskUserIds += taskobj.ids
+                        # if not taskobj:
+                        #     tskUserIds +=defTaskUser.ids
+                        # else:
+                        #     tskUserIds += taskobj.ids
 
                         childData.append((4, aal.id))
                     vals['detail_ids'] = childData
@@ -1011,7 +1013,9 @@ class AnalyticUserTotal(models.Model):
             self.fee_rate = fr = task_user.fee_rate
             self.amount = - self.unit_amount * fr
         else:
-            self.fee_rate = fr = self.get_fee_rate(False, False)
+            #if no task user found, get price from consultant product
+            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id)])
+            self.fee_rate = fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             self.amount = - self.unit_amount * fr
 
     @api.one
