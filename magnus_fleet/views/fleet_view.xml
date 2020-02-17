@@ -49,7 +49,7 @@
          <field name="arch" type="xml">
              <pivot string="Mileage Report">
                 <field name="business_mileage" type="measure"/>
-               <field name="private_mileage" type="measure"/>
+               <field name="private_mileage_new" type="measure"/>
               <field name="employee_id" type="row"/>
              </pivot>
          </field>

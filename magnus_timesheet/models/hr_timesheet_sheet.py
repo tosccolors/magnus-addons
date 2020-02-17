@@ -156,7 +156,7 @@ class HrTimesheetSheet(models.Model):
     starting_mileage_editable = fields.Integer(string='Starting Mileage')
     vehicle = fields.Boolean(compute='_get_starting_mileage', string='Vehicle', store=False)
     business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
-    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=True)
+    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
     end_mileage = fields.Integer('End Mileage')
     overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
     overtime_hours_delta = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
