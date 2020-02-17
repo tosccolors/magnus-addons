@@ -193,39 +193,31 @@ class HrTimesheetSheet(models.Model):
                     ('employee_id', '=', self.employee_id.id),
                     ('week_id', '=', last_week.id)
                 ], limit=1)
-                if not last_week_timesheet:
+                current_week_lines = [(0, 0, {
+                    'date': l.date,
+                    'name': l.name,
+                    'project_id': l.project_id.id,
+                    'task_id': l.task_id.id,
+                    'user_id': l.user_id.id,
+                    'unit_amount': l.unit_amount
+                }) for l in self.timesheet_ids] if self.timesheet_ids else []
+                if last_week_timesheet:
+                    self.timesheet_ids.unlink()
+                    last_week_lines = [(0, 0, {
+                        'date': datetime.strptime(l.date, "%Y-%m-%d") +
+                                timedelta(days=7),
+                        'name': '/',
+                        'project_id': l.project_id.id,
+                        'task_id': l.task_id.id,
+                        'user_id': l.user_id.id
+                    }) for l in last_week_timesheet.timesheet_ids]
+                    self.timesheet_ids = current_week_lines + last_week_lines
+                else:
                     raise UserError(_(
                         "You have no timesheet logged for last week. "
                         "Duration: %s to %s"
-                    ) % (datetime.strftime(date_start, "%d-%b-%Y"),
-                         datetime.strftime(date_end, "%d-%b-%Y")))
-
-                # elif self.employee_id.department_id != last_week_timesheet.employee_id.department_id \
-                #     or self.employee_id.product_id != last_week_timesheet.employee_id.product_id \
-                #     or self.employee_id.operating_unit_id != last_week_timesheet.employee_id.operating_unit_id:
-                #     current_week_lines = [(0, 0, {
-                #         'date': l.date,
-                #         'name': l.name,
-                #         'project_id': l.project_id.id,
-                #         'task_id': l.task_id.id,
-                #         'user_id': l.user_id.id,
-                #         'unit_amount': l.unit_amount
-                #     }) for l in self.timesheet_ids] if self.timesheet_ids else []
-                #     if last_week_timesheet:
-                #         self.timesheet_ids.unlink()
-                #         last_week_lines = [(0, 0, {
-                #             'date': datetime.strptime(l.date, "%Y-%m-%d") +
-                #                     timedelta(days=7),
-                #             'name': '/',
-                #             'project_id': l.project_id.id,
-                #             'task_id': l.task_id.id,
-                #             'user_id': l.user_id.id
-                #         }) for l in last_week_timesheet.timesheet_ids]
-                #         self.timesheet_ids = current_week_lines + last_week_lines
-
-                else:
-                    self.copy_wih_query(True, last_week_timesheet.id)
-
+                    ) %(datetime.strftime(date_start, "%d-%b-%Y"),
+                        datetime.strftime(date_end, "%d-%b-%Y")))
 
     def _check_end_mileage(self):
         total = self.starting_mileage + self.business_mileage
@@ -293,10 +285,10 @@ class HrTimesheetSheet(models.Model):
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         self.create_overtime_entries()
-        self.copy_wih_query(False, None)
+        self.copy_wih_query()
         return res
 
-    def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
+    def copy_wih_query(self):
         query = """
         INSERT INTO
         account_analytic_line
@@ -326,96 +318,83 @@ class HrTimesheetSheet(models.Model):
                 ts_line,
                 so_line,
                 user_total_id,
-                invoiceable,
                 month_id,
                 week_id,
                 account_department_id,               
+                expenses,
                 chargeable,
                 operating_unit_id,
-                project_operating_unit_id,
                 correction_charge,
+                write_off_move,
                 ref_id,
                 actual_qty,
                 planned_qty,
                 planned,
+                select_week_id,
                 kilometers,
                 state,
                 non_invoiceable_mileage,
                 product_uom_id )
-        SELECT  DISTINCT ON (task_id)
-                aal.create_uid as create_uid,
+        SELECT  aal.create_uid as create_uid,
                 aal.user_id as user_id,
                 aal.account_id as account_id,
                 aal.company_id as company_id,
-                aal.write_uid as write_uid, """ + \
-                ("aal.amount as amount, " if not copy_last_week else "0 as amount, ") + \
-                ("aal.kilometers as unit_amount, " if not copy_last_week else "0 as unit_amount, ") + \
-                ("aal.date as date, " if not copy_last_week else "aal.date + 7 as date, ") + \
-             """%(create)s as create_date,
+                aal.write_uid as write_uid,
+                aal.amount as amount,
+                aal.kilometers as unit_amount,
+                aal.date as date,
+                %(create)s as create_date,
                 %(create)s as write_date,
-                aal.partner_id as partner_id, """ + \
-                ("aal.name as name, " if not copy_last_week else "'/' as name, ") + \
-             """aal.code as code,
+                aal.partner_id as partner_id,
+                aal.name as name,
+                aal.code as code,
                 aal.currency_id as currency_id,
                 aal.ref as ref,
                 aal.general_account_id as general_account_id,
                 aal.move_id as move_id,
-                aal.product_id as product_id,""" + \
-                ("aal.amount_currency as amount_currency, " if not copy_last_week else "0 as amount_currency, ") + \
-             """aal.project_id as project_id,
+                aal.product_id as product_id,
+                aal.amount_currency as amount_currency,
+                aal.project_id as project_id,
                 aal.department_id as department_id,
-                aal.task_id as task_id, """ + \
-                ("NULL as sheet_id, " if not copy_last_week else "%(sheet_aal)s as sheet_id, ") + \
-                ("NULL as ts_line, " if not copy_last_week else "aal.ts_line as ts_line, ") + \
-             """aal.so_line as so_line,
+                aal.task_id as task_id,
+                NULL as sheet_id,
+                NULL as ts_line,
+                aal.so_line as so_line,
                 aal.user_total_id as user_total_id,
-                aal.invoiceable as invoiceable, """ + \
-                ("aal.month_id as month_id, " if not copy_last_week else "dr.id as month_id, ") + \
-                ("aal.week_id as week_id, " if not copy_last_week else "%(week_id_aal)s as week_id, ") + \
-             """aal.account_department_id as account_department_id,
+                aal.month_id as month_id,
+                aal.week_id as week_id,
+                aal.account_department_id as account_department_id,
+                aal.expenses as expenses,
                 aal.chargeable as chargeable,
                 aal.operating_unit_id as operating_unit_id,
-                aal.project_operating_unit_id as project_operating_unit_id,
-                aal.correction_charge as correction_charge, """ + \
-                ("aal.id as ref_id, " if not copy_last_week else "NULL as ref_id, ") + \
-                ("aal.actual_qty as actual_qty, " if not copy_last_week else "0 as actual_qty, ") + \
-                ("aal.planned_qty as planned_qty, " if not copy_last_week else "0 as planned_qty, ") + \
-             """aal.planned as planned,
-                0 as kilometers, """ + \
-                ("'open' as state," if not copy_last_week else "'draft' as state, ") + \
-             """CASE
+                aal.correction_charge as correction_charge,
+                aal.write_off_move as write_off_move,              
+                aal.id as ref_id,
+                aal.actual_qty as actual_qty,
+                aal.planned_qty as planned_qty,
+                aal.planned as planned,
+                aal.select_week_id as select_week_id,
+                0 as kilometers,
+                CASE
                   WHEN ip.invoice_mileage IS NULL THEN true
                   ELSE ip.invoice_mileage
-                END AS non_invoiceable_mileage, """ + \
-                ("%(uom)s as product_uom_id " if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
-          """FROM 
-             account_analytic_line aal
-                 LEFT JOIN project_project pp 
-                 ON pp.id = aal.project_id
-                 LEFT JOIN project_invoicing_properties ip
-                 ON ip.id = pp.invoice_properties
-                 RIGHT JOIN hr_timesheet_sheet_sheet hss
-                 ON hss.id = aal.sheet_id
-                 LEFT JOIN date_range dr 
-                 on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
-             WHERE hss.id = %(sheet_select)s
-             AND aal.ref_id IS NULL             
-             AND aal.task_id NOT IN 
-             (
-             SELECT DISTINCT task_id
-             FROM account_analytic_line
-             WHERE sheet_id = %(sheet_aal)s
-             )
-             """ + \
-             ("AND aal.kilometers > 0 ;" if not copy_last_week else ";")
-
-        self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
-                                    'week_id_aal': self.week_id.id,
-                                    'uom': self.env.ref('product.product_uom_km').id,
-                                    'sheet_select': self.id if not copy_last_week else last_week_timesheet_id,
-                                    'sheet_aal': self.id,
-                                    }
-                            )
+                END AS non_invoiceable_mileage,
+                %(km)s as product_uom_id      
+        FROM
+         account_analytic_line aal
+         LEFT JOIN project_project pp 
+         ON pp.id = aal.project_id
+         LEFT JOIN project_invoicing_properties ip
+         ON ip.id = pp.invoice_properties
+         RIGHT JOIN hr_timesheet_sheet_sheet hss
+         ON hss.id = aal.sheet_id
+        WHERE hss.id = %(sheet)s
+        AND aal.ref_id IS NULL
+        AND aal.kilometers > 0       
+        ;"""
+        km_id = self.env.ref('product.product_uom_km').id
+        heden = str(fields.Datetime.to_string(fields.datetime.now()))
+        self.env.cr.execute(query, {'create': heden,'km': km_id, 'sheet':self.id})
         self.env.invalidate_all()
         return True
 
@@ -462,8 +441,7 @@ class DateRangeGenerator(models.TransientModel):
     @api.multi
     def _compute_date_ranges(self):
         self.ensure_one()
-        vals = rrule(freq=self.unit_of_time,
-                     interval=self.duration_count,
+        vals = rrule(freq=self.unit_of_time, interval=self.duration_count,
                      dtstart=fields.Date.from_string(self.date_start),
                      count=self.count+1)
         vals = list(vals)
