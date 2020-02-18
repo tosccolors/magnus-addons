@@ -1014,7 +1014,7 @@ class AnalyticUserTotal(models.Model):
             self.amount = - self.unit_amount * fr
         else:
             #if no task user found, get price from consultant product
-            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id)])
+            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id),('end_date_of_employment','=', False)])
             self.fee_rate = fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             self.amount = - self.unit_amount * fr
 
