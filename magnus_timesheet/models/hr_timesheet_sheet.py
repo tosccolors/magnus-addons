@@ -66,10 +66,6 @@ class HrTimesheetSheet(models.Model):
                 raise UserError(_('Please contact administrator.'))
         return rec
 
-    @api.onchange('week_id')
-    def onchange_week_id(self):
-        return {'domain':{'week_id':self._get_week_domain()}}
-
     def _get_week_domain(self):
         emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         emp_id = emp_id.id if emp_id else False
@@ -148,45 +144,103 @@ class HrTimesheetSheet(models.Model):
         self.overtime_hours = working_hrs_incl_ott - 40
         self.overtime_hours_delta = working_hrs_incl_ott - ott - 40
 
-
-
-    week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
-    employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
-    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=False)
-    starting_mileage_editable = fields.Integer(string='Starting Mileage')
-    vehicle = fields.Boolean(compute='_get_starting_mileage', string='Vehicle', store=False)
-    business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
-    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
-    end_mileage = fields.Integer('End Mileage')
-    overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
-    overtime_hours_delta = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
-    odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
-    overtime_analytic_line_id = fields.Many2one('account.analytic.line', string="Overtime Entry")
+    week_id = fields.Many2one(
+        'date.range',
+        domain=_get_week_domain,
+        string="Timesheet Week",
+        required=True
+    )
+    employee_id = fields.Many2one(
+        'hr.employee',
+        string='Employee',
+        default=_default_employee,
+        required=True,
+        domain=_get_employee_domain
+    )
+    starting_mileage = fields.Integer(
+        compute='_get_starting_mileage',
+        string='Starting Mileage',
+        store=False
+    )
+    starting_mileage_editable = fields.Integer(
+        string='Starting Mileage'
+    )
+    vehicle = fields.Boolean(
+        compute='_get_starting_mileage',
+        string='Vehicle',
+        store=False
+    )
+    business_mileage = fields.Integer(
+        compute='_get_business_mileage',
+        string='Business Mileage',
+        store=True
+    )
+    private_mileage = fields.Integer(
+        compute='_get_private_mileage',
+        string='Private Mileage',
+        store=True
+    )
+    end_mileage = fields.Integer(
+        'End Mileage'
+    )
+    overtime_hours = fields.Float(
+        compute="_get_overtime_hours",
+        string='Overtime Hours',
+        store=True
+    )
+    overtime_hours_delta = fields.Float(
+        compute="_get_overtime_hours",
+        string='Change in Overtime Hours',
+        store=True
+    )
+    odo_log_id = fields.Many2one(
+        'fleet.vehicle.odometer',
+        string="Odo Log ID"
+    )
+    overtime_analytic_line_id = fields.Many2one(
+        'account.analytic.line',
+        string="Overtime Entry"
+    )
     date_from = fields.Date(
-        string='Date From',
         related=week_id.date_start,
-#        required=True,
+        string='Date From',
         store=True,
-        readonly=True
     )
     date_to = fields.Date(
-        string='Date To',
         related=week_id.date_end,
-#        required=True,
+        string='Date To',
         store=True,
-        readonly=True,
     )
-
+    ## with override of date fields as related of week_id not necessary anymore
     # @api.onchange('week_id', 'date_from', 'date_to')
     # def onchange_week(self):
     #     self.date_from = self.week_id.date_start
     #     self.date_to = self.week_id.date_end
 
-  #  @api.onchange('starting_mileage', 'business_mileage')
-  #  def onchange_private_mileage(self):
-  #      if self.private_mileage == 0:
-  #          self.end_mileage = self.starting_mileage + self.business_mileage
+    #  @api.onchange('starting_mileage', 'business_mileage')
+    #  def onchange_private_mileage(self):
+    #      if self.private_mileage == 0:
+    #          self.end_mileage = self.starting_mileage + self.business_mileage
 
+    @api.constrains('week_id', 'employee_id')
+    def _check_sheet_date(self, forced_user_id=False):
+        for sheet in self:
+            new_user_id = forced_user_id or sheet.user_id and sheet.user_id.id
+            if new_user_id:
+                self.env.cr.execute('''
+                        SELECT id
+                        FROM hr_timesheet_sheet_sheet
+                        WHERE week_id=%s
+                        AND user_id=%s''',
+                                    (sheet.week_id, new_user_id))
+                if self.env.cr.rowcount > 1:
+                    raise ValidationError(_(
+                        'You cannot have 2 timesheets with the same week_id!\nPlease use the menu \'My Current Timesheet\' to avoid this problem.'))
+
+    @api.onchange('employee_id')
+    def onchange_employee_id(self):
+        super(HrTimesheetSheet, self).onchange_employee_id()
+        return {'domain': {'week_id': self._get_week_domain()}}
 
     def duplicate_last_week(self):
         if self.week_id and self.employee_id:
