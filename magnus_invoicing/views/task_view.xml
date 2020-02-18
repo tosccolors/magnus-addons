@@ -75,6 +75,8 @@
             <field name="arch" type="xml">
                 <field name="invoice_mileage" position="after">
                     <field name="group_invoice" />
+                    <field name="group_by_fee_rate"/>
+                    <field name="group_by_month"/>
                 </field>
             </field>
         </record>

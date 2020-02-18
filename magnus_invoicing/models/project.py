@@ -99,3 +99,5 @@ class ProjectInvoicingProperties(models.Model):
     _inherit = "project.invoicing.properties"
 
     group_invoice = fields.Boolean('Group Invoice')
+    group_by_fee_rate = fields.Boolean('Group By Fee Rate')
+    group_by_month = fields.Boolean('Group By Month')

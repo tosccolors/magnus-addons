@@ -31,6 +31,10 @@ class AnalyticLineStatus(models.TransientModel):
     description = fields.Char(
         "Description"
     )
+    wip_month_ids = fields.Many2many(
+        'date.range',
+        string="Month of Analytic Line or last Wip Posting"
+    )
 
     def validate_entries_month(self, analytic_ids):
         fields_grouped = [
@@ -54,6 +58,13 @@ class AnalyticLineStatus(models.TransientModel):
         if len(result) > 1:
             raise ValidationError(
                 _("Entries must belong to same month!"))
+        return True
+
+    def update_line_fee_rates(self, analytic_ids):
+        for analytic in self.env['account.analytic.line'].browse(analytic_ids):
+            new_amt = analytic.get_fee_rate_amount(analytic.task_id.id, analytic.user_id.id)
+            if new_amt != analytic.amount:
+                analytic.amount = new_amt
         return True
 
     @api.one
@@ -80,9 +91,11 @@ class AnalyticLineStatus(models.TransientModel):
                 """ % (status, cond, rec))
             self.env.invalidate_all()
             if status == 'delayed' and self.wip and self.wip_percentage > 0.0:
-                self.validate_entries_month(analytic_ids)
+                # self.validate_entries_month(analytic_ids)
+                self.update_line_fee_rates(analytic_ids)
                 self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
             if status == 'invoiceable':
+                self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
 
@@ -211,6 +224,17 @@ class AnalyticLineStatus(models.TransientModel):
                        'message': _('Percentage can\'t be negative!')}
             return {'warning': warning, 'value':{'wip_percentage': 0}}
 
+    @api.onchange('name')
+    def onchange_name(self):
+        if self.name == 'delayed':
+            self.wip = True
+            context = self.env.context.copy()
+            entries_ids = context.get('active_ids', [])
+            wip_months = self.env['account.analytic.line'].browse(entries_ids).mapped('wip_month_id')
+            self.wip_month_ids = [(6, 0, wip_months.ids)]
+        else:
+            self.wip = False
+
     @api.model
     def _calculate_fee_rate(self, line):
         amount = line.get_fee_rate_amount(False, False)
@@ -262,6 +286,7 @@ class AnalyticLineStatus(models.TransientModel):
     def prepare_account_move(self, analytic_lines_ids):
         """ Creates analytics related financial move lines """
         acc_analytic_line = self.env['account.analytic.line']
+        done_analytic_line = self.env['account.analytic.line']
         account_move = self.env['account.move']
         fields_grouped = [
             'id',
@@ -304,7 +329,8 @@ class AnalyticLineStatus(models.TransientModel):
                         raise UserError(_('Please define receivable account for partner %s.') % (partner.name))
 
                     aml = []
-                    analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id)])
+                    analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id), ('wip_month_id', '=', month_id)])
+                    analytic_line_obj -= done_analytic_line
                     for aal in analytic_line_obj:
                         if not aal.product_id.property_account_wip_id:
                             raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
@@ -355,6 +381,7 @@ class AnalyticLineStatus(models.TransientModel):
                                     cond,
                                     rec))
                     self.env.cr.execute(line_query)
+                    done_analytic_line |= analytic_line_obj
 
         except Exception, e:
             raise FailedJobError(

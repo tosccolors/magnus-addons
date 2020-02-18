@@ -16,11 +16,5 @@
     ],
     'data': [
         'views/fleet_view.xml',
-        'wizard/fleet_wizard_view.xml',
-        'views/templates_views.xml',
-    ],
-    'qweb': [
-        "static/src/xml/qweb.xml",
     ],
 }
-

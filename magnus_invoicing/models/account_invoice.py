@@ -100,6 +100,8 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).action_invoice_open()
         if self.type in ('out_invoice'):
             analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
+            if not analytic_invoice_id:
+                return res
             # if invoicing period doesn't lie in same month
             period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
             cur_date = datetime.now().date().strftime("%Y-%m")
@@ -128,7 +130,7 @@ class AccountInvoice(models.Model):
             date_end = inv.month_id.date_end
             new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
             if inv.move_id:
-                wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id)
+                wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id, inv.number)
             wip_move.post()
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id

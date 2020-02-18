@@ -1,0 +1,848 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c91de27d-82d2-49b2-8f61-44d3793cb85b" name="Default" comment="Fix: Independent invoice validation&#10;Module: magnus_invoicing">
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/magnus-addons.iml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py" afterPath="$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py" />
+      <change beforePath="$PROJECT_DIR$/magnus_invoicing/models/project.py" afterPath="$PROJECT_DIR$/magnus_invoicing/models/project.py" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="analytic_invoice.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="437">
+              <caret line="973" column="72" lean-forward="false" selection-start-line="973" selection-start-column="72" selection-end-line="973" selection-end-column="72" />
+              <folding>
+                <marker date="1581924422950" expanded="true" signature="21828:21895" ph="UPDATE missing_value... " />
+                <marker date="1581924422950" expanded="true" signature="33704:34238" ph="SELECT pp.id... project_invoicing_properties" />
+                <marker date="1581924422950" expanded="true" signature="34009:34096" ph="SELECT proje... account_analytic_line" />
+                <marker date="1581924422950" expanded="true" signature="39370:39948" ph="SELECT pp.id... project_invoicing_properties" />
+                <marker date="1581924422950" expanded="true" signature="39370:39988" ph="SELECT pp.id... project_invoicing_properties" />
+                <marker date="1581924422950" expanded="true" signature="39707:39794" ph="SELECT proje... account_analytic_line" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="report_invoice.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/magnus_account/report/report_invoice.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="265">
+              <caret line="340" column="70" lean-forward="false" selection-start-line="340" selection-start-column="57" selection-end-line="340" selection-end-column="70" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="project.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/project.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="372">
+              <caret line="95" column="33" lean-forward="false" selection-start-line="95" selection-start-column="33" selection-end-line="95" selection-end-column="33" />
+              <folding>
+                <marker date="1581683244181" expanded="true" signature="2862:2934" ph="SELECT from_... task_user" />
+                <marker date="1581683244181" expanded="true" signature="2862:2943" ph="SELECT from_... task_user" />
+                <marker date="1581683244181" expanded="true" signature="2862:2946" ph="SELECT from_... task_user" />
+                <marker date="1581683244181" expanded="true" signature="2862:2966" ph="SELECT from_... task_user" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>_get_user_per_month</find>
+      <find>temp</find>
+      <find>read_group</find>
+      <find>for item in result:</find>
+      <find>project_specification</find>
+      <find>user_total_objs</find>
+      <find>line_fee_rate = fi</find>
+      <find>mapped</find>
+      <find>ana_inv</find>
+      <find>update_line_fee_rates</find>
+      <find>_calculate_data</find>
+      <find>pdb</find>
+      <find>gb_fee_rate</find>
+      <find>line_fee_rate</find>
+      <find>proLines</find>
+      <find>result</find>
+      <find>print</find>
+      <find>_get_user_per_day</find>
+      <find>_get_specs_on_task</find>
+      <find>both</find>
+      <find>value_conversion</find>
+      <find>user_obj</find>
+      <find>task.user</find>
+      <find>t-op</find>
+      <find>from_date</find>
+      <find>child_of</find>
+      <find>self.exx</find>
+      <find>.</find>
+      <find>res</find>
+      <find>Hours Overview</find>
+    </findStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$/magnus_invoicing</dir>
+      <dir>$PROJECT_DIR$/magnus_invoicing/models</dir>
+      <dir>$PROJECT_DIR$/</dir>
+      <dir>$PROJECT_DIR$</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="delta-test-prod" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/magnus_timesheet/models/analytic.py" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/views/account_analytic_view.xml" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/models/account_move.py" />
+        <option value="$PROJECT_DIR$/magnus_account/__manifest__.py" />
+        <option value="$PROJECT_DIR$/magnus_account/views/project_view.xml" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/views/analytic_invoice.xml" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/views/task_view.xml" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice_view.xml" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice.py" />
+        <option value="$PROJECT_DIR$/magnus_account/models/account_invoice.py" />
+        <option value="$PROJECT_DIR$/magnus_account/report/report_invoice.xml" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/models/project.py" />
+        <option value="$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="309" />
+    <option name="y" value="47" />
+    <option name="width" value="1394" />
+    <option name="height" value="1004" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_account" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_account" type="462c0819:PsiDirectoryNode" />
+              <item name="models" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_account" type="462c0819:PsiDirectoryNode" />
+              <item name="report" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_invoicing" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_invoicing" type="462c0819:PsiDirectoryNode" />
+              <item name="models" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_invoicing" type="462c0819:PsiDirectoryNode" />
+              <item name="views" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_invoicing" type="462c0819:PsiDirectoryNode" />
+              <item name="wizard" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_project" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_project" type="462c0819:PsiDirectoryNode" />
+              <item name="models" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_project" type="462c0819:PsiDirectoryNode" />
+              <item name="views" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_timesheet" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="magnus-addons" type="b2602c69:ProjectViewProjectNode" />
+              <item name="magnus-addons" type="462c0819:PsiDirectoryNode" />
+              <item name="magnus_timesheet" type="462c0819:PsiDirectoryNode" />
+              <item name="models" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../odoo11/odoo/club3d-addons" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c91de27d-82d2-49b2-8f61-44d3793cb85b" name="Default" comment="" />
+      <created>1580476150933</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1580476150933</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Fix: Independent invoice validation&#10;Module: magnus_invoicing">
+      <created>1580477200954</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1580477200955</updated>
+    </task>
+    <task id="LOCAL-00002" summary="1. Analytic Invoicing grouping based on fee rates&#10;2. Fix: Invocing property save error&#10;Module: magnus_invoicing, magnus_timesheet">
+      <created>1580995596293</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1580995596297</updated>
+    </task>
+    <task id="LOCAL-00003" summary="1. Removed month validation&#10;2. Updated fee rate while delying lines.&#10;3. add wip boolean true on status delayed.&#10;Module: magnus_invoicing">
+      <created>1581076960190</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1581076960191</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Adjust filter for analytic lines&#10;Module: magnus_invoicing">
+      <created>1581079554462</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1581079554462</updated>
+    </task>
+    <task id="LOCAL-00005" summary="1. Invoice ref to wip moves&#10;2. On delayed action, hide button ‘create analytic invoices’&#10;3. Task object Rename ‘Jira key’ to ‘ticket number’&#10;4. Added field Group by fee rate &amp; Group by month on invoice property&#10;5. In the ‘delay wizard’ we would like to show the WIP month&#10;6. Added Invoice property on analytic invoice from view&#10;Module: magnus_invoicing, magnus_account">
+      <created>1581341797014</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1581341797015</updated>
+    </task>
+    <task id="LOCAL-00006" summary="1. Update analytic entires fee rate while creating analytic invoices&#10;2. Update analytic invoicing fee rate from user total detail lines(analytic entires)&#10;Module: magnus_invoicing">
+      <created>1581577222778</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1581577222779</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Magnus specification grouping by month or fee rates or both &#10;Module: magnus_invoicing, magnus_account">
+      <created>1581673988325</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1581673988326</updated>
+    </task>
+    <task id="LOCAL-00008" summary="print Year &amp; Month name &#10;Module: magnus_account">
+      <created>1581678280970</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1581678280971</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13403141" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29424083" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28081813" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2498618" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.027225131" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17591622" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27418464" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2498618" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Fix: Independent invoice validation&#10;Module: magnus_invoicing" />
+    <MESSAGE value="1. Analytic Invoicing grouping based on fee rates&#10;2. Fix: Invocing property save error&#10;Module: magnus_invoicing, magnus_timesheet" />
+    <MESSAGE value="1. Removed month validation&#10;2. Updated fee rate while delying lines.&#10;3. add wip boolean true on status delayed.&#10;Module: magnus_invoicing" />
+    <MESSAGE value="Adjust filter for analytic lines&#10;Module: magnus_invoicing" />
+    <MESSAGE value="1. Invoice ref to wip moves&#10;2. On delayed action, hide button ‘create analytic invoices’&#10;3. Task object Rename ‘Jira key’ to ‘ticket number’&#10;4. Added field Group by fee rate &amp; Group by month on invoice property&#10;5. In the ‘delay wizard’ we would like to show the WIP month&#10;6. Added Invoice property on analytic invoice from view&#10;Module: magnus_invoicing, magnus_account" />
+    <MESSAGE value="1. Update analytic entires fee rate while creating analytic invoices&#10;2. Update analytic invoicing fee rate from user total detail lines(analytic entires)&#10;Module: magnus_invoicing" />
+    <MESSAGE value="Magnus specification grouping by month or fee rates or both &#10;Module: magnus_invoicing, magnus_account" />
+    <MESSAGE value="print Year &amp; Month name &#10;Module: magnus_account" />
+    <option name="LAST_COMMIT_MESSAGE" value="print Year &amp; Month name &#10;Module: magnus_account" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2178">
+          <caret line="123" column="35" lean-forward="false" selection-start-line="123" selection-start-column="35" selection-end-line="123" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/report/report_invoice.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4374">
+          <caret line="243" column="114" lean-forward="false" selection-start-line="243" selection-start-column="114" selection-end-line="243" selection-end-column="114" />
+          <folding>
+            <element signature="n#div#1;n#t#1;n#t#4;n#div#0;n#t#0;n#template#0;n#data#0;n#odoo#0;n#!!top" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15408">
+          <caret line="856" column="0" lean-forward="true" selection-start-line="856" selection-start-column="0" selection-end-line="856" selection-end-column="0" />
+          <folding>
+            <marker date="1581924422950" expanded="true" signature="21828:21895" ph="UPDATE missing_value... " />
+            <marker date="1581924422950" expanded="true" signature="33704:34238" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="34009:34096" ph="SELECT proje... account_analytic_line" />
+            <marker date="1581924422950" expanded="true" signature="39370:39948" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39370:39988" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39707:39794" ph="SELECT proje... account_analytic_line" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4086">
+          <caret line="232" column="30" lean-forward="false" selection-start-line="232" selection-start-column="17" selection-end-line="232" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2340">
+          <caret line="132" column="54" lean-forward="false" selection-start-line="132" selection-start-column="39" selection-end-line="132" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="17" column="4" lean-forward="false" selection-start-line="17" selection-start-column="4" selection-end-line="19" selection-end-column="38" />
+          <folding>
+            <marker date="1581924422950" expanded="true" signature="21828:21895" ph="UPDATE missing_value... " />
+            <marker date="1581924422950" expanded="true" signature="33704:34238" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="34009:34096" ph="SELECT proje... account_analytic_line" />
+            <marker date="1581924422950" expanded="true" signature="39370:39948" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39370:39988" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39707:39794" ph="SELECT proje... account_analytic_line" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="7" column="24" lean-forward="false" selection-start-line="7" selection-start-column="24" selection-end-line="7" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1926">
+          <caret line="109" column="12" lean-forward="false" selection-start-line="109" selection-start-column="12" selection-end-line="109" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_timesheet/models/analytic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5940">
+          <caret line="332" column="9" lean-forward="false" selection-start-line="332" selection-start-column="8" selection-end-line="332" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1530">
+          <caret line="86" column="25" lean-forward="false" selection-start-line="86" selection-start-column="8" selection-end-line="86" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3708">
+          <caret line="211" column="31" lean-forward="false" selection-start-line="211" selection-start-column="30" selection-end-line="211" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/views/account_move_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12654">
+          <caret line="706" column="65" lean-forward="false" selection-start-line="706" selection-start-column="65" selection-end-line="706" selection-end-column="65" />
+          <folding>
+            <marker date="1581924422950" expanded="true" signature="21828:21895" ph="UPDATE missing_value... " />
+            <marker date="1581924422950" expanded="true" signature="33704:34238" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="34009:34096" ph="SELECT proje... account_analytic_line" />
+            <marker date="1581924422950" expanded="true" signature="39370:39948" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39370:39988" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39707:39794" ph="SELECT proje... account_analytic_line" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="33" column="10" lean-forward="false" selection-start-line="33" selection-start-column="10" selection-end-line="33" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/views/account_analytic_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="22" column="23" lean-forward="true" selection-start-line="22" selection-start-column="23" selection-end-line="22" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1926">
+          <caret line="109" column="12" lean-forward="false" selection-start-line="109" selection-start-column="12" selection-end-line="109" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1566">
+          <caret line="88" column="26" lean-forward="true" selection-start-line="88" selection-start-column="26" selection-end-line="88" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5112">
+          <caret line="289" column="25" lean-forward="false" selection-start-line="289" selection-start-column="19" selection-end-line="289" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15426">
+          <caret line="860" column="50" lean-forward="false" selection-start-line="860" selection-start-column="38" selection-end-line="860" selection-end-column="50" />
+          <folding>
+            <marker date="1581924422950" expanded="true" signature="21828:21895" ph="UPDATE missing_value... " />
+            <marker date="1581924422950" expanded="true" signature="33704:34238" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="34009:34096" ph="SELECT proje... account_analytic_line" />
+            <marker date="1581924422950" expanded="true" signature="39370:39948" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39370:39988" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39707:39794" ph="SELECT proje... account_analytic_line" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_timesheet/models/analytic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5634">
+          <caret line="315" column="20" lean-forward="false" selection-start-line="315" selection-start-column="20" selection-end-line="315" selection-end-column="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_timesheet/models/hr_timesheet_sheet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1401">
+          <caret line="440" column="33" lean-forward="false" selection-start-line="440" selection-start-column="22" selection-end-line="440" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/-1247972723/datetime.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="365">
+          <caret line="171" column="32" lean-forward="true" selection-start-line="171" selection-start-column="32" selection-end-line="171" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/views/account_move_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_move.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="293">
+          <caret line="66" column="35" lean-forward="true" selection-start-line="66" selection-start-column="35" selection-end-line="66" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/views/project_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="22" column="32" lean-forward="false" selection-start-line="22" selection-start-column="32" selection-end-line="22" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/models/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="16" lean-forward="false" selection-start-line="15" selection-start-column="16" selection-end-line="15" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_timesheet/__manifest__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-108">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/__manifest__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="27" column="33" lean-forward="false" selection-start-line="27" selection-start-column="17" selection-end-line="27" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/views/account_analytic_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="883">
+          <caret line="65" column="78" lean-forward="false" selection-start-line="65" selection-start-column="70" selection-end-line="65" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/views/analytic_invoice.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="145">
+          <caret line="21" column="26" lean-forward="true" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/__manifest__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="46" column="14" lean-forward="false" selection-start-line="46" selection-start-column="13" selection-end-line="46" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_project/views/project_views.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2088">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/views/task_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="738">
+          <caret line="78" column="50" lean-forward="true" selection-start-line="78" selection-start-column="50" selection-end-line="78" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_project/models/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="576">
+          <caret line="73" column="17" lean-forward="false" selection-start-line="73" selection-start-column="17" selection-end-line="73" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="38" column="17" lean-forward="true" selection-start-line="38" selection-start-column="17" selection-end-line="38" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/views/account_invoice_report.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/report/report_account_invoice_print.rml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/views/account_invoice_view.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_fleet/models/fleet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="613">
+          <caret line="107" column="45" lean-forward="false" selection-start-line="107" selection-start-column="45" selection-end-line="107" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/-1247972723/__builtin__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="4456" column="12" lean-forward="true" selection-start-line="4456" selection-start-column="12" selection-end-line="4456" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/report/report_account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="522">
+          <caret line="31" column="38" lean-forward="false" selection-start-line="31" selection-start-column="38" selection-end-line="31" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="33" column="10" lean-forward="false" selection-start-line="33" selection-start-column="10" selection-end-line="33" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_timesheet/models/analytic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3312">
+          <caret line="186" column="38" lean-forward="false" selection-start-line="186" selection-start-column="16" selection-end-line="186" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/wizard/analytic_line_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-433">
+          <caret line="74" column="31" lean-forward="false" selection-start-line="74" selection-start-column="30" selection-end-line="74" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="197">
+          <caret line="73" column="0" lean-forward="true" selection-start-line="76" selection-start-column="8" selection-end-line="77" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/account_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-791">
+          <caret line="123" column="35" lean-forward="false" selection-start-line="123" selection-start-column="35" selection-end-line="123" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/project.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="372">
+          <caret line="95" column="33" lean-forward="false" selection-start-line="95" selection-start-column="33" selection-end-line="95" selection-end-column="33" />
+          <folding>
+            <marker date="1581683244181" expanded="true" signature="2862:2934" ph="SELECT from_... task_user" />
+            <marker date="1581683244181" expanded="true" signature="2862:2943" ph="SELECT from_... task_user" />
+            <marker date="1581683244181" expanded="true" signature="2862:2946" ph="SELECT from_... task_user" />
+            <marker date="1581683244181" expanded="true" signature="2862:2966" ph="SELECT from_... task_user" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_account/report/report_invoice.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="265">
+          <caret line="340" column="70" lean-forward="false" selection-start-line="340" selection-start-column="57" selection-end-line="340" selection-end-column="70" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/magnus_invoicing/models/analytic_invoice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="437">
+          <caret line="973" column="72" lean-forward="false" selection-start-line="973" selection-start-column="72" selection-end-line="973" selection-end-column="72" />
+          <folding>
+            <marker date="1581924422950" expanded="true" signature="21828:21895" ph="UPDATE missing_value... " />
+            <marker date="1581924422950" expanded="true" signature="33704:34238" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="34009:34096" ph="SELECT proje... account_analytic_line" />
+            <marker date="1581924422950" expanded="true" signature="39370:39948" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39370:39988" ph="SELECT pp.id... project_invoicing_properties" />
+            <marker date="1581924422950" expanded="true" signature="39707:39794" ph="SELECT proje... account_analytic_line" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

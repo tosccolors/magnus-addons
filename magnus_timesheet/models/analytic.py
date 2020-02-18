@@ -72,7 +72,7 @@ class AccountAnalyticLine(models.Model):
                         line.week_id = line.find_daterange_week(line.date)
                         var_month_id = line.find_daterange_month(line.date)
                     if line.month_of_last_wip:
-                        line.wip_month_id = self.month_of_last_wip
+                        line.wip_month_id = line.month_of_last_wip
                     else:
                         line.wip_month_id = line.month_id = var_month_id
                     if line.product_uom_id.id == UomHrs:
@@ -157,6 +157,13 @@ class AccountAnalyticLine(models.Model):
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
 
+    @api.depends('unit_amount','amount')
+    def _compute_analytic_line_fee_rate(self):
+        for aal in self:
+            if aal.unit_amount and aal.amount:
+                aal.line_fee_rate = abs(aal.amount/aal.unit_amount)
+            else:
+                aal.line_fee_rate = 0.0
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -254,6 +261,11 @@ class AccountAnalyticLine(models.Model):
     )
     employee_id = fields.Many2one('hr.employee', string='Employee')
 
+    line_fee_rate = fields.Float(
+        compute=_compute_analytic_line_fee_rate,
+        string='Fee Rate',
+        store=True,
+    )
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
