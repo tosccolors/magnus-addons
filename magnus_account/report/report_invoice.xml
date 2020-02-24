@@ -222,11 +222,11 @@
 
                 <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id">
                     <br/>
-                    <t t-set="bank_acc" t-value="any([b.acc_number for b in o.operating_unit_id.partner_id.bank_ids])"/>
+                    <t t-set="bank_acc" t-value="o.get_bank_details()"/>
                     <span t-if="bank_acc" style="padding-left:85px;padding-right:15px;padding-top:30px;">
-                        <strong>Bank:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                        <strong>IBAN:</strong> <span t-esc="', '.join(map(lambda b: (b.acc_number or ''), o.operating_unit_id.partner_id.bank_ids))"/>
-                        <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_bic or ''), o.operating_unit_id.partner_id.bank_ids))"/>
+                        <strong>Bank:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.name or ''), bank_acc))"/>
+                        <strong>IBAN:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_acc_number or ''), bank_acc))"/>
+                        <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.bic or ''), bank_acc))"/>
                     </span>
                 </span>
             </div>
@@ -236,47 +236,60 @@
                 <t t-set="analytic_inv" t-value="analytic_invoice_id[0]._get_user_per_month()"/>
                 <t t-if="analytic_inv">
                     <div style="padding-left:85px;padding-right:15px;page-break-before:always;">
-                        <t t-foreach="analytic_inv" t-as="proLines">
-                            <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report">
-
-                                <div width="85%"><strong><span t-field="proLines.name"/></strong></div>
-
-                                <table class="table table-condensed table-padding" style="border:none;width:85%;">
-                                    <br/>
-                                    <div><strong>Hours Overview</strong></div>
-                                    <thead>
-                                        <th style="font-weight:normal;" width="20%">Name</th>
-                                        <th style="font-weight:normal;" class="text-right" width="20%">Hours</th>
-                                        <t t-if="proLines.invoice_properties.specs_type != 'both'">
-                                            <th style="font-weight:normal;" class="text-right" width="20%">Fee Rate</th>
-                                            <th style="font-weight:normal;" class="text-right" width="20%">Amount</th>
-                                        </t>
-                                    </thead>
-                                    <t t-foreach="proLines_value" t-as="userLine">
-                                        <tr t-if="userLine not in ('amt_tot','hrs_tot')" style='border-top:none;'>
-                                            <td style='border-top:none;' width="20%"><span t-field="userLine.name"/></td>
-                                            <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
-                                            <t t-if="proLines.invoice_properties.specs_type != 'both'">
-                                                <td style='border-top:none;' class="text-right" width="20%">
-                                                    <span t-esc="o.value_conversion(-userLine_value['amount'] / userLine_value['hours'])"/>
-                                                </td>
-                                                <td style='border-top:none;' class="text-right" width="20%">
-                                                    <span t-esc="o.value_conversion(-userLine_value['amount'], monetary=True, currency_obj=o.company_currency_id)"/>
-                                                </td>
-                                            </t>
-                                        </tr>
+                        <t t-foreach="analytic_inv" t-as="monthLines">
+                            <t t-foreach="monthLines_value" t-as="feeLines">
+                                <div width="85%">
+                                    <t t-if="monthLines != 'null'">
+                                         Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(monthLines.date_start,'%Y-%m-%d'))"/></strong>
                                     </t>
-                                    <tr >
-                                        <td style='border-top-style: solid;border-top-color: black;border-top-width: thin;' width="20%"></td>
-                                        <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"> <span t-esc="o.value_conversion(proLines_value['hrs_tot'])"></span> </td>
-                                        <t t-if="proLines.invoice_properties.specs_type != 'both'">
-                                            <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"></td>
-                                            <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%">
-                                                 <span t-esc="o.value_conversion(-proLines_value['amt_tot'], monetary=True, currency_obj=o.company_currency_id)"/>
-                                            </td>
-                                        </t>
-                                    </tr>
-                                </table>
+                                    <t t-if="feeLines != 'null'">
+                                        Fee Rate: <strong><span t-esc="feeLines"/></strong>
+                                    </t>
+
+                                </div>
+                                <t t-foreach="feeLines_value" t-as="proLines">
+                                    <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report">
+
+                                        <div width="85%"><strong><span t-field="proLines.name"/></strong></div>
+
+                                        <table class="table table-condensed table-padding" style="border:none;width:85%;">
+                                            <br/>
+                                            <div><strong>Hours Overview</strong></div>
+                                            <thead>
+                                                <th style="font-weight:normal;" width="20%">Name</th>
+                                                <th style="font-weight:normal;" class="text-right" width="20%">Hours</th>
+                                                <t t-if="proLines.invoice_properties.specs_type != 'both'">
+                                                    <th style="font-weight:normal;" class="text-right" width="20%">Fee Rate</th>
+                                                    <th style="font-weight:normal;" class="text-right" width="20%">Amount</th>
+                                                </t>
+                                            </thead>
+                                            <t t-foreach="proLines_value" t-as="userLine">
+                                                <tr t-if="userLine not in ('amt_tot','hrs_tot')" style='border-top:none;'>
+                                                    <td style='border-top:none;' width="20%"><span t-field="userLine.name"/></td>
+                                                    <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
+                                                    <t t-if="proLines.invoice_properties.specs_type != 'both'">
+                                                        <td style='border-top:none;' class="text-right" width="20%">
+                                                            <span t-esc="o.value_conversion(-userLine_value['amount'] / userLine_value['hours'])"/>
+                                                        </td>
+                                                        <td style='border-top:none;' class="text-right" width="20%">
+                                                            <span t-esc="o.value_conversion(-userLine_value['amount'], monetary=True, currency_obj=o.company_currency_id)"/>
+                                                        </td>
+                                                    </t>
+                                                </tr>
+                                            </t>
+                                            <tr >
+                                                <td style='border-top-style: solid;border-top-color: black;border-top-width: thin;' width="20%"></td>
+                                                <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"> <span t-esc="o.value_conversion(proLines_value['hrs_tot'])"></span> </td>
+                                                <t t-if="proLines.invoice_properties.specs_type != 'both'">
+                                                    <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%"></td>
+                                                    <td style='border-top-style: solid;border-top-color: black ;border-top-width: thin;' class="text-right" width="20%">
+                                                         <span t-esc="o.value_conversion(-proLines_value['amt_tot'], monetary=True, currency_obj=o.company_currency_id)"/>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </table>
+                                    </t>
+                                </t>
                             </t>
                         </t>
                     </div>
@@ -311,35 +324,46 @@
                     </div>
 
                     <div style="padding-left:85px;padding-right:15px;page-break-inside:avoid;">
-                        <t t-foreach="analytic_invoice_id[0]._get_specs_on_task()" t-as="proLines">
-                            <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report and proLines.invoice_properties.specs_on_task_level">
-                                <table class="table table-condensed table-padding" style="border:none;width:85%;">
-                                    <br/>
-                                    <div><strong>Specification On Task Level</strong></div>
-                                    <thead>
-                                        <th style="font-weight:normal;" width="20%">Project</th>
-                                        <th style="font-weight:normal;" class="text-right" width="30%">Task type</th>
-                                        <th style="font-weight:normal;" class="text-right" width="30%">Jira Key</th>
-                                        <th style="font-weight:normal;" class="text-right" width="20%">Quantity</th>
-                                    </thead>
-                                    <t t-foreach="proLines_value" t-as="line">
-                                        <tr>
-                                            <td style='border-top:none;' width="20%">
-                                                <span t-field="proLines.analytic_account_related.name"/>
-                                            </td>
-                                            <td style='border-top:none;' class="text-right" width="30%">
-                                                <span t-field="line.jira_issue_type"></span>
-                                            </td>
-                                            <td style='border-top:none;' class="text-right" width="30%">
-                                                <span t-field="line.jira_compound_key"/>-<span t-field="line.name"/>
-                                            </td>
-                                            <td style='border-top:none;' class="text-right" width="29%">
-                                                <span t-esc="line_value['unit_amount']"/>
-                                            </td>
-                                        </tr>
+                        <t t-foreach="analytic_invoice_id[0]._get_specs_on_task()" t-as="monthLines">
+                            <t t-foreach="monthLines_value" t-as="feeLines">
+                                <div width="85%">
+                                    <t t-if="monthLines != 'null'">
+                                        Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(monthLines.date_start,'%Y-%m-%d'))"/></strong>
+                                        <t t-if="feeLines != 'null'">
+                                            Fee Rate: <strong><span t-esc="feeLines"/></strong>
+                                        </t>
                                     </t>
-                                </table>
-
+                                </div>
+                                 <t t-foreach="feeLines_value" t-as="proLines">
+                                    <t t-if="proLines.invoice_properties and proLines.invoice_properties.specs_invoice_report and proLines.invoice_properties.specs_on_task_level">
+                                        <table class="table table-condensed table-padding" style="border:none;width:85%;">
+                                            <br/>
+                                            <div><strong>Specification On Task Level</strong></div>
+                                            <thead>
+                                                <th style="font-weight:normal;" width="20%">Project</th>
+                                                <th style="font-weight:normal;" class="text-right" width="30%">Task type</th>
+                                                <th style="font-weight:normal;" class="text-right" width="30%">Jira Key</th>
+                                                <th style="font-weight:normal;" class="text-right" width="20%">Quantity</th>
+                                            </thead>
+                                            <t t-foreach="proLines_value" t-as="line">
+                                                <tr>
+                                                    <td style='border-top:none;' width="20%">
+                                                        <span t-field="proLines.analytic_account_related.name"/>
+                                                    </td>
+                                                    <td style='border-top:none;' class="text-right" width="30%">
+                                                        <span t-field="line.jira_issue_type"></span>
+                                                    </td>
+                                                    <td style='border-top:none;' class="text-right" width="30%">
+                                                        <span t-field="line.jira_compound_key"/>-<span t-field="line.name"/>
+                                                    </td>
+                                                    <td style='border-top:none;' class="text-right" width="29%">
+                                                        <span t-esc="line_value['unit_amount']"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </table>
+                                     </t>
+                                 </t>
                             </t>
 
                         </t>
