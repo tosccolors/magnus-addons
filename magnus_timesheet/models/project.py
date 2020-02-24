@@ -144,7 +144,7 @@ class TaskUser(models.Model):
                        {0}
                     WHERE {1}
                 )
-                UPDATE {0} SET line_fee_rate = {2}, amount = (aal.unit_amount * {2})
+                UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2})
                 FROM aal WHERE {0}.id = aal.id
                         """.format(
             aal_tables,
