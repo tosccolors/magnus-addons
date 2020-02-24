@@ -93,7 +93,7 @@ class TaskUser(models.Model):
         next_fee_rate_date = self.search([('from_date', '>', self.from_date), ('task_id', '=', self.task_id.id), ('user_id', '=', self.user_id.id)], order='from_date', limit=1)
 
         aal_obj = self.env['account.analytic.line']
-        aal_domain = [('task_id', '=', self.task_id.id), ('user_id', '=', self.user_id.id), ('state', 'in', ('draft','open','delayed','re_confirmed')), ('date', '>=', self.from_date)]
+        aal_domain = [('task_id', '=', self.task_id.id), ('user_id', '=', self.user_id.id), ('state', '=', 'draft'), ('date', '>=', self.from_date)]
         if next_fee_rate_date:
             aal_domain += [('date', '<', next_fee_rate_date.from_date)]
         aal_query_line = aal_obj._where_calc(aal_domain)
