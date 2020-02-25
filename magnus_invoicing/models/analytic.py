@@ -52,7 +52,6 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        import pdb; pdb.set_trace()
         #Condition to check if sheet_id already exists!
         if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
             raise ValidationError(_(

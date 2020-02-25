@@ -1003,6 +1003,7 @@ class AnalyticUserTotal(models.Model):
         #     lambda line: line.user_id == self.user_id
         #             and line.task_id == self.task_id
         # )
+        import pdb; pdb.set_trace()
         task_user = self.env['task.user']
         for aaline in self.detail_ids:
             task_user |= task_user.search(
@@ -1028,6 +1029,10 @@ class AnalyticUserTotal(models.Model):
     def _compute_analytic_line(self):
         for aut in self:
             aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
+
+    @api.one
+    def _compute_analytic_line_fee_rate(self):
+        """override no super"""
 
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
@@ -1059,6 +1064,10 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
+
+    @api.multi
+    def create(self, vals):
+        """no super"""
 
     @api.multi
     def write(self, vals):
