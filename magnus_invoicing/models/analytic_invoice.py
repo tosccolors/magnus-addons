@@ -50,7 +50,7 @@ class AnalyticInvoice(models.Model):
         # global taskUserIds
         taskUserIds, userTotData = [], []
 
-        def _calculate_data(result, time_domain, reconfirmed_entires=False):
+        def _calculate_data(result, time_domain, reconfirmed_entries=False):
             tskUserIds = []
             if len(result) > 0:
                 for item in result:
@@ -76,7 +76,7 @@ class AnalyticInvoice(models.Model):
                         'line_fee_rate': item.get('line_fee_rate'),
                     }
 
-                    if reconfirmed_entires:
+                    if reconfirmed_entries:
                         vals.update({'gb_month_id':item.get('month_of_last_wip')[0] if item.get(
                             'month_of_last_wip') != False else False})
                     else:
@@ -94,7 +94,7 @@ class AnalyticInvoice(models.Model):
                         ('line_fee_rate', '=', vals['line_fee_rate']),
                         # ('month_id', '=', vals['gb_month_id']),
                     ]
-                    if reconfirmed_entires:
+                    if reconfirmed_entries:
                         aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
                     else:
                         aal_domain += [('month_id', '=', vals['gb_month_id'])]
@@ -170,7 +170,7 @@ class AnalyticInvoice(models.Model):
             userInvoicedObjs = userTotObj.search(
                 [('analytic_invoice_id', '=', current_ref), ('state', 'in', ('invoice_created', 'invoiced'))])
 
-            # don't look for analytic lines which has been already added for other analytic invoice
+            # don't look for analytic lines which have been already added to other analytic invoice
             tot_obj = userTotObj.search(
                 [('analytic_invoice_id', '!=', current_ref), ('state', 'not in', ('invoice_created', 'invoiced'))])
             for t in tot_obj:
@@ -1003,6 +1003,7 @@ class AnalyticUserTotal(models.Model):
         #     lambda line: line.user_id == self.user_id
         #             and line.task_id == self.task_id
         # )
+        import pdb; pdb.set_trace()
         task_user = self.env['task.user']
         for aaline in self.detail_ids:
             task_user |= task_user.search(
@@ -1014,7 +1015,7 @@ class AnalyticUserTotal(models.Model):
             self.amount = - self.unit_amount * fr
         else:
             #if no task user found, get price from consultant product
-            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id)])
+            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id),('end_date_of_employment','=', False)])
             self.fee_rate = fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             self.amount = - self.unit_amount * fr
 
@@ -1028,6 +1029,10 @@ class AnalyticUserTotal(models.Model):
     def _compute_analytic_line(self):
         for aut in self:
             aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
+
+    @api.one
+    def _compute_analytic_line_fee_rate(self):
+        """override no super"""
 
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
@@ -1061,5 +1066,9 @@ class AnalyticUserTotal(models.Model):
     )
 
     @api.multi
+    def create(self, vals):
+        """no super"""
+
+    @api.multi
     def write(self, vals):
-        return super(AnalyticUserTotal, self).write(vals)
+        """no super"""

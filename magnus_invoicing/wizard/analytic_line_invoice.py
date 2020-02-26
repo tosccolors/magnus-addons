@@ -60,12 +60,12 @@ class AnalyticLineStatus(models.TransientModel):
                 _("Entries must belong to same month!"))
         return True
 
-    def update_line_fee_rates(self, analytic_ids):
-        for analytic in self.env['account.analytic.line'].browse(analytic_ids):
-            new_amt = analytic.get_fee_rate_amount(analytic.task_id.id, analytic.user_id.id)
-            if new_amt != analytic.amount:
-                analytic.amount = new_amt
-        return True
+    # def update_line_fee_rates(self, analytic_ids):
+    #     for analytic in self.env['account.analytic.line'].browse(analytic_ids):
+    #         new_amt = analytic.get_fee_rate_amount(analytic.task_id.id, analytic.user_id.id)
+    #         if new_amt != analytic.amount:
+    #             analytic.amount = new_amt
+    #     return True
 
     @api.one
     def analytic_invoice_lines(self):
@@ -92,10 +92,10 @@ class AnalyticLineStatus(models.TransientModel):
             self.env.invalidate_all()
             if status == 'delayed' and self.wip and self.wip_percentage > 0.0:
                 # self.validate_entries_month(analytic_ids)
-                self.update_line_fee_rates(analytic_ids)
+                # self.update_line_fee_rates(analytic_ids)
                 self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
             if status == 'invoiceable':
-                self.update_line_fee_rates(analytic_ids)
+                # self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
 
