@@ -740,9 +740,9 @@ class AnalyticInvoice(models.Model):
         if self.state == 'draft' and aal_from_summary:
             self.state = 'open'
         if aal_from_summary:
-            aal_from_summary.write({'state':'invoice_created'})
+            self._sql_update(aal_from_summary, 'invoice_created')
         if user_total:
-            user_total.write({'state':'invoice_created'})
+            self._sql_update(user_total, 'invoice_created')
         return True
 
     @api.one
@@ -1003,7 +1003,6 @@ class AnalyticUserTotal(models.Model):
         #     lambda line: line.user_id == self.user_id
         #             and line.task_id == self.task_id
         # )
-        import pdb; pdb.set_trace()
         task_user = self.env['task.user']
         for aaline in self.detail_ids:
             task_user |= task_user.search(
@@ -1023,7 +1022,6 @@ class AnalyticUserTotal(models.Model):
     def _compute_sheet(self):
         """Override because this object is not related to sheets
         """
-
 
     @api.one
     def _compute_analytic_line(self):
