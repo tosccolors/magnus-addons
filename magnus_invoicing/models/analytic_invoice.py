@@ -1066,9 +1066,9 @@ class AnalyticUserTotal(models.Model):
     @api.model
     def create(self, vals):
         """no super"""
-        return orm.create(vals)
+        return models.Model.create(vals)
 
     @api.multi
     def write(self, vals):
         """no super"""
-        return orm.write(vals)
+        return models.Model.Model.write(vals)
