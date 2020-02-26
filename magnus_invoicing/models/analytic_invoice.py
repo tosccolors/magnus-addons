@@ -1066,9 +1066,9 @@ class AnalyticUserTotal(models.Model):
     @api.model
     def create(self, vals):
         """no super"""
-        return self.env['analytic.user.total'].create(vals)
+        return super('analytic.user.total',self).create(vals)
 
     @api.multi
     def write(self, vals):
         """no super"""
-        return self.env['analytic.user.total'].write(vals)
+        return super('analytic.user.total',self).write(vals)
