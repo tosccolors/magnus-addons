@@ -1063,10 +1063,10 @@ class AnalyticUserTotal(models.Model):
         string='Month',
     )
 
-    @api.multi
+    @api.model
     def create(self, vals):
         """no super"""
 
-    @api.multi
+    @api.model
     def write(self, vals):
         """no super"""
