@@ -1071,4 +1071,4 @@ class AnalyticUserTotal(models.Model):
     @api.multi
     def write(self, vals):
         """no super"""
-        return models.Model.Model.write(vals)
+        return models.Model.write(vals)
