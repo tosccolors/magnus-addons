@@ -51,7 +51,7 @@ thereof""",
                 'account_fiscal_month',
                 'account_fiscal_year',
                 'hr_timesheet_sheet_validators',
-                'connector_jira' 
+                'connector_jira',
                 'web_domain_field',
                 'invoice_line_revenue_distribution_operating_unit'
                 ],
