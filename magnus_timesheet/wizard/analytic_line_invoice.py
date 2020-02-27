@@ -313,7 +313,7 @@ class AnalyticLineStatus(models.TransientModel):
         narration = self.description if self.wip else ''
         try:
             if len(result) > 0:
-                wip_journal = self.env.ref('magnus_invoicing.wip_journal')
+                wip_journal = self.env.ref('magnus_timesheet.wip_journal')
                 if not wip_journal.sequence_id:
                     raise UserError(_('Please define sequence on the type WIP journal.'))
                 for item in result:

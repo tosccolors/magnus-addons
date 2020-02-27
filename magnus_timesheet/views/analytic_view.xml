@@ -86,5 +86,160 @@
             </field>
         </record>
 
+        <record id="view_account_analytic_line_tree_inherit_magnus_invoicing" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.inherit.magnus.invoicing</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_tree"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='ref']" position="replace">
+                    </xpath>
+                    <xpath expr="//field[@name='name']" position="after">
+                        <field name="user_id" />
+                        <field name="product_id" />
+                    </xpath>
+                    <xpath expr="//field[@name='account_id']" position="replace">
+                        <field name="operating_unit_id" />
+                        <field name="project_id" />
+                        <field name="task_id" />
+                        <field name="date_of_last_wip"/>
+                    </xpath>
+                    <xpath expr="//field[@name='unit_amount']" position="after">
+                        <field name="product_uom_id" />
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record id="view_account_analytic_line_filter_inherit_account" model="ir.ui.view">
+            <field name="name">account.analytic.line.select.inherit.account</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_filter"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='account_id']" position="replace">
+                    </xpath>
+
+                    <xpath expr="//field[@name='name']" position="before">
+                        <filter string="My Projects"
+                                domain="[
+                                '|',
+                                ('project_id.user_id.id', '=', uid),
+                                ('account_id.project_ids.user_id.id', '=', uid)
+                                ]"
+                                context="{u'pivot_column_groupby': [u'month_id'],
+                                  u'pivot_row_groupby': [u'account_id', u'user_id'],
+                                  u'pivot_measures': [u'unit_amount', u'amount']}"/>
+                        <filter string="All Projects"
+                                context="{u'pivot_column_groupby': [u'month_id'],
+                                  u'pivot_row_groupby': [u'project_mgr',u'account_id', u'user_id'],
+                                  u'pivot_measures': [u'unit_amount', u'amount']}"/>
+                        <separator />
+                        <filter name="hours" string="Hours"
+                                domain="[('product_uom_id','=',%(product.product_uom_hour)d)]"/>
+                        <filter name="kms" string="Kilometers"
+                                domain="[('product_uom_id','=',%(product.product_uom_km)d)]"/>
+                        <filter name="cost_expense" string="Cost/Expense"
+                                domain="[
+                                ('move_id','!=',False)
+                                ]"/>
+                        <separator />
+                        <filter name="chargeable" string="Chargeable"
+                                domain="[('chargeable','=',True)]"/>
+                        <separator />
+                        <filter name="invoice-able" string="Invoice-able"
+                                domain="[
+                                '|', '&amp;',
+                                ('state', 'in', ['draft','open']),
+                                ('move_id','!=',False),
+                                ('state', 'not in', ['draft','delayed','write_off','invoice_created','invoiced','progress','change-chargecode']),
+                                ('non_invoiceable_mileage', '=', False),
+                                ('chargeable', '=', True)
+                                ]"/>
+                        <separator string="State"/>
+                        <filter name="draft" string="Draft"
+                                domain="[('state','=','draft')]"/>
+                        <filter name="open" string="Confirmed"
+                                domain="[('state', 'in', ['open','re_confirmed'])]"/>
+                        <filter name="progress" string="In progress"
+                                domain="[('state','=','progress')]"/>
+                        <filter name="invoiceable" string="To Be Invoiced"
+                                domain="[('state','=','invoiceable')]"/>
+                        <filter name="invoiced" string="Invoiced"
+                                domain="[('state','=','invoiced')]"/>
+                        <filter name="delayed" string="Delayed"
+                                domain="[('state','=','delayed')]"/>
+                        <filter name="write_off" string="Write-Off"
+                                domain="[('state','=','write_off')]"/>
+                        <filter name="change-chargecode" string="Correcties"
+                                domain="[('state','=','change-chargecode')]"/>
+                        <field name="account_id" />
+                        <field name="project_mgr" />
+                    </xpath>
+                    <xpath expr="//field[@name='date']" position="after">
+                        <field name="user_id"/>
+                        <field name="task_id" />
+                    </xpath>
+                    <xpath expr="//group[@name='groupby']" position="after">
+                        <filter string="Project Manager" context="{'group_by':'project_mgr'}"/>
+                        <filter string="Professional" context="{'group_by':'user_id'}"/>
+                        <filter string="Task" context="{'group_by':'task_id'}"/>
+                        <filter string="Measure" context="{'group_by':'product_uom_id'}"/>
+                        <filter string="Status" context="{'group_by':'state'}"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record id="view_account_analytic_line_pivot" model="ir.ui.view">
+            <field name="name">account.analytic.line.pivot</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_pivot"/>
+            <field name="arch" type="xml">
+                <field name="account_id" position="after">
+                    <field name="partner_id" type="row"/>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="account_analytic_line_action_entries_magnus">
+            <field name="name">Analytic Entries</field>
+            <field name="res_model">account.analytic.line</field>
+            <field name="view_mode">tree,form,graph,pivot</field>
+            <field name="view_id" ref="magnus_invoicing.view_account_analytic_line_tree_inherit_magnus_invoicing"/>
+            <field name="view_type">form</field>
+            <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
+            <field name="context">{"search_default_invoice-able":1}</field>
+            <field name="domain">{}</field>
+            <field name="help" type="html">
+              <p>
+                No activity yet.
+              </p><p>
+                In Odoo, sale orders and projects are implemented using
+                analytic accounts. You can track costs and revenues to analyse
+                your margins easily.
+              </p><p>
+                Costs will be created automatically when you register supplier
+                invoices, expenses or timesheets.
+              </p><p>
+                Revenues will be created automatically when you create customer
+                invoices. Customer invoices can be created based on sale orders
+                (fixed price invoices), on timesheets (based on the work done) or
+                on expenses (e.g. reinvoicing of travel costs).
+              </p>
+            </field>
+        </record>
+
+        <record id="view_account_analytic_line_tree_magnus" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.magnus</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount']" position="after">
+                    <field name="state"/>
+                </xpath>
+            </field>
+        </record>
+
     </data>
 </odoo>

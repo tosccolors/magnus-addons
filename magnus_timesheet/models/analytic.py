@@ -5,6 +5,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError
+import calendar
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -165,6 +166,16 @@ class AccountAnalyticLine(models.Model):
             else:
                 aal.line_fee_rate = 0.0
 
+    @api.depends('unit_amount')
+    def _get_qty(self):
+        for line in self:
+            if line.planned:
+                line.planned_qty = line.unit_amount
+                line.actual_qty = 0.0
+            else:
+                line.actual_qty = line.unit_amount
+                line.planned_qty = 0.0
+
     kilometers = fields.Integer(
         'Kilometers'
     )
@@ -266,6 +277,34 @@ class AccountAnalyticLine(models.Model):
         string='Fee Rate',
         store=True,
     )
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('open', 'Confirmed'),
+        ('delayed', 'Delayed'),
+        ('invoiceable', 'To be Invoiced'),
+        ('progress', 'In Progress'),
+        ('invoice_created', 'Invoice Created'),
+        ('invoiced', 'Invoiced'),
+        ('write-off', 'Write-Off'),
+        ('change-chargecode', 'Change-Chargecode'),
+        ('re_confirmed', 'Re-Confirmed'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
+    ],
+        string='Status',
+        readonly=True,
+        copy=False,
+        index=True,
+        track_visibility='onchange',
+        default='draft'
+    )
+    user_total_id = fields.Many2one(
+        'analytic.user.total',
+        string='Summary Reference',
+        index=True
+    )
+    date_of_last_wip = fields.Date("Date Of Last WIP")
+    date_of_next_reconfirmation = fields.Date("Date Of Next Reconfirmation")
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
@@ -359,6 +398,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
+        ## todo evaluate and refactor
         for aal in self:
             task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
@@ -378,18 +418,75 @@ class AccountAnalyticLine(models.Model):
             if ts_line:
                 unit_amount = vals.get('unit_amount', aal.unit_amount)
                 vals['amount'] = aal.get_fee_rate_amount(task_id, user_id, unit_amount)
+        # Condition to check if sheet_id already exists!
+        if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
+            raise ValidationError(_(
+                'Timesheet link can not be deleted for %s.\n '
+            ) % self)
+
+        # don't call super if only state has to be updated
+        if self and 'state' in vals and len(vals) == 1:
+            state = vals['state']
+            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=",
+                                                                       self.id)
+            self.env.cr.execute("""
+                               UPDATE %s SET state = '%s' WHERE id %s %s
+                               """ % (self._table, state, cond, rec))
+            self.env.invalidate_all()
+            vals.pop('state')
+            return True
+
+        if self.filtered('ts_line') and not (
+                'unit_amount' in vals or
+                'product_uom_id' in vals or
+                'sheet_id' in vals or
+                'date' in vals or
+                'project_id' in vals or
+                'task_id' in vals or
+                'user_id' in vals or
+                'name' in vals or
+                'ref' in vals):
+            # always copy context to keep other context reference
+            context = self.env.context.copy()
+            context.update({'analytic_check_state': True})
+            return super(AccountAnalyticLine, self.with_context(context)).write(
+                vals)
         return super(AccountAnalyticLine, self).write(vals)
 
-    @api.depends('unit_amount')
-    def _get_qty(self):
-        for line in self:
-            if line.planned:
-                line.planned_qty = line.unit_amount
-                line.actual_qty = 0.0
-            else:
-                line.actual_qty = line.unit_amount
-                line.planned_qty = 0.0
+    def _check_state(self):
+        """
+        to check if any lines computes method calls allow to modify
+        :return: True or super
+        """
+        context = self.env.context.copy()
+        if 'analytic_check_state' in context \
+                or 'active_invoice_id' in context:
+            return True
+        return super(AccountAnalyticLine, self)._check_state()
 
     def _get_day(self):
         for line in self:
             line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
+
+    @api.model
+    def run_reconfirmation_process(self):
+        current_date = datetime.now().date()
+        # pre_month_start_date = current_date.replace(day=1, month=current_date.month - 1)
+        month_days = calendar.monthrange(current_date.year, current_date.month)[1]
+        month_end_date = current_date.replace(day=month_days)
+
+        domain = [('date_of_next_reconfirmation', '!=', False), ('date_of_next_reconfirmation', '<=', month_end_date),
+                  ('state', '=', 'delayed')]
+        query_line = self._where_calc(domain)
+        self_tables, where_clause, where_clause_params = query_line.get_sql()
+
+        list_query = ("""                    
+                UPDATE {0}
+                SET state = 're_confirmed', date_of_next_reconfirmation = null
+                WHERE {1}                          
+                     """.format(
+            self_tables,
+            where_clause
+        ))
+        self.env.cr.execute(list_query, where_clause_params)
+        return True

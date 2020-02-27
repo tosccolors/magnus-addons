@@ -233,6 +233,29 @@ class HrTimesheetSheet(models.Model):
             raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
 
     @api.one
+    def action_timesheet_draft(self):
+        """
+        On timesheet reset draft check analytic shouldn't be in invoiced
+        :return: Super
+        """
+        if any([ts.state == 'progress' for ts in self.timesheet_ids]):
+            # if self.timesheet_ids.filtered('invoiced') or any([ts.state == 'progress' for ts in self.timesheet_ids]):
+            raise UserError(_('You cannot modify timesheet entries either Invoiced or belongs to Analytic Invoiced!'))
+        res = super(HrTimesheetSheet, self).action_timesheet_draft()
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                                UPDATE account_analytic_line SET state = 'draft' WHERE id %s %s;
+                                DELETE FROM account_analytic_line WHERE ref_id %s %s;
+                        """ % (cond, rec, cond, rec))
+            self.env.invalidate_all()
+        return res
+
+    @api.one
     def action_timesheet_confirm(self):
         self._check_end_mileage()
         vehicle = self._get_vehicle()
@@ -253,6 +276,23 @@ class HrTimesheetSheet(models.Model):
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
+    @api.one
+    def action_timesheet_done(self):
+        """
+        On timesheet confirmed update analytic state to confirmed
+        :return: Super
+        """
+        res = super(HrTimesheetSheet, self).action_timesheet_done()
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                                UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+                        """ % (cond, rec))
+        return res
 
     @api.one
     def create_overtime_entries(self):

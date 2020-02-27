@@ -121,7 +121,7 @@ class AccountInvoice(models.Model):
     def action_wip_move_create(self):
         """ Creates invoice related analytics and financial move lines """
         for inv in self:
-            wip_journal = self.env.ref('magnus_invoicing.wip_journal')
+            wip_journal = self.env.ref('magnus_timesheet.wip_journal')
             if not wip_journal.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
             sequence = wip_journal.sequence_id

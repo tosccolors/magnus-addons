@@ -2,3 +2,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import hr_timesheet_current
+import analytic_line_invoice
+import change_chargecode

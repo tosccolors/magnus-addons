@@ -7,5 +7,13 @@
         <record id="product_category_fee_rate" model="product.category">
             <field name="name">Fee Rate</field>
         </record>
+        <!--
+        Resource: account.journal
+        -->
+        <record id="wip_journal" model="account.journal">
+            <field name="name">WIP Invoices</field>
+            <field name="code">WIP</field>
+            <field name="type">wip</field>
+        </record>
     </data>
 </odoo>
