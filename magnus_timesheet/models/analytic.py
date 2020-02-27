@@ -294,10 +294,10 @@ class AccountAnalyticLine(models.Model):
         return product_id
 
     @api.model
-    def get_fee_rate(self, task_id=None, user_id=None):
+    def get_fee_rate(self, task_id=None, user_id=None, date=None):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
-        date = self.date or False
+        date = date or self.date or False
         amount, fr = 0.0, 0.0
         if uid and tid and date:
             task_user = self.env['task.user'].get_user_fee_rate(tid, uid, date)
@@ -320,7 +320,7 @@ class AccountAnalyticLine(models.Model):
         return fr
 
     @api.model
-    def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=0.0):
+    def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=False):
         fr = self.get_fee_rate(task_id=task_id, user_id=user_id)
         unit_amount = unit_amount if unit_amount else self.unit_amount
         amount = - unit_amount * fr
@@ -360,12 +360,10 @@ class AccountAnalyticLine(models.Model):
     @api.multi
     def write(self, vals):
         for aal in self:
-
             task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
             #for planning skip fee rate check
             planned = vals.get('planned', aal.planned)
-
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
                 if user_id and not vals.get('product_id', aal.product_id):
@@ -376,7 +374,6 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-
             ts_line = vals.get('ts_line', aal.ts_line)
             if ts_line:
                 unit_amount = vals.get('unit_amount', aal.unit_amount)
