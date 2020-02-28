@@ -87,7 +87,7 @@ class AccountAnalyticLine(models.Model):
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
                         unit_amount = line.unit_amount
-                        line.amount = amount = line.get_fee_rate_amount(task, user, unit_amount)
+                        line.amount = amount = line.get_fee_rate_amount(task.id, user.id, unit_amount)
                         line.line_fee_rate = amount / unit_amount
                     product = self.get_task_user_product(task.id, user.id) or False
                     if not product:
