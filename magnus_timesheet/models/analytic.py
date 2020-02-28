@@ -61,43 +61,47 @@ class AccountAnalyticLine(models.Model):
                     line.expenses = line.project_id.invoice_properties.expenses
             elif line.account_id:
                 line.project_mgr = line.account_id.project_ids.user_id or False
-            if line.task_id and line.user_id:
-                uou = line.user_id._get_operating_unit_id()
+            task = line.task_id
+            user = line.user_id
+            date = line.date
+            if task and user:
+                uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
+                if date:
+                    line.day_name = str(datetime.strptime(date, '%Y-%m-%d').
+                                    strftime("%m/%d/%Y")) + \
+                                    ' (' + datetime.strptime(date, '%Y-%m-%d').\
+                                    strftime('%a') + ')'
                 if not line.planned:
-                    if line.sheet_id.week_id and line.date:
+                    if line.sheet_id.week_id and date:
                         line.week_id = line.sheet_id.week_id
-                        var_month_id = line.find_daterange_month(line.date)
-                    elif line.date:
-                        line.week_id = line.find_daterange_week(line.date)
-                        var_month_id = line.find_daterange_month(line.date)
+                        var_month_id = line.find_daterange_month(date)
+                    elif date:
+                        line.week_id = line.find_daterange_week(date)
+                        var_month_id = line.find_daterange_month(date)
                     if line.month_of_last_wip:
                         line.wip_month_id = line.month_of_last_wip
                     else:
                         line.wip_month_id = line.month_id = var_month_id
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
-                task = line.task_id
-                user = line.user_id
-                line.product_id = self.get_task_user_product(task.id, user.id) or False
-                if not line.product_id:
-                    raise ValidationError(_(
-                        'Please fill in Fee Rate Product in employee %s.\n '
-                    ) % line.user_id.name)
-                # taskuser = self.env['task.user'].search(
-                #     [('task_id', '=', task.id), ('user_id', '=', user.id)], limit=1)
-                # if taskuser and taskuser.fee_rate or taskuser.product_id:
-                #     fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
-                # else:
-                #     employee = user._get_related_employees()
-                #     fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
-                # if line.product_uom_id and line.product_uom_id.id == \
-                #         self.env.ref('product.product_uom_hour').id:
-                #     line.amount = line.unit_amount * - fee_rate
-
+                        unit_amount = line.unit_amount
+                        line.amount = amount = line.get_fee_rate_amount(task, user, unit_amount)
+                        line.line_fee_rate = amount / unit_amount
+                    product = self.get_task_user_product(task.id, user.id) or False
+                    if not product:
+                        raise ValidationError(_(
+                            'Please fill in Fee Rate Product in TaskUser or employee %s.\n '
+                        ) % user.name)
+                    if product:
+                        line.product_id = product
+                    line.actual_qty = line.unit_amount
+                    line.planned_qty = 0.0
             if line.planned:
                 line.week_id = line.find_daterange_week(line.date)
+                line.planned_qty = line.unit_amount
+                line.actual_qty = 0.0
 
 
     def find_daterange_week(self, date):
@@ -158,23 +162,23 @@ class AccountAnalyticLine(models.Model):
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
 
-    @api.depends('unit_amount','amount')
-    def _compute_analytic_line_fee_rate(self):
-        for aal in self:
-            if aal.unit_amount and aal.amount:
-                aal.line_fee_rate = abs(aal.amount/aal.unit_amount)
-            else:
-                aal.line_fee_rate = 0.0
+    # @api.depends('unit_amount','amount')
+    # def _compute_analytic_line_fee_rate(self):
+    #     for aal in self:
+    #         if aal.unit_amount and aal.amount:
+    #             aal.line_fee_rate = abs(aal.amount/aal.unit_amount)
+    #         else:
+    #             aal.line_fee_rate = 0.0
 
-    @api.depends('unit_amount')
-    def _get_qty(self):
-        for line in self:
-            if line.planned:
-                line.planned_qty = line.unit_amount
-                line.actual_qty = 0.0
-            else:
-                line.actual_qty = line.unit_amount
-                line.planned_qty = 0.0
+    # @api.depends('unit_amount')
+    # def _get_qty(self):
+    #     for line in self:
+    #         if line.planned:
+    #             line.planned_qty = line.unit_amount
+    #             line.actual_qty = 0.0
+    #         else:
+    #             line.actual_qty = line.unit_amount
+    #             line.planned_qty = 0.0
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -230,17 +234,17 @@ class AccountAnalyticLine(models.Model):
     )
     actual_qty = fields.Float(
         string='Actual Qty',
-        compute='_get_qty',
+        compute=_compute_analytic_line,
         store=True
     )
     planned_qty = fields.Float(
         string='Planned Qty',
-        compute='_get_qty',
+        compute=_compute_analytic_line,
         store=True
     )
     day_name = fields.Char(
         string="Day",
-        compute='_get_day'
+        compute=_compute_analytic_line
     )
     ts_line = fields.Boolean(
         compute=_compute_analytic_line,
@@ -274,7 +278,7 @@ class AccountAnalyticLine(models.Model):
         string='Employee'
     )
     line_fee_rate = fields.Float(
-        compute=_compute_analytic_line_fee_rate,
+        compute=_compute_analytic_line,
         string='Fee Rate',
         store=True,
     )
@@ -379,50 +383,20 @@ class AccountAnalyticLine(models.Model):
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
 
-    @api.model
-    def create(self, vals):
-        task_id = vals.get('task_id', False)
-        user_id = vals.get('user_id', False)
-
-        #some cases product id is missing
-        product_id = self.get_task_user_product(task_id, user_id) or False
-
-        # for planning skip fee rate check
-        if not product_id and user_id and not vals.get('planned', False):
-            user = self.env.user.browse(user_id)
-            raise ValidationError(_(
-                'Please fill in Fee Rate Product in employee %s.\n '
-                ) % user.name)
-        if product_id:
-            vals['product_id'] = product_id
-
-        if vals.get('ts_line', False):
-            unit_amount = vals.get('unit_amount', False)
-            vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
-        return super(AccountAnalyticLine, self).create(vals)
+    # @api.model
+    # def create(self, vals):
+    #     task_id = vals.get('task_id', False)
+    #     user_id = vals.get('user_id', False)
+    #
+    #     #some cases product id is missing
+    #
+    #
+    #     # for planning skip fee rate check
+    #
+    #     return super(AccountAnalyticLine, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        ## todo evaluate and refactor
-        for aal in self:
-            task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
-            user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
-            #for planning skip fee rate check
-            planned = vals.get('planned', aal.planned)
-            # some cases product id is missing
-            if not vals.get('product_id', aal.product_id) and user_id:
-                if user_id and not vals.get('product_id', aal.product_id):
-                    product_id = aal.get_task_user_product(task_id, user_id) or False
-                if not product_id and not planned:
-                    user = self.env.user.browse(user_id)
-                    raise ValidationError(_(
-                        'Please fill in Fee Rate Product in employee %s.\n '
-                    ) % user.name)
-                vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', aal.ts_line)
-            if ts_line:
-                unit_amount = vals.get('unit_amount', aal.unit_amount)
-                vals['amount'] = aal.get_fee_rate_amount(task_id, user_id, unit_amount)
         # Condition to check if sheet_id already exists!
         if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
             raise ValidationError(_(
@@ -469,9 +443,9 @@ class AccountAnalyticLine(models.Model):
             return True
         return super(AccountAnalyticLine, self)._check_state()
 
-    def _get_day(self):
-        for line in self:
-            line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
+    # def _get_day(self):
+    #     for line in self:
+    #         line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
 
     @api.model
     def run_reconfirmation_process(self):
