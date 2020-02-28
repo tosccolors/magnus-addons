@@ -266,12 +266,13 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_analytic_line,
         store=True
     )
-
     ot = fields.Boolean(
         string='Overtime',
     )
-    employee_id = fields.Many2one('hr.employee', string='Employee')
-
+    employee_id = fields.Many2one(
+        'hr.employee',
+        string='Employee'
+    )
     line_fee_rate = fields.Float(
         compute=_compute_analytic_line_fee_rate,
         string='Fee Rate',
@@ -303,8 +304,12 @@ class AccountAnalyticLine(models.Model):
         string='Summary Reference',
         index=True
     )
-    date_of_last_wip = fields.Date("Date Of Last WIP")
-    date_of_next_reconfirmation = fields.Date("Date Of Next Reconfirmation")
+    date_of_last_wip = fields.Date(
+        "Date Of Last WIP"
+    )
+    date_of_next_reconfirmation = fields.Date(
+        "Date Of Next Reconfirmation"
+    )
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
