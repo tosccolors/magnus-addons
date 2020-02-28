@@ -66,13 +66,11 @@
             <field name="model">project.invoicing.properties</field>
             <field name="inherit_id" ref="magnus_project.project_invoicing_Period_form_view"/>
             <field name="arch" type="xml">
-                <field name="invoice_mileage" position="after">
+                <field name="fixed_fee_capped" position="after">
+                    <field name="invoice_mileage" />
                     <field name="group_invoice" />
                     <field name="group_by_fee_rate"/>
                     <field name="group_by_month"/>
-                </field>
-                <field name="fixed_fee_capped" position="after">
-                    <field name="invoice_mileage" />
                 </field>
             </field>
         </record>
