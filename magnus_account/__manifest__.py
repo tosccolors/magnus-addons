@@ -48,7 +48,9 @@ voor de interface naar slam.
                 'report_qweb_operating_unit',
                 'account_operating_unit',
                 'operating_unit_report_layout',
-                'magnus_timesheet'
+                'magnus_timesheet',
+                'magnus_calender',
+                'connector_jira'
     ],
     'data' : [
         "report/report_layout.xml",
