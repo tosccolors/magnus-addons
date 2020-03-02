@@ -698,7 +698,7 @@ class AnalyticInvoice(models.Model):
         })
 
         # Add analytic tags to invoice line
-        invoice_line.analytic_tag_ids |= line.tag_ids
+        # invoice_line.analytic_tag_ids |= line.tag_ids
 
         # Get other invoice line values from product onchange
         invoice_line._onchange_product_id()
@@ -988,7 +988,7 @@ class AnalyticInvoice(models.Model):
 
 class AnalyticUserTotal(models.Model):
     _name = "analytic.user.total"
-    _inherit = 'account.analytic.line'
+    # _inherit = 'account.analytic.line'
     _description = "Analytic User Total"
 
     @api.one
@@ -1032,6 +1032,10 @@ class AnalyticUserTotal(models.Model):
     def _compute_analytic_line_fee_rate(self):
         """override no super"""
 
+    @api.model
+    def _default_user(self):
+        return self.env.context.get('user_id', self.env.user.id)
+
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
     )
@@ -1062,6 +1066,49 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
+    name = fields.Char('Description', required=True)
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('open', 'Confirmed'),
+        ('delayed', 'Delayed'),
+        ('invoiceable', 'To be Invoiced'),
+        ('progress', 'In Progress'),
+        ('invoice_created', 'Invoice Created'),
+        ('invoiced', 'Invoiced'),
+        ('write-off', 'Write-Off'),
+        ('change-chargecode', 'Change-Chargecode'),
+        ('re_confirmed', 'Re-Confirmed'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
+    ],
+        string='Status',
+        readonly=True,
+        copy=False,
+        index=True,
+        track_visibility='onchange',
+        default='draft'
+    )
+    account_id = fields.Many2one('account.analytic.account', 'Analytic Account', required=True, ondelete='restrict', index=True)
+    partner_id = fields.Many2one('res.partner', related='account_id.partner_id', string='Partner', store=True, readonly=True)
+    user_id = fields.Many2one('res.users', string='User', default=_default_user)
+    company_id = fields.Many2one(related='account_id.company_id', string='Company', store=True, readonly=True)
+    department_id = fields.Many2one('hr.department', "Department", related='user_id.employee_ids.department_id', store=True, readonly=True)
+    product_id = fields.Many2one('product.product', string='Product')
+    task_id = fields.Many2one('project.task', 'Task')
+    project_id = fields.Many2one('project.project', 'Project', domain=[('allow_timesheets', '=', True)])
+    product_uom_id = fields.Many2one('product.uom', string='Unit of Measure')
+    unit_amount = fields.Float('Quantity', default=0.0)
+    operating_unit_id = fields.Many2one(
+        'operating.unit',
+        string='Operating Unit',
+        store=True
+    )
+    project_operating_unit_id = fields.Many2one(
+        'operating.unit',
+        string='Project Operating Unit',
+        store=True
+    )
+    date = fields.Date('Date', required=True, index=True, default=fields.Date.context_today)
 
     @api.model
     def create(self, vals):
