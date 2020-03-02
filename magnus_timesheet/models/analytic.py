@@ -72,7 +72,7 @@ class AccountAnalyticLine(models.Model):
                         line.week_id = line.find_daterange_week(line.date)
                         var_month_id = line.find_daterange_month(line.date)
                     if line.month_of_last_wip:
-                        line.wip_month_id = self.month_of_last_wip
+                        line.wip_month_id = line.month_of_last_wip
                     else:
                         line.wip_month_id = line.month_id = var_month_id
                     if line.product_uom_id.id == UomHrs:
@@ -157,6 +157,13 @@ class AccountAnalyticLine(models.Model):
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
 
+    @api.depends('unit_amount','amount')
+    def _compute_analytic_line_fee_rate(self):
+        for aal in self:
+            if aal.unit_amount and aal.amount:
+                aal.line_fee_rate = abs(aal.amount/aal.unit_amount)
+            else:
+                aal.line_fee_rate = 0.0
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -254,6 +261,11 @@ class AccountAnalyticLine(models.Model):
     )
     employee_id = fields.Many2one('hr.employee', string='Employee')
 
+    line_fee_rate = fields.Float(
+        compute=_compute_analytic_line_fee_rate,
+        string='Fee Rate',
+        store=True,
+    )
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
@@ -282,16 +294,12 @@ class AccountAnalyticLine(models.Model):
         return product_id
 
     @api.model
-    def get_fee_rate(self, task_id=None, user_id=None):
+    def get_fee_rate(self, task_id=None, user_id=None, date=None):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
-        date = self.date or False
+        date = date or self.date or False
         amount, fr = 0.0, 0.0
         if uid and tid and date:
-            # task-358
-            # task_user = self.env['task.user'].search([
-            #     ('user_id', '=', uid),
-            #     ('task_id', '=', tid)], limit=1)
             task_user = self.env['task.user'].get_user_fee_rate(tid, uid, date)
             if task_user and task_user.fee_rate or task_user.product_id:
                 fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
@@ -302,8 +310,6 @@ class AccountAnalyticLine(models.Model):
                 if standard_task:
                     # task-358
                     task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid, date)
-                    # task_user = self.env['task.user'].search([('task_id', '=', standard_task.id), ('user_id', '=', uid)],
-                    #                               limit=1)
                     if task_user and task_user.fee_rate or task_user.product_id:
                         fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
         if not fr :
@@ -314,7 +320,7 @@ class AccountAnalyticLine(models.Model):
         return fr
 
     @api.model
-    def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=0.0):
+    def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=False):
         fr = self.get_fee_rate(task_id=task_id, user_id=user_id)
         unit_amount = unit_amount if unit_amount else self.unit_amount
         amount = - unit_amount * fr
@@ -354,12 +360,10 @@ class AccountAnalyticLine(models.Model):
     @api.multi
     def write(self, vals):
         for aal in self:
-
             task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
             user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
             #for planning skip fee rate check
             planned = vals.get('planned', aal.planned)
-
             # some cases product id is missing
             if not vals.get('product_id', aal.product_id) and user_id:
                 if user_id and not vals.get('product_id', aal.product_id):
@@ -370,7 +374,6 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-
             ts_line = vals.get('ts_line', aal.ts_line)
             if ts_line:
                 unit_amount = vals.get('unit_amount', aal.unit_amount)
