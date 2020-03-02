@@ -88,7 +88,7 @@ class AccountAnalyticLine(models.Model):
                         line.ts_line = True
                         unit_amount = line.unit_amount
                         line.amount = amount = line.get_fee_rate_amount(task.id, user.id, unit_amount)
-                        line.line_fee_rate = amount / unit_amount
+                        line.line_fee_rate = amount / unit_amount if unit_amount > 0 else False
                     product = self.get_task_user_product(task.id, user.id) or False
                     if not product:
                         raise ValidationError(_(
@@ -162,23 +162,6 @@ class AccountAnalyticLine(models.Model):
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
 
-    # @api.depends('unit_amount','amount')
-    # def _compute_analytic_line_fee_rate(self):
-    #     for aal in self:
-    #         if aal.unit_amount and aal.amount:
-    #             aal.line_fee_rate = abs(aal.amount/aal.unit_amount)
-    #         else:
-    #             aal.line_fee_rate = 0.0
-
-    # @api.depends('unit_amount')
-    # def _get_qty(self):
-    #     for line in self:
-    #         if line.planned:
-    #             line.planned_qty = line.unit_amount
-    #             line.actual_qty = 0.0
-    #         else:
-    #             line.actual_qty = line.unit_amount
-    #             line.planned_qty = 0.0
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -383,17 +366,6 @@ class AccountAnalyticLine(models.Model):
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
 
-    # @api.model
-    # def create(self, vals):
-    #     task_id = vals.get('task_id', False)
-    #     user_id = vals.get('user_id', False)
-    #
-    #     #some cases product id is missing
-    #
-    #
-    #     # for planning skip fee rate check
-    #
-    #     return super(AccountAnalyticLine, self).create(vals)
 
     @api.multi
     def write(self, vals):
@@ -442,10 +414,6 @@ class AccountAnalyticLine(models.Model):
                 or 'active_invoice_id' in context:
             return True
         return super(AccountAnalyticLine, self)._check_state()
-
-    # def _get_day(self):
-    #     for line in self:
-    #         line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
 
     @api.model
     def run_reconfirmation_process(self):
