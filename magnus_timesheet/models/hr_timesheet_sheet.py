@@ -162,11 +162,25 @@ class HrTimesheetSheet(models.Model):
     overtime_hours_delta = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
     odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
     overtime_analytic_line_id = fields.Many2one('account.analytic.line', string="Overtime Entry")
+    date_from = fields.Date(
+        string='Date From',
+        related=week_id.date_start,
+#        required=True,
+        store=True,
+        readonly=True
+    )
+    date_to = fields.Date(
+        string='Date To',
+        related=week_id.date_end,
+#        required=True,
+        store=True,
+        readonly=True,
+    )
 
-    @api.onchange('week_id', 'date_from', 'date_to')
-    def onchange_week(self):
-        self.date_from = self.week_id.date_start
-        self.date_to = self.week_id.date_end
+    # @api.onchange('week_id', 'date_from', 'date_to')
+    # def onchange_week(self):
+    #     self.date_from = self.week_id.date_start
+    #     self.date_to = self.week_id.date_end
 
   #  @api.onchange('starting_mileage', 'business_mileage')
   #  def onchange_private_mileage(self):
@@ -253,7 +267,12 @@ class HrTimesheetSheet(models.Model):
                                 DELETE FROM account_analytic_line WHERE ref_id %s %s;
                         """ % (cond, rec, cond, rec))
             self.env.invalidate_all()
+        if self.odo_log_id:
+            self.env['fleet.vehicle.odometer'].sudo().search([('id', '=', self.odo_log_id.id)]).unlink()
+            self.odo_log_id = False
         return res
+
+
 
     @api.one
     def action_timesheet_confirm(self):
@@ -275,24 +294,6 @@ class HrTimesheetSheet(models.Model):
                 if i < 5 and float_compare(hour, 8, precision_digits=3, precision_rounding=None) < 0:
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
-
-    @api.one
-    def action_timesheet_done(self):
-        """
-        On timesheet confirmed update analytic state to confirmed
-        :return: Super
-        """
-        res = super(HrTimesheetSheet, self).action_timesheet_done()
-        if self.timesheet_ids:
-            cond = '='
-            rec = self.timesheet_ids.ids[0]
-            if len(self.timesheet_ids) > 1:
-                cond = 'IN'
-                rec = tuple(self.timesheet_ids.ids)
-            self.env.cr.execute("""
-                                UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
-                        """ % (cond, rec))
-        return res
 
     @api.one
     def create_overtime_entries(self):
@@ -324,7 +325,6 @@ class HrTimesheetSheet(models.Model):
                 self.overtime_analytic_line_id.unlink()
         return self.overtime_analytic_line_id
 
-
     @api.one
     def action_timesheet_done(self):
         """
@@ -332,9 +332,43 @@ class HrTimesheetSheet(models.Model):
         :return: Super
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                                    UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+                            """ % (cond, rec))
         self.create_overtime_entries()
         self.copy_wih_query(False, None)
         return res
+
+    @api.one
+    def write(self, vals):
+        result = super(HrTimesheetSheet, self).write(vals)
+        lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(
+            lambda line: line.unit_amount > 24 or line.unit_amount < 0)
+        for l in lines:
+            l.write({'unit_amount': 0})
+        return result
+
+    @api.multi
+    def action_view_overtime_entry(self):
+        self.ensure_one()
+        action = self.env.ref('analytic.account_analytic_line_action_entries')
+        return {
+            'name': action.name,
+            'help': action.help,
+            'type': action.type,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'target': action.target,
+            'res_id': self.overtime_analytic_line_id.id or False,
+            'res_model': action.res_model,
+            'domain': [('id', '=', self.overtime_analytic_line_id.id)],
+        }
 
     def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
         query = """
@@ -460,42 +494,6 @@ class HrTimesheetSheet(models.Model):
                             )
         self.env.invalidate_all()
         return True
-
-    @api.one
-    def action_timesheet_draft(self):
-        """
-        On timesheet reset draft check analytic shouldn't be in invoiced
-        :return: Super
-        """
-        res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        if self.odo_log_id:
-            self.env['fleet.vehicle.odometer'].sudo().search([('id','=', self.odo_log_id.id)]).unlink()
-            self.odo_log_id = False
-        return res
-
-    @api.one
-    def write(self, vals):
-        result = super(HrTimesheetSheet, self).write(vals)
-        lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(lambda line: line.unit_amount > 24 or line.unit_amount < 0)
-        for l in lines:
-            l.write({'unit_amount': 0})
-        return result
-
-    @api.multi
-    def action_view_overtime_entry(self):
-        self.ensure_one()
-        action = self.env.ref('analytic.account_analytic_line_action_entries')
-        return {
-            'name': action.name,
-            'help': action.help,
-            'type': action.type,
-            'view_type': 'form',
-            'view_mode': 'form',
-            'target': action.target,
-            'res_id': self.overtime_analytic_line_id.id or False,
-            'res_model': action.res_model,
-            'domain': [('id', '=', self.overtime_analytic_line_id.id)],
-        }
 
 
 class DateRangeGenerator(models.TransientModel):
