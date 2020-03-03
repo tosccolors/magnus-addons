@@ -117,7 +117,7 @@ class AnalyticInvoice(models.Model):
         ana_ids = self.env['account.analytic.line']
         if current_ref:
             # get all invoiced user total objs using current reference
-            userInvoicedObjs = userTotObj.search(
+            UserTotalInvoicedObjs = self.env['analytic.user.total'].search(
                 [('analytic_invoice_id', '=', current_ref), ('state', 'in', ('invoice_created', 'invoiced'))])
             # don't look for analytic lines which have been already added to other analytic invoice
             tot_obj = userTotObj.search(
@@ -215,7 +215,7 @@ class AnalyticInvoice(models.Model):
             else:
                 self.task_user_ids = [(6, 0, [])]
             # add invoiced user total
-            for usrTot in userInvoicedObjs:
+            for usrTot in UserTotalInvoicedObjs:
                 userTotData.append((4, usrTot.id))
             self.user_total_ids = userTotData
 
