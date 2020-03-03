@@ -38,7 +38,7 @@ thereof""",
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['account',
+    'depends': ['analytic',
                 'hr_timesheet_task_required',
                 'fleet',
                 'data_time_tracker',
