@@ -60,13 +60,6 @@ class AnalyticLineStatus(models.TransientModel):
                 _("Entries must belong to same month!"))
         return True
 
-    # def update_line_fee_rates(self, analytic_ids):
-    #     for analytic in self.env['account.analytic.line'].browse(analytic_ids):
-    #         new_amt = analytic.get_fee_rate_amount(analytic.task_id.id, analytic.user_id.id)
-    #         if new_amt != analytic.amount:
-    #             analytic.amount = new_amt
-    #     return True
-
     @api.one
     def analytic_invoice_lines(self):
         context = self.env.context.copy()
@@ -74,16 +67,13 @@ class AnalyticLineStatus(models.TransientModel):
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
         status = str(self.name)
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
-
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
-
         no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
         if no_invoicing_property_entries and status == 'invoiceable':
             project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
                 )%project_names)
-
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             self.env.cr.execute("""
@@ -98,7 +88,6 @@ class AnalyticLineStatus(models.TransientModel):
                 # self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
-
 
     def prepare_analytic_invoice(self):
         def analytic_invoice_create(result, link_project):
