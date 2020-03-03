@@ -20,22 +20,24 @@ class AnalyticInvoice(models.Model):
     def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
-            if self.month_id:
-                domain = self.month_id.get_domain('date')
-                domain += [('account_id', 'in', account_analytic_ids)]
-            else:
-                domain = [('account_id', 'in', account_analytic_ids)]
             hrs = self.env.ref('product.product_uom_hour').id
+            domain = [('account_id', 'in', account_analytic_ids)]
+            if self.month_id:
+                domain += self.month_id.get_domain('date')
             time_domain = domain + [
                 ('product_uom_id', '=', hrs),
                 ('state', 'in', ['invoiceable', 'invoiced']),
             ]
+            cost_domain = domain + [
+                ('product_uom_id', '!=', hrs),
+                ('amount', '<', 0)
+            ]
+            revenue_domain = domain + [
+                ('product_uom_id', '!=', hrs),
+                ('amount', '>', 0)
+            ]
             self.time_line_ids = self.env['account.analytic.line'].search(time_domain).ids
-
-            cost_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '<', 0)]
             self.cost_line_ids = self.env['account.analytic.line'].search(cost_domain).ids
-
-            revenue_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '>', 0)]
             self.revenue_line_ids = self.env['account.analytic.line'].search(revenue_domain).ids
         else:
             self.time_line_ids = []
@@ -45,12 +47,12 @@ class AnalyticInvoice(models.Model):
     @api.one
     @api.depends('partner_id', 'month_id', 'gb_week', 'project_operating_unit_id', 'project_id', 'link_project')
     def _compute_objects(self):
-        taskUserObj = self.env['task.user']
+        task_user_obj = self.env['task.user']
         # global taskUserIds
-        taskUserIds, userTotData = [], []
+        task_user_ids, user_total_data = [], []
 
         def _calculate_data(result, time_domain, reconfirmed_entries=False):
-            tskUserIds = []
+            task_user_ids = []
             if len(result) > 0:
                 for item in result:
                     task_id = item.get('task_id')[0] if item.get('task_id') != False else False
@@ -102,40 +104,39 @@ class AnalyticInvoice(models.Model):
 
                     childData = []
                     for aal in self.env['account.analytic.line'].search(aal_domain):
-                        taskobj = taskUserObj.search(
+                        task_user_lines = task_user_obj.search(
                             [('task_id', '=', aal.task_id.id),
                              ('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)])
-                        if taskobj:
-                            tskUserIds += taskobj.ids
+                        if task_user_lines:
+                            task_user_ids += task_user_lines.ids
                         childData.append((4, aal.id))
                     vals['detail_ids'] = childData
-                    userTotData.append((0, 0, vals))
-            return list(set(tskUserIds))
+                    user_total_data.append((0, 0, vals))
+            return list(set(task_user_ids))
         ctx = self.env.context.copy()
         current_ref = ctx.get('active_invoice_id', False)
-        userTotObj = userInvoicedObjs = self.env['analytic.user.total']
-        ana_ids = self.env['account.analytic.line']
+        aal_ids = self.env['account.analytic.line']
         if current_ref:
             # get all invoiced user total objs using current reference
-            UserTotalInvoicedObjs = self.env['analytic.user.total'].search(
+            user_total_invoiced_lines = self.env['analytic.user.total'].search(
                 [('analytic_invoice_id', '=', current_ref), ('state', 'in', ('invoice_created', 'invoiced'))])
             # don't look for analytic lines which have been already added to other analytic invoice
-            tot_obj = userTotObj.search(
+            other_lines = self.env['analytic.user.total'].search(
                 [('analytic_invoice_id', '!=', current_ref), ('state', 'not in', ('invoice_created', 'invoiced'))])
-            for t in tot_obj:
-                ana_ids |= t.detail_ids
+            for t in other_lines:
+                aal_ids |= t.detail_ids
         partner_id = self.partner_id or False
         if self.project_id and self.link_project:
             partner_id = self.project_id.partner_id
         if partner_id and len(self.account_analytic_ids) == 0:
-            account_analytic = self.env['account.analytic.account'].search([
+            analytic_accounts = self.env['account.analytic.account'].search([
                 ('partner_id', '=', partner_id.id)])
-            if len(account_analytic) == 0:
-                account_analytic = self.env['account.analytic.account'].search([
+            if len(analytic_accounts) == 0:
+                analytic_accounts = self.env['account.analytic.account'].search([
                     ('partner_id', '=', self.project_id.partner_id.id)])
-            if len(account_analytic) > 0:
+            if len(analytic_accounts) > 0:
                 self.account_analytic_ids = \
-                    [(6, 0, account_analytic.ids)]
+                    [(6, 0, analytic_accounts.ids)]
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
             # if self.month_id:
@@ -158,8 +159,8 @@ class AnalyticInvoice(models.Model):
                 ('product_uom_id', '=', hrs),
                 ('state', 'in', ['invoiceable', 'progress'])
             ]
-            if ana_ids:
-                time_domain += [('id', 'not in', ana_ids.ids)]
+            if aal_ids:
+                time_domain += [('id', 'not in', aal_ids.ids)]
             time_domain1 = time_domain + [('month_of_last_wip', '=', False)]
             if self.month_id:
                 time_domain1 += self.month_id.get_domain('date')
@@ -194,7 +195,7 @@ class AnalyticInvoice(models.Model):
                 orderby=False,
                 lazy=False
             )
-            taskUserIds += _calculate_data(result, time_domain1)
+            task_user_ids += _calculate_data(result, time_domain1)
             # calculate reconfirmed entries from month_of_last_wip
             time_domain2 = time_domain + [('month_of_last_wip', '!=', False)]
             reconfirmed_fields_grouped = fields_grouped + ['month_of_last_wip']
@@ -208,16 +209,16 @@ class AnalyticInvoice(models.Model):
                 orderby=False,
                 lazy=False
             )
-            taskUserIds += _calculate_data(result2, time_domain2, True)
-            if taskUserIds:
-                taskUserIds = list(set(taskUserIds))
-                self.task_user_ids = [(6, 0, taskUserIds)]
+            task_user_ids += _calculate_data(result2, time_domain2, True)
+            if task_user_ids:
+                task_user_ids = list(set(task_user_ids))
+                self.task_user_ids = [(6, 0, task_user_ids)]
             else:
                 self.task_user_ids = [(6, 0, [])]
             # add invoiced user total
-            for usrTot in UserTotalInvoicedObjs:
-                userTotData.append((4, usrTot.id))
-            self.user_total_ids = userTotData
+            for total_line in user_total_invoiced_lines:
+                user_total_data.append((4, total_line.id))
+            self.user_total_ids = user_total_data
 
     def _sql_update(self, self_obj, status):
         if not self_obj.ids or not status:
