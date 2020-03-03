@@ -50,7 +50,6 @@ voor de interface naar slam.
                 'operating_unit_report_layout',
                 'magnus_timesheet',
                 'magnus_calender',
-                'connector_jira'
     ],
     'data' : [
         "report/report_layout.xml",
