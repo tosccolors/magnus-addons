@@ -202,12 +202,12 @@ class HrTimesheetSheet(models.Model):
         string="Overtime Entry"
     )
     date_from = fields.Date(
-        related=week_id.date_start,
+        related='week_id.date_start',
         string='Date From',
         store=True,
     )
     date_to = fields.Date(
-        related=week_id.date_end,
+        related='week_id.date_end',
         string='Date To',
         store=True,
     )
