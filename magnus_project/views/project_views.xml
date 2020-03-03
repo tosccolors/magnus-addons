@@ -3,7 +3,6 @@
   <data>
 
         <!-- Task -->
-
         <record id="view_task_form2_inherited_magnus" model="ir.ui.view">
             <field name="name">project.task.form</field>
             <field name="model">project.task</field>
@@ -67,7 +66,6 @@
                 </xpath>
             </field>
         </record>
-
         <record id="view_project_project_filter_magnus" model="ir.ui.view">
             <field name="name">project.project.search</field>
             <field name="model">project.project</field>
@@ -78,7 +76,6 @@
                 </xpath>
             </field>
         </record>
-
         <record id="view_project_magnus" model="ir.ui.view">
             <field name="name">project.project.tree</field>
             <field name="model">project.project</field>
@@ -94,7 +91,6 @@
                 </field>
             </field>
         </record>
-
         <record id="view_project_kanban_magnus" model="ir.ui.view">
             <field name="name">project.project.Kanban</field>
             <field name="model">project.project</field>
@@ -111,7 +107,7 @@
             </field>
         </record>
 
-
+        <!-- project.invoicing.properties -->
         <record model="ir.ui.view" id="project_invoicing_period_tree_view">
             <field name="name">Invoicing Properties</field>
             <field name="model">project.invoicing.properties</field>
