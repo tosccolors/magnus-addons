@@ -144,8 +144,6 @@ class HrTimesheetSheet(models.Model):
         self.overtime_hours = working_hrs_incl_ott - 40
         self.overtime_hours_delta = working_hrs_incl_ott - ott - 40
 
-
-
     week_id = fields.Many2one(
         'date.range',
         domain=_get_week_domain,
@@ -204,12 +202,12 @@ class HrTimesheetSheet(models.Model):
         string="Overtime Entry"
     )
     date_from = fields.Date(
-        related=week_id.date_start,
+        related='week_id.date_start',
         string='Date From',
         store=True,
     )
     date_to = fields.Date(
-        related=week_id.date_end,
+        related='week_id.date_end',
         string='Date To',
         store=True,
     )
