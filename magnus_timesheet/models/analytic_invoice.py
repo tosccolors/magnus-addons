@@ -915,14 +915,14 @@ class AnalyticInvoice(models.Model):
             rec = tuple(analytic_obj.ids)
 
         self.env.cr.execute("""
-                                       SELECT pp.id AS project_id, prop.group_by_month, prop.group_by_fee_rate
-                                       FROM project_invoicing_properties prop
-                                       JOIN project_project pp ON pp.invoice_properties = prop.id
-                                       JOIN 
-                                           (SELECT project_id FROM account_analytic_line aal WHERE aal.id %s %s GROUP BY project_id) AS temp 
-                                           ON temp.project_id = pp.id
-                                       WHERE prop.specs_invoice_report = TRUE AND prop.specs_on_task_level = TRUE
-                                       """ % (cond, rec))
+                           SELECT pp.id AS project_id, prop.group_by_month, prop.group_by_fee_rate
+                           FROM project_invoicing_properties prop
+                           JOIN project_project pp ON pp.invoice_properties = prop.id
+                           JOIN 
+                               (SELECT project_id FROM account_analytic_line aal WHERE aal.id %s %s GROUP BY project_id) AS temp 
+                               ON temp.project_id = pp.id
+                           WHERE prop.specs_invoice_report = TRUE AND prop.specs_on_task_level = TRUE
+                           """ % (cond, rec))
 
         grp_data = self.env.cr.fetchall()
         for data in grp_data:
@@ -992,17 +992,13 @@ class AnalyticUserTotal(models.Model):
     _description = "Analytic User Total"
 
     @api.one
-    @api.depends('unit_amount', 'user_id', 'task_id','analytic_invoice_id.task_user_ids')
+    @api.depends('unit_amount', 'user_id', 'task_id', 'analytic_invoice_id.task_user_ids')
     def _compute_fee_rate(self):
         """
             First, look get fee rate from task_user_ids from analytic invoice.
             Else, get fee rate from method get_fee_rate()
         :return:
         """
-        # task_user = self.analytic_invoice_id.task_user_ids.filtered(
-        #     lambda line: line.user_id == self.user_id
-        #             and line.task_id == self.task_id
-        # )
         task_user = self.env['task.user']
         for aaline in self.detail_ids:
             task_user |= task_user.search(
@@ -1019,18 +1015,9 @@ class AnalyticUserTotal(models.Model):
             self.amount = - self.unit_amount * fr
 
     @api.one
-    def _compute_sheet(self):
-        """Override because this object is not related to sheets
-        """
-
-    @api.one
     def _compute_analytic_line(self):
         for aut in self:
             aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
-
-    @api.one
-    def _compute_analytic_line_fee_rate(self):
-        """override no super"""
 
     @api.model
     def _default_user(self):
@@ -1066,8 +1053,12 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
-    name = fields.Char('Description', required=True)
-    state = fields.Selection([
+    name = fields.Char(
+        'Description',
+        required=True
+    )
+    state = fields.Selection(
+        [
         ('draft', 'Draft'),
         ('open', 'Confirmed'),
         ('delayed', 'Delayed'),
@@ -1080,7 +1071,7 @@ class AnalyticUserTotal(models.Model):
         ('re_confirmed', 'Re-Confirmed'),
         ('invoiced-by-fixed', 'Invoiced by Fixed'),
         ('expense-invoiced', 'Expense Invoiced')
-    ],
+        ],
         string='Status',
         readonly=True,
         copy=False,
@@ -1088,16 +1079,58 @@ class AnalyticUserTotal(models.Model):
         track_visibility='onchange',
         default='draft'
     )
-    account_id = fields.Many2one('account.analytic.account', 'Analytic Account', required=True, ondelete='restrict', index=True)
-    partner_id = fields.Many2one('res.partner', related='account_id.partner_id', string='Partner', store=True, readonly=True)
-    user_id = fields.Many2one('res.users', string='User', default=_default_user)
-    company_id = fields.Many2one(related='account_id.company_id', string='Company', store=True, readonly=True)
-    department_id = fields.Many2one('hr.department', "Department", related='user_id.employee_ids.department_id', store=True, readonly=True)
-    product_id = fields.Many2one('product.product', string='Product')
-    task_id = fields.Many2one('project.task', 'Task')
-    project_id = fields.Many2one('project.project', 'Project', domain=[('allow_timesheets', '=', True)])
-    product_uom_id = fields.Many2one('product.uom', string='Unit of Measure')
-    unit_amount = fields.Float('Quantity', default=0.0)
+    account_id = fields.Many2one(
+        'account.analytic.account',
+        'Analytic Account',
+        required=True,
+        ondelete='restrict',
+    )
+    partner_id = fields.Many2one(
+        'res.partner',
+        related='account_id.partner_id',
+        string='Partner',
+        store=True,
+        readonly=True
+    )
+    user_id = fields.Many2one(
+        'res.users',
+        string='User',
+        default=_default_user
+    )
+    company_id = fields.Many2one(
+        related='account_id.company_id',
+        string='Company',
+        store=True,
+        readonly=True
+    )
+    department_id = fields.Many2one(
+        'hr.department',
+        "Department",
+        related='user_id.employee_ids.department_id',
+        store=True,
+        readonly=True
+    )
+    product_id = fields.Many2one(
+        'product.product',
+        string='Product'
+    )
+    task_id = fields.Many2one(
+        'project.task',
+        'Task'
+    )
+    project_id = fields.Many2one(
+        'project.project',
+        'Project',
+        domain=[('allow_timesheets', '=', True)]
+    )
+    product_uom_id = fields.Many2one(
+        'product.uom',
+        string='Unit of Measure'
+    )
+    unit_amount = fields.Float(
+        'Quantity',
+        default=0.0
+    )
     operating_unit_id = fields.Many2one(
         'operating.unit',
         string='Operating Unit',
@@ -1108,14 +1141,10 @@ class AnalyticUserTotal(models.Model):
         string='Project Operating Unit',
         store=True
     )
-    date = fields.Date('Date', required=True, index=True, default=fields.Date.context_today)
+    date = fields.Date(
+        'Date',
+        required=True,
+        index=True,
+        default=fields.Date.context_today
+    )
 
-    @api.model
-    def create(self, vals):
-        """no super"""
-        return models.Model.create(self, vals)
-
-    @api.multi
-    def write(self, vals):
-        """no super"""
-        return models.Model.write(self, vals)
