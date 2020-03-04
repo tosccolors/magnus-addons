@@ -753,8 +753,9 @@ class AnalyticUserTotal(models.Model):
         :return:
         """
         task_user = self.env['task.user']
-        for aaline in self.detail_ids:
-            task_user |= task_user.search(
+        ## get task-user out of first aaline
+        aaline = self.detail_ids[0]
+        task_user |= task_user.search(
                 [('id', 'in', self.analytic_invoice_id.task_user_ids.ids),('task_id', '=', self.task_id.id),
                  ('from_date', '<=', aaline.date), ('user_id', '=', self.user_id.id)])
         if task_user:
@@ -766,6 +767,12 @@ class AnalyticUserTotal(models.Model):
             employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id),('end_date_of_employment','=', False)])
             self.fee_rate = fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
             self.amount = - self.unit_amount * fr
+        ## make sure that aal.fee_rate and amount is corresponding to user_total_line
+        for aaline in self.detail_ids:
+            vals = {}
+            aaline.line_fee_rate = fr
+            aaline.amount = aaline.unit_amount * - fr
+
 
     @api.one
     def _compute_analytic_line(self):
