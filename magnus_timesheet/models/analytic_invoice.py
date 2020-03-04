@@ -116,6 +116,7 @@ class AnalyticInvoice(models.Model):
         ctx = self.env.context.copy()
         current_ref = ctx.get('active_invoice_id', False)
         aal_ids = self.env['account.analytic.line']
+        user_total_invoiced_lines = self.env['analytic.user.total']
         if current_ref:
             # get all invoiced user total objs using current reference
             user_total_invoiced_lines = self.env['analytic.user.total'].search(
@@ -741,7 +742,6 @@ class AnalyticInvoice(models.Model):
 
 class AnalyticUserTotal(models.Model):
     _name = "analytic.user.total"
-    # _inherit = 'account.analytic.line'
     _description = "Analytic User Total"
 
     @api.one
