@@ -840,10 +840,10 @@ class AnalyticUserTotal(models.Model):
     )
     partner_id = fields.Many2one(
         'res.partner',
-        related='account_id.partner_id',
+#        related='account_id.partner_id',
         string='Partner',
-        store=True,
-        readonly=True
+#        store=True,
+#        readonly=True
     )
     user_id = fields.Many2one(
         'res.users',

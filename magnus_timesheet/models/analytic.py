@@ -289,7 +289,6 @@ class AccountAnalyticLine(models.Model):
     user_total_id = fields.Many2one(
         'analytic.user.total',
         string='Summary Reference',
-        index=True
     )
     date_of_last_wip = fields.Date(
         "Date Of Last WIP"
@@ -366,6 +365,13 @@ class AccountAnalyticLine(models.Model):
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
 
+    @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
+    def on_change_unit_amount(self):
+        if self.product_uom_id == self.env.ref("product.product_uom_hour").id:
+            return {}
+        return super(AccountAnalyticLine, self).on_change_unit_amount()
+
+
 
     @api.multi
     def write(self, vals):
@@ -403,6 +409,9 @@ class AccountAnalyticLine(models.Model):
             return super(AccountAnalyticLine, self.with_context(context)).write(
                 vals)
         return super(AccountAnalyticLine, self).write(vals)
+
+    def _get_timesheet_cost(self, values):
+        return {}
 
     def _check_state(self):
         """
