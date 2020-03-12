@@ -14,16 +14,16 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('date',
                  'user_id',
-                 'project_id',
+                 'task_id',
+                 'product_uom_id',
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
                  'sheet_id_computed.employee_id')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         """
-        for ts_line in self.filtered('project_id'):
-            if not ts_line.ts_line :
-                continue
+        uom_hrs = self.env.ref("product.product_uom_hour").id
+        for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
                 [('date_to', '>=', ts_line.date),
                  ('date_from', '<=', ts_line.date),
@@ -411,6 +411,23 @@ class AccountAnalyticLine(models.Model):
         return super(AccountAnalyticLine, self).write(vals)
 
     def _get_timesheet_cost(self, values):
+        ## turn off updating amount and account
+        values = values if values is not None else {}
+        if values.get('project_id') or self.project_id:
+            if values.get('amount'):
+                return {}
+            # unit_amount = values.get('unit_amount', 0.0) or self.unit_amount
+            user_id = values.get('user_id') or self.user_id.id or self._default_user()
+            user = self.env['res.users'].browse([user_id])
+            emp = self.env['hr.employee'].search([('user_id', '=', user_id)], limit=1)
+            # cost = emp and emp.timesheet_cost or 0.0
+            uom = (emp or user).company_id.project_time_mode_id
+            # Nominal employee cost = 1 * company project UoM (project_time_mode_id)
+            return {
+                # 'amount': -unit_amount * cost,
+                'product_uom_id': uom.id,
+                # 'account_id': values.get('account_id') or self.account_id.id or emp.account_id.id,
+            }
         return {}
 
     def _check_state(self):
