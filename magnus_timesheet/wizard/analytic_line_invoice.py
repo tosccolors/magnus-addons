@@ -92,36 +92,28 @@ class AnalyticLineStatus(models.TransientModel):
     def prepare_analytic_invoice(self):
         def analytic_invoice_create(result, link_project):
             for res in result:
-                project_id = False
                 analytic_account_ids = res[0]
                 partner_id = res[1]
                 partner = self.env['res.partner'].browse(partner_id)
                 month_id = res[2]
                 project_operating_unit_id = res[3]
-
+                search_domain = []
                 if link_project:
                     project_id = res[4]
                     partner_id = self.env['project.project'].browse(project_id).invoice_address.id
-
-                search_domain = [
+                    search_domain += [('project_id', '=', project_id)]
+                search_domain += [
                     ('partner_id', '=', partner_id),
                     ('account_analytic_ids', 'in', analytic_account_ids),
                     ('project_operating_unit_id', '=', project_operating_unit_id),
                     ('state', 'not in', ('invoiced', 're_confirmed')),
-                    ('month_id', '=', month_id)]
-                if link_project:
-                    search_domain += [('project_id', '=', project_id)]
-                    search_domain += [('link_project', '=', True)]
-                else:
-                    search_domain += [('link_project', '=', False)]
-
+                    ('month_id', '=', month_id),
+                    ('link_project', '=', link_project)]
                 analytic_invobj = analytic_invoice.search(search_domain, limit=1)
                 if analytic_invobj:
                     ctx = self.env.context.copy()
                     ctx.update({'active_invoice_id': analytic_invobj.id})
-                    analytic_invobj.with_context(ctx).partner_id = partner_id
-                    # analytic_invobj.with_context(ctx).month_id = month_id
-                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
+                    analytic_invobj.with_context(ctx)._compute_objects()
                 else:
                     data = {
                         'partner_id': partner_id,
@@ -130,27 +122,26 @@ class AnalyticLineStatus(models.TransientModel):
                         'month_id': month_id,
                         'project_operating_unit_id': project_operating_unit_id,
                         'operating_unit_id': project_operating_unit_id,
-                        'link_project': False,
+                        'link_project': link_project,
                         'payment_term_id': partner.property_payment_term_id.id or False,
                         'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
                         'fiscal_position_id': partner.property_account_position_id.id or False,
                         'user_id': self.env.user.id,
                         'company_id': self.env.user.company_id.id,
                         'date_invoice': datetime.now().date(),
+                        'project_id': project_id if link_project else False
                     }
-                    if link_project:
-                        data.update({'project_id': project_id, 'link_project': True})
                     analytic_invoice.create(data)
-
-
         context = self.env.context.copy()
+        # All selected time lines
         entries_ids = context.get('active_ids', [])
         if len(self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable')) > 0:
             raise UserError(_('Please select only Analytic Lines with state "To Be Invoiced".'))
 
         analytic_invoice = self.env['analytic.invoice']
         cond, rec = ("in", tuple(entries_ids)) if len(entries_ids) > 1 else ("=", entries_ids[0])
-
+        # select and process time lines without grouping per client but invoice per project and as last step subtract
+        # from all selected time lines.
         sep_entries = self.env['account.analytic.line'].search([
             ('id', cond, rec),
             '|',
@@ -158,53 +149,49 @@ class AnalyticLineStatus(models.TransientModel):
             ('task_id.project_id.invoice_properties.group_invoice', '=', False)
         ])
         if sep_entries:
-            rec = list(set(entries_ids)-set(sep_entries.ids))
-            cond, rec = ("IN", tuple(rec)) if len(rec) > 1 else ("=", rec and rec[0] or [])
-        if rec:
-            self.env.cr.execute("""
-                SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id
-                FROM account_analytic_line
-                WHERE id %s %s AND date_of_last_wip IS NULL 
-                GROUP BY partner_id, month_id, project_operating_unit_id"""
-                % (cond, rec))
-
-            result = self.env.cr.fetchall()
-            analytic_invoice_create(result, False)
-
-            #reconfirmed seperate entries
-            self.env.cr.execute("""
-                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
-                            FROM account_analytic_line
-                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
-                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
-                                % (cond, rec))
-
-            reconfirm_res = self.env.cr.fetchall()
-            analytic_invoice_create(reconfirm_res, False)
-
-        if sep_entries:
+            # regular separate entries
             cond1, rec1 = ("IN", tuple(sep_entries.ids)) if len(sep_entries) > 1 else ("=", sep_entries.id)
             self.env.cr.execute("""
-                SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id, project_id
-                FROM account_analytic_line
-                WHERE id %s %s AND date_of_last_wip IS NULL
-                GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
-                        % (cond1, rec1))
+                        SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id, project_id
+                        FROM account_analytic_line
+                        WHERE id %s %s AND date_of_last_wip IS NULL
+                        GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
+                                % (cond1, rec1))
 
             result1 = self.env.cr.fetchall()
             analytic_invoice_create(result1, True)
-
-            # reconfirmed grouping entries
+            # reconfirmed separate entries
             self.env.cr.execute("""
-                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
-                            FROM account_analytic_line
-                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
-                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
+                        SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
+                        FROM account_analytic_line
+                        WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                        GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
                                 % (cond1, rec1))
 
             reconfirm_res1 = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res1, True)
+            rec = list(set(entries_ids) - set(sep_entries.ids))
+        if rec:
+            # regular "grouped" entries
+            cond, rec = ("IN", tuple(rec)) if len(rec) > 1 else ("=", rec and rec[0] or [])
+            self.env.cr.execute("""
+                        SELECT array_agg(account_id), partner_id, month_id, project_operating_unit_id
+                        FROM account_analytic_line
+                        WHERE id %s %s AND date_of_last_wip IS NULL 
+                        GROUP BY partner_id, month_id, project_operating_unit_id"""
+                % (cond, rec))
 
+            result = self.env.cr.fetchall()
+            analytic_invoice_create(result, False)
+            # reconfirmed group_invoice entries
+            self.env.cr.execute("""
+                        SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
+                        FROM account_analytic_line
+                        WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                        GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
+                                % (cond, rec))
+            reconfirm_res = self.env.cr.fetchall()
+            analytic_invoice_create(reconfirm_res, False)
 
     @api.onchange('wip_percentage')
     def onchange_wip_percentage(self):

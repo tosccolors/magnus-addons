@@ -411,7 +411,7 @@ class AccountAnalyticLine(models.Model):
         return super(AccountAnalyticLine, self).write(vals)
 
     def _get_timesheet_cost(self, values):
-        ## turn off updating amount and account
+        ## override without super(): turn off updating amount and account
         values = values if values is not None else {}
         if values.get('project_id') or self.project_id:
             if values.get('amount'):
