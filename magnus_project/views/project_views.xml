@@ -60,8 +60,9 @@
                 <xpath expr="//notebook/page[@name='settings']"
                        position="inside">
                     <group>
-                        <field name="correction_charge" />
-                        <field name="chargeable" />
+                        <field name="correction_charge"/>
+                        <field name="chargeable"/>
+                        <field name="wbso"/>
                         <field name="invoice_properties" options="{'no_create_edit': True}"/>
                     </group>
                 </xpath>
