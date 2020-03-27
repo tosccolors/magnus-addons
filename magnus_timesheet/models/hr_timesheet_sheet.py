@@ -232,7 +232,8 @@ class HrTimesheetSheet(models.Model):
                         FROM hr_timesheet_sheet_sheet
                         WHERE week_id=%s
                         AND user_id=%s''',
-                                    (sheet.week_id.id, new_user_id))
+                        (sheet.week_id.id, new_user_id)
+                )
                 if self.env.cr.rowcount > 1:
                     raise ValidationError(_(
                         'You cannot have 2 timesheets with the same week_id!\nPlease use the menu \'My Current Timesheet\' to avoid this problem.'))

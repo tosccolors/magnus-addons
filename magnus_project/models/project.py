@@ -20,6 +20,7 @@ class Project(models.Model):
         related='analytic_account_id',
         string='Contract/Analytic',
         )
+    wbso = fields.Boolean('WBSO')
 
     @api.multi
     def name_get(self):

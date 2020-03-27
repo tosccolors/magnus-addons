@@ -773,7 +773,6 @@ class AnalyticUserTotal(models.Model):
             aaline.line_fee_rate = fr
             aaline.amount = aaline.unit_amount * - fr
 
-
     @api.one
     def _compute_analytic_line(self):
         for aut in self:
