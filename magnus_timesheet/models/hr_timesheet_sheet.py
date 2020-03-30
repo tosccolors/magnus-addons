@@ -455,7 +455,6 @@ class HrTimesheetSheet(models.Model):
                 ts_line,
                 so_line,
                 user_total_id,
-                invoiceable,
                 month_id,
                 week_id,
                 account_department_id,               
@@ -497,8 +496,7 @@ class HrTimesheetSheet(models.Model):
                 ("NULL as sheet_id, " if not copy_last_week else "%(sheet_aal)s as sheet_id, ") + \
                 ("NULL as ts_line, " if not copy_last_week else "aal.ts_line as ts_line, ") + \
              """aal.so_line as so_line,
-                aal.user_total_id as user_total_id,
-                aal.invoiceable as invoiceable, """ + \
+                aal.user_total_id as user_total_id, """ + \
                 ("aal.month_id as month_id, " if not copy_last_week else "dr.id as month_id, ") + \
                 ("aal.week_id as week_id, " if not copy_last_week else "%(week_id_aal)s as week_id, ") + \
              """aal.account_department_id as account_department_id,
