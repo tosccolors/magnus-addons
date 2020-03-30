@@ -86,16 +86,7 @@ class AccountAnalyticLine(models.Model):
                         line.wip_month_id = line.month_id = var_month_id
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
-                        unit_amount = line.unit_amount
-                        amount = line.get_fee_rate_amount(task.id, user.id, unit_amount)
-                        line.line_fee_rate = amount / unit_amount if unit_amount > 0 else False
-                    # product = self.get_task_user_product(task.id, user.id) or False
-                    # if not product:
-                    #     raise ValidationError(_(
-                    #         'Please fill in Fee Rate Product in TaskUser or employee %s.\n '
-                    #     ) % user.name)
-                    # if product:
-                    #     line.product_id = product
+                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
                     line.actual_qty = line.unit_amount
                     line.planned_qty = 0.0
             if line.planned:
