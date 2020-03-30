@@ -87,15 +87,15 @@ class AccountAnalyticLine(models.Model):
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
                         unit_amount = line.unit_amount
-                        line.amount = amount = line.get_fee_rate_amount(task.id, user.id, unit_amount)
+                        amount = line.get_fee_rate_amount(task.id, user.id, unit_amount)
                         line.line_fee_rate = amount / unit_amount if unit_amount > 0 else False
-                    product = self.get_task_user_product(task.id, user.id) or False
-                    if not product:
-                        raise ValidationError(_(
-                            'Please fill in Fee Rate Product in TaskUser or employee %s.\n '
-                        ) % user.name)
-                    if product:
-                        line.product_id = product
+                    # product = self.get_task_user_product(task.id, user.id) or False
+                    # if not product:
+                    #     raise ValidationError(_(
+                    #         'Please fill in Fee Rate Product in TaskUser or employee %s.\n '
+                    #     ) % user.name)
+                    # if product:
+                    #     line.product_id = product
                     line.actual_qty = line.unit_amount
                     line.planned_qty = 0.0
             if line.planned:
@@ -392,6 +392,26 @@ class AccountAnalyticLine(models.Model):
             self.env.invalidate_all()
             vals.pop('state')
             return True
+
+        if len(self) == 1:
+            task_id = vals.get('task_id', self.task_id and self.task_id.id)
+            user_id = vals.get('user_id', self.user_id and self.user_id.id)
+            # for planning skip fee rate check
+            planned = vals.get('planned', self.planned)
+            # some cases product id is missing
+            if not vals.get('product_id', self.product_id) and user_id:
+                if user_id and not vals.get('product_id', self.product_id):
+                    product_id = self.get_task_user_product(task_id, user_id) or False
+                if not product_id and not planned:
+                    user = self.env.user.browse(user_id)
+                    raise ValidationError(_(
+                        'Please fill in Fee Rate Product in employee %s.\n '
+                    ) % user.name)
+                vals['product_id'] = product_id
+            ts_line = vals.get('ts_line', self.ts_line)
+            if ts_line:
+                unit_amount = vals.get('unit_amount', self.unit_amount)
+                vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
 
         if self.filtered('ts_line') and not (
                 'unit_amount' in vals or
