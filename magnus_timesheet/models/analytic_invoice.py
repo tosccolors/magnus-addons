@@ -104,9 +104,11 @@ class AnalyticInvoice(models.Model):
 
                     childData = []
                     for aal in self.env['account.analytic.line'].search(aal_domain):
-                        task_user_lines = task_user_obj.search(
-                            [('task_id', '=', aal.task_id.id),
-                             ('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)])
+                        task_user_domain = [('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)]
+                        task_user_lines = task_user_obj.search(task_user_domain+[('task_id', '=', aal.task_id.id)])
+                        if not task_user_lines:
+                            task_user_lines = task_user_obj.search(task_user_domain+
+                                                                   [('task_id', '=', aal.task_id.project_id.task_ids.filtered('standard').id)])
                         if task_user_lines:
                             task_user_ids += task_user_lines.ids
                         childData.append((4, aal.id))
@@ -759,17 +761,15 @@ class AnalyticUserTotal(models.Model):
                 [('id', 'in', self.analytic_invoice_id.task_user_ids.ids),('task_id', '=', self.task_id.id),
                  ('from_date', '<=', aaline.date), ('user_id', '=', self.user_id.id)])
         if task_user:
-            task_user = task_user.search([('id', 'in', task_user.ids)], limit = 1, order = 'from_date Desc')
+            task_user = task_user.search([('id', 'in', task_user.ids)], limit=1, order='from_date Desc')
             self.fee_rate = fr = task_user.fee_rate
             self.amount = - self.unit_amount * fr
         else:
-            #if no task user found, get price from consultant product
-            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id),('end_date_of_employment','=', False)])
-            self.fee_rate = fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
+            self.fee_rate = fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)
             self.amount = - self.unit_amount * fr
+
         ## make sure that aal.fee_rate and amount is corresponding to user_total_line
         for aaline in self.detail_ids:
-            vals = {}
             aaline.line_fee_rate = fr
             aaline.amount = aaline.unit_amount * - fr
 
