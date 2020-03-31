@@ -269,28 +269,7 @@ class HrTimesheetSheet(models.Model):
                     ) % (datetime.strftime(date_start, "%d-%b-%Y"),
                          datetime.strftime(date_end, "%d-%b-%Y")))
                 ## todo What if during last week department_id and/or operating_unit_id and/or product_id has changed?
-                # elif self.employee_id.department_id != last_week_timesheet.employee_id.department_id \
-                #     or self.employee_id.product_id != last_week_timesheet.employee_id.product_id \
-                #     or self.employee_id.operating_unit_id != last_week_timesheet.employee_id.operating_unit_id:
-                #     current_week_lines = [(0, 0, {
-                #         'date': l.date,
-                #         'name': l.name,
-                #         'project_id': l.project_id.id,
-                #         'task_id': l.task_id.id,
-                #         'user_id': l.user_id.id,
-                #         'unit_amount': l.unit_amount
-                #     }) for l in self.timesheet_ids] if self.timesheet_ids else []
-                #     if last_week_timesheet:
-                #         self.timesheet_ids.unlink()
-                #         last_week_lines = [(0, 0, {
-                #             'date': datetime.strptime(l.date, "%Y-%m-%d") +
-                #                     timedelta(days=7),
-                #             'name': '/',
-                #             'project_id': l.project_id.id,
-                #             'task_id': l.task_id.id,
-                #             'user_id': l.user_id.id
-                #         }) for l in last_week_timesheet.timesheet_ids]
-                #         self.timesheet_ids = current_week_lines + last_week_lines
+                ## todo nothing because when unit_amount is set in the timesheet, _compute_analytic_line and write() are called
 
                 else:
                     self.copy_wih_query(True, last_week_timesheet.id)
@@ -453,8 +432,6 @@ class HrTimesheetSheet(models.Model):
                 task_id,
                 sheet_id,
                 ts_line,
-                so_line,
-                user_total_id,
                 month_id,
                 week_id,
                 account_department_id,               
@@ -495,8 +472,6 @@ class HrTimesheetSheet(models.Model):
                 aal.task_id as task_id, """ + \
                 ("NULL as sheet_id, " if not copy_last_week else "%(sheet_aal)s as sheet_id, ") + \
                 ("NULL as ts_line, " if not copy_last_week else "aal.ts_line as ts_line, ") + \
-             """aal.so_line as so_line,
-                aal.user_total_id as user_total_id, """ + \
                 ("aal.month_id as month_id, " if not copy_last_week else "dr.id as month_id, ") + \
                 ("aal.week_id as week_id, " if not copy_last_week else "%(week_id_aal)s as week_id, ") + \
              """aal.account_department_id as account_department_id,
@@ -515,19 +490,23 @@ class HrTimesheetSheet(models.Model):
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage, """ + \
                 ("%(uom)s as product_uom_id " if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
-          """FROM 
-             account_analytic_line aal
-                 LEFT JOIN project_project pp 
-                 ON pp.id = aal.project_id
-                 LEFT JOIN account_analytic_account aaa
-                 ON aaa.id = aal.account_id
-                 LEFT JOIN project_invoicing_properties ip
-                 ON ip.id = pp.invoice_properties
-                 RIGHT JOIN hr_timesheet_sheet_sheet hss
-                 ON hss.id = aal.sheet_id
-                 LEFT JOIN date_range dr 
-                 on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
-             WHERE hss.id = %(sheet_select)s
+            """
+        FROM account_analytic_line aal
+             LEFT JOIN project_project pp 
+             ON pp.id = aal.project_id
+             LEFT JOIN account_analytic_account aaa
+             ON aaa.id = aal.account_id
+             LEFT JOIN project_invoicing_properties ip
+             ON ip.id = pp.invoice_properties
+             RIGHT JOIN hr_timesheet_sheet_sheet hss
+             ON hss.id = aal.sheet_id
+             LEFT JOIN date_range dr 
+             ON (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
+             LEFT JOIN hr_employee he 
+             ON (hss.employee_id = he.id)
+             LEFT JOIN task_user tu 
+             ON (tu.task_id = aal.task_id and tu.user_id = aal.user_id and aal.date >= tu.from_date)
+        WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL             
              AND aal.task_id NOT IN 
              (
