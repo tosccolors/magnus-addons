@@ -756,7 +756,7 @@ class AnalyticUserTotal(models.Model):
         """
         task_user = self.env['task.user']
         ## get task-user out of first aaline
-        aaline = self.detail_ids[0]
+        aaline = self.detail_ids and self.detail_ids[0]
         task_user |= task_user.search(
                 [('id', 'in', self.analytic_invoice_id.task_user_ids.ids),('task_id', '=', self.task_id.id),
                  ('from_date', '<=', aaline.date), ('user_id', '=', self.user_id.id)])
