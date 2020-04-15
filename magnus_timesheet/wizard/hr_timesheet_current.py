@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-
+from datetime import datetime
 
 class HrTimesheetCurrentOpen(models.TransientModel):
     _inherit = 'hr.timesheet.current.open'
@@ -18,6 +18,36 @@ class HrTimesheetCurrentOpen(models.TransientModel):
             if len(sheets) == 1:
                 result['res_id'] = sheets.ids[0]
         return result
+
+    @api.model
+    def open_timesheet_planning(self):
+        view_type = 'form,tree'
+
+        date = datetime.now().date()
+        period = self.env['date.range'].search(
+            [('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False),
+             ('type_id.fiscal_month', '=', False), ('date_start', '<=', date), ('date_end', '>=', date)], limit=1)
+
+        planning = self.env['magnus.planning'].search([('user_id', '=', self._uid), ('planning_quarter', '=', period.id)])
+        if len(planning) > 1:
+            view_type = 'tree,form'
+            domain = "[('id', 'in', " + str(planning.ids) + "),('user_id', '=', uid)]"
+        else:
+            domain = "[('user_id', '=', uid)]"
+        value = {
+            'domain': domain,
+            'name': _('Open Planning'),
+            'view_type': 'form',
+            'view_mode': view_type,
+            'res_model': 'magnus.planning',
+            'view_id': False,
+            'type': 'ir.actions.act_window',
+            'context':{'readonly_by_pass': True}
+        }
+        if len(planning) == 1:
+            value['res_id'] = planning.ids[0]
+            value['context'] = {'readonly_by_pass': True}
+        return value
 
 class MyWizard(models.Model):
     _name = 'my.wizard'

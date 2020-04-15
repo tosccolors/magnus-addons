@@ -185,6 +185,17 @@ class MagnusPlanning(models.Model):
         emp_list = self.env['hr.employee'].search(domain).ids
         self.emp_domain_compute = ",".join(map(str, emp_list))
 
+    @api.onchange('employee_id')
+    def onchange_employee_id(self):
+        vals, data = {}, {}
+        date = datetime.now().date()
+        period = self.env['date.range'].search(
+            [('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False), ('type_id.fiscal_month', '=', False), ('date_start', '<=', date), ('date_end', '>=', date)])
+        vals['planning_quarter'] = period.id
+        data = {'planning_quarter': [('id', 'in', period.ids)]}
+        self._compute_emp_domain()
+        return {'value': vals, 'domain': data}
+
     employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True)
     user_id = fields.Many2one('res.users', related='employee_id.user_id', string='User', store=True, readonly=True)
     date_from = fields.Date(string='Date From', default=_default_date_from, required=True, index=True)
@@ -192,10 +203,24 @@ class MagnusPlanning(models.Model):
     planning_ids = fields.Many2many('account.analytic.line', 'magnus_planning_analytic_line_rel', 'planning_id',
                                     'analytic_line_id', string='Planning lines', copy=False)
     company_id = fields.Many2one('res.company', string='Company')
+    planning_quarter = fields.Many2one('date.range', string='Select Quarter', required=True, index=True)
     week_from = fields.Many2one('date.range', string='week from', required=True, index=True)
     week_to = fields.Many2one('date.range', string='week to', required=True, index=True)
     planning_ids_compute = fields.Boolean(compute='_compute_planning_lines')
     emp_domain_compute = fields.Char(compute='_compute_emp_domain')
+
+    @api.onchange('planning_quarter')
+    def onchange_planning_quarter(self):
+        if self._origin.planning_quarter and self._origin.planning_quarter != self.planning_quarter:
+            self.planning_quarter = self._origin.planning_quarter.id
+        self.employee_id = self._default_employee()
+        start_date = self.planning_quarter.date_start
+        end_date = self.planning_quarter.date_end
+        date_range_type_cw = self.env.ref('magnus_date_range_week.date_range_calender_week')
+        date_range = self.env['date.range']
+        domain = [('type_id', '=', date_range_type_cw.id)]
+        self.week_from = date_range.search(domain + [('date_start', '<=', start_date), ('date_end', '>=', start_date)], limit=1).id
+        self.week_to = date_range.search(domain + [('date_start', '<=', end_date), ('date_end', '>=', end_date)], limit=1).id
 
     @api.onchange('week_from', 'week_to')
     def onchange_week(self):
