@@ -30,7 +30,6 @@ class HrTimesheetCurrentOpen(models.TransientModel):
 
         planning = self.env['magnus.planning'].search([('user_id', '=', self._uid), ('planning_quarter', '=', period.id)])
         if len(planning) > 1:
-            view_type = 'tree,form'
             domain = "[('id', 'in', " + str(planning.ids) + "),('user_id', '=', uid)]"
         else:
             domain = "[('user_id', '=', uid)]"
@@ -46,7 +45,6 @@ class HrTimesheetCurrentOpen(models.TransientModel):
         }
         if len(planning) == 1:
             value['res_id'] = planning.ids[0]
-            value['context'] = {'readonly_by_pass': True}
         return value
 
 class MyWizard(models.Model):

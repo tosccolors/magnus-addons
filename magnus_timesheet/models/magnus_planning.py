@@ -18,14 +18,14 @@ class MagnusPlanning(models.Model):
     _rec_name = "user_id"
 
     @api.one
-    @api.constrains('week_from', 'week_to')
+    @api.constrains('week_from', 'week_to', 'planning_quarter')
     def _check_weeks(self):
         start_date = self.week_from.date_start
         end_date = self.week_to.date_start
         if (start_date and end_date) and (start_date > end_date):
             raise ValidationError(_("End week should be greater than start week."))
-        if self.week_from:
-            planning = self.search_count([('employee_id', '=', self.employee_id.id),('week_from', '<=', self.week_from.id),('week_to', '>=', self.week_from.id)])
+        if self.planning_quarter and self.week_from:
+            planning = self.search_count([('planning_quarter', '=', self.planning_quarter.id),('employee_id', '=', self.employee_id.id),('week_from', '<=', self.week_from.id),('week_to', '>=', self.week_from.id)])
             if planning > 1:
                 raise ValidationError(_("Week range already exists."))
 
@@ -188,11 +188,16 @@ class MagnusPlanning(models.Model):
     @api.onchange('employee_id')
     def onchange_employee_id(self):
         vals, data = {}, {}
-        date = datetime.now().date()
-        period = self.env['date.range'].search(
-            [('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False), ('type_id.fiscal_month', '=', False), ('date_start', '<=', date), ('date_end', '>=', date)])
-        vals['planning_quarter'] = period.id
-        data = {'planning_quarter': [('id', 'in', period.ids)]}
+        ctx = self.env.context
+        default_planning_quarter = ctx.get('default_planning_quarter', False)
+        if default_planning_quarter:
+            data = {'planning_quarter': [('id', '=', default_planning_quarter)]}
+        else:
+            date = datetime.now().date()
+            period = self.env['date.range'].search(
+                [('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False), ('type_id.fiscal_month', '=', False), ('date_start', '<=', date), ('date_end', '>=', date)])
+            vals['planning_quarter'] = period.id
+            data = {'planning_quarter': [('id', 'in', period.ids)]}
         self._compute_emp_domain()
         return {'value': vals, 'domain': data}
 

@@ -4,3 +4,4 @@
 import hr_timesheet_current
 import analytic_line_invoice
 import change_chargecode
+import planning_wizard
