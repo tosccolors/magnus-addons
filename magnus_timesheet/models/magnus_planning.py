@@ -297,24 +297,26 @@ class MagnusPlanning(models.Model):
     #     self.env.cr.execute(rel_query, aal_where_clause_params)
 
 
-    # def unlink_analytic_entries(self):
-    #     analytic = self.planning_ids.filtered(lambda x: x.unit_amount == 0)
-    #     analytic.unlink()
-    #     return True
+    def unlink_analytic_entries(self, cur_entries):
+        # analytic = self.planning_ids.filtered(lambda x: x.unit_amount == 0)
+        analytic = cur_entries - self.planning_ids
+        analytic.unlink()
+        return True
 
-    # @api.model
-    # def create(self ,vals):
-    #     res = super(MagnusPlanning, self).create(vals)
-    #     res.unlink_analytic_entries()
-    #     res._create_planning()
-    #     return res
+    @api.model
+    def create(self ,vals):
+        res = super(MagnusPlanning, self).create(vals)
+        res.unlink_analytic_entries(res.planning_ids)
+        # res._create_planning()
+        return res
 
-    # @api.multi
-    # def write(self, vals):
-    #     res = super(MagnusPlanning, self).write(vals)
-    #     self.unlink_analytic_entries()
-    #     self._create_planning()
-    #     return res
+    @api.multi
+    def write(self, vals):
+        cur_entries = self.planning_ids
+        res = super(MagnusPlanning, self).write(vals)
+        self.unlink_analytic_entries(cur_entries)
+        # self._create_planning()
+        return res
 
 
 class MagnusStandbyPlanning(models.Model):
