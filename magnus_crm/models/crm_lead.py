@@ -381,28 +381,9 @@ class MonthlyRevenue(models.Model):
 
 class CRMRevenueSplit(models.Model):
     _name = "crm.revenue.split"
-
-    def _compute_actuals(self):
-        # for split in self:
-        split_projects = self.mapped('project_id.account_ids[0]')
-        split_months = self.mapped('month')
-        sql = '''
-        SELECT sum(aal.amount), dr.id, aml.operating_unit_id, aal.account_id
-        FROM account_analytic_line aal
-        LEFT JOIN date_range dr on (dr.type_id = 2 AND dr.date_start <= aal.date AND dr.date_end >= aal.date)
-        LEFT JOIN account_account aa on (aal.general_account_id = aa.id)
-		LEFT JOIN account_move_line aml on (aal.move_id = aml.id)
-        WHERE aa.code = '8100' 
-        AND aml.operating_unit_id in %s
-        AND aal.account_id in %s
-        AND dr.id in 
-        AND aal.move_id is not NULL
-		GROUP BY dr.id, aml.operating_unit_id, aal.account_id '''
-
-        
-
-
+    
     lead_id = fields.Many2one('crm.lead', string='Opportunity', ondelete='cascade')
+    
     department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
     project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
@@ -412,24 +393,14 @@ class CRMRevenueSplit(models.Model):
     month = fields.Many2one('date.range', string='Month')
     total_revenue = fields.Float('Total Revenue')
     total_revenue_per = fields.Float('Total Revenue %')
-    magnus_blue_bv_amount = fields.Float(oldname='mangnus_blue_bv_amount', string='Forecast Blue')
-    magnus_blue_bv_per = fields.Float(oldname='mangnus_blue_bv_per', string='Forecast Blue %')
-    magnus_red_bv_amount = fields.Float(oldname='mangnus_red_bv_amount', string='Forecast Red')
-    magnus_red_bv_per = fields.Float(oldname='mangnus_red_bv_per', string='Forecast Red %')
-    magnus_green_bv_amount = fields.Float(oldname='mangnus_green_bv_amount', string='Forecast Green')
-    magnus_green_bv_per = fields.Float(oldname='mangnus_green_bv_per', string='Forecast Green %')
-    magnus_black_bv_amount = fields.Float(oldname='mangnus_black_bv_amount', string='Forecast Black')
-    magnus_black_bv_per = fields.Float(oldname='mangnus_black_bv_per', string='Forecast Black %')
-    total_actuals_amount = fields.Float(compute=_compute_actuals, string='Actuals Total')
-    actuals_red_amount = fields.Float(compute=_compute_actuals, string='Actuals Red')
-    actuals_blue_amount = fields.Float(compute=_compute_actuals, string='Actuals Blue')
-    actuals_green_amount = fields.Float(compute=_compute_actuals, string='Actuals Green')
-    actuals_black_amount = fields.Float(compute=_compute_actuals, string='Actuals Black')
-    actuals_blue_perc = fields.Float(compute=_compute_actuals, string='Actuals Red %')
-    actuals_red_perc = fields.Float(compute=_compute_actuals, string='Actuals Blue %')
-    actuals_green_perc = fields.Float(compute=_compute_actuals, string='Actuals Green %')
-    actuals_black_perc = fields.Float(compute=_compute_actuals, string='Actuals Black %')
-
+    magnus_blue_bv_amount = fields.Float(oldname='mangnus_blue_bv_amount', string='Magnus Blue B.V.')
+    magnus_blue_bv_per = fields.Float(oldname='mangnus_blue_bv_per', string='Magnus Blue B.V. %')
+    magnus_red_bv_amount = fields.Float(oldname='mangnus_red_bv_amount', string='Magnus Red B.V.')
+    magnus_red_bv_per = fields.Float(oldname='mangnus_red_bv_per', string='Magnus Red B.V. %')
+    magnus_green_bv_amount = fields.Float(oldname='mangnus_green_bv_amount', string='Magnus Green B.V.')
+    magnus_green_bv_per = fields.Float(oldname='mangnus_green_bv_per', string='Magnus Green B.V. %')
+    magnus_black_bv_amount = fields.Float(oldname='mangnus_black_bv_amount', string='Magnus Black B.V.')
+    magnus_black_bv_per = fields.Float(oldname='mangnus_black_bv_per', string='Magnus Black B.V. %')
     
     @api.one
     @api.constrains('magnus_blue_bv_per', 'magnus_red_bv_per','magnus_green_bv_per','magnus_black_bv_per')
