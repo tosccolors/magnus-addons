@@ -214,18 +214,23 @@ class MagnusPlanning(models.Model):
     planning_ids_compute = fields.Boolean(compute='_compute_planning_lines')
     emp_domain_compute = fields.Char(compute='_compute_emp_domain')
 
-    @api.onchange('planning_quarter')
-    def onchange_planning_quarter(self):
-        if self._origin.planning_quarter and self._origin.planning_quarter != self.planning_quarter:
-            self.planning_quarter = self._origin.planning_quarter.id
-        self.employee_id = self._default_employee()
-        start_date = self.planning_quarter.date_start
-        end_date = self.planning_quarter.date_end
+    def fetch_weeks_from_planning_quarter(self, planning_quarter):
+        start_date = planning_quarter.date_start
+        end_date = planning_quarter.date_end
         date_range_type_cw = self.env.ref('magnus_date_range_week.date_range_calender_week')
         date_range = self.env['date.range']
         domain = [('type_id', '=', date_range_type_cw.id)]
-        self.week_from = date_range.search(domain + [('date_start', '<=', start_date), ('date_end', '>=', start_date)], limit=1).id
-        self.week_to = date_range.search(domain + [('date_start', '<=', end_date), ('date_end', '>=', end_date)], limit=1).id
+        week_from = date_range.search(domain + [('date_start', '<=', start_date), ('date_end', '>=', start_date)],
+                                           limit=1).id
+        week_to = date_range.search(domain + [('date_start', '<=', end_date), ('date_end', '>=', end_date)],
+                                         limit=1).id
+        return week_from, week_to
+
+    @api.onchange('planning_quarter')
+    def onchange_planning_quarter(self):
+        self.employee_id = self._default_employee()
+        if not self.week_to or not self.week_from:
+            self.week_from, self.week_to = self.fetch_weeks_from_planning_quarter(self.planning_quarter)
 
     @api.onchange('week_from', 'week_to')
     def onchange_week(self):

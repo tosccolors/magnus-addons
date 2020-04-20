@@ -17,14 +17,14 @@
             <field name="name">magnus.planning.form</field>
             <field name="model">magnus.planning</field>
             <field name="arch" type="xml">
-                <form string="Planning">
+                <form string="Planning" create="false" delete="false" copy="false">
                 <style>.o_form_sheet{
                     max-width: none !important;
                     width:100% !important;
                 </style>
                 <header>
                         <button class="oe_stat_button" name="compute_planning_lines" type="object" string="Update Planning" />
-                        <button class="oe_stat_button" name="%(magnus_timesheet.action_view_view_planning_wizard)d" string="Planning Period"  type="action" target="new" context="{'active_planning_quarter':planning_quarter}"/>
+                        <button class="oe_stat_button" name="%(magnus_timesheet.action_view_view_planning_wizard)d" string="Change Planning Period"  type="action" target="new" context="{'active_planning_quarter':planning_quarter}"/>
                 </header>
                 <sheet>
                     <field name="planning_ids_compute" invisible="1"/>
