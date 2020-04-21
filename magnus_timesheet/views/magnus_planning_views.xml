@@ -17,13 +17,14 @@
             <field name="name">magnus.planning.form</field>
             <field name="model">magnus.planning</field>
             <field name="arch" type="xml">
-                <form string="Planning">
+                <form string="Planning" create="false" delete="false" copy="false">
                 <style>.o_form_sheet{
                     max-width: none !important;
                     width:100% !important;
                 </style>
                 <header>
                         <button class="oe_stat_button" name="compute_planning_lines" type="object" string="Update Planning" />
+                        <button class="oe_stat_button" name="%(magnus_timesheet.action_view_view_planning_wizard)d" string="Change Planning Period"  type="action" target="new" context="{'active_planning_quarter':planning_quarter}"/>
                 </header>
                 <sheet>
                     <field name="planning_ids_compute" invisible="1"/>
@@ -37,8 +38,10 @@
                     <field name="date_to" class="oe_inline" invisible="1"/>
                     <group>
                         <group>
-                            <label for="week_from" string="Week Planning Period"/>
-                            <div><field name="week_from" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/> to <field name="week_to" class="oe_inline" domain="[('type_id.calender_week', '=', True)]"/></div>
+                            <label for="planning_quarter" string="Planning Period"/>
+                            <div><field name="planning_quarter" readonly="1" context="{'readonly_by_pass': True}"/></div>
+                            <field name="week_from" class="oe_inline" domain="[('type_id.calender_week', '=', True)]" invisible="1"/>
+                            <field name="week_to" class="oe_inline" domain="[('type_id.calender_week', '=', True)]" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                         </group>
                     </group>
@@ -47,7 +50,7 @@
                             <widget type="weekly_planning">
                             </widget>
                         </page>
-                        <page string="Details" class="o_hr_timesheet_sheet_details">
+                        <page string="Details" class="o_hr_timesheet_sheet_details" invisible="1">
                             <field context="{'employee_id': employee_id, 'user_id':user_id, 'timesheet_date_from': date_from, 'timesheet_date_to': date_to}" name="planning_ids" nolabel="1">
                                 <tree editable="bottom" string="Timesheet Activities" create="false" edit="false">
                                     <field name="date" invisible="1"/>
@@ -55,7 +58,8 @@
                                     <field name="name"/>
                                     <field name="project_id" required="1"/>
                                     <field name="employee_id" required="1"/>
-                                    <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>                                                              <field name="user_id" invisible="1"/>
+                                    <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>
+                                    <field name="user_id" invisible="1"/>
                                 </tree>
                                 <form string="Planning Activities">
                                     <group>
@@ -66,7 +70,6 @@
                                         <field name="employee_id"/>
                                         <field name="unit_amount" widget="float_time" string="Hours"/>
                                         <field name="user_id" invisible="1"/>
-
                                     </group>
                                 </form>
                             </field>
@@ -97,7 +100,10 @@
         </record>
 
 
-        <menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
+        <!--<menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"-->
+             <!--sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>-->
+
+        <menuitem action="ir_actions_server_timesheet_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
              sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>
 
         <record id="standby_planning_form_calender" model="ir.ui.view">

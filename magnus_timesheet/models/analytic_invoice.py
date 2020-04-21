@@ -20,22 +20,24 @@ class AnalyticInvoice(models.Model):
     def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
-            if self.month_id:
-                domain = self.month_id.get_domain('date')
-                domain += [('account_id', 'in', account_analytic_ids)]
-            else:
-                domain = [('account_id', 'in', account_analytic_ids)]
             hrs = self.env.ref('product.product_uom_hour').id
+            domain = [('account_id', 'in', account_analytic_ids)]
+            if self.month_id:
+                domain += self.month_id.get_domain('date')
             time_domain = domain + [
                 ('product_uom_id', '=', hrs),
                 ('state', 'in', ['invoiceable', 'invoiced']),
             ]
+            cost_domain = domain + [
+                ('product_uom_id', '!=', hrs),
+                ('amount', '<', 0)
+            ]
+            revenue_domain = domain + [
+                ('product_uom_id', '!=', hrs),
+                ('amount', '>', 0)
+            ]
             self.time_line_ids = self.env['account.analytic.line'].search(time_domain).ids
-
-            cost_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '<', 0)]
             self.cost_line_ids = self.env['account.analytic.line'].search(cost_domain).ids
-
-            revenue_domain = domain + [('product_uom_id', '!=', hrs), ('amount', '>', 0)]
             self.revenue_line_ids = self.env['account.analytic.line'].search(revenue_domain).ids
         else:
             self.time_line_ids = []
@@ -45,13 +47,12 @@ class AnalyticInvoice(models.Model):
     @api.one
     @api.depends('partner_id', 'month_id', 'gb_week', 'project_operating_unit_id', 'project_id', 'link_project')
     def _compute_objects(self):
-
-        taskUserObj = self.env['task.user']
+        task_user_obj = self.env['task.user']
         # global taskUserIds
-        taskUserIds, userTotData = [], []
+        task_user_ids, user_total_data = [], []
 
         def _calculate_data(result, time_domain, reconfirmed_entries=False):
-            tskUserIds = []
+            task_user_ids = []
             if len(result) > 0:
                 for item in result:
                     task_id = item.get('task_id')[0] if item.get('task_id') != False else False
@@ -102,94 +103,43 @@ class AnalyticInvoice(models.Model):
                             aal_domain += [('week_id', '=', vals['gb_week_id'])]
 
                     childData = []
-
-                    # task-358
-                    # month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
-                    # if month_id:
-                    #     month = self.env['date.range'].browse([month_id])
-                    #     date_start = month.date_start
-                    #     date_end = month.date_end
-                    # defTaskUser = taskUserObj.search(
-                    #     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
-                    #      ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-                    # if len(defTaskUser) == 0:
-                    #     defTaskUser = taskUserObj.search(
-                    #         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
-                    #          ('user_id', '=', vals['user_id'])], )
-                    # tskUserIds += taskUser.ids
                     for aal in self.env['account.analytic.line'].search(aal_domain):
-                        taskobj = taskUserObj.search(
-                            [('task_id', '=', aal.task_id.id),
-                             ('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)])
-                        if taskobj:
-                            tskUserIds += taskobj.ids
-                        # if not taskobj:
-                        #     tskUserIds +=defTaskUser.ids
-                        # else:
-                        #     tskUserIds += taskobj.ids
-
+                        task_user_domain = [('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)]
+                        task_user_lines = task_user_obj.search(task_user_domain+[('task_id', '=', aal.task_id.id)])
+                        if not task_user_lines:
+                            task_user_lines = task_user_obj.search(task_user_domain+
+                                                                   [('task_id', '=', aal.task_id.project_id.task_ids.filtered('standard').id)])
+                        if task_user_lines:
+                            task_user_ids += task_user_lines.ids
                         childData.append((4, aal.id))
                     vals['detail_ids'] = childData
-
-                    userTotData.append((0, 0, vals))
-                    # task-358
-                    # month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
-                    # if month_id:
-                    #     month = self.env['date.range'].browse([month_id])
-                    #     date_start = month.date_start
-                    #     date_end = month.date_end
-                    # taskUser = taskUserObj.search(
-                    #     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
-                    #      ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-                    # if len(taskUser) == 0:
-                    #     taskUser = taskUserObj.search(
-                    #         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
-                    #          ('user_id', '=', vals['user_id'])], )
-                    # # date_now = fields.Date.today()
-                    # taskUser = taskUserObj.search(
-                    #     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start),
-                    #      ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-                    # if len(taskUser) == 0:
-                    #     taskUser = taskUserObj.search(
-                    #         [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()),
-                    #          ('user_id', '=', vals['user_id'])],
-                    #           limit=1, order='from_date Desc')
-                    # tskUserIds += taskUser.ids
-
-            return list(set(tskUserIds))
-
-
+                    user_total_data.append((0, 0, vals))
+            return list(set(task_user_ids))
         ctx = self.env.context.copy()
         current_ref = ctx.get('active_invoice_id', False)
-
-        userTotObj = userInvoicedObjs = self.env['analytic.user.total']
-
-        ana_ids = self.env['account.analytic.line']
+        aal_ids = self.env['account.analytic.line']
+        user_total_invoiced_lines = self.env['analytic.user.total']
         if current_ref:
             # get all invoiced user total objs using current reference
-            userInvoicedObjs = userTotObj.search(
+            user_total_invoiced_lines = self.env['analytic.user.total'].search(
                 [('analytic_invoice_id', '=', current_ref), ('state', 'in', ('invoice_created', 'invoiced'))])
-
             # don't look for analytic lines which have been already added to other analytic invoice
-            tot_obj = userTotObj.search(
+            other_lines = self.env['analytic.user.total'].search(
                 [('analytic_invoice_id', '!=', current_ref), ('state', 'not in', ('invoice_created', 'invoiced'))])
-            for t in tot_obj:
-                ana_ids |= t.detail_ids
-
+            for t in other_lines:
+                aal_ids |= t.detail_ids
         partner_id = self.partner_id or False
         if self.project_id and self.link_project:
             partner_id = self.project_id.partner_id
-
         if partner_id and len(self.account_analytic_ids) == 0:
-            account_analytic = self.env['account.analytic.account'].search([
+            analytic_accounts = self.env['account.analytic.account'].search([
                 ('partner_id', '=', partner_id.id)])
-            if len(account_analytic) == 0:
-                account_analytic = self.env['account.analytic.account'].search([
+            if len(analytic_accounts) == 0:
+                analytic_accounts = self.env['account.analytic.account'].search([
                     ('partner_id', '=', self.project_id.partner_id.id)])
-            if len(account_analytic) > 0:
+            if len(analytic_accounts) > 0:
                 self.account_analytic_ids = \
-                    [(6, 0, account_analytic.ids)]
-
+                    [(6, 0, analytic_accounts.ids)]
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
             # if self.month_id:
@@ -197,7 +147,6 @@ class AnalyticInvoice(models.Model):
             #     domain += [('account_id', 'in', account_analytic_ids)]
             # else:
             domain = [('account_id', 'in', account_analytic_ids)]
-
             if self.project_operating_unit_id:
                 domain += [('project_operating_unit_id', '=', self.project_operating_unit_id.id)]
             if self.project_id and self.link_project:
@@ -213,14 +162,11 @@ class AnalyticInvoice(models.Model):
                 ('product_uom_id', '=', hrs),
                 ('state', 'in', ['invoiceable', 'progress'])
             ]
-
-            if ana_ids:
-                time_domain += [('id', 'not in', ana_ids.ids)]
-
+            if aal_ids:
+                time_domain += [('id', 'not in', aal_ids.ids)]
             time_domain1 = time_domain + [('month_of_last_wip', '=', False)]
             if self.month_id:
                 time_domain1 += self.month_id.get_domain('date')
-
             fields_grouped = [
                 'id',
                 'user_id',
@@ -231,9 +177,7 @@ class AnalyticInvoice(models.Model):
                 'line_fee_rate',
                 'project_operating_unit_id'
             ]
-
             reg_fields_grouped = fields_grouped + ['month_id', 'week_id']
-
             grouped_by = [
                 'user_id',
                 'task_id',
@@ -242,11 +186,9 @@ class AnalyticInvoice(models.Model):
                 'line_fee_rate',
                 'project_operating_unit_id'
             ]
-
             reg_grouped_by = grouped_by + ['month_id']
             if self.gb_week:
                 reg_grouped_by.append('week_id')
-
             result = self.env['account.analytic.line'].read_group(
                 time_domain1,
                 reg_fields_grouped,
@@ -256,13 +198,11 @@ class AnalyticInvoice(models.Model):
                 orderby=False,
                 lazy=False
             )
-            taskUserIds += _calculate_data(result, time_domain1)
-
+            task_user_ids += _calculate_data(result, time_domain1)
             # calculate reconfirmed entries from month_of_last_wip
             time_domain2 = time_domain + [('month_of_last_wip', '!=', False)]
             reconfirmed_fields_grouped = fields_grouped + ['month_of_last_wip']
             reconfirmed_grouped_by = grouped_by + ['month_of_last_wip']
-
             result2 = self.env['account.analytic.line'].read_group(
                 time_domain2,
                 reconfirmed_fields_grouped,
@@ -272,184 +212,16 @@ class AnalyticInvoice(models.Model):
                 orderby=False,
                 lazy=False
             )
-
-            taskUserIds += _calculate_data(result2, time_domain2, True)
-
-            if taskUserIds:
-                taskUserIds = list(set(taskUserIds))
-                self.task_user_ids = [(6, 0, taskUserIds)]
+            task_user_ids += _calculate_data(result2, time_domain2, True)
+            if task_user_ids:
+                task_user_ids = list(set(task_user_ids))
+                self.task_user_ids = [(6, 0, task_user_ids)]
             else:
                 self.task_user_ids = [(6, 0, [])]
-
             # add invoiced user total
-            for usrTot in userInvoicedObjs:
-                userTotData.append((4, usrTot.id))
-            self.user_total_ids = userTotData
-
-
-    # @api.one
-    # @api.depends('partner_id', 'month_id', 'gb_week','project_operating_unit_id', 'project_id', 'link_project')
-    # def _compute_objects(self):
-    #     ctx = self.env.context.copy()
-    #     current_ref = ctx.get('active_invoice_id', False)
-    #
-    #     userTotObj = userInvoicedObjs = self.env['analytic.user.total']
-    #
-    #     ana_ids = self.env['account.analytic.line']
-    #     if current_ref:
-    #         # get all invoiced user total objs using current reference
-    #         userInvoicedObjs = userTotObj.search(
-    #             [('analytic_invoice_id', '=', current_ref), ('state', 'in', ('invoice_created', 'invoiced'))])
-    #
-    #         # don't look for analytic lines which has been already added for other analytic invoice
-    #         tot_obj = userTotObj.search([('analytic_invoice_id', '!=', current_ref), ('state', 'not in', ('invoice_created', 'invoiced'))])
-    #         for t in tot_obj:
-    #             ana_ids |= t.detail_ids
-    #
-    #     partner_id = self.partner_id or False
-    #     if self.project_id and self.link_project:
-    #         partner_id = self.project_id.partner_id
-    #
-    #     if partner_id and len(self.account_analytic_ids) == 0:
-    #         account_analytic = self.env['account.analytic.account'].search([
-    #             ('partner_id', '=', partner_id.id)])
-    #         if len(account_analytic) == 0:
-    #             account_analytic = self.env['account.analytic.account'].search([
-    #             ('partner_id', '=', self.project_id.partner_id.id)])
-    #         if len(account_analytic) > 0:
-    #             self.account_analytic_ids = \
-    #                 [(6, 0, account_analytic.ids)]
-    #
-    #     if len(self.account_analytic_ids) > 0:
-    #         account_analytic_ids = self.account_analytic_ids.ids
-    #         if self.month_id:
-    #             domain = self.month_id.get_domain('date')
-    #             domain += [('account_id', 'in', account_analytic_ids)]
-    #         else:
-    #             domain = [('account_id', 'in', account_analytic_ids)]
-    #
-    #         if self.project_operating_unit_id:
-    #             domain += [('project_operating_unit_id', '=',self.project_operating_unit_id.id)]
-    #         if self.project_id and self.link_project:
-    #             domain += [('project_id', '=', self.project_id.id)]
-    #         else:
-    #             domain +=['|',
-    #                       ('project_id.invoice_properties.group_invoice', '=', True),
-    #                       ('task_id.project_id.invoice_properties.group_invoice', '=', True)
-    #                       ]
-    #         hrs = self.env.ref('product.product_uom_hour').id
-    #         time_domain = domain + [
-    #             ('chargeable', '=', True),
-    #             ('product_uom_id', '=', hrs),
-    #             ('state', 'in', ['invoiceable', 'progress'])
-    #             ]
-    #         if ana_ids:
-    #             time_domain += [('id', 'not in', ana_ids.ids)]
-    #
-    #         fields_grouped = [
-    #             'id',
-    #             'user_id',
-    #             'task_id',
-    #             'account_id',
-    #             'product_id',
-    #             'month_id',
-    #             'week_id',
-    #             'unit_amount',
-    #             'project_operating_unit_id'
-    #         ]
-    #         grouped_by = [
-    #             'user_id',
-    #             'task_id',
-    #             'account_id',
-    #             'product_id',
-    #             'month_id',
-    #             'project_operating_unit_id'
-    #         ]
-    #         if self.gb_week:
-    #             grouped_by.append('week_id')
-    #
-    #         result = self.env['account.analytic.line'].read_group(
-    #             time_domain,
-    #             fields_grouped,
-    #             grouped_by,
-    #             offset=0,
-    #             limit=None,
-    #             orderby=False,
-    #             lazy=False
-    #         )
-    #
-    #         taskUserObj = self.env['task.user']
-    #         taskUserIds, userTotData = [], []
-    #
-    #         if len(result) > 0:
-    #             for item in result:
-    #                 task_id = item.get('task_id')[0] if item.get('task_id') != False else False
-    #                 project_id = False
-    #                 if task_id:
-    #                     project_id = self.env['project.task'].browse(task_id).project_id.id or False
-    #                 vals = {
-    #                     'name': '/',
-    #                     'user_id': item.get('user_id')[0] if item.get(
-    #                         'user_id') != False else False,
-    #                     'task_id': item.get('task_id')[0] if item.get('task_id') != False else False,
-    #                     'project_id':project_id,
-    #                     'account_id': item.get('account_id')[0] if item.get(
-    #                         'account_id') != False else False,
-    #                     'gb_month_id': item.get('month_id')[0] if item.get(
-    #                         'month_id') != False else False,
-    #                     'gb_week_id': item.get('week_id')[0] if self.gb_week and item.get('week_id') != False else False,
-    #                     'unit_amount': item.get('unit_amount'),
-    #                     'product_id': item.get('product_id'),
-    #                     'operating_unit_id': item.get('operating_unit_id'),
-    #                     'project_operating_unit_id': item.get('project_operating_unit_id'),
-    #                 }
-    #
-    #                 # aut_id = self.env['analytic.user.total'].create(vals)
-    #                 aal_domain = time_domain + [
-    #                     ('user_id', '=', vals['user_id']),
-    #                     ('task_id', '=', vals['task_id']),
-    #                     ('account_id', '=', vals['account_id']),
-    #                     ('month_id', '=', vals['gb_month_id']),
-    #                 ]
-    #                 if vals['gb_week_id']:
-    #                     aal_domain += [('week_id', '=', vals['gb_week_id'])]
-    #
-    #                 childData = []
-    #                 for aal in self.env['account.analytic.line'].search(aal_domain):
-    #                     childData.append((4, aal.id))
-    #                 vals['detail_ids'] = childData
-    #
-    #                 userTotData.append((0, 0, vals))
-    #                 # task-358
-    #                 month_id = vals.get('month_id', False) or self.month_id and self.month_id.id
-    #                 if month_id:
-    #                     month = self.env['date.range'].browse([month_id])
-    #                     date_start = month.date_start
-    #                     date_end = month.date_end
-    #                 taskUser = taskUserObj.search(
-    #                     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start), ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-    #                 if len(taskUser) == 0:
-    #                     taskUser = taskUserObj.search(
-    #                     [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()), ('user_id', '=', vals['user_id'])],)
-    #                 date_now = fields.Date.today()
-    #                 taskUser = taskUserObj.search(
-    #                     [('task_id', '=', vals['task_id']), ('from_date', '>=', date_start), ('from_date', '<=', date_end), ('user_id', '=', vals['user_id'])], order='from_date Desc')
-    #                 if len(taskUser) == 0:
-    #                     taskUser = taskUserObj.search(
-    #                     [('task_id', '=', vals['task_id']), ('from_date', '<=', fields.Date.today()), ('user_id', '=', vals['user_id'])],
-    #                     limit=1, order='from_date Desc')
-    #                 taskUserIds += taskUser.ids
-    #
-    #                 if taskUserIds:
-    #                     taskUserIds = list(set(taskUserIds))
-    #                     self.task_user_ids = [(6, 0, taskUserIds)]
-    #                 else:
-    #                     self.task_user_ids = [(6, 0, [])]
-    #
-    #         #add invoiced user total
-    #         for usrTot in userInvoicedObjs:
-    #             userTotData.append((4, usrTot.id))
-    #         self.user_total_ids = userTotData
+            for total_line in user_total_invoiced_lines:
+                user_total_data.append((4, total_line.id))
+            self.user_total_ids = user_total_data
 
     def _sql_update(self, self_obj, status):
         if not self_obj.ids or not status:
@@ -670,18 +442,6 @@ class AnalyticInvoice(models.Model):
             analytic_lines.write({'state': 'invoiceable'})
         return super(AnalyticInvoice, self).unlink()
 
-    # @api.multi
-    # def get_product_wip_account(self, product, fiscal_pos=None):
-    #     account = product.property_account_wip_id
-    #     if not account and product:
-    #         raise UserError(
-    #             _('Please define WIP account for this product: "%s" (id:%d).') %
-    #             (product.name, product.id))
-    #
-    #     if not fiscal_pos:
-    #         fiscal_pos = self.env['account.fiscal.position']
-    #     return fiscal_pos.map_account(account)
-
     @api.model
     def _prepare_invoice_line(self, line, invoice_id):
         ctx = self.env.context.copy()
@@ -696,10 +456,6 @@ class AnalyticInvoice(models.Model):
             'uom_id': line.product_uom_id.id,
             'user_id': line.user_id.id,
         })
-
-        # Add analytic tags to invoice line
-        # invoice_line.analytic_tag_ids |= line.tag_ids
-
         # Get other invoice line values from product onchange
         invoice_line._onchange_product_id()
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
@@ -915,14 +671,14 @@ class AnalyticInvoice(models.Model):
             rec = tuple(analytic_obj.ids)
 
         self.env.cr.execute("""
-                                       SELECT pp.id AS project_id, prop.group_by_month, prop.group_by_fee_rate
-                                       FROM project_invoicing_properties prop
-                                       JOIN project_project pp ON pp.invoice_properties = prop.id
-                                       JOIN 
-                                           (SELECT project_id FROM account_analytic_line aal WHERE aal.id %s %s GROUP BY project_id) AS temp 
-                                           ON temp.project_id = pp.id
-                                       WHERE prop.specs_invoice_report = TRUE AND prop.specs_on_task_level = TRUE
-                                       """ % (cond, rec))
+                           SELECT pp.id AS project_id, prop.group_by_month, prop.group_by_fee_rate
+                           FROM project_invoicing_properties prop
+                           JOIN project_project pp ON pp.invoice_properties = prop.id
+                           JOIN 
+                               (SELECT project_id FROM account_analytic_line aal WHERE aal.id %s %s GROUP BY project_id) AS temp 
+                               ON temp.project_id = pp.id
+                           WHERE prop.specs_invoice_report = TRUE AND prop.specs_on_task_level = TRUE
+                           """ % (cond, rec))
 
         grp_data = self.env.cr.fetchall()
         for data in grp_data:
@@ -988,7 +744,6 @@ class AnalyticInvoice(models.Model):
 
 class AnalyticUserTotal(models.Model):
     _name = "analytic.user.total"
-    # _inherit = 'account.analytic.line'
     _description = "Analytic User Total"
 
     @api.one
@@ -1000,19 +755,23 @@ class AnalyticUserTotal(models.Model):
         :return:
         """
         task_user = self.env['task.user']
-        for aaline in self.detail_ids:
-            task_user |= task_user.search(
+        ## get task-user out of first aaline
+        aaline = self.detail_ids and self.detail_ids[0]
+        task_user |= task_user.search(
                 [('id', 'in', self.analytic_invoice_id.task_user_ids.ids),('task_id', '=', self.task_id.id),
                  ('from_date', '<=', aaline.date), ('user_id', '=', self.user_id.id)])
         if task_user:
-            task_user = task_user.search([('id', 'in', task_user.ids)], limit = 1, order = 'from_date Desc')
+            task_user = task_user.search([('id', 'in', task_user.ids)], limit=1, order='from_date Desc')
             self.fee_rate = fr = task_user.fee_rate
             self.amount = - self.unit_amount * fr
         else:
-            #if no task user found, get price from consultant product
-            employee = self.env['hr.employee'].search([('user_id', '=', self.user_id.id),('end_date_of_employment','=', False)])
-            self.fee_rate = fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
+            self.fee_rate = fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)
             self.amount = - self.unit_amount * fr
+
+        ## make sure that aal.fee_rate and amount is corresponding to user_total_line
+        for aaline in self.detail_ids:
+            aaline.line_fee_rate = fr
+            aaline.amount = aaline.unit_amount * - fr
 
     @api.one
     def _compute_analytic_line(self):
@@ -1053,8 +812,12 @@ class AnalyticUserTotal(models.Model):
         'date.range',
         string='Month',
     )
-    name = fields.Char('Description', required=True)
-    state = fields.Selection([
+    name = fields.Char(
+        'Description',
+        required=True
+    )
+    state = fields.Selection(
+        [
         ('draft', 'Draft'),
         ('open', 'Confirmed'),
         ('delayed', 'Delayed'),
@@ -1067,7 +830,7 @@ class AnalyticUserTotal(models.Model):
         ('re_confirmed', 'Re-Confirmed'),
         ('invoiced-by-fixed', 'Invoiced by Fixed'),
         ('expense-invoiced', 'Expense Invoiced')
-    ],
+        ],
         string='Status',
         readonly=True,
         copy=False,
@@ -1083,10 +846,10 @@ class AnalyticUserTotal(models.Model):
     )
     partner_id = fields.Many2one(
         'res.partner',
-        related='account_id.partner_id',
+#        related='account_id.partner_id',
         string='Partner',
-        store=True,
-        readonly=True
+#        store=True,
+#        readonly=True
     )
     user_id = fields.Many2one(
         'res.users',

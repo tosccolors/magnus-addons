@@ -81,15 +81,27 @@ class AccountMove(models.Model):
         accids.append(ar_account_id)
         bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids and r.account_id.id not in accids)
         pl_move_lines = mls - bs_move_lines
-        amount = 0.0
-        for line in pl_move_lines:
-            amount += line.debit - line.credit
         ar_line = pl_move_lines.filtered(lambda r: r.account_id.id == ar_account_id)
-        amount -= ar_line.debit - ar_line.credit
+
+        analytic_account_obj = pl_move_lines.mapped('analytic_account_id')
+        count = 0
+
+        for analytic_acc in analytic_account_obj:
+            # initialize amount with ar_line debit-credit
+            amount = ar_line.debit - ar_line.credit
+            count += 1
+            #filter pl_move_lines which is type of current anlytic account this will exculde ar_line
+            for line in pl_move_lines.filtered(lambda r: r.analytic_account_id.id == analytic_acc.id):
+                amount += line.debit - line.credit
+            #create new ar_line if there is more than one analytic account
+            if count > 1:
+                ar_line = ar_line.copy()
+            amount -= ar_line.debit - ar_line.credit
+            ar_line.credit = amount if amount > 0 else 0
+            ar_line.debit = -amount if amount < 0 else 0
+            ar_line.account_id = wip_journal.default_credit_account_id.id
+            ar_line.analytic_account_id = analytic_acc.id
         bs_move_lines.unlink()
-        ar_line.credit = amount if amount > 0 else 0
-        ar_line.debit = -amount if amount < 0 else 0
-        ar_line.account_id = wip_journal.default_credit_account_id.id
         return wip_move
 
 

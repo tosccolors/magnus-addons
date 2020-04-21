@@ -29,6 +29,7 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
             date_to: false,
             week_from: false,
             week_to: false,
+            planning_quarter: false,
         });
 
         this.field_manager.on("field_changed:planning_ids", this, this.query_sheets);
@@ -43,6 +44,9 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
         });
         this.field_manager.on("field_changed:week_to", this, function() {
             this.set({"week_to": this.field_manager.get_field_value("week_to")});
+        });
+        this.field_manager.on("field_changed:planning_quarter", this, function() {
+            this.set({"planning_quarter": this.field_manager.get_field_value("planning_quarter")});
         });
         this.field_manager.on("field_changed:user_id", this, function() {
             this.set({"user_id": this.field_manager.get_field_value("user_id")});
@@ -114,6 +118,7 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
         this.on("change:date_from", this, this.initialize_content);
         this.on("change:week_from", this, this.initialize_content);
         this.on("change:week_to", this, this.initialize_content);
+        this.on("change:planning_quarter", this, this.initialize_content);
         this.on("change:user_id", this, this.initialize_content);
     },
     initialize_content: function() {
@@ -126,6 +131,9 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
             return;
         }
         if (!this.get("week_to") || !this.get("week_from")) {
+            return;
+        }
+        if (!this.get("planning_quarter")) {
             return;
         }
 
