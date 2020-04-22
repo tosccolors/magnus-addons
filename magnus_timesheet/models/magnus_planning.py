@@ -25,7 +25,7 @@ class MagnusPlanning(models.Model):
         if (start_date and end_date) and (start_date > end_date):
             raise ValidationError(_("End week should be greater than start week."))
         if self.planning_quarter and self.week_from:
-            planning = self.search_count([('planning_quarter', '=', self.planning_quarter.id),('employee_id', '=', self.employee_id.id),('week_from', '<=', self.week_from.id),('week_to', '>=', self.week_from.id)])
+            planning = self.search_count([('planning_quarter', '=', self.planning_quarter.id),('employee_id', '=', self.employee_id.id),('week_from', '<=', self.week_from.id),('week_to', '>=', self.week_from.id), ('is_planning_officer', '=', self.is_planning_officer)])
             if planning > 1:
                 raise ValidationError(_("Week range already exists."))
 
@@ -140,7 +140,10 @@ class MagnusPlanning(models.Model):
         self.env.cr.execute(line_query)
 
     def get_planning_from_employees(self):
-        child_emp_ids = self.get_employee_child_ids()
+        if not self.env.context.get('self_planning', False):
+            op, child_emp_ids = 'IN', tuple(set(self.get_employee_child_ids()) - set([self.employee_id.user_id.id]))
+        else:
+            op, child_emp_ids = '=', self.employee_id.user_id.id
         line_query = ("""
                 INSERT INTO
                    magnus_planning_analytic_line_rel
@@ -152,7 +155,7 @@ class MagnusPlanning(models.Model):
                         aal.week_id >= {1} AND aal.week_id <= {2}
                         AND aal.id IN (
 		                    SELECT analytic_line_id FROM magnus_planning_analytic_line_rel WHERE planning_id IN 
-                            (SELECT id FROM magnus_planning WHERE employee_id IN {3}))
+                            (SELECT id FROM magnus_planning WHERE employee_id {3} {4}))
                     EXCEPT
                         SELECT
                           planning_id, analytic_line_id
@@ -161,15 +164,19 @@ class MagnusPlanning(models.Model):
                     self.id,
                     self.week_from.id,
                     self.week_to.id,
-                    tuple(child_emp_ids)
+                    op,
+                    child_emp_ids
                     ))
         self.env.cr.execute(line_query)
 
 
     @api.one
     def _compute_planning_lines(self):
+        self_planning = self.env.context.get('self_planning', False)
         self.planning_ids_compute = False
-        if self.employee_id.user_id.has_group("hr.group_hr_user") or self.employee_id.user_id.has_group("hr.group_hr_manager"):
+        if self_planning:
+            self.get_planning_from_managers()
+        elif self.employee_id.user_id.has_group("hr.group_hr_user") or self.employee_id.user_id.has_group("hr.group_hr_manager"):
             self.get_planning_from_employees()
         else:
             self.get_planning_from_managers()
@@ -181,7 +188,10 @@ class MagnusPlanning(models.Model):
     @api.one
     def _compute_emp_domain(self):
         user = self.employee_id.user_id
-        domain = ['|','|','|',('department_id.manager_id.user_id','=',user.id),('department_id.parent_id.manager_id.user_id','=',user.id),('parent_id.user_id','=',user.id),('user_id','=',user.id)]
+        self_planning = self.env.context.get('self_planning', False)
+        domain = ['|','|',('department_id.manager_id.user_id','=',user.id),('department_id.parent_id.manager_id.user_id','=',user.id),('parent_id.user_id','=',user.id)]
+        if self_planning:
+            domain = [('user_id', '=', user.id)]
         emp_list = self.env['hr.employee'].search(domain).ids
         self.emp_domain_compute = ",".join(map(str, emp_list))
 
@@ -213,6 +223,7 @@ class MagnusPlanning(models.Model):
     week_to = fields.Many2one('date.range', string='week to', required=True, index=True)
     planning_ids_compute = fields.Boolean(compute='_compute_planning_lines')
     emp_domain_compute = fields.Char(compute='_compute_emp_domain')
+    is_planning_officer = fields.Boolean('Is Planning Officer')
 
     def fetch_weeks_from_planning_quarter(self, planning_quarter):
         start_date = planning_quarter.date_start

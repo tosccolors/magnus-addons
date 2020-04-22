@@ -20,15 +20,29 @@ class HrTimesheetCurrentOpen(models.TransientModel):
         return result
 
     @api.model
-    def open_timesheet_planning(self):
+    def open_self_planning(self):
+        value = self.open_timesheet_planning()
+        value['context']['self_planning'] = True
+        return value
+
+    @api.model
+    def open_employees_planning(self):
+        value = self.open_timesheet_planning(True)
+        value['context']['default_is_planning_officer'] = True
+        return value
+
+    @api.model
+    def open_timesheet_planning(self, is_planning_officer = False):
         view_type = 'form,tree'
 
         date = datetime.now().date()
-        period = self.env['date.range'].search(
-            [('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False),
+
+        period = self.env['date.range'].search([('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False),
              ('type_id.fiscal_month', '=', False), ('date_start', '<=', date), ('date_end', '>=', date)], limit=1)
 
-        planning = self.env['magnus.planning'].search([('user_id', '=', self._uid), ('planning_quarter', '=', period.id)])
+        domain = [('user_id', '=', self._uid), ('planning_quarter', '=', period.id), ('is_planning_officer', '=', is_planning_officer)]
+        planning = self.env['magnus.planning'].search(domain)
+
         if len(planning) > 1:
             domain = "[('id', 'in', " + str(planning.ids) + "),('user_id', '=', uid)]"
         else:
