@@ -348,6 +348,9 @@ var WeeklyPlanning = form_common.FormWidget.extend(form_common.ReinitializeWidge
                 ],
             },
         });
+        if (emp_domain.length == 1) {
+            self.employee_m2o.set({'value': parseInt(emp_domain[0])});
+        }
         self.project_m2o = new FieldMany2One(self.dfm, {
             attrs: {
                 name: 'project',
