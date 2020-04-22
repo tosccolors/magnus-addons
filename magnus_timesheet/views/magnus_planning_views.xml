@@ -33,6 +33,7 @@
                         <label for="employee_id" class="oe_edit_only" invisible="1"/>
                         <h1><field name="employee_id" class="oe_inline" placeholder="Employee's Name" invisible="1"/></h1>
                         <field name="user_id" invisible="1"/>
+                        <field name="is_planning_officer" invisible="1"/>
                     </div>
                     <field name="date_from" class="oe_inline" invisible="1"/>
                     <field name="date_to" class="oe_inline" invisible="1"/>
@@ -99,11 +100,9 @@
             </field>
         </record>
 
-
-        <!--<menuitem action="act_view_magnus_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"-->
-             <!--sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>-->
-
-        <menuitem action="ir_actions_server_timesheet_planning" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
+        <menuitem action="ir_actions_server_timesheet_planning_emp" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
+             sequence="4" groups="magnus_timesheet.group_magnus_planning_officer"/>
+        <menuitem action="ir_actions_server_timesheet_planning_self" id="menu_act_magnus_self_planning" parent="hr_timesheet.menu_hr_time_tracking"
              sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>
 
         <record id="standby_planning_form_calender" model="ir.ui.view">
