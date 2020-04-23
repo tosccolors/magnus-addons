@@ -53,14 +53,14 @@
 
         <record model="ir.actions.act_window.view" id="act_hr_timesheet_line_forecast_view_tree">
             <field name="view_mode">tree</field>
-            <field name="sequence">1</field>
+            <field name="sequence">2</field>
             <field name="view_id" ref="hr_timesheet_line_forecating_tree"/>
             <field name="act_window_id" ref="act_hr_timesheet_line_forecast"/>
         </record>
 
         <record model="ir.actions.act_window.view" id="act_hr_timesheet_line_forecast_view_pivot">
             <field name="view_mode">pivot</field>
-            <field name="sequence">2</field>
+            <field name="sequence">1</field>
             <field name="view_id" ref="view_account_analytic_line_pivot_forecate"/>
             <field name="act_window_id" ref="act_hr_timesheet_line_forecast"/>
         </record>
