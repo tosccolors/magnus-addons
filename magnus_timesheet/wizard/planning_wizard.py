@@ -52,6 +52,7 @@ class PlanningWizard(models.TransientModel):
         }
         if len(planning) == 1:
             value['res_id'] = planning.ids[0]
+            planning.compute_planning_lines()
         else:
             planning_obj = self.env['magnus.planning']
             week_from, week_to = planning_obj.fetch_weeks_from_planning_quarter(self.name)
