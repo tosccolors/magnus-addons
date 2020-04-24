@@ -138,6 +138,7 @@
 
     <record model="ir.ui.menu" id="hr_timesheet.menu_hr_activity_analysis">
         <field name="name">Actual Activity Analysis</field>
+        <field name="sequence">9</field>
     </record>
 
   </data>
