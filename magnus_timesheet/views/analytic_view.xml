@@ -240,5 +240,40 @@
             </field>
         </record>
 
+        <record id="view_account_analytic_line_pivot_planned_vs_actual" model="ir.ui.view">
+            <field name="name">account.analytic.line.pivot</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Analytic Entries">
+                    <field name="account_id" type="row"/>
+                    <field name="planned_qty" type="measure"/>
+                    <field name="actual_qty" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <record id="act_hr_timesheet_line_planned_vs_actual" model="ir.actions.act_window">
+            <field name="name">Planned vs. Actual Activity Analysis</field>
+            <field name="res_model">account.analytic.line</field>
+            <field name="domain">[('project_id', '!=', False), '|', ('correction_charge', '=', True), ('chargeable', '=', True)]</field>
+            <field name="context">{"search_default_today":1}</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="search_view_id" ref="hr_timesheet.hr_timesheet_line_search"/>
+            <field name="view_ids"
+               eval="[(5, 0, 0),
+                      (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_account_analytic_line_pivot_planned_vs_actual')}),
+            ]"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to record activities.
+              </p><p>
+                You can track Planned vs. Actual Activity Analysis.
+              </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_hr_working_planned_vs_actual" parent="hr_timesheet.menu_timesheets_reports" action="act_hr_timesheet_line_planned_vs_actual"
+            name="Planned vs. Actual Activity Analysis" sequence="11" groups="group_planning_forecasting"/>
+
     </data>
 </odoo>
