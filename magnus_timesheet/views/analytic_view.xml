@@ -66,7 +66,7 @@
         </record>
 
         <menuitem id="menu_hr_working_hours" parent="hr_timesheet.menu_timesheets_reports" action="act_hr_timesheet_line_forecast"
-            name="Planned Activity Analysis" sequence="10" groups="group_planning_forecasting"/>
+            name="Planned Activity Analysis" sequence="9" groups="group_planning_forecasting"/>
 
         <record id="hr_timesheet_line_tree_inherited" model="ir.ui.view">
             <field name="name">account.analytic.line.tree.hr_timesheet</field>
@@ -273,7 +273,7 @@
         </record>
 
         <menuitem id="menu_hr_working_planned_vs_actual" parent="hr_timesheet.menu_timesheets_reports" action="act_hr_timesheet_line_planned_vs_actual"
-            name="Planned vs. Actual Activity Analysis" sequence="11" groups="group_planning_forecasting"/>
+            name="Planned vs. Actual Activity Analysis" sequence="9" groups="group_planning_forecasting"/>
 
     </data>
 </odoo>
