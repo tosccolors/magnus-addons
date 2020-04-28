@@ -85,8 +85,10 @@ class AccountMove(models.Model):
         }
         for line in pl_move_lines:
             wip_line = line.copy(default)
-            wip_line.debit = line.credit
-            wip_line.credit = line.debit
+            if line.credit != 0:
+                wip_line.debit = line.credit
+            else:
+                wip_line.credit = line.debit
         return wip_move
 
 
