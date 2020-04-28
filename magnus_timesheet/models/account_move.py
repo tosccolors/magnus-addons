@@ -83,6 +83,7 @@ class AccountMove(models.Model):
         default = {
             'account_id': wip_journal.default_credit_account_id.id
         }
+        import pdb; pdb.set_trace()
         for line in pl_move_lines:
             wip_line = line.copy(default)
             if line.credit != 0:
