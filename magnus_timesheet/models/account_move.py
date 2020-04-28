@@ -82,16 +82,35 @@ class AccountMove(models.Model):
         bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids and r.account_id.id not in accids)
         pl_move_lines = mls - bs_move_lines
         ar_line = pl_move_lines.filtered(lambda r: r.account_id.id == ar_account_id)
-
-        analytic_account_obj = pl_move_lines.mapped('analytic_account_id')
+        fields_grouped = [
+            'id',
+            'user_id',
+            'analytic_account_id',
+        ]
+        grouped_by = [
+            'user_id',
+            'analytic_account_id',
+        ]
+        pl_move_lines_grp = pl_move_lines.read_group(
+            [('id', 'in', pl_move_lines.ids),
+             ('user_id', '!=', False),
+             ('analytic_account_id', '!=', False)],
+            fields_grouped,
+            grouped_by,
+            offset=0,
+            limit=None,
+            orderby=False,
+            lazy=False
+        )
         count = 0
-
-        for analytic_acc in analytic_account_obj:
+        for data in pl_move_lines_grp:
             # initialize amount with ar_line debit-credit
             amount = ar_line.debit - ar_line.credit
             count += 1
             #filter pl_move_lines which is type of current anlytic account this will exculde ar_line
-            for line in pl_move_lines.filtered(lambda r: r.analytic_account_id.id == analytic_acc.id):
+            analytic_acc = data['analytic_account_id'][0]
+            timesheet_user = data['user_id'][0]
+            for line in pl_move_lines.filtered(lambda r: r.analytic_account_id.id == analytic_acc and r.user_id.id == timesheet_user):
                 amount += line.debit - line.credit
             #create new ar_line if there is more than one analytic account
             if count > 1:
@@ -100,7 +119,8 @@ class AccountMove(models.Model):
             ar_line.credit = amount if amount > 0 else 0
             ar_line.debit = -amount if amount < 0 else 0
             ar_line.account_id = wip_journal.default_credit_account_id.id
-            ar_line.analytic_account_id = analytic_acc.id
+            ar_line.user_id = timesheet_user
+            ar_line.analytic_account_id = analytic_acc
         bs_move_lines.unlink()
         return wip_move
 
