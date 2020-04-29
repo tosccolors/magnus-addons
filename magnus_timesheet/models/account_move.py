@@ -68,60 +68,27 @@ class AccountMove(models.Model):
         }
         wip_move = self.copy(default)
         mls = wip_move.line_ids
-        ## we filter all P&L lines out of all move lines, including AR line(s) and OU-clearing lines (which are not P&L).
-        # All filtered out lines are unlinked. All except AR line will be kept unchanged. AR line will become wip line.
+        ## we filter all P&L lines out of all move lines.
+        # All filtered out lines are unlinked. All will be kept unchanged and copied with reversing debit/credit
+        # and replace P/L account by wip-account.
         ids = []
-        accids = []
         ids.append(self.env.ref('account.data_account_type_other_income').id)
         ids.append(self.env.ref('account.data_account_type_revenue').id)
         ids.append(self.env.ref('account.data_account_type_depreciation').id)
         ids.append(self.env.ref('account.data_account_type_expenses').id)
         ids.append(self.env.ref('account.data_account_type_direct_costs').id)
-        accids.append(self.company_id.inter_ou_clearing_account_id.id)
-        accids.append(ar_account_id)
-        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids and r.account_id.id not in accids)
+        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids )
         pl_move_lines = mls - bs_move_lines
-        ar_line = pl_move_lines.filtered(lambda r: r.account_id.id == ar_account_id)
-        fields_grouped = [
-            'id',
-            'user_id',
-            'analytic_account_id',
-        ]
-        grouped_by = [
-            'user_id',
-            'analytic_account_id',
-        ]
-        pl_move_lines_grp = pl_move_lines.read_group(
-            [('id', 'in', pl_move_lines.ids),
-             ('user_id', '!=', False),
-             ('analytic_account_id', '!=', False)],
-            fields_grouped,
-            grouped_by,
-            offset=0,
-            limit=None,
-            orderby=False,
-            lazy=False
-        )
-        count = 0
-        for data in pl_move_lines_grp:
-            # initialize amount with ar_line debit-credit
-            amount = ar_line.debit - ar_line.credit
-            count += 1
-            #filter pl_move_lines which is type of current anlytic account this will exculde ar_line
-            analytic_acc = data['analytic_account_id'][0]
-            timesheet_user = data['user_id'][0]
-            for line in pl_move_lines.filtered(lambda r: r.analytic_account_id.id == analytic_acc and r.user_id.id == timesheet_user):
-                amount += line.debit - line.credit
-            #create new ar_line if there is more than one analytic account
-            if count > 1:
-                ar_line = ar_line.copy()
-            amount -= ar_line.debit - ar_line.credit
-            ar_line.credit = amount if amount > 0 else 0
-            ar_line.debit = -amount if amount < 0 else 0
-            ar_line.account_id = wip_journal.default_credit_account_id.id
-            ar_line.user_id = timesheet_user
-            ar_line.analytic_account_id = analytic_acc
         bs_move_lines.unlink()
+        default = {
+            'account_id': wip_journal.default_credit_account_id.id
+        }
+        for line in pl_move_lines:
+            wip_line = line.copy(default)
+            if line.credit != 0:
+                wip_line.debit = line.credit
+            else:
+                wip_line.credit = line.debit
         return wip_move
 
 
