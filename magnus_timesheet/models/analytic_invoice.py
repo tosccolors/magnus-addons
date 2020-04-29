@@ -160,8 +160,7 @@ class AnalyticInvoice(models.Model):
             time_domain = domain + [
                 ('chargeable', '=', True),
                 ('product_uom_id', '=', hrs),
-                # ('state', 'in', ['invoiceable', 'progress']) #don't look for already linked user total detail lines
-                ('state', '=', 'invoiceable')
+                ('state', 'in', ['invoiceable', 'progress'])
             ]
             if aal_ids:
                 time_domain += [('id', 'not in', aal_ids.ids)]
