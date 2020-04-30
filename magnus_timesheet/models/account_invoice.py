@@ -200,11 +200,11 @@ class AccountInvoiceLine(models.Model):
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
 
-    @api.multi
-    def write(self, vals):
-        res = super(AccountInvoiceLine, self).write(vals)
-        self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes()
-        return res
+    # @api.multi
+    # def write(self, vals):
+    #     res = super(AccountInvoiceLine, self).write(vals)
+    #     self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes() #Issue: Vat creation double after invoice date change
+    #     return res
 
     @api.model
     def default_get(self, fields):
