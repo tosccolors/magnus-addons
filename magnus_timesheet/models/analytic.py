@@ -324,8 +324,8 @@ class AccountAnalyticLine(models.Model):
             task_user = self.env['task.user'].get_user_fee_rate(tid, uid, date)
             if task_user:
                 fr = task_user.fee_rate
-            elif task_user.product_id:
-                fr = task_user.product_id.lst_price or None
+            # elif task_user.product_id:
+            #     fr = task_user.product_id.lst_price or None
             # check standard task for fee earners
             if fr == None:
                 project_id = self.env['project.task'].browse(tid).project_id
@@ -335,8 +335,8 @@ class AccountAnalyticLine(models.Model):
                     task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid, date)
                     if task_user:
                         fr = task_user.fee_rate
-                    elif task_user.product_id:
-                        fr = task_user.product_id.lst_price or None
+                    # elif task_user.product_id:
+                    #     fr = task_user.product_id.lst_price or None
         if fr == None:
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
