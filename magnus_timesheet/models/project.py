@@ -131,7 +131,7 @@ class TaskUser(models.Model):
                 self.fee_rate = product.lst_price
 
     @api.multi
-    def get_user_fee_rate(self, task_id, user_id, date):
+    def get_task_user_obj(self, task_id, user_id, date):
         taskUserObj = self.search([
             ('from_date', '<=', date),
             ('task_id', '=', task_id),

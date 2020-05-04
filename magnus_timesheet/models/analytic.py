@@ -319,23 +319,23 @@ class AccountAnalyticLine(models.Model):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
-        amount, fr = 0.0, 0.0
+        fr = False
         if uid and tid and date:
-            task_user = self.env['task.user'].get_user_fee_rate(tid, uid, date)
+            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)
             if task_user and task_user.fee_rate or task_user.product_id:
-                fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
+                fr = task_user.fee_rate or task_user.product_id.lst_price or False
             # check standard task for fee earners
             if not fr:
                 project_id = self.env['project.task'].browse(tid).project_id
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
                     # task-358
-                    task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid, date)
+                    task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
                     if task_user and task_user.fee_rate or task_user.product_id:
                         fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
-        if not fr :
+        else:
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
-            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
+            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
         return fr
@@ -391,8 +391,7 @@ class AccountAnalyticLine(models.Model):
             planned = vals.get('planned', self.planned)
             # some cases product id is missing
             if not vals.get('product_id', self.product_id) and user_id:
-                if user_id and not vals.get('product_id', self.product_id):
-                    product_id = self.get_task_user_product(task_id, user_id) or False
+                product_id = self.get_task_user_product(task_id, user_id) or False
                 if not product_id and not planned:
                     user = self.env.user.browse(user_id)
                     raise ValidationError(_(
