@@ -333,8 +333,10 @@ class AccountAnalyticLine(models.Model):
                 if standard_task:
                     # task-358
                     task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid, date)
-                    if task_user and task_user.fee_rate or task_user.product_id:
-                        fr = task_user.fee_rate or task_user.product_id.lst_price or None
+                    if task_user:
+                        fr = task_user.fee_rate
+                    elif task_user.product_id:
+                        fr = task_user.product_id.lst_price or None
         if fr == None:
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
