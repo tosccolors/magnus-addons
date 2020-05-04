@@ -68,7 +68,7 @@ class AccountMove(models.Model):
         }
         wip_move = self.copy(default)
         mls = wip_move.line_ids
-        ## we filter all P&L lines out of all move lines.
+        ## we filter all BS lines out of all move lines. And also all "null" lines because of reconcile problem
         # All filtered out lines are unlinked. All will be kept unchanged and copied with reversing debit/credit
         # and replace P/L account by wip-account.
         ids = []
@@ -77,9 +77,14 @@ class AccountMove(models.Model):
         ids.append(self.env.ref('account.data_account_type_depreciation').id)
         ids.append(self.env.ref('account.data_account_type_expenses').id)
         ids.append(self.env.ref('account.data_account_type_direct_costs').id)
-        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids )
-        pl_move_lines = mls - bs_move_lines
+        # Balance Sheet lines
+        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids)
+        # lines with both debit and credit equals 0
+        null_lines = mls.filtered(lambda r: r.credit + r.debit == 0.0)
+        # leaving only not-null Profit and Loss lines
+        pl_move_lines = mls - bs_move_lines - null_lines
         bs_move_lines.unlink()
+        null_lines.unlink()
         default = {
             'account_id': wip_journal.default_credit_account_id.id
         }

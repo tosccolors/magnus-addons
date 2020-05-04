@@ -141,10 +141,12 @@ class AccountInvoice(models.Model):
             if line_amt > 0:
                 reconcile = True
             reverse_wip_move = wip_move.create_reversals(
-                date=reverse_date, journal=wip_journal,
-                move_prefix='WIP Invoicing Reverse', line_prefix='WIP Invoicing Reverse',
-                reconcile=reconcile)
-
+                date=reverse_date,
+                journal=wip_journal,
+                move_prefix='WIP Invoicing Reverse',
+                line_prefix='WIP Invoicing Reverse',
+                reconcile=reconcile
+            )
             if len(reverse_wip_move) == 1:
                 wip_nxt_seq = sequence.with_context(ir_sequence_date=reverse_wip_move.date).next_by_id()
                 reverse_wip_move.write({'name':wip_nxt_seq})
