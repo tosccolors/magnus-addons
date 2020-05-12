@@ -155,13 +155,17 @@ class HrExpenseSheet(models.Model):
         return res
     @api.multi
     def write(self,vals):
+        if self.filtered('is_from_crdit_card'):
+            credit_card_exp = True
+        else:
+            credit_card_exp = False
         if vals.get('expense_line_ids'):
             line_list = vals.get('expense_line_ids')[0][2]
             for expense in self.env['hr.expense'].browse(line_list):
-                expense.write({'is_from_crdit_card':True,'payment_mode':'company_account'})
+                expense.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
         for credit_line in self.filtered('is_from_crdit_card'):
             for line in credit_line.expense_line_ids:
-                line.write({'is_from_crdit_card':True,'payment_mode':'company_account'})
+                line.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
         return super(HrExpenseSheet,self).write(vals)
     
     @api.multi
