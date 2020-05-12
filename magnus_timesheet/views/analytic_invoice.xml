@@ -37,7 +37,7 @@
                            string="Fee Rates"
                            domain="task_user_ids_domain"
                            readonly="0"
-                           context="{'tree_view_ref' : 'magnus_invoicing.view_task_user_tree'}"
+                           context="{'tree_view_ref' : 'magnus_timesheet.view_task_user_tree'}"
                            />
 
                     <separator string="Invoice Lines"/>

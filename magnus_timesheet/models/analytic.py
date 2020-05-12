@@ -5,6 +5,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError
+import calendar
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -13,16 +14,16 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('date',
                  'user_id',
-                 'project_id',
+                 'task_id',
+                 'product_uom_id',
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
                  'sheet_id_computed.employee_id')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         """
-        for ts_line in self.filtered('project_id'):
-            if not ts_line.ts_line :
-                continue
+        uom_hrs = self.env.ref("product.product_uom_hour").id
+        for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
                 [('date_to', '>=', ts_line.date),
                  ('date_from', '<=', ts_line.date),
@@ -60,43 +61,38 @@ class AccountAnalyticLine(models.Model):
                     line.expenses = line.project_id.invoice_properties.expenses
             elif line.account_id:
                 line.project_mgr = line.account_id.project_ids.user_id or False
-            if line.task_id and line.user_id:
-                uou = line.user_id._get_operating_unit_id()
+            task = line.task_id
+            user = line.user_id
+            date = line.date
+            if task and user:
+                uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
+                if date:
+                    line.day_name = str(datetime.strptime(date, '%Y-%m-%d').
+                                    strftime("%m/%d/%Y")) + \
+                                    ' (' + datetime.strptime(date, '%Y-%m-%d').\
+                                    strftime('%a') + ')'
                 if not line.planned:
-                    if line.sheet_id.week_id and line.date:
+                    if line.sheet_id.week_id and date:
                         line.week_id = line.sheet_id.week_id
-                        var_month_id = line.find_daterange_month(line.date)
-                    elif line.date:
-                        line.week_id = line.find_daterange_week(line.date)
-                        var_month_id = line.find_daterange_month(line.date)
+                        var_month_id = line.find_daterange_month(date)
+                    elif date:
+                        line.week_id = line.find_daterange_week(date)
+                        var_month_id = line.find_daterange_month(date)
                     if line.month_of_last_wip:
                         line.wip_month_id = line.month_of_last_wip
                     else:
                         line.wip_month_id = line.month_id = var_month_id
                     if line.product_uom_id.id == UomHrs:
                         line.ts_line = True
-                task = line.task_id
-                user = line.user_id
-                line.product_id = self.get_task_user_product(task.id, user.id) or False
-                if not line.product_id:
-                    raise ValidationError(_(
-                        'Please fill in Fee Rate Product in employee %s.\n '
-                    ) % line.user_id.name)
-                # taskuser = self.env['task.user'].search(
-                #     [('task_id', '=', task.id), ('user_id', '=', user.id)], limit=1)
-                # if taskuser and taskuser.fee_rate or taskuser.product_id:
-                #     fee_rate = taskuser.fee_rate or taskuser.product_id.lst_price or 0.0
-                # else:
-                #     employee = user._get_related_employees()
-                #     fee_rate = employee.fee_rate or employee.product_id.lst_price or 0.0
-                # if line.product_uom_id and line.product_uom_id.id == \
-                #         self.env.ref('product.product_uom_hour').id:
-                #     line.amount = line.unit_amount * - fee_rate
-
+                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                    line.actual_qty = line.unit_amount
+                    line.planned_qty = 0.0
             if line.planned:
                 line.week_id = line.find_daterange_week(line.date)
+                line.planned_qty = line.unit_amount
+                line.actual_qty = 0.0
 
 
     def find_daterange_week(self, date):
@@ -157,13 +153,6 @@ class AccountAnalyticLine(models.Model):
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
 
-    @api.depends('unit_amount','amount')
-    def _compute_analytic_line_fee_rate(self):
-        for aal in self:
-            if aal.unit_amount and aal.amount:
-                aal.line_fee_rate = abs(aal.amount/aal.unit_amount)
-            else:
-                aal.line_fee_rate = 0.0
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -219,17 +208,17 @@ class AccountAnalyticLine(models.Model):
     )
     actual_qty = fields.Float(
         string='Actual Qty',
-        compute='_get_qty',
+        compute=_compute_analytic_line,
         store=True
     )
     planned_qty = fields.Float(
         string='Planned Qty',
-        compute='_get_qty',
+        compute=_compute_analytic_line,
         store=True
     )
     day_name = fields.Char(
         string="Day",
-        compute='_get_day'
+        compute=_compute_analytic_line
     )
     ts_line = fields.Boolean(
         compute=_compute_analytic_line,
@@ -255,16 +244,48 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_analytic_line,
         store=True
     )
-
     ot = fields.Boolean(
         string='Overtime',
     )
-    employee_id = fields.Many2one('hr.employee', string='Employee')
-
+    employee_id = fields.Many2one(
+        'hr.employee',
+        string='Employee'
+    )
     line_fee_rate = fields.Float(
-        compute=_compute_analytic_line_fee_rate,
+        compute=_compute_analytic_line,
         string='Fee Rate',
         store=True,
+    )
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('open', 'Confirmed'),
+        ('delayed', 'Delayed'),
+        ('invoiceable', 'To be Invoiced'),
+        ('progress', 'In Progress'),
+        ('invoice_created', 'Invoice Created'),
+        ('invoiced', 'Invoiced'),
+        ('write-off', 'Write-Off'),
+        ('change-chargecode', 'Change-Chargecode'),
+        ('re_confirmed', 'Re-Confirmed'),
+        ('invoiced-by-fixed', 'Invoiced by Fixed'),
+        ('expense-invoiced', 'Expense Invoiced')
+    ],
+        string='Status',
+        readonly=True,
+        copy=False,
+        index=True,
+        track_visibility='onchange',
+        default='draft'
+    )
+    user_total_id = fields.Many2one(
+        'analytic.user.total',
+        string='Summary Reference',
+    )
+    date_of_last_wip = fields.Date(
+        "Date Of Last WIP"
+    )
+    date_of_next_reconfirmation = fields.Date(
+        "Date Of Next Reconfirmation"
     )
 
     @api.model
@@ -298,23 +319,23 @@ class AccountAnalyticLine(models.Model):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
-        amount, fr = 0.0, 0.0
+        fr = None
         if uid and tid and date:
-            task_user = self.env['task.user'].get_user_fee_rate(tid, uid, date)
-            if task_user and task_user.fee_rate or task_user.product_id:
-                fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
+            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)
+            if task_user:
+                fr = task_user.fee_rate
             # check standard task for fee earners
-            if not fr:
+            if fr == None:
                 project_id = self.env['project.task'].browse(tid).project_id
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
                     # task-358
-                    task_user = self.env['task.user'].get_user_fee_rate(standard_task.id, uid, date)
-                    if task_user and task_user.fee_rate or task_user.product_id:
-                        fr = task_user.fee_rate or task_user.product_id.lst_price or 0.0
-        if not fr :
+                    task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
+                    if task_user:
+                        fr = task_user.fee_rate
+        if fr == None:
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
-            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price
+            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
         return fr
@@ -335,61 +356,120 @@ class AccountAnalyticLine(models.Model):
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
 
-    @api.model
-    def create(self, vals):
-        task_id = vals.get('task_id', False)
-        user_id = vals.get('user_id', False)
+    @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
+    def on_change_unit_amount(self):
+        if self.product_uom_id == self.env.ref("product.product_uom_hour").id:
+            return {}
+        return super(AccountAnalyticLine, self).on_change_unit_amount()
 
-        #some cases product id is missing
-        product_id = self.get_task_user_product(task_id, user_id) or False
 
-        # for planning skip fee rate check
-        if not product_id and user_id and not vals.get('planned', False):
-            user = self.env.user.browse(user_id)
-            raise ValidationError(_(
-                'Please fill in Fee Rate Product in employee %s.\n '
-                ) % user.name)
-        if product_id:
-            vals['product_id'] = product_id
-
-        if vals.get('ts_line', False):
-            unit_amount = vals.get('unit_amount', False)
-            vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
-        return super(AccountAnalyticLine, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        for aal in self:
-            task_id = vals.get('task_id', aal.task_id and aal.task_id.id)
-            user_id = vals.get('user_id', aal.user_id and aal.user_id.id)
-            #for planning skip fee rate check
-            planned = vals.get('planned', aal.planned)
+        # Condition to check if sheet_id already exists!
+        if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
+            raise ValidationError(_(
+                'Timesheet link can not be deleted for %s.\n '
+            ) % self)
+
+        # don't call super if only state has to be updated
+        if self and 'state' in vals and len(vals) == 1:
+            state = vals['state']
+            cond, rec = ("IN", tuple(self.ids)) if len(self) > 1 else ("=",
+                                                                       self.id)
+            self.env.cr.execute("""
+                               UPDATE %s SET state = '%s' WHERE id %s %s
+                               """ % (self._table, state, cond, rec))
+            self.env.invalidate_all()
+            vals.pop('state')
+            return True
+
+        if len(self) == 1:
+            task_id = vals.get('task_id', self.task_id and self.task_id.id)
+            user_id = vals.get('user_id', self.user_id and self.user_id.id)
+            # for planning skip fee rate check
+            planned = vals.get('planned', self.planned)
             # some cases product id is missing
-            if not vals.get('product_id', aal.product_id) and user_id:
-                if user_id and not vals.get('product_id', aal.product_id):
-                    product_id = aal.get_task_user_product(task_id, user_id) or False
+            if not vals.get('product_id', self.product_id) and user_id:
+                product_id = self.get_task_user_product(task_id, user_id) or False
                 if not product_id and not planned:
                     user = self.env.user.browse(user_id)
                     raise ValidationError(_(
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', aal.ts_line)
+            ts_line = vals.get('ts_line', self.ts_line)
             if ts_line:
-                unit_amount = vals.get('unit_amount', aal.unit_amount)
-                vals['amount'] = aal.get_fee_rate_amount(task_id, user_id, unit_amount)
+                unit_amount = vals.get('unit_amount', self.unit_amount)
+                vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
+
+        if self.filtered('ts_line') and not (
+                'unit_amount' in vals or
+                'product_uom_id' in vals or
+                'sheet_id' in vals or
+                'date' in vals or
+                'project_id' in vals or
+                'task_id' in vals or
+                'user_id' in vals or
+                'name' in vals or
+                'ref' in vals):
+            # always copy context to keep other context reference
+            context = self.env.context.copy()
+            context.update({'analytic_check_state': True})
+            return super(AccountAnalyticLine, self.with_context(context)).write(
+                vals)
         return super(AccountAnalyticLine, self).write(vals)
 
-    @api.depends('unit_amount')
-    def _get_qty(self):
-        for line in self:
-            if line.planned:
-                line.planned_qty = line.unit_amount
-                line.actual_qty = 0.0
-            else:
-                line.actual_qty = line.unit_amount
-                line.planned_qty = 0.0
+    def _get_timesheet_cost(self, values):
+        ## turn off updating amount and account
+        values = values if values is not None else {}
+        if values.get('project_id') or self.project_id:
+            if values.get('amount'):
+                return {}
+            # unit_amount = values.get('unit_amount', 0.0) or self.unit_amount
+            user_id = values.get('user_id') or self.user_id.id or self._default_user()
+            user = self.env['res.users'].browse([user_id])
+            emp = self.env['hr.employee'].search([('user_id', '=', user_id)], limit=1)
+            # cost = emp and emp.timesheet_cost or 0.0
+            uom = (emp or user).company_id.project_time_mode_id
+            # Nominal employee cost = 1 * company project UoM (project_time_mode_id)
+            return {
+                # 'amount': -unit_amount * cost,
+                'product_uom_id': uom.id,
+                # 'account_id': values.get('account_id') or self.account_id.id or emp.account_id.id,
+            }
+        return {}
 
-    def _get_day(self):
-        for line in self:
-            line.day_name = str(datetime.strptime(line.date, '%Y-%m-%d').strftime("%m/%d/%Y"))+' ('+datetime.strptime(line.date, '%Y-%m-%d').strftime('%a')+')'
+    def _check_state(self):
+        """
+        to check if any lines computes method calls allow to modify
+        :return: True or super
+        """
+        context = self.env.context.copy()
+        if 'analytic_check_state' in context \
+                or 'active_invoice_id' in context:
+            return True
+        return super(AccountAnalyticLine, self)._check_state()
+
+    @api.model
+    def run_reconfirmation_process(self):
+        current_date = datetime.now().date()
+        # pre_month_start_date = current_date.replace(day=1, month=current_date.month - 1)
+        month_days = calendar.monthrange(current_date.year, current_date.month)[1]
+        month_end_date = current_date.replace(day=month_days)
+
+        domain = [('date_of_next_reconfirmation', '!=', False), ('date_of_next_reconfirmation', '<=', month_end_date),
+                  ('state', '=', 'delayed')]
+        query_line = self._where_calc(domain)
+        self_tables, where_clause, where_clause_params = query_line.get_sql()
+
+        list_query = ("""                    
+                UPDATE {0}
+                SET state = 're_confirmed', date_of_next_reconfirmation = null
+                WHERE {1}                          
+                     """.format(
+            self_tables,
+            where_clause
+        ))
+        self.env.cr.execute(list_query, where_clause_params)
+        return True

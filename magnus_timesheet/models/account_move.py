@@ -68,28 +68,34 @@ class AccountMove(models.Model):
         }
         wip_move = self.copy(default)
         mls = wip_move.line_ids
-        ## we filter all P&L lines out of all move lines, including AR line(s) and OU-clearing lines (which are not P&L).
-        # All filtered out lines are unlinked. All except AR line will be kept unchanged. AR line will become wip line.
+        ## we filter all BS lines out of all move lines. And also all "null" lines because of reconcile problem
+        # All filtered out lines are unlinked. All will be kept unchanged and copied with reversing debit/credit
+        # and replace P/L account by wip-account.
         ids = []
-        accids = []
         ids.append(self.env.ref('account.data_account_type_other_income').id)
         ids.append(self.env.ref('account.data_account_type_revenue').id)
         ids.append(self.env.ref('account.data_account_type_depreciation').id)
         ids.append(self.env.ref('account.data_account_type_expenses').id)
         ids.append(self.env.ref('account.data_account_type_direct_costs').id)
-        accids.append(self.company_id.inter_ou_clearing_account_id.id)
-        accids.append(ar_account_id)
-        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids and r.account_id.id not in accids)
-        pl_move_lines = mls - bs_move_lines
-        amount = 0.0
-        for line in pl_move_lines:
-            amount += line.debit - line.credit
-        ar_line = pl_move_lines.filtered(lambda r: r.account_id.id == ar_account_id)
-        amount -= ar_line.debit - ar_line.credit
+        # Balance Sheet lines
+        bs_move_lines = mls.filtered(lambda r: r.account_id.user_type_id.id not in ids)
+        # lines with both debit and credit equals 0
+        null_lines = mls.filtered(lambda r: r.credit + r.debit == 0.0)
+        # leaving only not-null Profit and Loss lines
+        pl_move_lines = mls - bs_move_lines - null_lines
         bs_move_lines.unlink()
-        ar_line.credit = amount if amount > 0 else 0
-        ar_line.debit = -amount if amount < 0 else 0
-        ar_line.account_id = wip_journal.default_credit_account_id.id
+        null_lines.unlink()
+        default = {
+            'account_id': wip_journal.default_credit_account_id.id
+        }
+        for line in pl_move_lines:
+            wip_line = line.copy(default)
+            if line.credit != 0:
+                wip_line.credit = line.debit
+                wip_line.debit = line.credit
+            else:
+                wip_line.debit = line.credit
+                wip_line.credit = line.debit
         return wip_move
 
 

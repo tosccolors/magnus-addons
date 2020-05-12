@@ -66,10 +66,6 @@ class HrTimesheetSheet(models.Model):
                 raise UserError(_('Please contact administrator.'))
         return rec
 
-    @api.onchange('week_id')
-    def onchange_week_id(self):
-        return {'domain':{'week_id':self._get_week_domain()}}
-
     def _get_week_domain(self):
         emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
         emp_id = emp_id.id if emp_id else False
@@ -148,31 +144,104 @@ class HrTimesheetSheet(models.Model):
         self.overtime_hours = working_hrs_incl_ott - 40
         self.overtime_hours_delta = working_hrs_incl_ott - ott - 40
 
+    week_id = fields.Many2one(
+        'date.range',
+        domain=_get_week_domain,
+        string="Timesheet Week",
+        required=True
+    )
+    employee_id = fields.Many2one(
+        'hr.employee',
+        string='Employee',
+        default=_default_employee,
+        required=True,
+        domain=_get_employee_domain
+    )
+    starting_mileage = fields.Integer(
+        compute='_get_starting_mileage',
+        string='Starting Mileage',
+        store=False
+    )
+    starting_mileage_editable = fields.Integer(
+        string='Starting Mileage'
+    )
+    vehicle = fields.Boolean(
+        compute='_get_starting_mileage',
+        string='Vehicle',
+        store=False
+    )
+    business_mileage = fields.Integer(
+        compute='_get_business_mileage',
+        string='Business Mileage',
+        store=True
+    )
+    private_mileage = fields.Integer(
+        compute='_get_private_mileage',
+        string='Private Mileage',
+        store=True
+    )
+    end_mileage = fields.Integer(
+        'End Mileage'
+    )
+    overtime_hours = fields.Float(
+        compute="_get_overtime_hours",
+        string='Overtime Hours',
+        store=True
+    )
+    overtime_hours_delta = fields.Float(
+        compute="_get_overtime_hours",
+        string='Change in Overtime Hours',
+        store=True
+    )
+    odo_log_id = fields.Many2one(
+        'fleet.vehicle.odometer',
+        string="Odo Log ID"
+    )
+    overtime_analytic_line_id = fields.Many2one(
+        'account.analytic.line',
+        string="Overtime Entry"
+    )
+    date_from = fields.Date(
+        related='week_id.date_start',
+        string='Date From',
+        store=True,
+    )
+    date_to = fields.Date(
+        related='week_id.date_end',
+        string='Date To',
+        store=True,
+    )
+    ## with override of date fields as related of week_id not necessary anymore
+    # @api.onchange('week_id', 'date_from', 'date_to')
+    # def onchange_week(self):
+    #     self.date_from = self.week_id.date_start
+    #     self.date_to = self.week_id.date_end
 
+    #  @api.onchange('starting_mileage', 'business_mileage')
+    #  def onchange_private_mileage(self):
+    #      if self.private_mileage == 0:
+    #          self.end_mileage = self.starting_mileage + self.business_mileage
 
-    week_id = fields.Many2one('date.range', domain=_get_week_domain, string="Timesheet Week", required=True)
-    employee_id = fields.Many2one('hr.employee', string='Employee', default=_default_employee, required=True, domain=_get_employee_domain)
-    starting_mileage = fields.Integer(compute='_get_starting_mileage', string='Starting Mileage', store=False)
-    starting_mileage_editable = fields.Integer(string='Starting Mileage')
-    vehicle = fields.Boolean(compute='_get_starting_mileage', string='Vehicle', store=False)
-    business_mileage = fields.Integer(compute='_get_business_mileage', string='Business Mileage', store=True)
-    private_mileage = fields.Integer(compute='_get_private_mileage', string='Private Mileage', store=False)
-    end_mileage = fields.Integer('End Mileage')
-    overtime_hours = fields.Float(compute="_get_overtime_hours", string='Overtime Hours', store=True)
-    overtime_hours_delta = fields.Float(compute="_get_overtime_hours", string='Change in Overtime Hours', store=True)
-    odo_log_id = fields.Many2one('fleet.vehicle.odometer',  string="Odo Log ID")
-    overtime_analytic_line_id = fields.Many2one('account.analytic.line', string="Overtime Entry")
+    @api.constrains('week_id', 'employee_id')
+    def _check_sheet_date(self, forced_user_id=False):
+        for sheet in self:
+            new_user_id = forced_user_id or sheet.user_id and sheet.user_id.id
+            if new_user_id:
+                self.env.cr.execute('''
+                        SELECT id
+                        FROM hr_timesheet_sheet_sheet
+                        WHERE week_id=%s
+                        AND user_id=%s''',
+                        (sheet.week_id.id, new_user_id)
+                )
+                if self.env.cr.rowcount > 1:
+                    raise ValidationError(_(
+                        'You cannot have 2 timesheets with the same week_id!\nPlease use the menu \'My Current Timesheet\' to avoid this problem.'))
 
-    @api.onchange('week_id', 'date_from', 'date_to')
-    def onchange_week(self):
-        self.date_from = self.week_id.date_start
-        self.date_to = self.week_id.date_end
-
-  #  @api.onchange('starting_mileage', 'business_mileage')
-  #  def onchange_private_mileage(self):
-  #      if self.private_mileage == 0:
-  #          self.end_mileage = self.starting_mileage + self.business_mileage
-
+    @api.onchange('employee_id')
+    def onchange_employee_id(self):
+        super(HrTimesheetSheet, self).onchange_employee_id()
+        return {'domain': {'week_id': self._get_week_domain()}}
 
     def duplicate_last_week(self):
         if self.week_id and self.employee_id:
@@ -200,28 +269,7 @@ class HrTimesheetSheet(models.Model):
                     ) % (datetime.strftime(date_start, "%d-%b-%Y"),
                          datetime.strftime(date_end, "%d-%b-%Y")))
                 ## todo What if during last week department_id and/or operating_unit_id and/or product_id has changed?
-                # elif self.employee_id.department_id != last_week_timesheet.employee_id.department_id \
-                #     or self.employee_id.product_id != last_week_timesheet.employee_id.product_id \
-                #     or self.employee_id.operating_unit_id != last_week_timesheet.employee_id.operating_unit_id:
-                #     current_week_lines = [(0, 0, {
-                #         'date': l.date,
-                #         'name': l.name,
-                #         'project_id': l.project_id.id,
-                #         'task_id': l.task_id.id,
-                #         'user_id': l.user_id.id,
-                #         'unit_amount': l.unit_amount
-                #     }) for l in self.timesheet_ids] if self.timesheet_ids else []
-                #     if last_week_timesheet:
-                #         self.timesheet_ids.unlink()
-                #         last_week_lines = [(0, 0, {
-                #             'date': datetime.strptime(l.date, "%Y-%m-%d") +
-                #                     timedelta(days=7),
-                #             'name': '/',
-                #             'project_id': l.project_id.id,
-                #             'task_id': l.task_id.id,
-                #             'user_id': l.user_id.id
-                #         }) for l in last_week_timesheet.timesheet_ids]
-                #         self.timesheet_ids = current_week_lines + last_week_lines
+                ## todo nothing because when unit_amount is set in the timesheet, _compute_analytic_line and write() are called
 
                 else:
                     self.copy_wih_query(True, last_week_timesheet.id)
@@ -231,6 +279,34 @@ class HrTimesheetSheet(models.Model):
         total = self.starting_mileage + self.business_mileage
         if self.end_mileage < total:
             raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
+
+    @api.one
+    def action_timesheet_draft(self):
+        """
+        On timesheet reset draft check analytic shouldn't be in invoiced
+        :return: Super
+        """
+        if any([ts.state == 'progress' for ts in self.timesheet_ids]):
+            # if self.timesheet_ids.filtered('invoiced') or any([ts.state == 'progress' for ts in self.timesheet_ids]):
+            raise UserError(_('You cannot modify timesheet entries either Invoiced or belongs to Analytic Invoiced!'))
+        res = super(HrTimesheetSheet, self).action_timesheet_draft()
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                                UPDATE account_analytic_line SET state = 'draft' WHERE id %s %s;
+                                DELETE FROM account_analytic_line WHERE ref_id %s %s;
+                        """ % (cond, rec, cond, rec))
+            self.env.invalidate_all()
+        if self.odo_log_id:
+            self.env['fleet.vehicle.odometer'].sudo().search([('id', '=', self.odo_log_id.id)]).unlink()
+            self.odo_log_id = False
+        return res
+
+
 
     @api.one
     def action_timesheet_confirm(self):
@@ -252,7 +328,6 @@ class HrTimesheetSheet(models.Model):
                 if i < 5 and float_compare(hour, 8, precision_digits=3, precision_rounding=None) < 0:
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
-
 
     @api.one
     def create_overtime_entries(self):
@@ -284,7 +359,6 @@ class HrTimesheetSheet(models.Model):
                 self.overtime_analytic_line_id.unlink()
         return self.overtime_analytic_line_id
 
-
     @api.one
     def action_timesheet_done(self):
         """
@@ -292,9 +366,43 @@ class HrTimesheetSheet(models.Model):
         :return: Super
         """
         res = super(HrTimesheetSheet, self).action_timesheet_done()
+        if self.timesheet_ids:
+            cond = '='
+            rec = self.timesheet_ids.ids[0]
+            if len(self.timesheet_ids) > 1:
+                cond = 'IN'
+                rec = tuple(self.timesheet_ids.ids)
+            self.env.cr.execute("""
+                                    UPDATE account_analytic_line SET state = 'open' WHERE id %s %s
+                            """ % (cond, rec))
         self.create_overtime_entries()
         self.copy_wih_query(False, None)
         return res
+
+    @api.one
+    def write(self, vals):
+        result = super(HrTimesheetSheet, self).write(vals)
+        lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(
+            lambda line: line.unit_amount > 24 or line.unit_amount < 0)
+        for l in lines:
+            l.write({'unit_amount': 0})
+        return result
+
+    @api.multi
+    def action_view_overtime_entry(self):
+        self.ensure_one()
+        action = self.env.ref('analytic.account_analytic_line_action_entries')
+        return {
+            'name': action.name,
+            'help': action.help,
+            'type': action.type,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'target': action.target,
+            'res_id': self.overtime_analytic_line_id.id or False,
+            'res_model': action.res_model,
+            'domain': [('id', '=', self.overtime_analytic_line_id.id)],
+        }
 
     def copy_wih_query(self, copy_last_week=False, last_week_timesheet_id=None):
         query = """
@@ -324,9 +432,6 @@ class HrTimesheetSheet(models.Model):
                 task_id,
                 sheet_id,
                 ts_line,
-                so_line,
-                user_total_id,
-                invoiceable,
                 month_id,
                 week_id,
                 account_department_id,               
@@ -367,9 +472,6 @@ class HrTimesheetSheet(models.Model):
                 aal.task_id as task_id, """ + \
                 ("NULL as sheet_id, " if not copy_last_week else "%(sheet_aal)s as sheet_id, ") + \
                 ("NULL as ts_line, " if not copy_last_week else "aal.ts_line as ts_line, ") + \
-             """aal.so_line as so_line,
-                aal.user_total_id as user_total_id,
-                aal.invoiceable as invoiceable, """ + \
                 ("aal.month_id as month_id, " if not copy_last_week else "dr.id as month_id, ") + \
                 ("aal.week_id as week_id, " if not copy_last_week else "%(week_id_aal)s as week_id, ") + \
              """aal.account_department_id as account_department_id,
@@ -388,19 +490,23 @@ class HrTimesheetSheet(models.Model):
                   ELSE ip.invoice_mileage
                 END AS non_invoiceable_mileage, """ + \
                 ("%(uom)s as product_uom_id " if not copy_last_week else "aal.product_uom_id as product_uom_id ") + \
-          """FROM 
-             account_analytic_line aal
-                 LEFT JOIN project_project pp 
-                 ON pp.id = aal.project_id
-                 LEFT JOIN account_analytic_account aaa
-                 ON aaa.id = aal.account_id
-                 LEFT JOIN project_invoicing_properties ip
-                 ON ip.id = pp.invoice_properties
-                 RIGHT JOIN hr_timesheet_sheet_sheet hss
-                 ON hss.id = aal.sheet_id
-                 LEFT JOIN date_range dr 
-                 on (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
-             WHERE hss.id = %(sheet_select)s
+            """
+        FROM account_analytic_line aal
+             LEFT JOIN project_project pp 
+             ON pp.id = aal.project_id
+             LEFT JOIN account_analytic_account aaa
+             ON aaa.id = aal.account_id
+             LEFT JOIN project_invoicing_properties ip
+             ON ip.id = pp.invoice_properties
+             RIGHT JOIN hr_timesheet_sheet_sheet hss
+             ON hss.id = aal.sheet_id
+             LEFT JOIN date_range dr 
+             ON (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
+             LEFT JOIN hr_employee he 
+             ON (hss.employee_id = he.id)
+             LEFT JOIN task_user tu 
+             ON (tu.task_id = aal.task_id and tu.user_id = aal.user_id and aal.date >= tu.from_date)
+        WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL             
              AND aal.task_id NOT IN 
              (
@@ -420,42 +526,6 @@ class HrTimesheetSheet(models.Model):
                             )
         self.env.invalidate_all()
         return True
-
-    @api.one
-    def action_timesheet_draft(self):
-        """
-        On timesheet reset draft check analytic shouldn't be in invoiced
-        :return: Super
-        """
-        res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        if self.odo_log_id:
-            self.env['fleet.vehicle.odometer'].sudo().search([('id','=', self.odo_log_id.id)]).unlink()
-            self.odo_log_id = False
-        return res
-
-    @api.one
-    def write(self, vals):
-        result = super(HrTimesheetSheet, self).write(vals)
-        lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(lambda line: line.unit_amount > 24 or line.unit_amount < 0)
-        for l in lines:
-            l.write({'unit_amount': 0})
-        return result
-
-    @api.multi
-    def action_view_overtime_entry(self):
-        self.ensure_one()
-        action = self.env.ref('analytic.account_analytic_line_action_entries')
-        return {
-            'name': action.name,
-            'help': action.help,
-            'type': action.type,
-            'view_type': 'form',
-            'view_mode': 'form',
-            'target': action.target,
-            'res_id': self.overtime_analytic_line_id.id or False,
-            'res_model': action.res_model,
-            'domain': [('id', '=', self.overtime_analytic_line_id.id)],
-        }
 
 
 class DateRangeGenerator(models.TransientModel):

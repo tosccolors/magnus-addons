@@ -115,8 +115,9 @@
     </record>
 
     <record id="hr_timesheet.act_hr_timesheet_report" model="ir.actions.act_window">
-      <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)')]</field>
-        <field name="context">{"search_default_today":1, "search_default_filter_not_planned":1}</field>
+        <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)'), ('planned', '=', False)]</field>
+        <!--<field name="context">{"search_default_today":1, "search_default_filter_not_planned":1}</field>-->
+        <field name="context">{"search_default_today":1}</field>
     </record>
 
     <record id="hr_timesheet_line_search" model="ir.ui.view">
@@ -134,6 +135,11 @@
 
     <menuitem id="hr_timesheet.menu_timesheets_reports" name="Reports"
             parent="hr_timesheet.timesheet_menu_root" sequence="99" groups="magnus_timesheet.group_magnus_reports"/>
+
+    <record model="ir.ui.menu" id="hr_timesheet.menu_hr_activity_analysis">
+        <field name="name">Actual Activity Analysis</field>
+        <field name="sequence">9</field>
+    </record>
 
   </data>
 </odoo>

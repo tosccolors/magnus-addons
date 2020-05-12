@@ -60,13 +60,6 @@ class AnalyticLineStatus(models.TransientModel):
                 _("Entries must belong to same month!"))
         return True
 
-    # def update_line_fee_rates(self, analytic_ids):
-    #     for analytic in self.env['account.analytic.line'].browse(analytic_ids):
-    #         new_amt = analytic.get_fee_rate_amount(analytic.task_id.id, analytic.user_id.id)
-    #         if new_amt != analytic.amount:
-    #             analytic.amount = new_amt
-    #     return True
-
     @api.one
     def analytic_invoice_lines(self):
         context = self.env.context.copy()
@@ -74,23 +67,20 @@ class AnalyticLineStatus(models.TransientModel):
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
         status = str(self.name)
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
-
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
-
         no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
         if no_invoicing_property_entries and status == 'invoiceable':
             project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
                 )%project_names)
-
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             self.env.cr.execute("""
                 UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
                 """ % (status, cond, rec))
             self.env.invalidate_all()
-            if status == 'delayed' and self.wip and self.wip_percentage > 0.0:
+            if status == 'delayed' and self.wip:
                 # self.validate_entries_month(analytic_ids)
                 # self.update_line_fee_rates(analytic_ids)
                 self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
@@ -98,7 +88,6 @@ class AnalyticLineStatus(models.TransientModel):
                 # self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
-
 
     def prepare_analytic_invoice(self):
         def analytic_invoice_create(result, link_project):
@@ -313,7 +302,7 @@ class AnalyticLineStatus(models.TransientModel):
         narration = self.description if self.wip else ''
         try:
             if len(result) > 0:
-                wip_journal = self.env.ref('magnus_invoicing.wip_journal')
+                wip_journal = self.env.ref('magnus_timesheet.wip_journal')
                 if not wip_journal.sequence_id:
                     raise UserError(_('Please define sequence on the type WIP journal.'))
                 for item in result:
@@ -331,34 +320,36 @@ class AnalyticLineStatus(models.TransientModel):
                     aml = []
                     analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id), ('wip_month_id', '=', month_id)])
                     analytic_line_obj -= done_analytic_line
-                    for aal in analytic_line_obj:
-                        if not aal.product_id.property_account_wip_id:
-                            raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
-                        for ml in self._prepare_move_line(aal):
-                            aml.append(ml)
+                    if self.wip_percentage > 0.0:
+                        #Skip wip move creation when percantage is 0
+                        for aal in analytic_line_obj:
+                            if not aal.product_id.property_account_wip_id:
+                                raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
+                            for ml in self._prepare_move_line(aal):
+                                aml.append(ml)
 
-                    line = [(0, 0, l) for l in aml]
+                        line = [(0, 0, l) for l in aml]
 
-                    move_vals = {
-                        'type':'receivable',
-                        'ref': narration,
-                        'line_ids': line,
-                        'journal_id': wip_journal.id,
-                        'date': date_end,
-                        'narration': 'WIP move',
-                        'to_be_reversed': True,
-                    }
+                        move_vals = {
+                            'type':'receivable',
+                            'ref': narration,
+                            'line_ids': line,
+                            'journal_id': wip_journal.id,
+                            'date': date_end,
+                            'narration': 'WIP move',
+                            'to_be_reversed': True,
+                        }
 
-                    ctx = dict(self._context, lang=partner.lang)
-                    ctx['company_id'] = company_id
-                    ctx_nolang = ctx.copy()
-                    ctx_nolang.pop('lang', None)
-                    move = account_move.with_context(ctx_nolang).create(move_vals)
-                    if move:
-                        move._post_validate()
-                        move.post()
+                        ctx = dict(self._context, lang=partner.lang)
+                        ctx['company_id'] = company_id
+                        ctx_nolang = ctx.copy()
+                        ctx_nolang.pop('lang', None)
+                        move = account_move.with_context(ctx_nolang).create(move_vals)
+                        if move:
+                            move._post_validate()
+                            move.post()
 
-                    account_move |= move
+                        account_move |= move
 
                     cond = '='
                     rec = analytic_line_obj.ids[0]
@@ -387,7 +378,9 @@ class AnalyticLineStatus(models.TransientModel):
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
 
-        self.wip_reversal(account_move)
+        if self.wip_percentage > 0.0:
+            # Skip wip reversal creation when percantage is 0
+            self.wip_reversal(account_move)
 
         return "WIP moves amd Reversals successfully created. \n "
 

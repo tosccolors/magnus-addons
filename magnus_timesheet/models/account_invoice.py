@@ -121,7 +121,7 @@ class AccountInvoice(models.Model):
     def action_wip_move_create(self):
         """ Creates invoice related analytics and financial move lines """
         for inv in self:
-            wip_journal = self.env.ref('magnus_invoicing.wip_journal')
+            wip_journal = self.env.ref('magnus_timesheet.wip_journal')
             if not wip_journal.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
             sequence = wip_journal.sequence_id
@@ -136,11 +136,17 @@ class AccountInvoice(models.Model):
             inv.wip_move_id = wip_move.id
             #wip reverse posting
             reverse_date = datetime.strptime(wip_move.date, "%Y-%m-%d") + timedelta(days=1)
+            line_amt = sum(ml.credit + ml.debit for ml in wip_move.line_ids)
+            reconcile = False
+            if line_amt > 0:
+                reconcile = True
             reverse_wip_move = wip_move.create_reversals(
-                date=reverse_date, journal=wip_journal,
-                move_prefix='WIP Invoicing Reverse', line_prefix='WIP Invoicing Reverse',
-                reconcile=False)
-
+                date=reverse_date,
+                journal=wip_journal,
+                move_prefix='WIP Invoicing Reverse',
+                line_prefix='WIP Invoicing Reverse',
+                reconcile=reconcile
+            )
             if len(reverse_wip_move) == 1:
                 wip_nxt_seq = sequence.with_context(ir_sequence_date=reverse_wip_move.date).next_by_id()
                 reverse_wip_move.write({'name':wip_nxt_seq})
@@ -196,11 +202,11 @@ class AccountInvoiceLine(models.Model):
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
 
-    @api.multi
-    def write(self, vals):
-        res = super(AccountInvoiceLine, self).write(vals)
-        self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes()
-        return res
+    # @api.multi
+    # def write(self, vals):
+    #     res = super(AccountInvoiceLine, self).write(vals)
+    #     self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes() #Issue: Vat creation double after invoice date change
+    #     return res
 
     @api.model
     def default_get(self, fields):

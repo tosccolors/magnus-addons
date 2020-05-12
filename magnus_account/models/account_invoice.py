@@ -103,8 +103,8 @@ class AccountInvoice(models.Model):
     @api.multi
     def get_bank_details(self):
         self.ensure_one()
-        bank_ids = self.operating_unit_id.partner_id.bank_ids
-        bank_accs = self.env['account.journal'].search([('company_id', '=', self.company_id.id), ('bank_id', 'in', bank_ids.ids), ('type', '=', 'bank'), ('display_on_footer', '=', True)])
+        bank_ids = self.operating_unit_id.partner_id.bank_ids.mapped('bank_id')
+        bank_accs = self.env['account.journal'].search([('operating_unit_id', '=', self.operating_unit_id.id),('company_id', '=', self.company_id.id), ('bank_id', 'in', bank_ids.ids), ('type', '=', 'bank'), ('display_on_footer', '=', True)])
         return bank_accs
 
 class ResCompany(models.Model):

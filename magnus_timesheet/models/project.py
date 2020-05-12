@@ -17,8 +17,18 @@ class Task(models.Model):
         if len(task) > 1 and self.standard:
             raise ValidationError(_('You can have only one task with the standard as true per project!'))
 
-    standard = fields.Boolean(string='Standard')
-    my_wiz_id = fields.Many2one('my.wizard')
+    standard = fields.Boolean(
+        string='Standard'
+    )
+    my_wiz_id = fields.Many2one(
+        'my.wizard'
+    )
+    task_user_ids = fields.One2many(
+        'task.user',
+        'task_id',
+        string='Can register time',
+        track_visibility='always'
+    )
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
@@ -34,8 +44,23 @@ class Task(models.Model):
 class Project(models.Model):
     _inherit = "project.project"
 
-    overtime = fields.Boolean(string='Overtime Taken')
-    overtime_hrs = fields.Boolean(string='Overtime Hours')
+    overtime = fields.Boolean(
+        string='Overtime Taken'
+    )
+    overtime_hrs = fields.Boolean(
+        string='Overtime Hours'
+    )
+    invoice_principle = fields.Selection(
+        [
+        ('ff', 'Fixed Fee'),
+        ('tm', 'Time and Material'),
+        ('ctm', 'Capped Time and Material')
+    ], )
+    invoice_schedule_ids = fields.One2many(
+        'invoice.schedule.lines',
+        'project_id',
+        string='Invoice Schedule'
+    )
 
     @api.one
     @api.constrains('overtime', 'overtime_hrs')
@@ -106,7 +131,7 @@ class TaskUser(models.Model):
                 self.fee_rate = product.lst_price
 
     @api.multi
-    def get_user_fee_rate(self, task_id, user_id, date):
+    def get_task_user_obj(self, task_id, user_id, date):
         taskUserObj = self.search([
             ('from_date', '<=', date),
             ('task_id', '=', task_id),
@@ -167,10 +192,29 @@ class TaskUser(models.Model):
             res.update_analytic_lines()
         return result
 
+class InvoiceScheduleLine(models.Model):
+    _name = 'invoice.schedule.lines'
+
+    project_id = fields.Many2one(
+        'project.project',
+    )
+
+
 class ProjectInvoicingProperties(models.Model):
     _inherit = "project.invoicing.properties"
 
-    invoice_mileage = fields.Boolean('Invoice Mileage')
+    invoice_mileage = fields.Boolean(
+        'Invoice Mileage'
+    )
+    group_invoice = fields.Boolean(
+        'Group Invoice'
+    )
+    group_by_fee_rate = fields.Boolean(
+        'Group By Fee Rate'
+    )
+    group_by_month = fields.Boolean(
+        'Group By Month'
+    )
 
     @api.onchange('invoice_mileage')
     def onchange_invoice_mileage(self):
@@ -180,7 +224,10 @@ class ProjectInvoicingProperties(models.Model):
             id = self.id
         project = self.env['project.project'].search([('invoice_properties', '=', id)])
         if project:
-            analytic_lines = self.env['account.analytic.line'].search([('project_id', 'in', project.ids), ('product_uom_id', '=', self.env.ref('product.product_uom_km').id)])
+            analytic_lines = self.env['account.analytic.line'].search([
+                ('project_id', 'in', project.ids),
+                ('product_uom_id', '=', self.env.ref('product.product_uom_km').id)
+            ])
             if analytic_lines:
                 non_invoiceable_mileage = False if self.invoice_mileage else True
                 cond = '='

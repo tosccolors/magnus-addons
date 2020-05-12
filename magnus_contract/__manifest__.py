@@ -18,7 +18,7 @@
               "Magnus,"
               "Odoo Community Association (OCA)",
     'website': 'https://github.com/magnuscolors/magnus_contract',
-    'depends': ['contract', 'magnus_invoicing'],
+    'depends': ['contract', 'magnus_timesheet'],
     'data': [
     ],
     'installable': True,
