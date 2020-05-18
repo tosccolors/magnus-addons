@@ -68,6 +68,8 @@ class AnalyticLineStatus(models.TransientModel):
         status = str(self.name)
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
+        expense_entries = analytic_lines.filtered(lambda a: not a.project_id and not a.task_id and not a.sheet_id and a.state == 'draft')
+        entries = entries + expense_entries
         no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
         if no_invoicing_property_entries and status == 'invoiceable':
             project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
