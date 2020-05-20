@@ -18,15 +18,8 @@ class ResUsers(models.Model):
         employee_id = self._get_related_employees()
         assert len(employee_id) == 1, 'Only one employee can have this user_id'
         if employee_id.department_id:
-            dep = self.env['hr.department'].search([
-                ('parent_id', '=', False),
-                '|',
-                ('id', '=', employee_id.department_id.id),
-                ('child_ids', 'in', [employee_id.department_id.id]),
-                '|',
-                ('id', '=', employee_id.department_id.parent_id.id),
-                ('child_ids', 'in', [employee_id.department_id.parent_id.id] if employee_id.department_id.parent_id else [])
-            ])
+            dep = self.env['hr.department'].search(
+                ['&'('parent_id', '=', False), ('employee_id.department_id', 'child_of', [id])])
         else:
             raise ValidationError(_('The Employee in the Analytic line has '
                                     'no department defined. Please complete'))
