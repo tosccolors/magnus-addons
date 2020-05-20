@@ -25,7 +25,7 @@ class ResUsers(models.Model):
                 ('child_ids', 'in', [employee_id.department_id.id]),
                 '|',
                 ('id', '=', employee_id.department_id.parent_id.id),
-                ('child_ids', 'in', [employee_id.department_id.parent_id.id])
+                ('child_ids', 'in', [employee_id.department_id.parent_id.id] if employee_id.department_id.parent_id else [])
             ])
         else:
             raise ValidationError(_('The Employee in the Analytic line has '
