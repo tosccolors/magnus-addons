@@ -627,7 +627,7 @@ class HrTimesheetSheet(models.Model):
         WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL             
              AND aal.kilometers > 0 ;)
-
+        """
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
                                     'week_id_aal': self.week_id.id,
                                     'uom': self.env.ref('product.product_uom_km').id,
