@@ -626,7 +626,7 @@ class HrTimesheetSheet(models.Model):
              ON (tu.task_id = aal.task_id and tu.user_id = aal.user_id and aal.date >= tu.from_date)
         WHERE hss.id = %(sheet_select)s
              AND aal.ref_id IS NULL             
-             AND aal.kilometers > 0 )
+             AND aal.kilometers > 0 );
         """
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
                                     'week_id_aal': self.week_id.id,
