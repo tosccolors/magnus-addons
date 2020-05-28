@@ -272,7 +272,7 @@ class HrTimesheetSheet(models.Model):
                 ## todo nothing because when unit_amount is set in the timesheet, _compute_analytic_line and write() are called
 
                 else:
-                    self.copy_with_query(True, last_week_timesheet.id)
+                    self.copy_with_query(last_week_timesheet.id)
 
 
     def _check_end_mileage(self):
