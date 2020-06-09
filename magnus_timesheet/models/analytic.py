@@ -29,7 +29,11 @@ class AccountAnalyticLine(models.Model):
                  )
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
+        overriden from method in hr_timesheet_sheet without super() and
+        computes many other computed fields in the timeline
         """
+        # we first get value of sheet_id in cache, because it is empty for all to be computed fields
+        # because sheet_id does not get a value when sheets is empty, we need the original value
         self.read(['sheet_id'])
         uom_hrs = self.env.ref("product.product_uom_hour").id
         for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
@@ -43,6 +47,7 @@ class AccountAnalyticLine(models.Model):
                 # 2 dates
                 ts_line.sheet_id_computed = sheets[0]
                 ts_line.sheet_id = sheets[0]
+
         for line in self:       
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
@@ -67,23 +72,22 @@ class AccountAnalyticLine(models.Model):
                                     strftime("%m/%d/%Y")) + \
                                     ' (' + datetime.strptime(date, '%Y-%m-%d').\
                                     strftime('%a') + ')'
-                if not line.planned:
-                    if date:
-                        line.week_id = line.find_daterange_week(date)
-                        var_month_id = line.find_daterange_month(date)
-                    if line.month_of_last_wip:
-                        line.wip_month_id = line.month_of_last_wip
+                    line.week_id = line.find_daterange_week(date)
+                    if line.planned:
+                        line.planned_qty = line.unit_amount
+                        line.actual_qty = 0.0
                     else:
-                        line.wip_month_id = line.month_id = var_month_id
-                    if line.product_uom_id.id == uom_hrs:
-                        line.ts_line = True
-                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                    line.actual_qty = line.unit_amount
-                    line.planned_qty = 0.0
-            if line.planned:
-                line.week_id = line.find_daterange_week(line.date)
-                line.planned_qty = line.unit_amount
-                line.actual_qty = 0.0
+                        var_month_id = line.find_daterange_month(date)
+                        if line.month_of_last_wip:
+                            line.wip_month_id = line.month_of_last_wip
+                        else:
+                            line.wip_month_id = line.month_id = var_month_id
+                        if line.product_uom_id.id == uom_hrs:
+                            line.ts_line = True
+                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                        line.actual_qty = line.unit_amount
+                        line.planned_qty = 0.0
+
 
 
     def find_daterange_week(self, date):
