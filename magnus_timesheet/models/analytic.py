@@ -361,12 +361,6 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        # Condition to check if sheet_id already exists!
-        if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
-            raise ValidationError(_(
-                'Timesheet link can not be deleted for %s.\n '
-            ) % self)
-
         # don't call super if only state has to be updated
         if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
@@ -393,8 +387,8 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-            line = vals.get('line', self.line)
-            if line:
+            ts_line = vals.get('ts_line', self.ts_line)
+            if ts_line:
                 unit_amount = vals.get('unit_amount', self.unit_amount)
                 vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
 
