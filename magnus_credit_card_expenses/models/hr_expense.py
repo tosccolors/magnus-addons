@@ -58,7 +58,7 @@ class HrExpense(models.Model):
             if expense.is_from_crdit_card:
                 journal = expense.sheet_id.company_id.creditcard_decl_journal_id
             else:
-                journal = expense.sheet_id.company_id.decl_journal_id
+                journal = expense.sheet_id.bank_journal_id
 #             journal = expense.sheet_id.bank_journal_id if expense.payment_mode == 'company_account' else expense.sheet_id.journal_id
             #create the move that will contain the accounting entries
             acc_date = expense.sheet_id.accounting_date or expense.date
@@ -179,8 +179,8 @@ class HrExpenseSheet(models.Model):
                     raise UserError(_("Please set Credit Card Expense journal in company configuration"))
         else:
             for sheet in self:
-                if not sheet.company_id.decl_journal_id.id:
-                    raise UserError(_("Please set Declaration Journal in company configuration"))
+                if not sheet.bank_journal_id.id:
+                    raise UserError(_("Please create a Journal with the type Cash or Bank"))
             
         expense_line_ids = self.mapped('expense_line_ids')\
             .filtered(lambda r: not float_is_zero(r.total_amount, precision_rounding=(r.currency_id or self.env.user.company_id.currency_id).rounding))
