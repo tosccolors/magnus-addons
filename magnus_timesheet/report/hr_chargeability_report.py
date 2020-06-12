@@ -104,7 +104,7 @@ class HrChargeabilityReport(models.Model):
                     AND aa.planned = FALSE
                     AND (aa.ot = FALSE or aa.ot is null)
                     AND aa.project_id IS NOT NULL 
-                    AND emp.active = TRUE
+                    AND resource.active = TRUE
                 GROUP BY 
                     aa.operating_unit_id, 
                     aa.user_id, 
