@@ -29,9 +29,10 @@ class AccountAnalyticLine(models.Model):
                  )
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
-        overriden from method in hr_timesheet_sheet without super() and
+        overridden from method in hr_timesheet_sheet without super() and
         computes many other computed fields in the timeline
         """
+        # import pdb; pdb.set_trace()
         # we first get value of sheet_id in cache, because it is empty for all to be computed fields
         # because sheet_id does not get a value when sheets is empty, we need the original value
         self.read(['sheet_id'])
@@ -215,7 +216,7 @@ class AccountAnalyticLine(models.Model):
         string="Day",
         compute=_compute_sheet
     )
-    line = fields.Boolean(
+    ts_line = fields.Boolean(
         compute=_compute_sheet,
         string='Timesheet line',
         store=True,
@@ -392,7 +393,7 @@ class AccountAnalyticLine(models.Model):
                 unit_amount = vals.get('unit_amount', self.unit_amount)
                 vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
 
-        if self.filtered('line') and not (
+        if self.filtered('ts_line') and not (
                 'unit_amount' in vals or
                 'product_uom_id' in vals or
                 'sheet_id' in vals or
