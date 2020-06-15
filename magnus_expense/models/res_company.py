@@ -18,7 +18,7 @@
 #
 ##############################################################################
 
-from odoo import api, fields, models, _
+from odoo import models, fields, api
 
 
 class Company(models.Model):
