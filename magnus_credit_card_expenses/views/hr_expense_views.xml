@@ -18,6 +18,12 @@
             	<field name="payment_mode" position="attributes">
             		<attribute name="invisible">True</attribute>
             	</field>
+                <field name="employee_id" position="after">
+                    <field name="is_from_crdit_card" invisible="1"/>
+                </field>
+                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                    <attribute name="domain">[('employee_id', '=', employee_id), (['is_from_crdit_card', '=', is_from_crdit_card])]</attribute>
+                </xpath>
             </field>
         </record>
         
