@@ -25,6 +25,12 @@ class HrExpense(models.Model):
         self.name = name
         return res
 
+    @api.model
+    def default_get(self, default_fields):
+        res = super(HrExpenseSheet, self).default_get(default_fields) or {}
+        res['journal_id'] = self.env.user.company_id.decl_journal_id.id
+        return res
+
     @api.multi
     def action_move_create(self):
         '''

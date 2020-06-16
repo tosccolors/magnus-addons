@@ -58,7 +58,7 @@ class HrExpense(models.Model):
             if expense.is_from_crdit_card:
                 journal = expense.sheet_id.company_id.creditcard_decl_journal_id
             else:
-                journal = expense.sheet_id.bank_journal_id
+                journal = expense.sheet_id.company_id.decl_journal_id
 #             journal = expense.sheet_id.bank_journal_id if expense.payment_mode == 'company_account' else expense.sheet_id.journal_id
             #create the move that will contain the accounting entries
             acc_date = expense.sheet_id.accounting_date or expense.date
