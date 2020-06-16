@@ -2,8 +2,6 @@
 <odoo>
         <menuitem id="menu_credit_card_expense_root" name="Credit Card Expense" sequence="100" groups="group_credit_card_expenses,group_credit_card_expenses_officer"/>
         
-        <delete model="ir.ui.menu" id="hr_expense.menu_hr_expense_my_expenses_to_submit"/>
-        
         <menuitem id="menu_hr_expense_my_expenses_credit_card" name="My Expenses" sequence="1" parent="menu_credit_card_expense_root" groups="group_credit_card_expenses"/>
          <menuitem id="menu_hr_expense_my_expenses_to_submit_credit_card" name="Expenses to Submit" sequence="1" parent="menu_hr_expense_my_expenses_credit_card" action="magnus_credit_card_expenses.hr_expense_actions_my_unsubmitted_credit_card"/>
          <menuitem id="menu_hr_expense_my_expenses_refused_credit_card" name="Refused Expenses" sequence="2" parent="menu_hr_expense_my_expenses_credit_card" action="magnus_credit_card_expenses.action_hr_expense_refused_expenses" groups="group_credit_card_expenses"/>
