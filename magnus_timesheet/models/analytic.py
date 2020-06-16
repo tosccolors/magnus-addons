@@ -35,7 +35,7 @@ class AccountAnalyticLine(models.Model):
         # import pdb; pdb.set_trace()
         # we first get value of sheet_id in cache, because it is empty for all to be computed fields
         # because sheet_id does not get a value when sheets is empty, we need the original value
-        self.read(['sheet_id'])
+        self.sudo().read(['sheet_id'])
         uom_hrs = self.env.ref("product.product_uom_hour").id
         for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(

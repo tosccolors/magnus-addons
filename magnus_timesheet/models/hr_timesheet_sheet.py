@@ -268,8 +268,6 @@ class HrTimesheetSheet(models.Model):
                         "Duration: %s to %s"
                     ) % (datetime.strftime(date_start, "%d-%b-%Y"),
                          datetime.strftime(date_end, "%d-%b-%Y")))
-                ## todo What if during last week department_id and/or operating_unit_id and/or product_id has changed?
-                ## todo nothing because when unit_amount is set in the timesheet, _compute_analytic_line and write() are called
 
                 else:
                     self.copy_with_query(last_week_timesheet.id)
