@@ -18,24 +18,10 @@ class AccountAnalyticLine(models.Model):
                  'product_uom_id',
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
-                 'sheet_id_computed.employee_id',
-                 'project_id.chargeable',
-                 'project_id.correction_charge',
-                 'project_id.user_id',
-                 'project_id.invoice_properties.expenses',
-                 'account_id',
-                 'unit_amount',
-                 'planned'
-                 )
+                 'sheet_id_computed.employee_id')
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
-        overridden from method in hr_timesheet_sheet without super() and
-        computes many other computed fields in the timeline
         """
-        # import pdb; pdb.set_trace()
-        # we first get value of sheet_id in cache, because it is empty for all to be computed fields
-        # because sheet_id does not get a value when sheets is empty, we need the original value
-        self.read(['sheet_id'])
         uom_hrs = self.env.ref("product.product_uom_hour").id
         for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
@@ -49,7 +35,21 @@ class AccountAnalyticLine(models.Model):
                 ts_line.sheet_id_computed = sheets[0]
                 ts_line.sheet_id = sheets[0]
 
-        for line in self:       
+    @api.depends('project_id.chargeable',
+                 'project_id.correction_charge',
+                 'project_id.user_id',
+                 'project_id.invoice_properties.expenses',
+                 'sheet_id',
+                 'account_id',
+                 'unit_amount',
+                 'task_id',
+                 'product_uom_id',
+                 'planned')
+    def _compute_analytic_line(self):
+        """Calculates a number of fields
+        """
+        UomHrs = self.env.ref("product.product_uom_hour").id
+        for line in self:
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
@@ -73,21 +73,26 @@ class AccountAnalyticLine(models.Model):
                                     strftime("%m/%d/%Y")) + \
                                     ' (' + datetime.strptime(date, '%Y-%m-%d').\
                                     strftime('%a') + ')'
-                    line.week_id = line.find_daterange_week(date)
-                    if line.planned:
-                        line.planned_qty = line.unit_amount
-                        line.actual_qty = 0.0
-                    else:
+                if not line.planned:
+                    if line.sheet_id.week_id and date:
+                        line.week_id = line.sheet_id.week_id
                         var_month_id = line.find_daterange_month(date)
-                        if line.month_of_last_wip:
-                            line.wip_month_id = line.month_of_last_wip
-                        else:
-                            line.wip_month_id = line.month_id = var_month_id
-                        if line.product_uom_id.id == uom_hrs:
-                            line.ts_line = True
-                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                        line.actual_qty = line.unit_amount
-                        line.planned_qty = 0.0
+                    elif date:
+                        line.week_id = line.find_daterange_week(date)
+                        var_month_id = line.find_daterange_month(date)
+                    if line.month_of_last_wip:
+                        line.wip_month_id = line.month_of_last_wip
+                    else:
+                        line.wip_month_id = line.month_id = var_month_id
+                    if line.product_uom_id.id == UomHrs:
+                        line.ts_line = True
+                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                    line.actual_qty = line.unit_amount
+                    line.planned_qty = 0.0
+            if line.planned:
+                line.week_id = line.find_daterange_week(line.date)
+                line.planned_qty = line.unit_amount
+                line.actual_qty = 0.0
 
     def find_daterange_week(self, date):
         """
@@ -160,19 +165,19 @@ class AccountAnalyticLine(models.Model):
     )
     week_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Week',
         store=True,
     )
     month_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Month',
         store=True,
     )
     wip_month_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True,
         string="Month of Analytic Line or last Wip Posting"
     )
@@ -182,13 +187,13 @@ class AccountAnalyticLine(models.Model):
     )
     operating_unit_id = fields.Many2one(
         'operating.unit',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Operating Unit',
         store=True
     )
     project_operating_unit_id = fields.Many2one(
         'operating.unit',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Project Operating Unit',
         store=True
     )
@@ -201,40 +206,40 @@ class AccountAnalyticLine(models.Model):
     )
     actual_qty = fields.Float(
         string='Actual Qty',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
     planned_qty = fields.Float(
         string='Planned Qty',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
     day_name = fields.Char(
         string="Day",
-        compute=_compute_sheet
+        compute=_compute_analytic_line
     )
     ts_line = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Timesheet line',
         store=True,
     )
     correction_charge = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Chargeable',
         store=True,
     )
     expenses = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Expenses',
     )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
     ot = fields.Boolean(
@@ -245,7 +250,7 @@ class AccountAnalyticLine(models.Model):
         string='Employee'
     )
     line_fee_rate = fields.Float(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Fee Rate',
         store=True,
     )
@@ -357,6 +362,12 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
+        # Condition to check if sheet_id already exists!
+        if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
+            raise ValidationError(_(
+                'Timesheet link can not be deleted for %s.\n '
+            ) % self)
+
         # don't call super if only state has to be updated
         if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
