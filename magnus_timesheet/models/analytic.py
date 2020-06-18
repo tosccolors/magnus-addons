@@ -89,8 +89,6 @@ class AccountAnalyticLine(models.Model):
                         line.actual_qty = line.unit_amount
                         line.planned_qty = 0.0
 
-
-
     def find_daterange_week(self, date):
         """
         try to find a date range with type 'week'
@@ -148,7 +146,6 @@ class AccountAnalyticLine(models.Model):
             operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
-
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -357,8 +354,6 @@ class AccountAnalyticLine(models.Model):
         if self.product_uom_id == self.env.ref("product.product_uom_hour").id:
             return {}
         return super(AccountAnalyticLine, self).on_change_unit_amount()
-
-
 
     @api.multi
     def write(self, vals):
