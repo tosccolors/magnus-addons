@@ -12,27 +12,16 @@ class AccountAnalyticLine(models.Model):
     _description = 'Analytic Line'
     _order = 'date desc'
 
-    @api.depends('date',
-                 'user_id',
-                 'task_id',
-                 'product_uom_id',
+    @api.depends(
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
                  'sheet_id_computed.employee_id',
-                 'project_id.chargeable',
-                 'project_id.correction_charge',
-                 'project_id.user_id',
-                 'project_id.invoice_properties.expenses',
-                 'account_id',
-                 'unit_amount',
-                 'planned'
                  )
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
         overridden from method in hr_timesheet_sheet without super() and
         computes many other computed fields in the timeline
         """
-        # import pdb; pdb.set_trace()
         # we first get value of sheet_id in cache, because it is empty for all to be computed fields
         # because sheet_id does not get a value when sheets is empty, we need the original value
         self.read(['sheet_id'])
@@ -49,6 +38,16 @@ class AccountAnalyticLine(models.Model):
                 ts_line.sheet_id_computed = sheets[0]
                 ts_line.sheet_id = sheets[0]
 
+    @api.depends('project_id.chargeable',
+                 'project_id.correction_charge',
+                 'project_id.user_id',
+                 'project_id.invoice_properties.expenses',
+                 'account_id',
+                 'unit_amount',
+                 'planned'
+                 )
+    def _compute_analytic_line(self):
+        uom_hrs = self.env.ref("product.product_uom_hour").id
         for line in self:       
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
@@ -160,19 +159,19 @@ class AccountAnalyticLine(models.Model):
     )
     week_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Week',
         store=True,
     )
     month_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Month',
         store=True,
     )
     wip_month_id = fields.Many2one(
         'date.range',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True,
         string="Month of Analytic Line or last Wip Posting"
     )
@@ -182,13 +181,13 @@ class AccountAnalyticLine(models.Model):
     )
     operating_unit_id = fields.Many2one(
         'operating.unit',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Operating Unit',
         store=True
     )
     project_operating_unit_id = fields.Many2one(
         'operating.unit',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Project Operating Unit',
         store=True
     )
@@ -214,27 +213,27 @@ class AccountAnalyticLine(models.Model):
         compute=_compute_sheet
     )
     ts_line = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Timesheet line',
         store=True,
     )
     correction_charge = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Correction Chargeability',
         store=True,
     )
     chargeable = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Chargeable',
         store=True,
     )
     expenses = fields.Boolean(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Expenses',
     )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
     ot = fields.Boolean(
@@ -245,7 +244,7 @@ class AccountAnalyticLine(models.Model):
         string='Employee'
     )
     line_fee_rate = fields.Float(
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         string='Fee Rate',
         store=True,
     )
