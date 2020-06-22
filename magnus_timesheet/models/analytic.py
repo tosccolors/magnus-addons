@@ -23,8 +23,9 @@ class AccountAnalyticLine(models.Model):
         computes many other computed fields in the timeline
         """
         # we first get value of sheet_id in cache, because it is empty for all to be computed fields
-        # because sheet_id does not get a value when sheets is empty, we need the original value
-        self.read(['sheet_id'])
+        # because sheet_id does not get a value when sheets is empty, we need the original value.
+        # we have to filter self for records existing in db
+        self.filtered(lambda i: isinstance(i, (int, long))).read(['sheet_id'])
         uom_hrs = self.env.ref("product.product_uom_hour").id
         for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
@@ -146,6 +147,21 @@ class AccountAnalyticLine(models.Model):
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
         return res
 
+    @api.model
+    def _get_default_date(self):
+        context = self._context
+        if 'timesheet_date_from' in context:
+            date = context.get('timesheet_date_from')
+        else:
+            date = datetime.now().date()
+        return date
+
+    date = fields.Date(
+        'Date',
+        required=True,
+        index=True,
+        default=_get_default_date
+    )
     kilometers = fields.Integer(
         'Kilometers'
     )
@@ -347,6 +363,19 @@ class AccountAnalyticLine(models.Model):
             self.company_id = self.env.user.company_id
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
+        elif self.sheet_id and not self.sheet_id.date_from <= self.date <= self.sheet_id.date_to:
+            self.date = self.sheet_id.date_from
+            return {
+                'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
+            }
+        elif self.env.context.get('timesheet_date_from',False) and \
+            self.env.context.get('timesheet_date_to',False) and not \
+            self.env.context.get('timesheet_date_from') <= self.date <= self.env.context.get('timesheet_date_to'):
+            self.date = self.env.context.get('timesheet_date_from')
+            return {
+                'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
+            }
+
 
     @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
     def on_change_unit_amount(self):
