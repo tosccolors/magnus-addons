@@ -54,6 +54,7 @@ class AccountAnalyticLine(models.Model):
         for line in self:
             # all analytic lines need a project_operating_unit_id and
             # for all analytic lines day_name, week_id and month_id are computed
+            date = line.date
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
@@ -74,7 +75,6 @@ class AccountAnalyticLine(models.Model):
                 line.project_mgr = line.account_id.project_ids.user_id or False
             task = line.task_id
             user = line.user_id
-            date = line.date
             # only if task_id the remaining fields are computed
             if task and user:
                 uou = user._get_operating_unit_id()
@@ -141,7 +141,6 @@ class AccountAnalyticLine(models.Model):
     def default_get(self, fields):
         context = self._context
         res = super(AccountAnalyticLine, self).default_get(fields)
-
         if 'planning_lines' in context:
             project = self.env['project.project']
             project_id = context.get('default_project_id', project)
@@ -150,23 +149,11 @@ class AccountAnalyticLine(models.Model):
             account_id = project.analytic_account_id
             operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
-        return res
-
-    @api.model
-    def _get_default_date(self):
-        context = self._context
         if 'timesheet_date_from' in context:
             date = context.get('timesheet_date_from')
-        else:
-            date = datetime.now().date()
-        return date
+            res.update({'date': date})
+        return res
 
-    date = fields.Date(
-        'Date',
-        required=True,
-        index=True,
-        default=_get_default_date
-    )
     kilometers = fields.Integer(
         'Kilometers'
     )
@@ -221,17 +208,17 @@ class AccountAnalyticLine(models.Model):
     )
     actual_qty = fields.Float(
         string='Actual Qty',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
     planned_qty = fields.Float(
         string='Planned Qty',
-        compute=_compute_sheet,
+        compute=_compute_analytic_line,
         store=True
     )
     day_name = fields.Char(
         string="Day",
-        compute=_compute_sheet
+        compute=_compute_analytic_line
     )
     ts_line = fields.Boolean(
         compute=_compute_analytic_line,
