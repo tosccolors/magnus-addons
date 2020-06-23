@@ -44,44 +44,50 @@ class AccountAnalyticLine(models.Model):
                  'project_id.invoice_properties.expenses',
                  'account_id',
                  'unit_amount',
-                 'planned'
+                 'planned',
+                 'date',
+                 'task_id',
+                 'user_id'
                  )
     def _compute_analytic_line(self):
         uom_hrs = self.env.ref("product.product_uom_hour").id
-        for line in self:       
+        for line in self:
+            # all analytic lines need a project_operating_unit_id and
+            # for all analytic lines day_name, week_id and month_id are computed
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
+            line.day_name = str(datetime.strptime(date, '%Y-%m-%d').
+                                strftime("%m/%d/%Y")) + \
+                            ' (' + datetime.strptime(date, '%Y-%m-%d'). \
+                                strftime('%a') + ')'
+            line.week_id = line.find_daterange_week(date)
+            line.month_id = var_month_id = line.find_daterange_month(date)
+            # only when project_id these fields are computed
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
                 line.project_mgr = line.project_id.user_id or False
                 if line.project_id.invoice_properties:
                     line.expenses = line.project_id.invoice_properties.expenses
-            elif line.account_id:
+            else:
                 line.project_mgr = line.account_id.project_ids.user_id or False
             task = line.task_id
             user = line.user_id
             date = line.date
+            # only if task_id the remaining fields are computed
             if task and user:
                 uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
-                if date:
-                    line.day_name = str(datetime.strptime(date, '%Y-%m-%d').
-                                    strftime("%m/%d/%Y")) + \
-                                    ' (' + datetime.strptime(date, '%Y-%m-%d').\
-                                    strftime('%a') + ')'
-                    line.week_id = line.find_daterange_week(date)
                     if line.planned:
                         line.planned_qty = line.unit_amount
                         line.actual_qty = 0.0
                     else:
-                        var_month_id = line.find_daterange_month(date)
                         if line.month_of_last_wip:
                             line.wip_month_id = line.month_of_last_wip
                         else:
-                            line.wip_month_id = line.month_id = var_month_id
+                            line.wip_month_id = var_month_id
                         if line.product_uom_id.id == uom_hrs:
                             line.ts_line = True
                             line.line_fee_rate = line.get_fee_rate(task.id, user.id)
