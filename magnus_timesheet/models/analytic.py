@@ -19,8 +19,7 @@ class AccountAnalyticLine(models.Model):
                  )
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
-        overridden from method in hr_timesheet_sheet without super() and
-        computes many other computed fields in the timeline
+        overridden from method in hr_timesheet_sheet without super()
         """
         # we first get value of sheet_id in cache, because it is empty for all to be computed fields
         # because sheet_id does not get a value when sheets is empty, we need the original value.
