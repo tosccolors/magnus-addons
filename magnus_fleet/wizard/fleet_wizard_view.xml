@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_fleet_wizard" model="ir.ui.view">
+            <field name="name">Fleet Wizard</field>
+            <field name="model">fleet.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Fleet">
+                    <field name="add" invisible="1"/>
+                    <group>
+                        <field name="license_plate" required="1"/>
+                        <field name="driver_id" required="1"/>
+                        <field name="date" required="1"/>
+                        <field name="odometer_value" attrs="{'invisible':[('add','=',False)],'required':[('add','=',True)]}"/>
+                    </group>
+                    <footer>
+                        <button name="add_driver" string="Add" type="object" class="oe_highlight" attrs="{'invisible':[('add','=',False)]}"/>
+                        <button name="remove_driver" string="Remove" type="object"
+                                class="oe_highlight" attrs="{'invisible':[('add','=',True)]}"/>
+                        <button name="remove_driver" string="Remove &amp; Terminate" type="object"
+                                class="oe_highlight" context="{'terminate':True}" attrs="{'invisible':[('add','=',True)]}"/>
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_fleet_wizard" model="ir.actions.act_window">
+            <field name="name">Fleet</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">fleet.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_fleet_wizard"/>
+            <field name="target">new</field>
+        </record>
+
+
+    </data>
+</odoo>
