@@ -39,11 +39,21 @@ class AccountInvoice(models.Model):
     )
 
     def compute_target_invoice_amount(self):
-        if self.amount_untaxed != self.target_invoice_amount:
-            factor = self.target_invoice_amount / self.amount_untaxed
-            discount = (1.0 - factor) * 100
-            for line in self.invoice_line_ids:
-                line.discount = discount
+        try:
+            if self.amount_untaxed != self.target_invoice_amount:
+                factor = self.target_invoice_amount / self.amount_untaxed
+                discount = (1.0 - factor) * 100
+                for line in self.invoice_line_ids:
+                    line.discount = discount
+        except ZeroDivisionError:
+            raise UserError(_('You cannot set a target amount if the invoice line amount is 0'))
+
+    # onchange to trigger  reset_target_invoice_amount for calculating taxes correctly
+
+    @api.onchange('invoice_line_ids')
+    def _onchange_invoice_line_ids(self):
+        self.reset_target_invoice_amount()
+        return super(AccountInvoice, self)._onchange_invoice_line_ids()
 
     def reset_target_invoice_amount(self):
         for line in self.invoice_line_ids:
