@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import email_split, float_is_zero
 
 class HrExpense(models.Model):
     _inherit = "hr.expense"
@@ -85,7 +86,20 @@ class HrExpense(models.Model):
 class HrExpenseSheet(models.Model):
     _inherit = "hr.expense.sheet"
 
-    state = fields.Selection(selection_add=[('revise', 'To Be Revise')])
+    # added new status Approved by partner
+
+    state = fields.Selection([('submit', 'Submitted'),
+                              ('approve', 'Approved By Manager'),
+                              ('approve_partner','Approved By Partner'),
+                              ('post', 'Posted'),
+                              ('done', 'Paid'),
+                              ('cancel', 'Refused'),
+                              ('revise', 'To Be Revise')
+                              ], string='Status', index=True, readonly=True, track_visibility='onchange', copy=False,
+                             default='submit', required=True,
+                             help='Expense Report State')
+
+    # state = fields.Selection(selection_add=[('revise', 'To Be Revise')]
 
     @api.model
     def default_get(self, default_fields):
@@ -112,3 +126,40 @@ class HrExpenseSheet(models.Model):
                 self.operating_unit_id = self.expense_line_ids[0].operating_unit_id.id
         else:
             self.operating_unit_id = False
+
+   # updated by expense sheets are approved by partner group will goto status Approved By Partner
+
+    @api.multi
+    def approve_expense_sheets(self):
+        if not self.user_has_groups('hr_expense.group_hr_expense_user'):
+            raise UserError(_("Only HR Officers can approve expenses"))
+        desired_group_name = self.env['res.groups'].search([('name', '=', 'Partner')])
+        is_desired_group = self.env.user.id in desired_group_name.users.ids
+        if is_desired_group:
+            self.write({'state': 'approve_partner', 'responsible_id': self.env.user.id})
+        else:
+            self.write({'state': 'approve', 'responsible_id': self.env.user.id})
+
+    # updated by expense sheets move create which are in  status Approved By Partner
+
+    @api.multi
+    def action_sheet_move_create(self):
+        if any(sheet.state != 'approve' and sheet.state != 'approve_partner' for sheet in self):
+            raise UserError(_("You can only generate accounting entry for approved expense(s)."))
+
+        if any(not sheet.journal_id for sheet in self):
+            raise UserError(_("Expenses must have an expense journal specified to generate accounting entries."))
+
+        expense_line_ids = self.mapped('expense_line_ids') \
+            .filtered(lambda r: not float_is_zero(r.total_amount, precision_rounding=(
+                r.currency_id or self.env.user.company_id.currency_id).rounding))
+        res = expense_line_ids.action_move_create()
+
+        if not self.accounting_date:
+            self.accounting_date = self.account_move_id.date
+
+        if self.payment_mode == 'own_account' and expense_line_ids:
+            self.write({'state': 'post'})
+        else:
+            self.write({'state': 'done'})
+        return res

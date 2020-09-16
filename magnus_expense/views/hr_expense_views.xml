@@ -71,27 +71,49 @@
             <field name="act_window_id" ref="hr_expense.action_hr_expense_refused_expenses"/>
         </record>
 
-        <record id="magnus_expense_hr_expense_sheet_form2" model="ir.ui.view">
-            <field name="name">hr.expense.form.magnus.expense2</field>
+    <record id="magnus_expense_hr_expense_sheet_form2" model="ir.ui.view">
+        <field name="name">hr.expense.form.magnus.expense2</field>
+        <field name="model">hr.expense.sheet</field>
+        <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                <attribute name="readonly">False</attribute>
+            </xpath>
+            <xpath expr="//field[@name='expense_line_ids']/tree/field[@name='name']" position="after">
+                <field name="account_id"/>
+            </xpath>
+            <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
+                <button name="action_sheet_move_create" states="approve,approve_partner,revise"
+                        string="Post Journal Entries" type="object" groups="account.group_account_user"
+                        class="oe_highlight o_expense_sheet_post"/>
+            </xpath>
+            <xpath expr="//button[@name='%(hr_expense.hr_expense_refuse_wizard_action)d']" position="after">
+                <button name="%(hr_expense.hr_expense_refuse_wizard_action)d" states="approve_partner" string="Refuse"
+                        type="action" groups="account.group_account_user"/>
+            </xpath>
+            <xpath expr="//header/field[@name='state']" position="replace">
+                <field name="state" widget="statusbar"
+                       statusbar_visible="draft,submit,approve,approve_partner,post,done"/>
+            </xpath>
+            <xpath expr="//button[@name='action_sheet_move_create']" position="after">
+                <button name="revise_expense" type="object" string="Revise Expense" class="oe_highlight"
+                        states="approve,approve_partner" groups="hr_expense.group_hr_expense_manager"/>
+                <button name="expense_revised" type="object" string="Re-Submit" class="oe_highlight" states="revise"
+                        groups="hr_expense.group_hr_expense_manager"/>
+            </xpath>
+            <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                <attribute name="domain">[('employee_id', '=', employee_id)]</attribute>
+            </xpath>
+        </field>
+<!--    Adding the approve_partner to search filter to post-->
+    </record>
+        <record id="magnus_expense_hr_expense_sheet_filter" model="ir.ui.view">
+            <field name="name">hr.expense.filter.magnus.expense2</field>
             <field name="model">hr.expense.sheet</field>
-            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
-                    <attribute name="readonly">False</attribute>
-                </xpath>
-                <xpath expr="//field[@name='expense_line_ids']/tree/field[@name='name']" position="after">
-                    <field name="account_id"/>
-                </xpath>
-                <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
-                    <button name="action_sheet_move_create" states="approve,revise" string="Post Journal Entries" type="object" groups="account.group_account_user" class="oe_highlight o_expense_sheet_post"/>
-                </xpath>
-
-                <xpath expr="//button[@name='action_sheet_move_create']" position="after">
-                    <button name="revise_expense" type="object" string="Revise Expense" class="oe_highlight" states="approve" groups="hr_expense.group_hr_expense_manager"/>
-                    <button name="expense_revised" type="object" string="Re-Submit" class="oe_highlight" states="revise" groups="hr_expense.group_hr_expense_manager"/>
-                </xpath>
-                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
-                    <attribute name="domain">[('employee_id', '=', employee_id)]</attribute>
+                    <xpath expr="//search/filter[@name='to_post']" position="replace">
+                    <filter domain="['|',('state', '=', 'approve'),('state', '=', 'approve_partner')]" string="To Post" name="to_post" help="Approved Expenses"/>
                 </xpath>
             </field>
         </record>
@@ -127,6 +149,24 @@
             </field>
         </record>
 
+    <!-- adding new menu action Partner Approval-->
+
+    <record id="action_hr_expense_sheet_all_to_approve_partner" model="ir.actions.act_window">
+        <field name="name">Expense Reports to Approve by Partner</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+        <field name="domain">[('employee_id.parent_id.user_id', '=', uid)]</field>
+        <field name="context">{'search_default_submitted': 1}</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click here to create a new expense report.
+            </p><p>
+            Once you have created your expense, submit it to your manager who will validate it.
+        </p>
+        </field>
+    </record>
+
     <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
         <field name="context">{'readonly_by_pass': True}</field>
     </record>
@@ -146,5 +186,13 @@
     <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
         <field name="context">{'readonly_by_pass': True}</field>
     </record>
+
+    <record model="ir.ui.menu" id="hr_expense.menu_hr_expense_sheet_all_to_approve">
+        <field name='name'>Manager Approval</field>
+    </record>
+
+    <menuitem id="menu_hr_expense_sheet_all_to_approve_partner" name="Partner Approval" sequence="1"
+              parent="hr_expense.menu_hr_expense_to_approve"
+              action="action_hr_expense_sheet_all_to_approve_partner" groups="magnus_expense.group_hr_expense_partner"/>
 
 </odoo>
