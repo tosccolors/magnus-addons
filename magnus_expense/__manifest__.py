@@ -26,7 +26,8 @@
         # 'security/ir.model.access.csv',
         'views/hr_expense_views.xml',
         'views/res_company_view.xml',
-#        'views/account_views.xml',
+        'security/security.xml'
+        # 'views/account_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
