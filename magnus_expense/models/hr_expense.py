@@ -130,13 +130,11 @@ class HrExpenseSheet(models.Model):
    # updated by expense sheets are approved by partner group will goto status Approved By Partner
 
     @api.multi
-    def approve_expense_sheets(self):
-        if not self.user_has_groups('hr_expense.group_hr_expense_user'):
-            raise UserError(_("Only HR Officers can approve expenses"))
-        if self.env.user.has_group('magnus_expense.group_hr_expense_partner'):
-            self.write({'state': 'approve_partner', 'responsible_id': self.env.user.id})
-        else:
-            self.write({'state': 'approve', 'responsible_id': self.env.user.id})
+    def approve_partner_expense_sheets(self):
+        if not self.env.user.has_group('magnus_expense.group_hr_expense_partner'):
+            raise UserError(_("Only Partner can approve expenses"))
+        self.write({'state': 'approve_partner', 'responsible_id': self.env.user.id})
+
 
     # updated by expense sheets move create which are in  status Approved By Partner
 
