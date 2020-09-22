@@ -120,6 +120,9 @@
                     <xpath expr="//search/filter[@name='to_post']" position="replace">
                     <filter domain="['|',('state', '=', 'approve'),('state', '=', 'approve_partner')]" string="To Post" name="to_post" help="Approved Expenses"/>
                 </xpath>
+                <xpath expr="//search/filter[@name='to_post']" position="after">
+                    <filter domain="[('state', '=', 'approve')]" string="To Partner Approval" name="to_partner_approval" help="Manager Approved Expenses"/>
+                </xpath>
             </field>
         </record>
 
@@ -161,8 +164,8 @@
         <field name="res_model">hr.expense.sheet</field>
         <field name="view_mode">tree,kanban,form,pivot,graph</field>
         <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
-        <field name="domain">['|',('employee_id.user_id','=',uid),('employee_id.department_id.manager_id.user_id.id', '=', uid)]</field>
-        <field name="context">{'search_default_approved': 1}</field>
+        <field name="domain">['|','|',('employee_id.user_id','=',uid),('employee_id.department_id.parent_id.manager_id.user_id.id', '=', uid),('employee_id.department_id.manager_id.user_id.id', '=', uid)]</field>
+        <field name="context">{'search_default_to_partner_approval': 1}</field>
         <field name="help" type="html">
             <p class="oe_view_nocontent_create">
                 Click here to create a new expense report.
