@@ -42,6 +42,8 @@ class HREmployeeWizard(models.TransientModel):
     
     parent_id = fields.Many2one("hr.employee","Manager")
 
+    leave_hours = fields.Float(string="Leave Hours")
+
     @api.model
     def default_get(self, field_list):
         res = super(HREmployeeWizard, self).default_get(field_list)
@@ -114,6 +116,7 @@ class HREmployeeWizard(models.TransientModel):
                              'property_supplier_payment_term_id': account_payment_term_id and account_payment_term_id.id ,
                              'supplier_payment_mode_id':account_payment_mode_id and account_payment_mode_id.id,
                              'lang':'nl_NL'})
+
         res_partner_id = res_partner.create(partner_dict)
             
         res_partner_bank_id = res_partner_bank.search([('acc_number','=',acc_number)],limit=1)
@@ -144,6 +147,7 @@ class HREmployeeWizard(models.TransientModel):
                          'external':external,
                           'product_id':product_id,
                           'parent_id':parent_id,
+                          'leave_hours':self.leave_hours
                          })
         employee_id = hr_employee.create(emp_dict)
         

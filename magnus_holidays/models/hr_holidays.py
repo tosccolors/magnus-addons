@@ -23,3 +23,11 @@ class Holidays(models.Model):
             if rec.state == 'written' and rec.type == 'remove':
                 rec.number_of_hours = -rec.number_of_hours_temp
                 rec.virtual_hours = -rec.number_of_hours_temp
+
+
+    @api.multi
+    @api.onchange('employee_id')
+    def onchange_partner_update_leave_hours(self):
+        for rec in self:
+            if rec.employee_id:
+                rec.number_of_hours_temp = rec.employee_id.leave_hours
