@@ -120,6 +120,9 @@
                     <xpath expr="//search/filter[@name='to_post']" position="replace">
                     <filter domain="['|',('state', '=', 'approve'),('state', '=', 'approve_partner')]" string="To Post" name="to_post" help="Approved Expenses"/>
                 </xpath>
+                <xpath expr="//search/filter[@name='to_post']" position="after">
+                    <filter domain="[('state', '=', 'approve')]" string="To Partner Approval" name="to_partner_approval" help="Manager Approved Expenses"/>
+                </xpath>
             </field>
         </record>
 
@@ -154,24 +157,6 @@
             </field>
         </record>
 
-    <!-- adding new menu action Partner Approval-->
-
-    <record id="action_hr_expense_sheet_all_to_approve_partner" model="ir.actions.act_window">
-        <field name="name">Expense Reports to Approve by Partner</field>
-        <field name="res_model">hr.expense.sheet</field>
-        <field name="view_mode">tree,kanban,form,pivot,graph</field>
-        <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
-        <field name="domain">['|',('employee_id.user_id','=',uid),('employee_id.department_id.manager_id.user_id.id', '=', uid)]</field>
-        <field name="context">{'search_default_approved': 1}</field>
-        <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
-                Click here to create a new expense report.
-            </p><p>
-            Once you have created your expense, submit it to your manager who will validate it.
-        </p>
-        </field>
-    </record>
-
     <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
         <field name="context">{'readonly_by_pass': True}</field>
     </record>
@@ -195,9 +180,18 @@
     <record model="ir.ui.menu" id="hr_expense.menu_hr_expense_sheet_all_to_approve">
         <field name='name'>Manager Approval</field>
     </record>
+<!--   Adding Server Action for dynamic call the Tree view for menu Partner Approval-->
+    <record id="partner_approval_menu_server_action" model="ir.actions.server">
+        <field name="name">Partner Approval</field>
+        <field name="model_id" ref="hr_expense.model_hr_expense_sheet"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.partner_approval_menu_action()
+        </field>
+    </record>
 
     <menuitem id="menu_hr_expense_sheet_all_to_approve_partner" name="Partner Approval" sequence="1"
               parent="hr_expense.menu_hr_expense_to_approve"
-              action="action_hr_expense_sheet_all_to_approve_partner" groups="magnus_expense.group_hr_expense_partner"/>
+              action="partner_approval_menu_server_action" groups="magnus_expense.group_hr_expense_partner"/>
 
 </odoo>
