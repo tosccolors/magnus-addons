@@ -176,7 +176,7 @@ class HrExpenseSheet(models.Model):
             'res_model': 'hr.expense.sheet',
             'target': 'current'
             }
-
+    
     @api.one
     @api.constrains('expense_line_ids', 'employee_id')
     def _check_employee(self):
