@@ -177,6 +177,16 @@ class HrExpenseSheet(models.Model):
             'target': 'current'
             }
 
-
-
-
+    @api.one
+    @api.constrains('expense_line_ids', 'employee_id')
+    def _check_employee(self):
+        employee_ids = self.expense_line_ids.mapped('employee_id')
+        # checking the state revised and group Manager
+        if self.state== 'revise':
+            if self.env.user.has_group('hr_expense.group_hr_expense_manager'):
+                # Updating the expense_line_ids with employee_id
+                for emp in self.expense_line_ids:
+                    emp.employee_id=self.employee_id
+                return True
+        if len(employee_ids) > 1 or (len(employee_ids) == 1 and employee_ids != self.employee_id):
+            raise ValidationError(_('You cannot add expense lines of another employee.'))
