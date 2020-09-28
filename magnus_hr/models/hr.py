@@ -25,6 +25,9 @@ class Employee(models.Model):
     employee_numbersid = fields.Char('Employee NMBRs ID')
     date_last_promotion = fields.Date('Date of last Promotion')
 
+    has_private_car = fields.Boolean(string="Employee has a private car")
+    leave_hours = fields.Float(string="Leave Hours")
+
     def validate_dates(self):
         start_date = self.official_date_of_employment
         end_date = self.end_date_of_employment
