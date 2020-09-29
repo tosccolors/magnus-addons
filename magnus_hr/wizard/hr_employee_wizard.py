@@ -43,6 +43,7 @@ class HREmployeeWizard(models.TransientModel):
     parent_id = fields.Many2one("hr.employee","Manager")
 
     leave_hours = fields.Float(string="Leave Hours")
+    
 
     @api.model
     def default_get(self, field_list):
@@ -58,13 +59,17 @@ class HREmployeeWizard(models.TransientModel):
         emp_dict = {}
         user_dict = {}
         partner_dict = {}
+        holiday_dict = {}
         """ Employee and user creation data"""
         hr_employee = self.env['hr.employee']
         hr_users = self.env['res.users']
+        hr_holiday = self.env['hr.holidays']
+        hr_leave_type = self.env['hr.holidays.status'].search([('is_leave_type_of_wizard','=',True)],limit=1)
         res_partner = self.env['res.partner']
         res_partner_bank = self.env['res.partner.bank']
         account_payment_term = self.env['account.payment.term']
         account_payment_mode = self.env['account.payment.mode']
+        
         firstname = self.firstname
         lastname = self.lastname
         email = self.email
@@ -147,9 +152,16 @@ class HREmployeeWizard(models.TransientModel):
                          'external':external,
                           'product_id':product_id,
                           'parent_id':parent_id,
-                          'leave_hours':self.leave_hours
                          })
         employee_id = hr_employee.create(emp_dict)
+
+        holiday_dict.update({'holiday_status_id':hr_leave_type.id,
+                                'holiday_type':'employee',
+                                'employee_id':employee_id.id,
+                                'number_of_hours_temp':self.leave_hours,
+                                'type':'add',
+                                'state':'confirm'})
+        holiday_id = hr_holiday.create(holiday_dict)
         
         user_dict.update({'firstname':firstname,
                           'lastname':lastname,
