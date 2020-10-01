@@ -203,4 +203,23 @@ class HrExpenseSheet(models.Model):
 #         if positive_lines and negative_lines:
 #             raise ValidationError(_('You cannot have a positive and negative amounts on the same expense report.'))
 
-    
+    # adding server action function for the menuitem partner approval
+    @api.multi
+    def partner_credit_card_approval_menu_action(self):
+        get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
+        child_departs = self.env['hr.department'].sudo().search(
+            [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
+        return {
+            'name': 'Credit Card Partner Approval',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'tree,kanban,form,pivot,graph',
+            'domain': "['&','&',('employee_id.department_id.id', 'in', %s),('state','=','approve'),('is_from_crdit_card', '=', True)]" % child_departs,
+            'res_model': 'hr.expense.sheet',
+            'context': "{'from_credi_card_expense':True}",
+            'target': 'current'
+        }
+
+
+
+
