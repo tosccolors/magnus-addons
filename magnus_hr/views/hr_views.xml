@@ -74,19 +74,6 @@
       </field>
     </record>
 
-    <record id="hr_hr_employee_view_form3_inherited" model="ir.ui.view">
-      <field name="name">hr.hr.employee.view.form2</field>
-      <field name="model">hr.employee</field>
-      <field name="inherit_id" ref="hr_holidays.view_employee_form_leave_inherit"/>
-      <field name="arch" type="xml">
-        <xpath expr="//label[@for='remaining_leaves']" position="before">
-          <label for="leave_hours" string="Leave hours"/>
-          <div>
-            <field name="leave_hours"  class="oe_inline"/> hours
-          </div>
-        </xpath>
-      </field>
-    </record>
 
   </data>
 </odoo>
