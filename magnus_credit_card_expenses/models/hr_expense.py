@@ -84,7 +84,7 @@ class HrExpense(models.Model):
                     raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
 #                 emp_account = expense.sheet_id.bank_journal_id.default_credit_account_id.id
                 emp_account = expense.sheet_id.company_id.creditcard_decl_journal_id.default_credit_account_id.id
-                operating_unit = expense.sheet_id.company_id.creditcard_decl_journal_id_operating_unit_id.id
+                cc_operating_unit = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id.id
                 journal = expense.sheet_id.company_id.creditcard_decl_journal_id
                 #create payment
                 payment_methods = (total < 0) and journal.outbound_payment_method_ids or journal.inbound_payment_method_ids
@@ -95,7 +95,7 @@ class HrExpense(models.Model):
                     'partner_id': expense.employee_id.address_home_id.commercial_partner_id.id,
                     'partner_type': 'supplier',
                     'journal_id': journal.id,
-                    'operating_unit_id': operating_unit,
+                    'operating_unit_id': cc_operating_unit,
                     'payment_date': expense.date,
                     'state': 'reconciled',
                     'currency_id': diff_currency_p and expense.currency_id.id or journal_currency.id,
