@@ -162,6 +162,7 @@ class HREmployeeWizard(models.TransientModel):
                                 'type':'add',
                                 'state':'confirm'})
         holiday_id = hr_holiday.create(holiday_dict)
+        holiday_id.action_approve()
         
         user_dict.update({'firstname':firstname,
                           'lastname':lastname,

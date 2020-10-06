@@ -84,7 +84,7 @@ class HrExpense(models.Model):
                     raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
 #                 emp_account = expense.sheet_id.bank_journal_id.default_credit_account_id.id
                 emp_account = expense.sheet_id.company_id.creditcard_decl_journal_id.default_credit_account_id.id
-
+                default_operating_unit = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id.id
                 journal = expense.sheet_id.company_id.creditcard_decl_journal_id
                 #create payment
                 payment_methods = (total < 0) and journal.outbound_payment_method_ids or journal.inbound_payment_method_ids
@@ -108,6 +108,7 @@ class HrExpense(models.Model):
                 if not expense.employee_id.address_home_id:
                      raise UserError(_("No Home Address found for the employee %s, please configure one.") % (expense.employee_id.name))
                 emp_account = expense.employee_id.address_home_id.property_account_payable_id.id
+                default_operating_unit = expense.sheet_id.analytic_account_id.operating_unit_ids.id
 #                 emp_account = expense.sheet_id.company_id.decl_journal_id.default_credit_account_id.id
             aml_name = expense.employee_id.name + ': ' + expense.name.split('\n')[0][:64]
             move_lines.append({
@@ -116,6 +117,7 @@ class HrExpense(models.Model):
                     'price': total,
                     'account_id': emp_account,
                     'date_maturity': acc_date,
+                    'operating_unit_id': default_operating_unit,
                     'amount_currency': diff_currency_p and total_currency or False,
                     'currency_id': diff_currency_p and expense.currency_id.id or False,
                     'payment_id': payment_id,
