@@ -20,6 +20,9 @@ class HREmployeeWizard(models.TransientModel):
     bank_name_id =  fields.Many2one("res.bank","Bank")
     login = fields.Char("Login")
     ref = fields.Char("Internal Reference")
+    # Field to store the parent department based on the operating unit selected
+    parent_department_id = fields.Many2one("hr.department","Parent Department")
+    # Based on the parent department the child department along with parent will be displayed in the below field
     department_id = fields.Many2one("hr.department","Department")
     default_operating_unit_id = fields.Many2one("operating.unit","Default operating unit")
     operating_unit_ids = fields.Many2many("operating.unit",string="Allowed Operating units")
@@ -43,6 +46,26 @@ class HREmployeeWizard(models.TransientModel):
     parent_id = fields.Many2one("hr.employee","Manager")
 
     leave_hours = fields.Float(string="Leave Hours")
+
+    
+    @api.multi
+    @api.onchange('default_operating_unit_id')
+    def onchange_operating_unit(self):
+        res ={}
+        # In order to display the child ids, we need to get the parent id first
+        if self.default_operating_unit_id:
+            department_id = self.env['hr.department'].search([('operating_unit_id','=',self.default_operating_unit_id.id)])
+            if department_id:
+                for line in department_id:
+                    self.parent_department_id = line.id
+        else:
+            self.parent_department_id = False
+        if self.parent_department_id:
+            # with help of parent id , child ids can be fetched
+            res['domain'] = {'department_id': [('id', 'child_of', self.parent_department_id.id)]}
+        else:
+            res['domain'] = {'department_id': [('operating_unit_id', '=', self.default_operating_unit_id.id)]}
+        return res
     
 
     @api.model
