@@ -27,7 +27,7 @@ class HREmployeeWizard(models.TransientModel):
     default_operating_unit_id = fields.Many2one("operating.unit","Default operating unit")
     operating_unit_ids = fields.Many2many("operating.unit",string="Allowed Operating units")
 #     allocated_leaves = fields.Integer("Allocated Leaves")
-    product_id = fields.Many2one("product.product","Free rate product")
+    product_id = fields.Many2one("product.product","Fee rate product")
     #Address
     street = fields.Char("Street")
     zip = fields.Char("Zip")
