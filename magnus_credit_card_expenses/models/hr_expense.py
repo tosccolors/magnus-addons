@@ -67,7 +67,6 @@ class HrExpense(models.Model):
             move = self.env['account.move'].create({
                 'journal_id': journal.id,
                 'company_id': self.env.user.company_id.id,
-                'operating_unit_id': default_operating_unit,
                 'date': acc_date,
                 'ref': expense.sheet_id.name,
                 # force the name to the default value, to avoid an eventual 'default_name' in the context
@@ -119,6 +118,7 @@ class HrExpense(models.Model):
                     'name': aml_name,
                     'price': total,
                     'account_id': emp_account,
+                    'operating_unit': default_operating_unit,
                     'date_maturity': acc_date,
                     'amount_currency': diff_currency_p and total_currency or False,
                     'currency_id': diff_currency_p and expense.currency_id.id or False,
