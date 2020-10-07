@@ -83,7 +83,7 @@
                 <field name="account_id"/>
             </xpath>
             <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
-                <button name="action_sheet_move_create" states="approve,approve_partner,revise"
+                <button name="action_partner_sheet_move_create" states="approve_partner,revise"
                         string="Post Journal Entries" type="object" groups="account.group_account_user"
                         class="oe_highlight o_expense_sheet_post"/>
             </xpath>
@@ -100,7 +100,7 @@
                 <field name="state" widget="statusbar"
                        statusbar_visible="draft,submit,approve,approve_partner,post,done"/>
             </xpath>
-            <xpath expr="//button[@name='action_sheet_move_create']" position="after">
+            <xpath expr="//button[@name='action_partner_sheet_move_create']" position="after">
                 <button name="revise_expense" type="object" string="Revise Expense" class="oe_highlight"
                         states="approve,approve_partner" groups="hr_expense.group_hr_expense_manager"/>
                 <button name="expense_revised" type="object" string="Re-Submit" class="oe_highlight" states="revise"
@@ -118,7 +118,7 @@
             <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
             <field name="arch" type="xml">
                     <xpath expr="//search/filter[@name='to_post']" position="replace">
-                    <filter domain="['|',('state', '=', 'approve'),('state', '=', 'approve_partner')]" string="To Post" name="to_post" help="Approved Expenses"/>
+                    <filter domain="[('state', '=', 'approve_partner')]" string="To Post" name="to_post" help="Approved Expenses"/>
                 </xpath>
                 <xpath expr="//search/filter[@name='to_post']" position="after">
                     <filter domain="[('state', '=', 'approve')]" string="To Partner Approval" name="to_partner_approval" help="Manager Approved Expenses"/>

@@ -171,8 +171,8 @@ class HrExpenseSheet(models.Model):
         return super(HrExpenseSheet,self).write(vals)
     
     @api.multi
-    def action_sheet_move_create(self):
-        if any(sheet.state != 'approve' for sheet in self):
+    def action_partner_sheet_move_create(self):
+        if any(sheet.state != 'approve_partner' for sheet in self):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
         
         if self.is_from_crdit_card:

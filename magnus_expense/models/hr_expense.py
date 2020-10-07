@@ -140,8 +140,8 @@ class HrExpenseSheet(models.Model):
     # updated by expense sheets move create which are in  status Approved By Partner
 
     @api.multi
-    def action_sheet_move_create(self):
-        if any(sheet.state != 'approve' and sheet.state != 'approve_partner' for sheet in self):
+    def action_partner_sheet_move_create(self):
+        if any(sheet.state != 'approve_partner' for sheet in self):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
 
         if any(not sheet.journal_id for sheet in self):
@@ -149,7 +149,7 @@ class HrExpenseSheet(models.Model):
 
         expense_line_ids = self.mapped('expense_line_ids') \
             .filtered(lambda r: not float_is_zero(r.total_amount, precision_rounding=(
-                r.currency_id or self.env.user.company_id.currency_id).rounding))
+                    r.currency_id or self.env.user.company_id.currency_id).rounding))
         res = expense_line_ids.action_move_create()
 
         if not self.accounting_date:
