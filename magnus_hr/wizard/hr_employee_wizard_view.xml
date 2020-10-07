@@ -29,7 +29,8 @@
       				<field name="ref"/>
       				<field name="default_operating_unit_id"/>
       				<field name="operating_unit_ids" widget="many2many_tags"/>
-      				<field name="department_id" domain="[('operating_unit_id','=',default_operating_unit_id)]"/>
+      				<field name="parent_department_id" invisible="1"/>
+              <field name="department_id"/>
               <field name="leave_hours" />
       				<field name="product_id" domain="[('categ_id.name','=','Fee Rate')]"/>
       			</group>

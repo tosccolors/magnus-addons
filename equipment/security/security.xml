@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+		<record id="make_invisible" model="res.groups">
+		    <field name="name">Enable Equipment menu visibiltiy</field>
+		</record>
+
+		<record model="ir.ui.menu" id="maintenance.menu_m_dashboard">
+		    <field name="groups_id" eval="[(6,0,[ref('make_invisible')])]"/>
+		</record>
+
+
+		<record model="ir.ui.menu" id="maintenance.menu_m_request">
+		    <field name="groups_id" eval="[(6,0,[ref('make_invisible')])]"/>
+		</record>
+
+	</data>
+
+</odoo>
