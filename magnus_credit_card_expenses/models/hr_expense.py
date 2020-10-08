@@ -57,10 +57,8 @@ class HrExpense(models.Model):
         for expense in self:
             if expense.is_from_crdit_card:
                 journal = expense.sheet_id.company_id.creditcard_decl_journal_id
-                default_operating_unit = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id.id
             else:
                 journal = expense.sheet_id.company_id.decl_journal_id
-                default_operating_unit = expense.sheet_id.analytic_account_id.operating_unit_ids.id
 #             journal = expense.sheet_id.bank_journal_id if expense.payment_mode == 'company_account' else expense.sheet_id.journal_id
             #create the move that will contain the accounting entries
             acc_date = expense.sheet_id.accounting_date or expense.date
@@ -118,7 +116,6 @@ class HrExpense(models.Model):
                     'name': aml_name,
                     'price': total,
                     'account_id': emp_account,
-                    'operating_unit': default_operating_unit,
                     'date_maturity': acc_date,
                     'amount_currency': diff_currency_p and total_currency or False,
                     'currency_id': diff_currency_p and expense.currency_id.id or False,
@@ -127,11 +124,18 @@ class HrExpense(models.Model):
             #convert eml into an osv-valid format
             lines = map(lambda x: (0, 0, expense._prepare_move_line(x)), move_lines)
             move.with_context(dont_create_taxes=True).write({'line_ids': lines})
+            print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",lines)
             expense.sheet_id.write({'account_move_id': move.id})
+            #updating the line_ids 1st line_id OU with creditcard_decl_journal_id OU
+            if expense.is_from_crdit_card:
+                ou = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id
+                if ou and expense.sheet_id.account_move_id:
+                    expense.sheet_id.account_move_id.line_ids[0].operating_unit_id = ou.id
             move.post()
             if expense.payment_mode == 'company_account':
                 expense.sheet_id.paid_expense_sheets()
-            
+
+
         return True
         
 class HrExpenseSheet(models.Model):
