@@ -124,7 +124,6 @@ class HrExpense(models.Model):
             #convert eml into an osv-valid format
             lines = map(lambda x: (0, 0, expense._prepare_move_line(x)), move_lines)
             move.with_context(dont_create_taxes=True).write({'line_ids': lines})
-            print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",lines)
             expense.sheet_id.write({'account_move_id': move.id})
             #updating the line_ids 1st line_id OU with creditcard_decl_journal_id OU
             if expense.is_from_crdit_card:
@@ -134,8 +133,6 @@ class HrExpense(models.Model):
             move.post()
             if expense.payment_mode == 'company_account':
                 expense.sheet_id.paid_expense_sheets()
-
-
         return True
         
 class HrExpenseSheet(models.Model):
