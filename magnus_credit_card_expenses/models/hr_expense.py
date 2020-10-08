@@ -164,10 +164,11 @@ class HrExpenseSheet(models.Model):
             credit_card_exp = True
         else:
             credit_card_exp = False
-        if vals.get('expense_line_ids'):
-            line_list = vals.get('expense_line_ids')[0][2]
-            for expense in self.env['hr.expense'].browse(line_list):
-                expense.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
+        if self._context.get("from_credi_card_expense"):
+            if vals.get('expense_line_ids'):
+                line_list = vals.get('expense_line_ids')[0][2]
+                for expense in self.env['hr.expense'].browse(line_list):
+                    expense.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
         for credit_line in self.filtered('is_from_crdit_card'):
             for line in credit_line.expense_line_ids:
                 line.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
