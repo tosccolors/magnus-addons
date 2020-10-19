@@ -271,6 +271,30 @@
               </p>
             </field>
         </record>
+<!--        Adding Account analytic line's account moves when state in delay in list view-->
+        <record id="view_account_analytic_line_move_tree_form_magnus" model="ir.ui.view">
+            <field name="name">account.analytic.line.move.tree.form.magnus</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_form"/>
+            <field name="groups_id" eval="[(6, 0, [ref('account.group_account_invoice')])]"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <notebook name="Account Analytic Lines">
+                        <page string="Analytic Move Lines">
+                            <field name="account_analytic_line_ids" widget="Many2many_list">
+                                <tree string="analytic line list">
+                                    <field name="ref"/>
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="wip_percentage"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </xpath>
+            </field>
+        </record>
 
         <menuitem id="menu_hr_working_planned_vs_actual" parent="hr_timesheet.menu_timesheets_reports" action="act_hr_timesheet_line_planned_vs_actual"
             name="Planned vs. Actual Activity Analysis" sequence="9" groups="group_planning_forecasting"/>

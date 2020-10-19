@@ -11,6 +11,8 @@ class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
     _description = 'Analytic Line'
     _order = 'date desc'
+    # field account_analytic_line_ids for display the account moves
+    account_analytic_line_ids=fields.Many2many('account.move','analytic_tree_view',string="Analytic Account Line",readonly=True)
 
     @api.depends(
                  'sheet_id_computed.date_to',
@@ -478,3 +480,14 @@ class AccountAnalyticLine(models.Model):
         ))
         self.env.cr.execute(list_query, where_clause_params)
         return True
+
+ # To display the Account move and reverse move in many2many list view for status = delayed record
+
+    @api.multi
+    def add_move_line(self,analytic_lines_ids,account_move,reverse_move):
+        for id in analytic_lines_ids:
+            analy_line = self.env['account.analytic.line'].search([('id', '=', id)])
+            analy_line.account_analytic_line_ids=[(4,account_move.id),(4,reverse_move.id)]
+        return True
+
+
