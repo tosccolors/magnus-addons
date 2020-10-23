@@ -6,43 +6,43 @@ class FleetWizard(models.TransientModel):
     _name = "fleet.wizard"
     _description = "Fleet Wizard"
 
-    license_plate = fields.Char('License Plate')
+    license_plate = fields.Many2one('fleet.vehicle','License Plate')
     driver_id = fields.Many2one('res.partner', 'Driver')
     date = fields.Datetime('Date')
     odometer_value = fields.Float('Odometer Value')
     add = fields.Boolean()
+
+    @api.onchange('add')
+    def onchange_add(self):
+        domain = {}
+        if self.add:
+            license_plate_no_driver = self.env['fleet.vehicle'].search([('driver_id', '=', False)]).mapped('id')
+            domain['license_plate'] = [('id', 'in', license_plate_no_driver)]
+        else:
+            license_plate_driver = self.env['fleet.vehicle'].search([('driver_id', '!=', False)]).mapped('id')
+            domain['license_plate'] = [('id', 'in', license_plate_driver)]
+        return {'domain': domain}
 
     @api.onchange('license_plate')
     def onchange_license_plate(self):
         # import pdb;
         # pdb.set_trace();
         value, domain = {}, {}
+        fleet_obj = self.env['fleet.vehicle']
         if not self.add:
-            fleet_obj = self.env['fleet.vehicle']
-            fleet = fleet_obj.search([('license_plate', '=', self.license_plate)])
-            if not fleet:
-                fleet = self.env['fleet.vehicle'].search([('license_plate', 'ilike', self.license_plate)])
-            if len(fleet) == 1:
+           fleet = fleet_obj.search([('id', '=', self.license_plate.id)])
+           if len(fleet) == 1:
                 value['driver_id'] = fleet.driver_id.id
-            else:
-                drivers = fleet.mapped('driver_id')
-                value['driver_id'] = False
-                domain['driver_id'] = [('id', 'in', drivers.ids)]
+        else:
+            employees = self.env['hr.employee'].search([]).mapped('user_id.partner_id.id')
+            domain['driver_id'] = [('id', 'in', employees)]
         return {'value':value, 'domain':domain}
-
-    @api.onchange('driver_id')
-    def onchange_driver(self):
-        if self.license_plate and self.driver_id and not self.add:
-            fleet_obj = self.env['fleet.vehicle']
-            fleet = fleet_obj.search([('license_plate', 'ilike', self.license_plate), ('driver_id', '=', self.driver_id.id)])
-            if self.license_plate != fleet.license_plate:
-                self.license_plate = fleet.license_plate
 
     @api.multi
     def add_driver(self):
         fleet_obj = self.env['fleet.vehicle']
         data_tracker = self.env['data.time.tracker']
-        fleet = fleet_obj.search([('license_plate', '=', self.license_plate)])
+        fleet = fleet_obj.search([('id', '=', self.license_plate.id)])
         driver_fleet = fleet_obj.search([('driver_id', '=', self.driver_id.id)])
         if not fleet:
             raise UserError(_("Can't find vehicle with license_plate %s")%(self.license_plate))
@@ -63,8 +63,7 @@ class FleetWizard(models.TransientModel):
         fleet_obj = self.env['fleet.vehicle']
         data_tracker = self.env['data.time.tracker']
 
-        fleet = fleet_obj.search(
-            [('license_plate', 'ilike', self.license_plate), ('driver_id', '=', self.driver_id.id)])
+        fleet = fleet_obj.search([('id', '=', self.license_plate.id), ('driver_id', '=', self.driver_id.id)])
 
         sdomain = [('model', '=', fleet._name), ('relation_model', '=', self.driver_id._name),
                    ('model_ref', '=', fleet.id), ('date_to', '=', '9999-12-31 00:00:00'),
