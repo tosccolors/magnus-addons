@@ -119,6 +119,12 @@ class AccountInvoice(models.Model):
             inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
             if inv_date != period_date and self.move_id:
                 self.action_wip_move_create()
+            #if annalytic invoice move_id then update account_analytic_line_ids field for model account.analytic.line
+            if self.move_id:
+                for inv_analy_line in self.invoice_line_ids:
+                    for analytic_inv_line in inv_analy_line.user_task_total_line_id.detail_ids:
+                        analy_line = self.env['account.analytic.line'].sudo().search([('id', '=', analytic_inv_line.id)])
+                        analy_line.account_analytic_line_ids = [(4,self.move_id.id)]
         return res
 
     @api.model
