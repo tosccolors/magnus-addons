@@ -12,6 +12,7 @@
     'data': [
         'security/security.xml',
         'views/maintenance_view.xml',
+        'views/maintenance_equipment_view.xml'
     ],
 
     'installable': True,
