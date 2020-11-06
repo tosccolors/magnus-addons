@@ -124,7 +124,7 @@ class AccountInvoice(models.Model):
                 for inv_analy_line in self.invoice_line_ids:
                     for analytic_inv_line in inv_analy_line.user_task_total_line_id.detail_ids:
                         analy_line = self.env['account.analytic.line'].sudo().search([('id', '=', analytic_inv_line.id)])
-                        analy_line.account_analytic_line_ids = [(4,self.move_id.id)]
+                        analy_line.account_analytic_line_ids = [(4,self.move_id.id),(4,self.wip_move_id.id),(4,self.wip_move_id.reversal_id.id)]
         return res
 
     @api.model
