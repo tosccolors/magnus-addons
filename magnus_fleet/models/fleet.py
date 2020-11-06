@@ -108,3 +108,10 @@ class FleetVehicle(models.Model):
         res_ids = [x[0] for x in self.env.cr.fetchall()]
         res.append(('id', search_operator, res_ids))
         return res
+    # Setting domain for the driver field in base module to employees
+    @api.onchange('model_id')
+    def onchange_model_id(self):
+        domain = {}
+        employees = self.env['hr.employee'].search([]).mapped('user_id.partner_id.id')
+        domain['driver_id'] = [('id', 'in', employees)]
+        return {'domain':domain}

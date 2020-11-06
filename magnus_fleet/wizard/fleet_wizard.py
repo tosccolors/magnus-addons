@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from datetime import datetime,timedelta
 
 class FleetWizard(models.TransientModel):
     _name = "fleet.wizard"
@@ -33,9 +34,8 @@ class FleetWizard(models.TransientModel):
            fleet = fleet_obj.search([('id', '=', self.license_plate.id)])
            if len(fleet) == 1:
                 value['driver_id'] = fleet.driver_id.id
-        else:
-            employees = self.env['hr.employee'].search([]).mapped('user_id.partner_id.id')
-            domain['driver_id'] = [('id', 'in', employees)]
+        employees = self.env['hr.employee'].search([]).mapped('user_id.partner_id.id')
+        domain['driver_id'] = [('id', 'in', employees)]
         return {'value':value, 'domain':domain}
 
     @api.multi
@@ -50,12 +50,15 @@ class FleetWizard(models.TransientModel):
             raise UserError(_("The driver already owns a vehicle %s")%(driver_fleet.license_plate))
         elif fleet:
             sdomain = [('model', '=', fleet._name), ('relation_model', '=', self.driver_id._name),
-                       ('model_ref', '=', fleet.id), ('date_to', '=', '9999-12-31 00:00:00'),
-                       ('type_many2many', '=', False)]
+                       ('model_ref', '=', fleet.id),('type_many2many', '=', False)]
+
             trackObj = data_tracker.search(sdomain, limit=1)
             fleet.write({'driver_id': self.driver_id.id, 'odometer':self.odometer_value})
             if trackObj.date_from < self.date:
                 trackObj.write({'date_to': self.date})
+        #updating Date from to next sunday
+        data_tracker_update=data_tracker.search([('id', '=', fleet.model_track_ids[-1].id)])
+        data_tracker_update.sudo().write({'date_from': self.date_from_next_sunday()})
         return True
 
     @api.multi
@@ -65,11 +68,10 @@ class FleetWizard(models.TransientModel):
 
         fleet = fleet_obj.search([('id', '=', self.license_plate.id), ('driver_id', '=', self.driver_id.id)])
 
-        sdomain = [('model', '=', fleet._name), ('relation_model', '=', self.driver_id._name),
-                   ('model_ref', '=', fleet.id), ('date_to', '=', '9999-12-31 00:00:00'),
-                   ('type_many2many', '=', False)]
-
-        trackObj = data_tracker.search(sdomain, limit=1)
+        # sdomain = [('model', '=', fleet._name), ('relation_model', '=', self.driver_id._name),
+        #            ('model_ref', '=', fleet.id),('type_many2many', '=', False)]
+        #
+        # trackObj = data_tracker.search(sdomain, limit=1)
 
         data = {'driver_id':False}
 
@@ -77,7 +79,19 @@ class FleetWizard(models.TransientModel):
             data['active'] = False
             fleet.log_contracts.contract_close()
         fleet.write(data)
-
-        if trackObj.date_from < self.date:
-            trackObj.write({'date_to':self.date})
+        # if trackObj.date_from < self.date:
+        #     trackObj.write({'date_to':self.date})
+        data_tracker_update = data_tracker.search([('id', '=', fleet.model_track_ids[-1].id)])
+        data_tracker_update.sudo().write({'date_to': self.date_from_next_sunday()})
         return True
+
+    #To update the given date into next sunday of week
+    api.multi
+    def date_from_next_sunday(self):
+        covert_date = self.date.split(' ')
+        year = int(covert_date[0].split('-')[0])
+        month = int(covert_date[0].split('-')[1])
+        day = int(covert_date[0].split('-')[2])
+        getday = datetime(year, month, day).weekday()
+        nextsunday = str(datetime(year, month, day) + timedelta(days=6 - getday))
+        return nextsunday
