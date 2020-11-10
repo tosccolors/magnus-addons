@@ -23,3 +23,5 @@ class Holidays(models.Model):
             if rec.state == 'written' and rec.type == 'remove':
                 rec.number_of_hours = -rec.number_of_hours_temp
                 rec.virtual_hours = -rec.number_of_hours_temp
+
+

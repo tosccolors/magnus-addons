@@ -29,6 +29,9 @@
             <field name="employee_numbersid" />
           </group>
         </xpath>
+        <xpath expr="//field[@name='marital']" position="after">
+          <field name="has_private_car"/>
+        </xpath>
       </field>
     </record>
 
@@ -70,6 +73,7 @@
         </xpath>
       </field>
     </record>
+
 
   </data>
 </odoo>

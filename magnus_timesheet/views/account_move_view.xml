@@ -61,6 +61,8 @@
         <field name="arch" type="xml">
             <field name="journal_id" position="after">
                 <field name="operating_unit_id"/>
+                <field name="is_wip_move" invisible="True"/>
+                <field name="wip_percentage" attrs="{'invisible': [('is_wip_move','=',False)]}" readonly="1" />
             </field>
             <xpath expr="//field[@name='line_ids']/tree//field[@name='account_id']"
                    position="after">

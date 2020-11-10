@@ -39,11 +39,21 @@ class AccountInvoice(models.Model):
     )
 
     def compute_target_invoice_amount(self):
-        if self.amount_untaxed != self.target_invoice_amount:
-            factor = self.target_invoice_amount / self.amount_untaxed
-            discount = (1.0 - factor) * 100
-            for line in self.invoice_line_ids:
-                line.discount = discount
+        try:
+            if self.amount_untaxed != self.target_invoice_amount:
+                self.reset_target_invoice_amount()
+                factor = self.target_invoice_amount / self.amount_untaxed
+                discount = (1.0 - factor) * 100
+                for line in self.invoice_line_ids:
+                    line.discount = discount
+                taxes_grouped = self.get_taxes_values()
+                tax_lines = self.tax_line_ids.filtered('manual')
+                for tax in taxes_grouped.values():
+                    tax_lines += tax_lines.new(tax)
+                self.tax_line_ids = tax_lines
+        except ZeroDivisionError:
+            raise UserError(_('You cannot set a target amount if the invoice line amount is 0'))
+
 
     def reset_target_invoice_amount(self):
         for line in self.invoice_line_ids:
@@ -109,6 +119,15 @@ class AccountInvoice(models.Model):
             inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
             if inv_date != period_date and self.move_id:
                 self.action_wip_move_create()
+            #if annalytic invoice move_id then update account_analytic_line_ids field for model account.analytic.line
+            if self.move_id:
+                for inv_analy_line in self.invoice_line_ids:
+                    for analytic_inv_line in inv_analy_line.user_task_total_line_id.detail_ids:
+                        analy_line = self.env['account.analytic.line'].sudo().search([('id', '=', analytic_inv_line.id)])
+                        analy_line.account_analytic_line_ids = [(4,self.move_id.id),(4,self.wip_move_id.id),(4,self.wip_move_id.reversal_id.id)]
+                    for line in analy_line.account_analytic_line_ids:
+                        if line.id == self.wip_move_id.reversal_id.id:
+                            line.amount = -(line.amount)                            
         return res
 
     @api.model

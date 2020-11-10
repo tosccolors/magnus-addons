@@ -28,6 +28,7 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/project_holiday_views.xml',
+        'views/hr_holiday_status_view.xml',
         # 'views/templates.xml',
     ],
     # only loaded in demonstration mode

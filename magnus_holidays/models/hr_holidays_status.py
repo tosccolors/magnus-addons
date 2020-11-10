@@ -9,6 +9,7 @@ class HrHolidaysStatus(models.Model):
     _inherit = "hr.holidays.status"
 
     date_end = fields.Datetime(string="Expiry Date", default='2080-12-31 00:00:00')
+    is_leave_type_of_wizard = fields.Boolean(string="Is leave type of wizard")
 
     @api.multi
     def get_hours(self, employee):

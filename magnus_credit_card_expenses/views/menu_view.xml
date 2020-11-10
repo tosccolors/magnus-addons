@@ -2,8 +2,6 @@
 <odoo>
         <menuitem id="menu_credit_card_expense_root" name="Credit Card Expense" sequence="100" groups="group_credit_card_expenses,group_credit_card_expenses_officer"/>
         
-        <delete model="ir.ui.menu" id="hr_expense.menu_hr_expense_my_expenses_to_submit"/>
-        
         <menuitem id="menu_hr_expense_my_expenses_credit_card" name="My Expenses" sequence="1" parent="menu_credit_card_expense_root" groups="group_credit_card_expenses"/>
          <menuitem id="menu_hr_expense_my_expenses_to_submit_credit_card" name="Expenses to Submit" sequence="1" parent="menu_hr_expense_my_expenses_credit_card" action="magnus_credit_card_expenses.hr_expense_actions_my_unsubmitted_credit_card"/>
          <menuitem id="menu_hr_expense_my_expenses_refused_credit_card" name="Refused Expenses" sequence="2" parent="menu_hr_expense_my_expenses_credit_card" action="magnus_credit_card_expenses.action_hr_expense_refused_expenses" groups="group_credit_card_expenses"/>
@@ -12,8 +10,8 @@
 
 
         <menuitem id="menu_hr_expense_to_approve_credit_card" name="To Approve" sequence="2" parent="menu_credit_card_expense_root" groups="group_credit_card_expenses,group_credit_card_expenses_officer"/>
-        <menuitem id="menu_hr_expense_sheet_all_to_approve_credit_card" name="Expense Reports To Approve" sequence="1" parent="menu_hr_expense_to_approve_credit_card" action="magnus_credit_card_expenses.action_hr_expense_sheet_all_to_approve" />
-        
+        <menuitem id="menu_hr_expense_sheet_all_to_approve_credit_card" name="Manager Approve" sequence="1" parent="menu_hr_expense_to_approve_credit_card" action="magnus_credit_card_expenses.action_hr_expense_sheet_all_to_approve" />
+        <menuitem id="menu_hr_expense_sheet_all_to_partner_approve_credit_card" name="Partner Approve" sequence="2" parent="menu_hr_expense_to_approve_credit_card" action="magnus_credit_card_expenses.credit_card_partner_approval_menu_server_action" groups="magnus_expense.group_hr_expense_partner" />
         <menuitem id="menu_hr_expense_accountant_credit_card" name="Accountant" sequence="3" parent="menu_credit_card_expense_root" groups="group_expenses_superuser"/>
         <menuitem id="menu_hr_expense_sheet_all_to_post_credit_card" name="Expense Reports To Post" sequence="2" parent="menu_hr_expense_accountant_credit_card" action="magnus_credit_card_expenses.action_hr_expense_sheet_all_to_post"/>
         <menuitem id="menu_hr_expense_sheet_all_to_pay_credit_card" name="Expense Reports To Pay" sequence="3" parent="menu_hr_expense_accountant_credit_card" action="magnus_credit_card_expenses.action_hr_expense_sheet_all_to_pay"/>

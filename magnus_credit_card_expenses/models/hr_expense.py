@@ -84,7 +84,7 @@ class HrExpense(models.Model):
                     raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
 #                 emp_account = expense.sheet_id.bank_journal_id.default_credit_account_id.id
                 emp_account = expense.sheet_id.company_id.creditcard_decl_journal_id.default_credit_account_id.id
-
+                
                 journal = expense.sheet_id.company_id.creditcard_decl_journal_id
                 #create payment
                 payment_methods = (total < 0) and journal.outbound_payment_method_ids or journal.inbound_payment_method_ids
@@ -108,6 +108,7 @@ class HrExpense(models.Model):
                 if not expense.employee_id.address_home_id:
                      raise UserError(_("No Home Address found for the employee %s, please configure one.") % (expense.employee_id.name))
                 emp_account = expense.employee_id.address_home_id.property_account_payable_id.id
+
 #                 emp_account = expense.sheet_id.company_id.decl_journal_id.default_credit_account_id.id
             aml_name = expense.employee_id.name + ': ' + expense.name.split('\n')[0][:64]
             move_lines.append({
@@ -124,10 +125,14 @@ class HrExpense(models.Model):
             lines = map(lambda x: (0, 0, expense._prepare_move_line(x)), move_lines)
             move.with_context(dont_create_taxes=True).write({'line_ids': lines})
             expense.sheet_id.write({'account_move_id': move.id})
+            #updating the line_ids 1st line_id OU with creditcard_decl_journal_id OU
+            if expense.is_from_crdit_card:
+                ou = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id
+                if ou and expense.sheet_id.account_move_id:
+                    expense.sheet_id.account_move_id.line_ids[0].operating_unit_id = ou.id
             move.post()
             if expense.payment_mode == 'company_account':
                 expense.sheet_id.paid_expense_sheets()
-            
         return True
         
 class HrExpenseSheet(models.Model):
@@ -155,18 +160,23 @@ class HrExpenseSheet(models.Model):
         return res
     @api.multi
     def write(self,vals):
-        if vals.get('expense_line_ids'):
-            line_list = vals.get('expense_line_ids')[0][2]
-            for expense in self.env['hr.expense'].browse(line_list):
-                expense.write({'is_from_crdit_card':True,'payment_mode':'company_account'})
+        if self.filtered('is_from_crdit_card'):
+            credit_card_exp = True
+        else:
+            credit_card_exp = False
+        if self._context.get("from_credi_card_expense"):
+            if vals.get('expense_line_ids'):
+                line_list = vals.get('expense_line_ids')[0][2]
+                for expense in self.env['hr.expense'].browse(line_list):
+                    expense.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
         for credit_line in self.filtered('is_from_crdit_card'):
             for line in credit_line.expense_line_ids:
-                line.write({'is_from_crdit_card':True,'payment_mode':'company_account'})
+                line.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
         return super(HrExpenseSheet,self).write(vals)
     
     @api.multi
-    def action_sheet_move_create(self):
-        if any(sheet.state != 'approve' for sheet in self):
+    def action_partner_sheet_move_create(self):
+        if any(sheet.state != 'approve_partner' for sheet in self):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
         
         if self.is_from_crdit_card:
@@ -199,4 +209,23 @@ class HrExpenseSheet(models.Model):
 #         if positive_lines and negative_lines:
 #             raise ValidationError(_('You cannot have a positive and negative amounts on the same expense report.'))
 
-    
+    # adding server action function for the menuitem partner approval
+    @api.multi
+    def partner_credit_card_approval_menu_action(self):
+        get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
+        child_departs = self.env['hr.department'].sudo().search(
+            [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
+        return {
+            'name': 'Credit Card Partner Approval',
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'tree,kanban,form,pivot,graph',
+            'domain': "['&','&',('employee_id.department_id.id', 'in', %s),('state','=','approve'),('is_from_crdit_card', '=', True)]" % child_departs,
+            'res_model': 'hr.expense.sheet',
+            'context': "{'from_credi_card_expense':True}",
+            'target': 'current'
+        }
+
+
+
+

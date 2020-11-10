@@ -18,6 +18,12 @@
             	<field name="payment_mode" position="attributes">
             		<attribute name="invisible">True</attribute>
             	</field>
+                <field name="employee_id" position="after">
+                    <field name="is_from_crdit_card" invisible="1"/>
+                </field>
+                <xpath expr="//field[@name='expense_line_ids']" position="attributes">
+                    <attribute name="domain">[('employee_id', '=', employee_id), (['is_from_crdit_card', '=', is_from_crdit_card])]</attribute>
+                </xpath>
             </field>
         </record>
         
@@ -61,7 +67,7 @@
 		     <field name="search_view_id" ref="hr_expense.view_hr_expense_filter"/>
 		    <field name="view_type">form</field>
 		    <field name="view_mode">tree,kanban,form,graph,pivot</field>
-            <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+            <field name="domain">[('employee_id.user_id', '=', uid), ('is_from_crdit_card','=',True)]</field>
 		    <field name="context" eval="{'search_default_to_report': 1,'from_credi_card_expense':True}" />
 		    <field name="help" type="html">
               <p>
@@ -222,6 +228,15 @@
     </record>
     <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
         <field name="domain">[('is_from_crdit_card','=',False)]</field>
+    </record>
+    <!--   Adding Server Action for dynamic call the Tree view for menu Partner Approval-->
+    <record id="credit_card_partner_approval_menu_server_action" model="ir.actions.server">
+        <field name="name">Partner Approval</field>
+        <field name="model_id" ref="hr_expense.model_hr_expense_sheet"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.partner_credit_card_approval_menu_action()
+        </field>
     </record>
 
 

@@ -11,17 +11,22 @@ class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
     _description = 'Analytic Line'
     _order = 'date desc'
+    # field account_analytic_line_ids for display the account moves
+    account_analytic_line_ids=fields.Many2many('account.move','analytic_tree_view',string="Analytic Account Line",readonly=True)
 
-    @api.depends('date',
-                 'user_id',
-                 'task_id',
-                 'product_uom_id',
+    @api.depends(
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
-                 'sheet_id_computed.employee_id')
+                 'sheet_id_computed.employee_id',
+                 )
     def _compute_sheet(self):
         """Links the timesheet line to the corresponding sheet
+        overridden from method in hr_timesheet_sheet without super()
         """
+        # we first get value of sheet_id in cache, because it is empty for all to be computed fields
+        # because sheet_id does not get a value when sheets is empty, we need the original value.
+        # we have to filter self for records existing in db
+        self.filtered(lambda i: isinstance(i.id, (int, long))).read(['sheet_id'])
         uom_hrs = self.env.ref("product.product_uom_hour").id
         for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             sheets = self.env['hr_timesheet_sheet.sheet'].search(
@@ -39,61 +44,57 @@ class AccountAnalyticLine(models.Model):
                  'project_id.correction_charge',
                  'project_id.user_id',
                  'project_id.invoice_properties.expenses',
-                 'sheet_id',
                  'account_id',
                  'unit_amount',
+                 'planned',
+                 'date',
                  'task_id',
-                 'product_uom_id',
-                 'planned')
+                 'user_id'
+                 )
     def _compute_analytic_line(self):
-        """Calculates a number of fields
-        """
-        UomHrs = self.env.ref("product.product_uom_hour").id
+        uom_hrs = self.env.ref("product.product_uom_hour").id
         for line in self:
+            # all analytic lines need a project_operating_unit_id and
+            # for all analytic lines day_name, week_id and month_id are computed
+            date = line.date
             line.project_operating_unit_id = \
                 line.account_id.operating_unit_ids \
                 and line.account_id.operating_unit_ids[0] or False
+            line.day_name = str(datetime.strptime(date, '%Y-%m-%d').
+                                strftime("%m/%d/%Y")) + \
+                            ' (' + datetime.strptime(date, '%Y-%m-%d'). \
+                                strftime('%a') + ')'
+            line.week_id = line.find_daterange_week(date)
+            line.month_id = var_month_id = line.find_daterange_month(date)
+            # only when project_id these fields are computed
             if line.project_id:
                 line.chargeable = line.project_id.chargeable
                 line.correction_charge = line.project_id.correction_charge
                 line.project_mgr = line.project_id.user_id or False
                 if line.project_id.invoice_properties:
                     line.expenses = line.project_id.invoice_properties.expenses
-            elif line.account_id:
+            else:
                 line.project_mgr = line.account_id.project_ids.user_id or False
             task = line.task_id
             user = line.user_id
-            date = line.date
+            # only if task_id the remaining fields are computed
             if task and user:
                 uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
-                if date:
-                    line.day_name = str(datetime.strptime(date, '%Y-%m-%d').
-                                    strftime("%m/%d/%Y")) + \
-                                    ' (' + datetime.strptime(date, '%Y-%m-%d').\
-                                    strftime('%a') + ')'
-                if not line.planned:
-                    if line.sheet_id.week_id and date:
-                        line.week_id = line.sheet_id.week_id
-                        var_month_id = line.find_daterange_month(date)
-                    elif date:
-                        line.week_id = line.find_daterange_week(date)
-                        var_month_id = line.find_daterange_month(date)
-                    if line.month_of_last_wip:
-                        line.wip_month_id = line.month_of_last_wip
+                    if line.planned:
+                        line.planned_qty = line.unit_amount
+                        line.actual_qty = 0.0
                     else:
-                        line.wip_month_id = line.month_id = var_month_id
-                    if line.product_uom_id.id == UomHrs:
-                        line.ts_line = True
-                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                    line.actual_qty = line.unit_amount
-                    line.planned_qty = 0.0
-            if line.planned:
-                line.week_id = line.find_daterange_week(line.date)
-                line.planned_qty = line.unit_amount
-                line.actual_qty = 0.0
-
+                        if line.month_of_last_wip:
+                            line.wip_month_id = line.month_of_last_wip
+                        else:
+                            line.wip_month_id = var_month_id
+                        if line.product_uom_id.id == uom_hrs:
+                            line.ts_line = True
+                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                        line.actual_qty = line.unit_amount
+                        line.planned_qty = 0.0
 
     def find_daterange_week(self, date):
         """
@@ -142,7 +143,6 @@ class AccountAnalyticLine(models.Model):
     def default_get(self, fields):
         context = self._context
         res = super(AccountAnalyticLine, self).default_get(fields)
-
         if 'planning_lines' in context:
             project = self.env['project.project']
             project_id = context.get('default_project_id', project)
@@ -151,8 +151,10 @@ class AccountAnalyticLine(models.Model):
             account_id = project.analytic_account_id
             operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
+        if 'timesheet_date_from' in context:
+            date = context.get('timesheet_date_from')
+            res.update({'date': date})
         return res
-
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -355,6 +357,19 @@ class AccountAnalyticLine(models.Model):
             self.company_id = self.env.user.company_id
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
+        elif self.sheet_id and not self.sheet_id.date_from <= self.date <= self.sheet_id.date_to:
+            self.date = self.sheet_id.date_from
+            return {
+                'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
+            }
+        elif self.env.context.get('timesheet_date_from',False) and \
+            self.env.context.get('timesheet_date_to',False) and not \
+            self.env.context.get('timesheet_date_from') <= self.date <= self.env.context.get('timesheet_date_to'):
+            self.date = self.env.context.get('timesheet_date_from')
+            return {
+                'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
+            }
+
 
     @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
     def on_change_unit_amount(self):
@@ -362,16 +377,8 @@ class AccountAnalyticLine(models.Model):
             return {}
         return super(AccountAnalyticLine, self).on_change_unit_amount()
 
-
-
     @api.multi
     def write(self, vals):
-        # Condition to check if sheet_id already exists!
-        if 'sheet_id' in vals and vals['sheet_id'] == False and self.filtered('sheet_id'):
-            raise ValidationError(_(
-                'Timesheet link can not be deleted for %s.\n '
-            ) % self)
-
         # don't call super if only state has to be updated
         if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
@@ -473,3 +480,17 @@ class AccountAnalyticLine(models.Model):
         ))
         self.env.cr.execute(list_query, where_clause_params)
         return True
+
+ # To display the Account move and reverse move in many2many list view for status = delayed record
+
+    @api.multi
+    def add_move_line(self,analytic_lines_ids,account_move,reverse_move):
+        for id in analytic_lines_ids:
+            analy_line = self.env['account.analytic.line'].search([('id', '=', id)])
+            analy_line.account_analytic_line_ids=[(4,account_move.id),(4,reverse_move.id)]
+        for line in analy_line.account_analytic_line_ids:
+            if line.id==reverse_move.id:
+                line.amount=-(line.amount)
+        return True
+
+
