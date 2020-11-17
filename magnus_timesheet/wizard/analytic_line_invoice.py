@@ -76,6 +76,8 @@ class AnalyticLineStatus(models.TransientModel):
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
                 )%project_names)
+        for entry in entries:
+            entry.wip_percentage=self.wip_percentage
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             notupdatestate = {}
@@ -360,6 +362,8 @@ class AnalyticLineStatus(models.TransientModel):
                         move = account_move.with_context(ctx_nolang).create(move_vals)
                         move.is_wip_move=True
                         move.wip_percentage=self.wip_percentage
+                        for line in move.line_ids:
+                            line.wip_percentage=self.wip_percentage
                         if move:
                             move._post_validate()
                             move.post()
@@ -398,12 +402,13 @@ class AnalyticLineStatus(models.TransientModel):
                 self.env.invalidate_all()
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
-
+        vals = [account_move.id]
         if self.wip_percentage > 0.0:
             # Skip wip reversal creation when percantage is 0
             reverse_move=self.wip_reversal(account_move)
+            vals.append(reverse_move.id)
         # Adding moves to each record
-        self.env['account.analytic.line'].add_move_line(analytic_lines_ids, account_move,reverse_move)
+        self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
 
         return "WIP moves and Reversals successfully created. \n "
 
