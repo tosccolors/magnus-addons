@@ -501,9 +501,6 @@ class AccountAnalyticLine(models.Model):
                     analy_line = self.env['account.analytic.line'].search([('id', '=', id)])
                     for mov_line_ids in acc_mov_line:
                         analy_line.account_analytic_line_ids=[(4,mov_line_ids.id)]
-            # for line in analy_line.account_analytic_line_ids:
-            #     if line.id==vals['reverse_move'].id:
-            #         line.amount=-(line.amount)
         return True
 
 
