@@ -75,6 +75,15 @@ class AccountAnalyticLine(models.Model):
                     line.expenses = line.project_id.invoice_properties.expenses
             else:
                 line.project_mgr = line.account_id.project_ids.user_id or False
+
+            #All entries should mapped with planned and actual qty
+            if line.planned:
+                line.planned_qty = line.unit_amount
+                line.actual_qty = 0.0
+            else:
+                line.actual_qty = line.unit_amount
+                line.planned_qty = 0.0
+
             task = line.task_id
             user = line.user_id
             # only if task_id the remaining fields are computed
@@ -82,19 +91,19 @@ class AccountAnalyticLine(models.Model):
                 uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
-                    if line.planned:
-                        line.planned_qty = line.unit_amount
-                        line.actual_qty = 0.0
+                    # if line.planned:
+                    #     line.planned_qty = line.unit_amount
+                    #     line.actual_qty = 0.0
+                    # else:
+                    if line.month_of_last_wip:
+                        line.wip_month_id = line.month_of_last_wip
                     else:
-                        if line.month_of_last_wip:
-                            line.wip_month_id = line.month_of_last_wip
-                        else:
-                            line.wip_month_id = var_month_id
-                        if line.product_uom_id.id == uom_hrs:
-                            line.ts_line = True
-                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                        line.actual_qty = line.unit_amount
-                        line.planned_qty = 0.0
+                        line.wip_month_id = var_month_id
+                    if line.product_uom_id.id == uom_hrs:
+                        line.ts_line = True
+                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                    # line.actual_qty = line.unit_amount
+                    # line.planned_qty = 0.0
 
     def find_daterange_week(self, date):
         """
