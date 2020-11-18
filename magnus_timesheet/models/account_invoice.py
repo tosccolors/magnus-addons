@@ -130,7 +130,7 @@ class AccountInvoice(models.Model):
                                 [('id', '=', analytic_inv_line.id)])
                             for mov_line_id in mov_line:
                                 if (mov_line_id.id != False) and (mov_line_id.account_id.user_type_id.name== 'Income'):
-                                    analy_line.account_analytic_line_ids = [(4, mov_line_id.id)]
+                                    analy_line.account_analy_line_ids = [(4, mov_line_id.id)]
 
 
         return res

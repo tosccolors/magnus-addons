@@ -282,7 +282,7 @@
                 <xpath expr="//sheet" position="inside">
                     <notebook name="Account Analytic Lines">
                         <page string="Analytic Move Lines">
-                            <field name="account_analytic_line_ids" widget="Many2many_list">
+                            <field name="account_analy_line_ids" widget="Many2many_list">
                                 <tree string="analytic line list">
                                     <field name="move_id"/>
                                     <field name="ref"/>
