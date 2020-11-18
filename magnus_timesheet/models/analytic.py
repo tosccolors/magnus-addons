@@ -12,7 +12,7 @@ class AccountAnalyticLine(models.Model):
     _description = 'Analytic Line'
     _order = 'date desc'
     # field account_analytic_line_ids for display the account moves
-    account_analy_line_ids=fields.Many2many('account.move.line','analytic_tree_view',string="Analytic Account Line",readonly=True)
+    account_analy_line_ids=fields.Many2many('account.move.line',string="Analytic Account Line",readonly=True)
     wip_percentage=fields.Float("WIP percentage")
     @api.depends(
                  'sheet_id_computed.date_to',
@@ -498,10 +498,9 @@ class AccountAnalyticLine(models.Model):
             for mov_id in vals:
                 acc_mov_line=self.env['account.move.line'].search([('move_id', '=', mov_id)])
                 for id in analytic_lines_ids:
-                    analy_line = self.env['account.analytic.line'].search([('id', '=', id)])
+                    analytic_line = self.env['account.analytic.line'].search([('id', '=', id)])
                     for mov_line_ids in acc_mov_line:
-                        if mov_line_ids.account_id.user_type_id.name== 'Income':
-                            analy_line.account_analy_line_ids=[(4,mov_line_ids.id)]
+                        analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
         return True
 
 
