@@ -15,6 +15,7 @@ class AccountMoveLine(models.Model):
         'res.users',
         string='Timesheet User'
     )
+    wip_percentage=fields.Float("WIP percentage")
 
 
     @api.multi
