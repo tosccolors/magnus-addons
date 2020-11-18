@@ -8,6 +8,11 @@ from werkzeug import url_encode
 class HREmployeeWizard(models.TransientModel):
     _name= "hr.employee.wizard"
     _description = "Employee creation wizard"
+
+    def _get_ou_domain(self):
+        ou = self.env['operating.unit'].search([('company_id', '=', self.env.user.company_id.id)])
+        domain = [('id', 'in', ou.ids)] if ou else [('id', '=', False)]
+        return domain
     
     firstname = fields.Char("Firstname")
     lastname = fields.Char("Lastname")
@@ -24,8 +29,8 @@ class HREmployeeWizard(models.TransientModel):
     parent_department_id = fields.Many2one("hr.department","Parent Department")
     # Based on the parent department the child department along with parent will be displayed in the below field
     department_id = fields.Many2one("hr.department","Department")
-    default_operating_unit_id = fields.Many2one("operating.unit","Default operating unit")
-    operating_unit_ids = fields.Many2many("operating.unit",string="Allowed Operating units")
+    default_operating_unit_id = fields.Many2one("operating.unit","Default operating unit", domain=_get_ou_domain)
+    operating_unit_ids = fields.Many2many("operating.unit",string="Allowed Operating units", domain=_get_ou_domain)
 #     allocated_leaves = fields.Integer("Allocated Leaves")
     product_id = fields.Many2one("product.product","Fee rate product")
     #Address
@@ -70,8 +75,9 @@ class HREmployeeWizard(models.TransientModel):
 
     @api.model
     def default_get(self, field_list):
+        company = self.env.user.company_id.id
         res = super(HREmployeeWizard, self).default_get(field_list)
-        operating_unit_ids = self.env['operating.unit'].search([])
+        operating_unit_ids = self.env['operating.unit'].search([('company_id', '=', company)])
         res.update({
            'operating_unit_ids':operating_unit_ids.ids
         })
