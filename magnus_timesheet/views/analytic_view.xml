@@ -284,13 +284,12 @@
                         <page string="Analytic Move Lines">
                             <field name="account_analytic_line_ids" widget="Many2many_list">
                                 <tree string="analytic line list">
-                                    <field name="name"/>
+                                    <field name="move_id"/>
                                     <field name="ref"/>
                                     <field name="date"/>
                                     <field name="credit"/>
                                     <field name="debit"/>
                                     <field name="wip_percentage"/>
-<!--                                    <field name="state"/>-->
                                 </tree>
                             </field>
                         </page>
