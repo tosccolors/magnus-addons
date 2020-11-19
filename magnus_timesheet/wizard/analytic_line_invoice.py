@@ -415,13 +415,15 @@ class AnalyticLineStatus(models.TransientModel):
     @job
     @api.multi
     def wip_reversal(self, moves):
+        reverse_move = None
         for move in moves:
             try:
+                reconcile = True if move.wip_percentage > 0.0 else False
                 date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
                 reverse_move= move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
-                    reconcile=True)
+                    reconcile=reconcile)
             except Exception, e:
                 raise FailedJobError(
                     _("The details of the error:'%s'") % (unicode(e)))
