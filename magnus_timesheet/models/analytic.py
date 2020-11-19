@@ -500,7 +500,8 @@ class AccountAnalyticLine(models.Model):
                 for id in analytic_lines_ids:
                     analytic_line = self.env['account.analytic.line'].search([('id', '=', id)])
                     for mov_line_ids in acc_mov_line:
-                        analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
+                        if mov_line_ids.account_id.user_type_id.name=='Income':
+                            analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
         return True
 
 
