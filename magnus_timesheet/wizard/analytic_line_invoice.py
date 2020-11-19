@@ -76,6 +76,8 @@ class AnalyticLineStatus(models.TransientModel):
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
                 )%project_names)
+        for entry in entries:
+            entry.wip_percentage=self.wip_percentage
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             notupdatestate = {}
@@ -360,6 +362,8 @@ class AnalyticLineStatus(models.TransientModel):
                         move = account_move.with_context(ctx_nolang).create(move_vals)
                         move.is_wip_move=True
                         move.wip_percentage=self.wip_percentage
+                        for line in move.line_ids:
+                            line.wip_percentage=self.wip_percentage
                         if move:
                             move._post_validate()
                             move.post()
@@ -398,25 +402,28 @@ class AnalyticLineStatus(models.TransientModel):
                 self.env.invalidate_all()
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
-
-        if self.wip_percentage > 0.0:
+        vals = [account_move.id]
+        if self.wip_percentage > 0.0 or True:
             # Skip wip reversal creation when percantage is 0
             reverse_move=self.wip_reversal(account_move)
+            vals.append(reverse_move.id)
         # Adding moves to each record
-        self.env['account.analytic.line'].add_move_line(analytic_lines_ids, account_move,reverse_move)
+        self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
 
         return "WIP moves and Reversals successfully created. \n "
 
     @job
     @api.multi
     def wip_reversal(self, moves):
+        reverse_move = None
         for move in moves:
             try:
+                reconcile = True if move.wip_percentage > 0.0 else False
                 date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
                 reverse_move= move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
-                    reconcile=True)
+                    reconcile=reconcile)
             except Exception, e:
                 raise FailedJobError(
                     _("The details of the error:'%s'") % (unicode(e)))

@@ -102,6 +102,7 @@
                         <field name="project_id" />
                         <field name="task_id" />
                         <field name="date_of_last_wip"/>
+                        <field name="wip_percentage"/>
                     </xpath>
                     <xpath expr="//field[@name='unit_amount']" position="after">
                         <field name="product_uom_id" />
@@ -281,14 +282,15 @@
                 <xpath expr="//sheet" position="inside">
                     <notebook name="Account Analytic Lines">
                         <page string="Analytic Move Lines">
-                            <field name="account_analytic_line_ids" widget="Many2many_list">
+                            <field name="account_analy_line_ids" widget="one2many_list">
                                 <tree string="analytic line list">
-                                    <field name="name"/>
+                                    <field name="move_id"/>
+                                    <field name="account_id"/>
                                     <field name="ref"/>
                                     <field name="date"/>
-                                    <field name="amount"/>
+                                    <field name="credit"/>
+                                    <field name="debit"/>
                                     <field name="wip_percentage"/>
-                                    <field name="state"/>
                                 </tree>
                             </field>
                         </page>
