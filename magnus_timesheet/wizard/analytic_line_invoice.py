@@ -403,7 +403,7 @@ class AnalyticLineStatus(models.TransientModel):
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
         vals = [account_move.id]
-        if self.wip_percentage > 0.0:
+        if self.wip_percentage > 0.0 or True:
             # Skip wip reversal creation when percantage is 0
             reverse_move=self.wip_reversal(account_move)
             vals.append(reverse_move.id)
