@@ -406,7 +406,8 @@ class AnalyticLineStatus(models.TransientModel):
         if self.wip_percentage > 0.0 or True:
             # Skip wip reversal creation when percantage is 0
             reverse_move=self.wip_reversal(account_move)
-            vals.append(reverse_move.id)
+            if reverse_move:
+                vals.append(reverse_move.id)
         # Adding moves to each record
         self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
 
