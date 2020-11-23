@@ -234,7 +234,7 @@ class AnalyticLineStatus(models.TransientModel):
     @api.model
     def _calculate_fee_rate(self, line):
         amount = line.get_fee_rate_amount(False, False)
-        if self.wip and self.wip_percentage > 0:
+        if self.wip:
             amount = amount * (self.wip_percentage / 100)
         return amount
 
@@ -335,40 +335,41 @@ class AnalyticLineStatus(models.TransientModel):
                     aml = []
                     analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id), ('wip_month_id', '=', month_id)])
                     analytic_line_obj -= done_analytic_line
-                    if self.wip_percentage > 0.0:
+                    # if self.wip_percentage > 0.0:
                         #Skip wip move creation when percantage is 0
-                        for aal in analytic_line_obj:
-                            if not aal.product_id.property_account_wip_id:
-                                raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
-                            for ml in self._prepare_move_line(aal):
-                                aml.append(ml)
+                    #creates wip moves for all percentages
+                    for aal in analytic_line_obj:
+                        if not aal.product_id.property_account_wip_id:
+                            raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
+                        for ml in self._prepare_move_line(aal):
+                            aml.append(ml)
 
-                        line = [(0, 0, l) for l in aml]
+                    line = [(0, 0, l) for l in aml]
 
-                        move_vals = {
-                            'type':'receivable',
-                            'ref': narration,
-                            'line_ids': line,
-                            'journal_id': wip_journal.id,
-                            'date': date_end,
-                            'narration': 'WIP move',
-                            'to_be_reversed': True,
-                        }
+                    move_vals = {
+                        'type':'receivable',
+                        'ref': narration,
+                        'line_ids': line,
+                        'journal_id': wip_journal.id,
+                        'date': date_end,
+                        'narration': 'WIP move',
+                        'to_be_reversed': True,
+                    }
 
-                        ctx = dict(self._context, lang=partner.lang)
-                        ctx['company_id'] = company_id
-                        ctx_nolang = ctx.copy()
-                        ctx_nolang.pop('lang', None)
-                        move = account_move.with_context(ctx_nolang).create(move_vals)
-                        move.is_wip_move=True
-                        move.wip_percentage=self.wip_percentage
-                        for line in move.line_ids:
-                            line.wip_percentage=self.wip_percentage
-                        if move:
-                            move._post_validate()
-                            move.post()
+                    ctx = dict(self._context, lang=partner.lang)
+                    ctx['company_id'] = company_id
+                    ctx_nolang = ctx.copy()
+                    ctx_nolang.pop('lang', None)
+                    move = account_move.with_context(ctx_nolang).create(move_vals)
+                    move.is_wip_move=True
+                    move.wip_percentage=self.wip_percentage
+                    for line in move.line_ids:
+                        line.wip_percentage=self.wip_percentage
+                    if move:
+                        move._post_validate()
+                        move.post()
 
-                        account_move |= move
+                    account_move |= move
                     cond = '='
                     rec = analytic_line_obj.ids[0]
                     if len(analytic_line_obj) > 1:
@@ -403,9 +404,11 @@ class AnalyticLineStatus(models.TransientModel):
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
         vals = [account_move.id]
-        if self.wip_percentage > 0.0:
+        # if self.wip_percentage > 0.0 or True:
             # Skip wip reversal creation when percantage is 0
-            reverse_move=self.wip_reversal(account_move)
+        # creates wip reversal moves for all percentages
+        reverse_move=self.wip_reversal(account_move)
+        if reverse_move:
             vals.append(reverse_move.id)
         # Adding moves to each record
         self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
@@ -415,13 +418,15 @@ class AnalyticLineStatus(models.TransientModel):
     @job
     @api.multi
     def wip_reversal(self, moves):
+        reverse_move = None
         for move in moves:
             try:
+                reconcile = True if move.wip_percentage > 0.0 else False
                 date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
                 reverse_move= move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
-                    reconcile=True)
+                    reconcile=reconcile)
             except Exception, e:
                 raise FailedJobError(
                     _("The details of the error:'%s'") % (unicode(e)))
