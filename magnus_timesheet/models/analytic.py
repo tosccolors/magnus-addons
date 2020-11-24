@@ -102,6 +102,7 @@ class AccountAnalyticLine(models.Model):
                     if line.product_uom_id.id == uom_hrs:
                         line.ts_line = True
                         line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                        line.project_rate = line.get_fee_rate(task.id, user.id, date, True)
                     # line.actual_qty = line.unit_amount
                     # line.planned_qty = 0.0
 
@@ -267,6 +268,11 @@ class AccountAnalyticLine(models.Model):
         string='Fee Rate',
         store=True,
     )
+    project_rate = fields.Float(
+        compute=_compute_analytic_line,
+        string='Project Rate',
+        store=True,
+    )
     state = fields.Selection([
         ('draft', 'Draft'),
         ('open', 'Confirmed'),
@@ -326,7 +332,7 @@ class AccountAnalyticLine(models.Model):
         return product_id
 
     @api.model
-    def get_fee_rate(self, task_id=None, user_id=None, date=None):
+    def get_fee_rate(self, task_id=None, user_id=None, date=None, project_rate=False):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
@@ -335,6 +341,8 @@ class AccountAnalyticLine(models.Model):
             task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)
             if task_user:
                 fr = task_user.fee_rate
+            if project_rate:
+                return fr or 0.0
             # check standard task for fee earners
             if fr == None:
                 project_id = self.env['project.task'].browse(tid).project_id
