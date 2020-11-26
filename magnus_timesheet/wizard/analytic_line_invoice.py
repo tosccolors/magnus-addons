@@ -421,7 +421,9 @@ class AnalyticLineStatus(models.TransientModel):
         reverse_move = None
         for move in moves:
             try:
-                reconcile = True if move.wip_percentage > 0.0 else False
+                tot_credit = sum(move.line_ids.mapped('credit'))
+                tot_debit = sum(move.line_ids.mapped('debit'))
+                reconcile = True if move.wip_percentage and (tot_credit or tot_debit) else False
                 date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
                 reverse_move= move.create_reversals(
                     date=date, journal=move.journal_id,
