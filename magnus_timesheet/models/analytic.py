@@ -103,7 +103,7 @@ class AccountAnalyticLine(models.Model):
                         line.ts_line = True
                         line.line_fee_rate = line.get_fee_rate(task.id, user.id)
                         line.project_rate = line.get_fee_rate(task.id, user.id, date, True)
-                        line.project_amount = -(line.project_rate * line.unit_amount)
+                        line.project_amount = (line.project_rate * line.unit_amount)
                     # line.actual_qty = line.unit_amount
                     # line.planned_qty = 0.0
 
