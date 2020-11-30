@@ -118,6 +118,10 @@ class TaskUser(models.Model):
         string='From Date',
         default=datetime.today()
     )
+    user_ids = fields.Many2many(
+        'res.users',
+        string='Consultants',
+    )
 
     @api.onchange('user_id')
     def onchange_user_id(self):
@@ -129,6 +133,21 @@ class TaskUser(models.Model):
                 product = emp.product_id
                 self.product_id = product.id
                 self.fee_rate = product.lst_price
+
+    @api.onchange('user_ids')
+    def onchange_users(self):
+        if len(self.user_ids) == 1:
+            self.user_id = self.user_ids.id
+        else:
+            self.user_id = self.user_ids and self.user_ids.ids[0] or False
+
+    #update user_ids attribute if any user_id added already
+    @api.model
+    def update_user_ids(self):
+        taskUser = self.sudo().search([])
+        for tuser in taskUser:
+            if tuser.user_id:
+                tuser.user_ids = [(6, 0, [tuser.user_id.id])]
 
     @api.multi
     def get_task_user_obj(self, task_id, user_id, date):
@@ -179,15 +198,36 @@ class TaskUser(models.Model):
         self.env.cr.execute(list_query, aal_where_clause_params)
         return True
 
+    @api.one
+    def split_task_users(self):
+        if len(self.user_ids) == 1:
+            return
+        data = {'fee_rate': self.fee_rate, 'from_date': self.from_date,
+                'product_id': self.product_id.id, 'task_id':self.task_id.id}
+        for user in (self.user_ids - self.user_id):
+            tUser = self.search([('user_id', '=', user.id), ('task_id', '=', self.task_id.id),
+                                 ('from_date', '=', self.from_date),
+                                 ('product_id', '=', self.product_id and self.product_id.id or False),])
+            if tUser:
+                tUser.fee_rate = self.fee_rate
+                tUser.user_ids = [(6, 0, [user.id])]
+            else:
+                data['user_id'] = user.id
+                data['user_ids'] = [(6, 0, [user.id])]
+                self.create(data)
+        self.user_ids = [(6, 0, [self.user_id.id])]
+
     @api.model
     def create(self, vals):
         res = super(TaskUser, self).create(vals)
+        res.split_task_users()
         res.update_analytic_lines()
         return res
 
     @api.multi
     def write(self, vals):
         result = super(TaskUser, self).write(vals)
+        self.split_task_users()
         for res in self:
             res.update_analytic_lines()
         return result
