@@ -45,7 +45,8 @@
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
-                                    </tree>
+                                    </group>
+                                </form>
                             </field>
                         </group>
                     </page>
