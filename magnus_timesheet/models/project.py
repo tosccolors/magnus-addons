@@ -118,6 +118,10 @@ class TaskUser(models.Model):
         string='From Date',
         default=datetime.today()
     )
+    user_ids = fields.Many2many(
+        'res.users',
+        string='Consultants',
+    )
 
     @api.onchange('user_id')
     def onchange_user_id(self):
