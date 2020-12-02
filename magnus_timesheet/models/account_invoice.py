@@ -129,7 +129,7 @@ class AccountInvoice(models.Model):
                             analytic_line = self.env['account.analytic.line'].sudo().search(
                                 [('id', '=', analytic_inv_line.id)])
                             for mov_line_id in move_line:
-                                if mov_line_id.id != False:
+                                if (mov_line_id.id != False):
                                     analytic_line.account_analy_line_ids = [(4, mov_line_id.id)]
         return res
 

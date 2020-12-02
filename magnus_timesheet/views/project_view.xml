@@ -31,7 +31,7 @@
                     <page name="users" string="Fee Earners">
                         <group colspan="4" col="2">
                             <field name="task_user_ids" context="{'default_task_id':active_id}">
-                                <tree string="Fee Earners" create="true"
+                                    <tree string="Fee Earners" create="true"
                                           edit="true" delete="true" copy="false">
                                     <field name="user_id" />
                                     <field name="from_date" />
@@ -45,8 +45,7 @@
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
-                                    </group>
-                                </form>
+                                    </tree>
                             </field>
                         </group>
                     </page>
