@@ -37,7 +37,7 @@
             <field name="name">My Planning</field>
         </record>
     </data>
-    <data noupdate="1">
+    <data noupdate="0">
         <function model="task.user" name="update_user_ids"/>
     </data>
 </odoo>
