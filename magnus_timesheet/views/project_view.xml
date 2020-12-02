@@ -40,8 +40,8 @@
                                 </tree>
                                 <form string="Fee Earners">
                                     <group>
-                                        <field name="user_id" invisible="1"/>
-                                        <field name="user_ids" widget="many2many_tags"/>
+                                        <field name="user_id" invisible="0"/>
+                                        <!--<field name="user_ids" widget="many2many_tags"/>-->
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
