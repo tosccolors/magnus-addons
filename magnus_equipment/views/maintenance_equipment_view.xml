@@ -35,7 +35,10 @@
                 </xpath>
                 <xpath expr="//notebook/page[3]" position="after">
                     <page string="Owner History">
-                        <field name="owner_history" widget="one2many_list">
+                        <field name="owner_history"
+                               context="{'default_maintenance_equipment_id': active_id,
+                               'default_from_date':datetime.datetime.now().strftime('%Y-%m-%d'),
+                               'default_employee_name':employee_id}" widget="one2many_list">
                                 <tree string="Owner History List">
                                     <field name="employee_name"/>
                                     <field name="from_date"/>
