@@ -13,9 +13,9 @@ class MaintenanceEquipment(models.Model):
     end_date = fields.Date(string="Replaced on")
     is_being_repaired=fields.Boolean(string="The device currently is being repaired")
     imei_number=fields.Char("IMEI Number")
-    owner_history=fields.One2many('equipment.user','maintenance_equipment_id',string='Owner History')
+    owner_history=fields.One2many('equipment.user','maintenance_equipment_id',string='Owner History',track_visibility='always')
 
-  
+
 class MaintanceEquipmentUser(models.Model):
 
     _name = 'equipment.user'
@@ -23,3 +23,4 @@ class MaintanceEquipmentUser(models.Model):
     maintenance_equipment_id=fields.Many2one('maintenance.equipment',string="Equipment")
     employee_name=fields.Many2one('hr.employee',string="Employee Name")
     from_date=fields.Date(string="From Date")
+
