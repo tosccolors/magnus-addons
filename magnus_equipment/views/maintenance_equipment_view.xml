@@ -10,45 +10,37 @@
                     <field name="end_date"/>
                 </xpath>
                 <xpath expr="//notebook/page[1]" position="attributes">
-                  <attribute name="invisible">1</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//notebook/page[3]/group/group/label[1]" position="attributes">
-                  <attribute name="invisible">1</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//notebook/page[3]/group/group/label[2]" position="attributes">
-                  <attribute name="invisible">1</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//notebook/page[3]/group/group/div[1]" position="attributes">
-                  <attribute name="invisible">1</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
-                 <xpath expr="//notebook/page[3]/group/group/div[2]" position="attributes">
-                  <attribute name="invisible">1</attribute>
+                <xpath expr="//notebook/page[3]/group/group/div[2]" position="attributes">
+                    <attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//notebook/page[3]/group/group" position="inside">
-                  <field name="is_being_repaired"/>
+                    <field name="is_being_repaired"/>
                 </xpath>
                 <xpath expr="//notebook/page[2]/group/group/field[@name='partner_ref']" position="attributes">
-                  <attribute name="invisible">1</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//notebook/page[2]/group/group/field[@name='partner_ref']" position="after">
-                  <field name="imei_number"/>
+                    <field name="imei_number"/>
                 </xpath>
                 <xpath expr="//notebook/page[3]" position="after">
-                    <page string="Owner History">
-                        <field name="owner_history"
-                               context="{'default_maintenance_equipment_id': active_id,
-                               'default_from_date':datetime.datetime.now().strftime('%Y-%m-%d'),
-                               'default_employee_name':employee_id}" widget="one2many_list">
-                                <tree string="Owner History List">
-                                    <field name="employee_name"/>
-                                    <field name="from_date"/>
-                                </tree>
-                        </field>
+                    <page name="Owner History" string="Owner History">
+                        <field name="model_track_ids" readonly="1"
+                               context="{'active_model':'maintenance.equipment', 'relation_ref':True}"/>
                     </page>
-
                 </xpath>
 
             </field>
         </record>
-  </data>
+    </data>
 </odoo>
