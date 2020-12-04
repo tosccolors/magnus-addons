@@ -7,7 +7,7 @@
     'website' : 'http://www.magnus.nl',
     'category': 'Maintenance',
     'description': """Restricting Menu Visibility""",
-    'depends': ['maintenance'],
+    'depends': ['maintenance','data_time_tracker'],
     'summary': 'Equipments, Assets, Internal Hardware, Allocation Tracking',
     'data': [
         'security/security.xml',
