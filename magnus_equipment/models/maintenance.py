@@ -10,9 +10,10 @@ class MaintenanceEquipment(models.Model):
     _name = 'maintenance.equipment'
     _inherit = ['maintenance.equipment','data.track.thread']
 
-    start_date = fields.Date(string="Purchased on")
+    start_date = fields.Date(string="Assigned on")
     end_date = fields.Date(string="Replaced on")
-    is_being_repaired=fields.Boolean(string="The device currently is being repaired")
-    imei_number=fields.Char("IMEI Number")
+    is_being_repaired = fields.Boolean(string="The device currently is being repaired")
+    imei_number = fields.Char("IMEI Number")
+    puk_code = fields.Char("PUK Code")
 
 

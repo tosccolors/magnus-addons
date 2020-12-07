@@ -9,6 +9,9 @@
                     <field name="start_date"/>
                     <field name="end_date"/>
                 </xpath>
+                <xpath expr="//field[@name='assign_date']" position="attributes">
+                    <attribute name="string">Purchased On</attribute>
+                </xpath>
                 <xpath expr="//notebook/page[1]" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
@@ -33,13 +36,15 @@
                 <xpath expr="//notebook/page[2]/group/group/field[@name='partner_ref']" position="after">
                     <field name="imei_number"/>
                 </xpath>
+                <xpath expr="//notebook/page[2]/group/group/field[@name='partner_ref']" position="after">
+                    <field name="puk_code"/>
+                </xpath>
                 <xpath expr="//notebook/page[3]" position="after">
                     <page name="Owner History" string="Owner History">
                         <field name="model_track_ids" readonly="1"
                                context="{'active_model':'maintenance.equipment', 'relation_ref':True}"/>
                     </page>
                 </xpath>
-
             </field>
         </record>
     </data>
