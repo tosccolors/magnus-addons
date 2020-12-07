@@ -10,6 +10,7 @@
                     <field name="end_date"/>
                 </xpath>
                 <xpath expr="//group/field[@name='assign_date']" position="replace">
+                <xpath>
                 <xpath expr="//group/field[@name='end_date']" position="after">
                     <field name="assign_date"/>
                 </xpath>
