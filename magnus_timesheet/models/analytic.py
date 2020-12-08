@@ -166,10 +166,10 @@ class AccountAnalyticLine(models.Model):
         return res
 
     @api.depends('line_fee_rate')
-    def _compute_line_project_rate(self):
+    def _compute_line_project_rates(self):
         for line in self:
-            line.line_project_rate = line.get_fee_rate(line.task_id.id, line.user_id.id, line.date, True)
-            line.project_amount = (line.line_project_rate * line.unit_amount)
+            line.line_project_rates = line.get_fee_rate(line.task_id.id, line.user_id.id, line.date, True)
+            line.project_amount = (line.line_project_rates * line.unit_amount)
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -273,13 +273,13 @@ class AccountAnalyticLine(models.Model):
         string='Fee Rate',
         store=True,
     )
-    line_project_rate = fields.Float(
-        compute=_compute_line_project_rate,
+    line_project_rates = fields.Float(
+        compute=_compute_line_project_rates,
         string='Project Rate',
         store=True,
     )
     project_amount = fields.Float(
-        compute=_compute_line_project_rate,
+        compute=_compute_line_project_rates,
         string='Project Amount',
         store=True,
     )
