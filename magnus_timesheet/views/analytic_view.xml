@@ -185,7 +185,7 @@
                         <filter string="Professional" context="{'group_by':'user_id'}"/>
                         <filter string="Task" context="{'group_by':'task_id'}"/>
                         <filter string="Measure" context="{'group_by':'product_uom_id'}"/>
-                        <filter string="Project Rate" context="{'group_by':'project_rate'}"/>
+                        <filter string="Project Rate" context="{'group_by':'line_project_rate'}"/>
                         <filter string="Status" context="{'group_by':'state'}"/>
                     </xpath>
                 </data>

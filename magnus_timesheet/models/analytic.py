@@ -102,8 +102,6 @@ class AccountAnalyticLine(models.Model):
                     if line.product_uom_id.id == uom_hrs:
                         line.ts_line = True
                         line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                        line.project_rate = line.get_fee_rate(task.id, user.id, date, True)
-                        line.project_amount = (line.project_rate * line.unit_amount)
                     # line.actual_qty = line.unit_amount
                     # line.planned_qty = 0.0
 
@@ -166,6 +164,12 @@ class AccountAnalyticLine(models.Model):
             date = context.get('timesheet_date_from')
             res.update({'date': date})
         return res
+
+    @api.depends('line_fee_rate')
+    def _compute_line_project_rate(self):
+        for line in self:
+            line.line_project_rate = line.get_fee_rate(line.task_id.id, line.user_id.id, line.date, True)
+            line.project_amount = (line.line_project_rate * line.unit_amount)
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -269,13 +273,13 @@ class AccountAnalyticLine(models.Model):
         string='Fee Rate',
         store=True,
     )
-    project_rate = fields.Float(
-        compute=_compute_analytic_line,
+    line_project_rate = fields.Float(
+        compute=_compute_line_project_rate,
         string='Project Rate',
         store=True,
     )
     project_amount = fields.Float(
-        compute=_compute_analytic_line,
+        compute=_compute_line_project_rate,
         string='Project Amount',
         store=True,
     )
