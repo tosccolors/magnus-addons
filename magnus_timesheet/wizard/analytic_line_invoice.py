@@ -403,13 +403,13 @@ class AnalyticLineStatus(models.TransientModel):
                 self.env.invalidate_all()
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
-        vals = [account_move.id]
+        vals = [am.id for am in account_move]
         # if self.wip_percentage > 0.0 or True:
             # Skip wip reversal creation when percantage is 0
         # creates wip reversal moves for all percentages
-        reverse_move=self.wip_reversal(account_move)
-        if reverse_move:
-            vals.append(reverse_move.id)
+        reverse_move = self.wip_reversal(account_move)
+        for rm in reverse_move:
+            vals.append(rm.id)
         # Adding moves to each record
         self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
 
