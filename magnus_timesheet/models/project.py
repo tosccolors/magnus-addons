@@ -95,6 +95,12 @@ class TaskUser(models.Model):
         return [('categ_id', '=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
+    @api.multi
+    def _compute_task_user_ids(self):
+        for line in self:
+            if line.user_id and not line.user_ids:
+                line.user_ids = [(6, 0, [line.user_id.id])]
+
     task_id = fields.Many2one(
         'project.task',
         string='Task'
@@ -121,6 +127,7 @@ class TaskUser(models.Model):
     user_ids = fields.Many2many(
         'res.users',
         string='Consultants',
+        compute='_compute_task_user_ids'
     )
 
     @api.onchange('user_id')
@@ -133,6 +140,13 @@ class TaskUser(models.Model):
                 product = emp.product_id
                 self.product_id = product.id
                 self.fee_rate = product.lst_price
+
+    @api.onchange('user_ids')
+    def onchange_users(self):
+        if len(self.user_ids) == 1:
+            self.user_id = self.user_ids.id
+        else:
+            self.user_id = self.user_ids and self.user_ids.ids[0] or False
 
     @api.multi
     def get_task_user_obj(self, task_id, user_id, date):
@@ -183,15 +197,38 @@ class TaskUser(models.Model):
         self.env.cr.execute(list_query, aal_where_clause_params)
         return True
 
+    @api.one
+    def split_task_users(self, vals):
+        userVal = vals.get('user_ids', [])
+        userIDs = userVal[0][2] if userVal else []
+        if len(userIDs) == 1:
+            return
+        data = {'fee_rate': self.fee_rate, 'from_date': self.from_date,
+                'product_id': self.product_id.id, 'task_id': self.task_id.id}
+        for userID in (set(userIDs) - set(self.user_id.ids)):
+            tUser = self.search([('user_id', '=', userID), ('task_id', '=', self.task_id.id),
+                                 ('from_date', '=', self.from_date),
+                                 ('product_id', '=', self.product_id and self.product_id.id or False), ])
+            if tUser:
+                tUser.fee_rate = self.fee_rate
+                tUser.user_ids = [(6, 0, [userID])]
+            else:
+                data['user_id'] = userID
+                data['user_ids'] = [(6, 0, [userID])]
+                self.create(data)
+        self.user_ids = [(6, 0, [self.user_id.id])]
+
     @api.model
     def create(self, vals):
         res = super(TaskUser, self).create(vals)
+        res.split_task_users(vals)
         res.update_analytic_lines()
         return res
 
     @api.multi
     def write(self, vals):
         result = super(TaskUser, self).write(vals)
+        self.split_task_users(vals)
         for res in self:
             res.update_analytic_lines()
         return result
