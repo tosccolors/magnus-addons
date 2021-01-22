@@ -7,4 +7,5 @@ from odoo import models, fields, _
 class Department(models.Model):
     _inherit = "hr.department"
 
-    manager_2_id = fields.Many2one('hr.employee', string='Co Manager')
+    #manager_2_id = fields.Many2one('hr.employee', string='Co Manager')
+    manager_2_ids = fields.Many2many('hr.employee', string='Co Manager')
