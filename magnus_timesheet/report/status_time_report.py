@@ -27,6 +27,11 @@ class StatusTimeReport(models.Model):
         string='Department',
         readonly=True
     )
+    operating_unit_id=fields.Many2one(
+        'operating.unit',
+        string='Operating Unit',
+        readonly=True
+    )
     state = fields.Char(
         'State',
         readonly=True
@@ -66,7 +71,8 @@ class StatusTimeReport(models.Model):
                 hrc.external as external,
                 hrc.timesheet_optional as ts_optional,
                 string_agg(rp.name,',' ORDER BY rp.name ASC) as validators,
-                htsss.state as state
+                htsss.state as state,
+                ou.id as operating_unit_id
             FROM date_range dr
             CROSS JOIN  hr_employee hrc
             LEFT JOIN hr_timesheet_sheet_sheet htsss 
@@ -79,13 +85,15 @@ class StatusTimeReport(models.Model):
             ON (validators.res_users_id = ru.id)
             LEFT JOIN res_partner rp 
             ON (rp.id = ru.partner_id)
+            LEFT JOIN operating_unit ou 
+            ON (ou.id = hd.operating_unit_id)
             WHERE dr.type_id = %s 
             AND hrc.official_date_of_employment < dr.date_start
             AND (
             hrc.end_date_of_employment > dr.date_end 
             OR hrc.end_date_of_employment is NULL
             )
-            GROUP BY hrc.id, dr.id, hrc.department_id, htsss.state
+            GROUP BY hrc.id, dr.id, hrc.department_id, htsss.state,ou.id
             )""" % (drcw))
 
 
