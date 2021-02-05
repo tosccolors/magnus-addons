@@ -11,9 +11,7 @@ class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
     _description = 'Analytic Line'
     _order = 'date desc'
-    # field account_analytic_line_ids for display the account moves
-    account_analy_line_ids=fields.Many2many('account.move.line',string="Analytic Account Line",readonly=True)
-    wip_percentage=fields.Float("WIP percentage")
+
     @api.depends(
                  'sheet_id_computed.date_to',
                  'sheet_id_computed.date_from',
@@ -75,15 +73,6 @@ class AccountAnalyticLine(models.Model):
                     line.expenses = line.project_id.invoice_properties.expenses
             else:
                 line.project_mgr = line.account_id.project_ids.user_id or False
-
-            #All entries should mapped with planned and actual qty
-            if line.planned:
-                line.planned_qty = line.unit_amount
-                line.actual_qty = 0.0
-            else:
-                line.actual_qty = line.unit_amount
-                line.planned_qty = 0.0
-
             task = line.task_id
             user = line.user_id
             # only if task_id the remaining fields are computed
@@ -91,19 +80,19 @@ class AccountAnalyticLine(models.Model):
                 uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
-                    # if line.planned:
-                    #     line.planned_qty = line.unit_amount
-                    #     line.actual_qty = 0.0
-                    # else:
-                    if line.month_of_last_wip:
-                        line.wip_month_id = line.month_of_last_wip
+                    if line.planned:
+                        line.planned_qty = line.unit_amount
+                        line.actual_qty = 0.0
                     else:
-                        line.wip_month_id = var_month_id
-                    if line.product_uom_id.id == uom_hrs:
-                        line.ts_line = True
-                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                    # line.actual_qty = line.unit_amount
-                    # line.planned_qty = 0.0
+                        if line.month_of_last_wip:
+                            line.wip_month_id = line.month_of_last_wip
+                        else:
+                            line.wip_month_id = var_month_id
+                        if line.product_uom_id.id == uom_hrs:
+                            line.ts_line = True
+                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)
+                        line.actual_qty = line.unit_amount
+                        line.planned_qty = 0.0
 
     def find_daterange_week(self, date):
         """
@@ -164,12 +153,6 @@ class AccountAnalyticLine(models.Model):
             date = context.get('timesheet_date_from')
             res.update({'date': date})
         return res
-
-    @api.depends('line_fee_rate')
-    def _compute_line_project_rates(self):
-        for line in self:
-            line.line_project_rates = line.get_fee_rate(line.task_id.id, line.user_id.id, line.date, True)
-            line.project_amount = (line.line_project_rates * line.unit_amount)
 
     kilometers = fields.Integer(
         'Kilometers'
@@ -235,8 +218,7 @@ class AccountAnalyticLine(models.Model):
     )
     day_name = fields.Char(
         string="Day",
-        compute=_compute_analytic_line,
-        store=True,
+        compute=_compute_analytic_line
     )
     ts_line = fields.Boolean(
         compute=_compute_analytic_line,
@@ -256,7 +238,6 @@ class AccountAnalyticLine(models.Model):
     expenses = fields.Boolean(
         compute=_compute_analytic_line,
         string='Expenses',
-        store=True,
     )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
@@ -273,16 +254,6 @@ class AccountAnalyticLine(models.Model):
     line_fee_rate = fields.Float(
         compute=_compute_analytic_line,
         string='Fee Rate',
-        store=True,
-    )
-    line_project_rates = fields.Float(
-        compute=_compute_line_project_rates,
-        string='Project Rate',
-        store=True,
-    )
-    project_amount = fields.Float(
-        compute=_compute_line_project_rates,
-        string='Project Amount',
         store=True,
     )
     state = fields.Selection([
@@ -344,17 +315,15 @@ class AccountAnalyticLine(models.Model):
         return product_id
 
     @api.model
-    def get_fee_rate(self, task_id=None, user_id=None, date=None, project_rate=False):
+    def get_fee_rate(self, task_id=None, user_id=None, date=None):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
         fr = None
         if uid and tid and date:
-            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
+            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)
             if task_user:
                 fr = task_user.fee_rate
-            if project_rate:
-                return fr or 0.0
             # check standard task for fee earners
             if fr == None:
                 project_id = self.env['project.task'].browse(tid).project_id
@@ -363,9 +332,9 @@ class AccountAnalyticLine(models.Model):
                     # task-358
                     task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
                     if task_user:
-                        fr = task_user[:1].fee_rate
+                        fr = task_user.fee_rate
         if fr == None:
-            employee = self.env['hr.employee'].search([('user_id', '=', uid)], limit=1)
+            employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
             if self.product_id and self.product_id != employee.product_id:
                 fr = self.product_id.lst_price
@@ -408,7 +377,6 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
-        uom_hour = self.env.ref("product.product_uom_hour")
         # don't call super if only state has to be updated
         if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
@@ -435,12 +403,12 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', self.product_uom_id == uom_hour)
+            ts_line = vals.get('ts_line', self.ts_line)
             if ts_line:
                 unit_amount = vals.get('unit_amount', self.unit_amount)
                 vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
 
-        if not (
+        if self.filtered('ts_line') and not (
                 'unit_amount' in vals or
                 'product_uom_id' in vals or
                 'sheet_id' in vals or
@@ -449,8 +417,7 @@ class AccountAnalyticLine(models.Model):
                 'task_id' in vals or
                 'user_id' in vals or
                 'name' in vals or
-                'ref' in vals
-        ) and any(this.product_uom_id == uom_hour for this in self):
+                'ref' in vals):
             # always copy context to keep other context reference
             context = self.env.context.copy()
             context.update({'analytic_check_state': True})
@@ -511,18 +478,3 @@ class AccountAnalyticLine(models.Model):
         ))
         self.env.cr.execute(list_query, where_clause_params)
         return True
-
- # To display the Account move and reverse move in many2many list view for status = delayed record
-
-    @api.multi
-    def add_move_line(self,analytic_lines_ids,vals):
-        if False not in vals:
-            for mov_id in vals:
-                acc_mov_line=self.env['account.move.line'].search([('move_id', '=', mov_id)])
-                for id in analytic_lines_ids:
-                    analytic_line = self.env['account.analytic.line'].search([('id', '=', id)])
-                    for mov_line_ids in acc_mov_line:
-                        analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
-        return True
-
-

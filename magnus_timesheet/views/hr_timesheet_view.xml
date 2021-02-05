@@ -52,9 +52,6 @@
         <xpath expr="//form/group/field[@name='user_id']" position="after">
             <field name="operating_unit_id" attrs="{'invisible':[('operating_unit_id', '=', False)]}"/>
         </xpath>
-          <xpath expr="//notebook/page/field/tree/field[@name='project_id']" position="attributes">
-            <attribute name="required">1</attribute>
-        </xpath>
       </field>
     </record>
 
