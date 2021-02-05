@@ -218,7 +218,8 @@ class AccountAnalyticLine(models.Model):
     )
     day_name = fields.Char(
         string="Day",
-        compute=_compute_analytic_line
+        compute=_compute_analytic_line,
+        store=True,
     )
     ts_line = fields.Boolean(
         compute=_compute_analytic_line,
@@ -238,6 +239,7 @@ class AccountAnalyticLine(models.Model):
     expenses = fields.Boolean(
         compute=_compute_analytic_line,
         string='Expenses',
+        store=True,
     )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
@@ -321,7 +323,7 @@ class AccountAnalyticLine(models.Model):
         date = date or self.date or False
         fr = None
         if uid and tid and date:
-            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)
+            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
             if task_user:
                 fr = task_user.fee_rate
             # check standard task for fee earners
@@ -332,7 +334,7 @@ class AccountAnalyticLine(models.Model):
                     # task-358
                     task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
                     if task_user:
-                        fr = task_user.fee_rate
+                        fr = task_user[:1].fee_rate
         if fr == None:
             employee = self.env['hr.employee'].search([('user_id', '=', uid)])
             fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
@@ -377,6 +379,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
+        uom_hour = self.env.ref("product.product_uom_hour")
         # don't call super if only state has to be updated
         if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
@@ -403,12 +406,12 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', self.ts_line)
+            ts_line = vals.get('ts_line', self.product_uom_id == uom_hour)
             if ts_line:
                 unit_amount = vals.get('unit_amount', self.unit_amount)
                 vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
 
-        if self.filtered('ts_line') and not (
+        if not (
                 'unit_amount' in vals or
                 'product_uom_id' in vals or
                 'sheet_id' in vals or
@@ -417,7 +420,8 @@ class AccountAnalyticLine(models.Model):
                 'task_id' in vals or
                 'user_id' in vals or
                 'name' in vals or
-                'ref' in vals):
+                'ref' in vals
+        ) and any(this.product_uom_id == uom_hour for this in self):
             # always copy context to keep other context reference
             context = self.env.context.copy()
             context.update({'analytic_check_state': True})
