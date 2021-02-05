@@ -6,24 +6,48 @@
             <field name="model_id" ref="hr_expense.model_hr_expense"/>
             <field name="groups" eval="[(4, ref('group_hr_expense_comanager'))]"/>
             <field name="domain_force">
-                ['|','|', ('employee_id.department_id.manager_2_id.user_id','=',user.id),
-                ('employee_id.department_id.parent_id.manager_2_id.user_id','=',user.id),
+                ['|','|',
+                ('employee_id.department_id.manager_2_ids','=',user.employee_ids.ids[0]),
+                ('employee_id.department_id.parent_id.manager_2_ids','=',user.employee_ids.ids[0]),
                 ('employee_id.user_id','=',user.id)
                 ]
             </field>
-    </record>
-    </data>
-    <data noupdate="1">
+        </record>
         <record model="ir.rule" id="co_manager_visibility_rule_expense_report">
             <field name="name">Co-manager: See everything from department's employees</field>
             <field name="model_id" ref="hr_expense.model_hr_expense_sheet"/>
             <field name="groups" eval="[(4, ref('group_hr_expense_comanager'))]"/>
             <field name="domain_force">
-                ['|','|', ('employee_id.department_id.manager_2_id.user_id','=',user.id),
-                ('employee_id.department_id.parent_id.manager_2_id.user_id','=',user.id),
+                ['|','|',
+                ('employee_id.department_id.manager_2_ids','=',user.employee_ids.ids[0]),
+                ('employee_id.department_id.parent_id.manager_2_ids','=',user.employee_ids.ids[0]),
                 ('employee_id.user_id','=',user.id)
                 ]
             </field>
-    </record>
+        </record>
+        <record model="ir.rule" id="co_manager_visibility_rule_planning">
+            <field name="name">Co-manager: See everything from department's employees</field>
+            <field name="model_id" ref="magnus_timesheet.model_magnus_planning"/>
+            <field name="groups" eval="[(4, ref('group_hr_expense_comanager'))]"/>
+            <field name="domain_force">
+                ['|','|',
+                ('employee_id.department_id.manager_2_ids','=',user.employee_ids.ids[0]),
+                ('employee_id.department_id.parent_id.manager_2_ids','=',user.employee_ids.ids[0]),
+                ('employee_id.user_id','=',user.id)
+                ]
+            </field>
+        </record>
+        <record model="ir.rule" id="co_manager_visibility_rule_timesheet">
+            <field name="name">Co-manager: See everything from department's employees</field>
+            <field name="model_id" ref="magnus_expense.model_account_analytic_line"/>
+            <field name="groups" eval="[(4, ref('group_hr_expense_comanager'))]"/>
+            <field name="domain_force">
+                ['|','|',
+                ('department_id.manager_2_ids','=',user.employee_ids.ids[0]),
+                ('department_id.parent_id.manager_2_ids','=',user.employee_ids.ids[0]),
+                ('project_id.user_id','=',user.id)
+                ]
+            </field>
+        </record>
     </data>
 </odoo>

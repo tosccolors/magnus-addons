@@ -8,7 +8,11 @@
       <field name="inherit_id" ref="hr.view_department_form"/>
       <field name="arch" type="xml">
         <xpath expr="//field[@name='manager_id']" position="after">
-          <field name="manager_2_id"/>
+          <field name="manager_2_ids" options="{'no_open': True,'no_create': True, 'no_create_edit': True}">
+            <tree create="true" edit="false" delete="true" copy="false">
+               <field name="name" string="Name" readonly="1"/>
+            </tree>
+          </field>
         </xpath>
       </field>
     </record>
