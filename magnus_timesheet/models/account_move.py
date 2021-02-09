@@ -15,7 +15,6 @@ class AccountMoveLine(models.Model):
         'res.users',
         string='Timesheet User'
     )
-    wip_percentage=fields.Float("WIP percentage")
 
 
     @api.multi
@@ -43,8 +42,6 @@ class AccountMove(models.Model):
 
     # override post(), when first post, nothing extra. When move.name exists,
     # it cannot be first posting. Then 'OU-balancing' lines are unlinked.
-    is_wip_move=fields.Boolean("Is WIP move")
-    wip_percentage=fields.Integer("WIP percentage")
     @api.multi
     def post(self):
         for move in self:
