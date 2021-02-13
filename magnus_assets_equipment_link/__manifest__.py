@@ -12,9 +12,10 @@
     "installable": True,
     "depends": [
         "account_asset_maintenance",
+        "magnus_equipment"
     ],
     "data": [
         "views/account_asset_asset_views.xml",
-        "maintenance_equipment_view.xml"
+        "views/maintenance_equipment_view.xml"
     ],
 }
