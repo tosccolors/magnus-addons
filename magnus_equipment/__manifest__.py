@@ -11,7 +11,6 @@
     'summary': 'Equipments, Assets, Internal Hardware, Allocation Tracking',
     'data': [
         'security/security.xml',
-        'security/ir.model.access.csv',
         'views/maintenance_view.xml',
         'views/maintenance_equipment_view.xml',
         'data/maintenance_data.xml'
