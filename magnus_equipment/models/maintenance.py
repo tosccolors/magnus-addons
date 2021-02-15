@@ -27,8 +27,8 @@ class MaintenanceEquipment(models.Model):
     department = fields.Many2one('hr.department', string="Department")
 
     #Phone specific fields
-    phone_number = fields.Integer(string="Phone Number", size=10)
-    sim_number = fields.Integer(string="SIM number")
+    phone_number = fields.Char(string="Phone Number", size=10)
+    sim_number = fields.Char(string="SIM number")
     puk_code = fields.Char(string="PUK Code")
     imei_number = fields.Char(string="IMEI Number")
     remarks = fields.Text(string="Remarks")
