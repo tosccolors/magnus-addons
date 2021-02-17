@@ -62,7 +62,7 @@ msgstr "Aangemaakt op"
 #. module: magnus_equipment
 #: model:ir.model.fields,field_description:magnus_equipment.field_maintenance_equipment_purchase_date
 msgid "Date of acquisition"
-msgstr "Date of acquisition"
+msgstr "Datum van aankoop"
 
 #. module: magnus_equipment
 #: model:ir.model.fields,field_description:magnus_equipment.field_maintenance_equipment_department
