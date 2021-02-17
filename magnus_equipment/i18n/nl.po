@@ -227,12 +227,12 @@ msgstr "Garantie categorie van apparaat"
 msgid "Warranty until"
 msgstr "Garantie tot"
 
-#. module: magnus_equipment
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_serial_no
 msgid "Serial Number"
 msgstr "Serienummer"
 
-#. module: magnus_equipment
+#. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category_id
 msgid "Equipment Category"
 msgstr "Apparatuur Category"
