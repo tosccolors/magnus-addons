@@ -149,17 +149,13 @@ class MagnusPlanning(models.Model):
             DELETE FROM magnus_planning_analytic_line_rel 
                 WHERE planning_id = {0} AND analytic_line_id IN (
                     SELECT id FROM account_analytic_line WHERE id IN 
-                        (SELECT analytic_line_id FROM magnus_planning_analytic_line_rel WHERE planning_id = {0}) 
-                            AND user_id IN (
-                                  SELECT resource.user_id FROM hr_employee emp 
-                                  LEFT JOIN resource_resource resource ON resource.id = emp.resource_id
-                                  WHERE emp.id {1} {2}
-                                  )
+                    (SELECT analytic_line_id FROM magnus_planning_analytic_line_rel WHERE planning_id = {0}) 
+                        AND employee_id {1} {2}
                     )
-                """.format(
-                self.id,
-                op,
-                empIds
+            """.format(
+            self.id,
+            op,
+            empIds
         ))
         self.env.cr.execute(line_query)
 
