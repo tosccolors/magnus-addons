@@ -91,7 +91,7 @@ class MagnusPlanning(models.Model):
         self.env.cr.execute("""
             WITH RECURSIVE
                 subordinates AS(
-                    SELECT id, parent_id, manager_id  FROM hr_department WHERE id = %s
+                    SELECT id, parent_id, manager_id FROM hr_department WHERE id = %s
                     UNION
                     SELECT h.id, h.parent_id, h.manager_id FROM hr_department h
                     INNER JOIN subordinates s ON s.id = h.parent_id)
@@ -111,6 +111,7 @@ class MagnusPlanning(models.Model):
                 % (self.employee_id.id))
 
         employee_ids = [x[0] for x in self.env.cr.fetchall() if x[0]]
+
         child_ids = list(set(dept_mgr_ids+employee_ids))
         return child_ids
 
@@ -139,11 +140,33 @@ class MagnusPlanning(models.Model):
 
         self.env.cr.execute(line_query)
 
+    def remove_planning_from_managers(self, empIds):
+        # delete employee lines from manager's planning, which no longer belongs to manager
+        op = '!='
+        if len(empIds) > 1:
+            op = 'NOT IN'
+        line_query = ("""
+            DELETE FROM magnus_planning_analytic_line_rel 
+                WHERE planning_id = {0} AND analytic_line_id IN (
+                    SELECT id FROM account_analytic_line WHERE id IN 
+                    (SELECT analytic_line_id FROM magnus_planning_analytic_line_rel WHERE planning_id = {0}) 
+                        AND employee_id {1} {2}
+                    )
+            """.format(
+            self.id,
+            op,
+            empIds
+        ))
+        self.env.cr.execute(line_query)
+
     def get_planning_from_employees(self):
         if not self.env.context.get('self_planning', False):
-            op, child_emp_ids = 'IN', tuple(set(self.get_employee_child_ids()) - set([self.employee_id.user_id.id]))
+            op, child_emp_ids = 'IN', tuple(set(self.get_employee_child_ids()) - set([self.employee_id.id]))
         else:
-            op, child_emp_ids = '=', self.employee_id.user_id.id
+            op, child_emp_ids = '=', self.employee_id.id
+
+        self.remove_planning_from_managers(child_emp_ids)
+
         line_query = ("""
                 INSERT INTO
                    magnus_planning_analytic_line_rel

@@ -158,7 +158,7 @@
             <field name="inherit_id" ref="project.view_task_tree2"/>
             <field name="arch" type="xml">
                 <field name="stage_id" position="before">
-                  <field name="parsed_description"/>
+                  <field name="parsed_description" string="Description"/>
                 </field>
             </field>
       </record>
