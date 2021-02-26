@@ -321,25 +321,25 @@ class AccountAnalyticLine(models.Model):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
-        fr = None
+        fr = 0.0
         if uid and tid and date:
             task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
-            if task_user:
+            if task_user and task_user.fee_rate:
                 fr = task_user.fee_rate
             # check standard task for fee earners
-            if fr == None:
-                project_id = self.env['project.task'].browse(tid).project_id
-                standard_task = project_id.task_ids.filtered('standard')
-                if standard_task:
-                    # task-358
-                    task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
-                    if task_user:
-                        fr = task_user[:1].fee_rate
-        if fr == None:
-            employee = self.env['hr.employee'].search([('user_id', '=', uid)])
-            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
-            if self.product_id and self.product_id != employee.product_id:
-                fr = self.product_id.lst_price
+        #     if fr == None:
+        #         project_id = self.env['project.task'].browse(tid).project_id
+        #         standard_task = project_id.task_ids.filtered('standard')
+        #         if standard_task:
+        #             # task-358
+        #             task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
+        #             if task_user:
+        #                 fr = task_user[:1].fee_rate
+        # if fr == None:
+        #     employee = self.env['hr.employee'].search([('user_id', '=', uid)])
+        #     fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
+        #     if self.product_id and self.product_id != employee.product_id:
+        #         fr = self.product_id.lst_price
         return fr
 
     @api.model
