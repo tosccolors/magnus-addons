@@ -34,15 +34,16 @@ class MagnusPlanning(models.Model):
             % (self.employee_id.id))
         co_mgr_dept_list = [x[0] for x in self.env.cr.fetchall() if x[0]]
 
-        op, dept_list = '=', co_mgr_dept_list[0]
+        if co_mgr_dept_list:
+            op, dept_list = '=', co_mgr_dept_list[0]
 
-        if len(co_mgr_dept_list) > 1:
-            op, dept_list = 'IN', tuple(co_mgr_dept_list)
+            if len(co_mgr_dept_list) > 1:
+                op, dept_list = 'IN', tuple(co_mgr_dept_list)
 
-        self.env.cr.execute("""SELECT id FROM hr_employee WHERE department_id %s %s"""
-            % (op, dept_list))
+            self.env.cr.execute("""SELECT id FROM hr_employee WHERE department_id %s %s"""
+                % (op, dept_list))
 
-        co_mgr_emp_list = [x[0] for x in self.env.cr.fetchall() if x[0]]
+            co_mgr_emp_list = [x[0] for x in self.env.cr.fetchall() if x[0]]
 
-        child_ids = list(set(co_mgr_emp_list+child_ids))
+            child_ids = list(set(co_mgr_emp_list+child_ids))
         return child_ids
