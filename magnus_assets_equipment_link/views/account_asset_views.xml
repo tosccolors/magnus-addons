@@ -11,6 +11,9 @@
             <xpath expr="//field[@name='account_analytic_id']" position="after">
                     <field name="analytic_id_2"/>
             </xpath>
+			<xpath expr="//field[@name='account_analytic_id']" position="attributes">
+                    <attribute name="attrs">{}</attribute>
+            </xpath>
         </field>
     </record>
 </odoo>
