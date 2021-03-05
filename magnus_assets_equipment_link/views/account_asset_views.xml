@@ -8,6 +8,10 @@
                     <field string="Equipments" name="equipment_count" widget="statinfo"/>
                 </button>
             </div>
+            <xpath expr="//field[@name='account_analytic_id']" position="replace"/>
+            <xpath expr="//field[@name='parent_id']" position="after">
+                <field name="account_analytic_id"/>
+            </xpath>
         </field>
     </record>
 </odoo>
