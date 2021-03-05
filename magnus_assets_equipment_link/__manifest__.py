@@ -12,11 +12,13 @@
     "installable": True,
     "depends": [
         "magnus_equipment",
-        "account_asset_management"
+        "account_asset_management",
+        "magnus_operating_unit_asset_management"
     ],
     "data": [
-        #"views/account_asset_asset_views.xml",
+        "views/account_asset_views.xml",
         "views/maintenance_equipment_view.xml",
-        "views/account_asset_category_views.xml"
+        "views/account_asset_profile_views.xml",
+        "views/account_invoice_views.xml"
     ],
 }

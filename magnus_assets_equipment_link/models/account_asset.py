@@ -29,8 +29,10 @@ class AccountAsset(models.Model):
         res = self.env.ref('maintenance.hr_equipment_action').read()[0]
         res['domain'] = [('asset_ids', 'in', self.ids)]
         res['context'] = {'default_asset_ids': [(6, 0, self.ids)]}
-        return resc
+        return res
 
+    # Hayo Bos: This function is to create equipments (equal to the qty specified in the line). The equipments are
+    # automatically linked to the just created asset.
     @api.model
     def create(self, vals):
         res = super(AccountAsset, self).create(vals)
