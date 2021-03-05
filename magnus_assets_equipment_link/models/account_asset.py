@@ -18,6 +18,10 @@ class AccountAsset(models.Model):
         string="Equipment count", compute="_compute_equipment_count",
     )
 
+    analytic_id_2 = fields.Many2one(
+        comodel_name="account.analytic.account", string="Analytic Account 2",
+    )
+
     @api.depends('equipment_ids')
     def _compute_equipment_count(self):
         for asset in self:
