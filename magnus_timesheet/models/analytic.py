@@ -38,6 +38,25 @@ class AccountAnalyticLine(models.Model):
                 ts_line.sheet_id_computed = sheets[0]
                 ts_line.sheet_id = sheets[0]
 
+    def _search_sheet(self, operator, value):
+        assert operator == 'in'
+        ids = []
+        for ts in self.env['hr_timesheet_sheet.sheet'].browse(value):
+            self._cr.execute("""
+                    SELECT l.id
+                        FROM account_analytic_line l
+                    WHERE %(date_to)s >= l.date
+                        AND %(date_from)s <= l.date
+                        AND %(user_id)s = l.user_id
+                        AND l.task_id is not NULL
+                        AND %(uom_hrs)s = l.product_uom_id
+                    GROUP BY l.id""", {'date_from': ts.date_from,
+                                       'date_to': ts.date_to,
+                                       'user_id': ts.employee_id.user_id.id,
+                                       'uom_hrs': self.env.ref("product.product_uom_hour").id})
+            ids.extend([row[0] for row in self._cr.fetchall()])
+        return [('id', 'in', ids)]
+
     @api.depends('project_id.chargeable',
                  'project_id.correction_charge',
                  'project_id.user_id',
