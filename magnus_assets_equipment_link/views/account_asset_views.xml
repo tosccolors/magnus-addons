@@ -1,0 +1,19 @@
+<odoo>
+    <record id="view_account_asset_form_magnus" model="ir.ui.view">
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset_management.account_asset_view_form"/>
+        <field name="arch" type="xml">
+            <div class="oe_button_box">
+                <button class="oe_stat_button" name="button_open_equipment" type="object" icon="fa-laptop">
+                    <field string="Equipments" name="equipment_count" widget="statinfo"/>
+                </button>
+            </div>
+            <xpath expr="//field[@name='account_analytic_id']" position="after">
+                    <field name="analytic_id_2"/>
+            </xpath>
+			<xpath expr="//field[@name='account_analytic_id']" position="attributes">
+                    <attribute name="attrs">{}</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

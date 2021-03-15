@@ -1,0 +1,38 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* magnus_assets_equipment_link
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-17 15:06+0000\n"
+"PO-Revision-Date: 2021-02-17 16:07+0100\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: en\n"
+"X-Generator: Poedit 2.4.1\n"
+
+#. module: magnus_assets_equipment_link
+#: model:ir.ui.view,arch_db:magnus_assets_equipment_link.magnus_equipment_hr_equipment_view_form
+msgid "Accounting Information"
+msgstr "Boekhoudinformatie"
+
+#. module: magnus_assets_equipment_link
+#: model:ir.model,name:magnus_assets_equipment_link.model_account_asset_asset
+msgid "Asset/Revenue Recognition"
+msgstr "Activa/Inkomsten herkenning"
+
+#. module: magnus_assets_equipment_link
+#: model:ir.model.fields,field_description:magnus_assets_equipment_link.field_account_asset_asset_book_value
+msgid "Book Value"
+msgstr "Boekwaarde"
+
+#. module: magnus_assets_equipment_link
+#: model:ir.ui.view,arch_db:magnus_assets_equipment_link.view_account_asset_asset_form_magnus
+msgid "To Be Deprecated"
+msgstr "Nog af te schrijven"

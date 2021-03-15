@@ -5,7 +5,6 @@
             <field name="model">maintenance.equipment</field>
             <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='asset_ids']" position="replace"/>
                 <xpath expr="//notebook" position="inside">
                     <page string="Accounting Information">
                         <field name="asset_ids"/>

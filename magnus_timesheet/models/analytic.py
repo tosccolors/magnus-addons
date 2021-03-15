@@ -38,6 +38,25 @@ class AccountAnalyticLine(models.Model):
                 ts_line.sheet_id_computed = sheets[0]
                 ts_line.sheet_id = sheets[0]
 
+    def _search_sheet(self, operator, value):
+        assert operator == 'in'
+        ids = []
+        for ts in self.env['hr_timesheet_sheet.sheet'].browse(value):
+            self._cr.execute("""
+                    SELECT l.id
+                        FROM account_analytic_line l
+                    WHERE %(date_to)s >= l.date
+                        AND %(date_from)s <= l.date
+                        AND %(user_id)s = l.user_id
+                        AND l.task_id is not NULL
+                        AND %(uom_hrs)s = l.product_uom_id
+                    GROUP BY l.id""", {'date_from': ts.date_from,
+                                       'date_to': ts.date_to,
+                                       'user_id': ts.employee_id.user_id.id,
+                                       'uom_hrs': self.env.ref("product.product_uom_hour").id})
+            ids.extend([row[0] for row in self._cr.fetchall()])
+        return [('id', 'in', ids)]
+
     @api.depends('project_id.chargeable',
                  'project_id.correction_charge',
                  'project_id.user_id',
@@ -321,13 +340,15 @@ class AccountAnalyticLine(models.Model):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
+        #fr = 0.0
         fr = None
         if uid and tid and date:
             task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
-            if task_user:
+            if task_user and task_user.fee_rate:
                 fr = task_user.fee_rate
-            # check standard task for fee earners
+            #check standard task for fee earners
             if fr == None:
+                fr = 0.0
                 project_id = self.env['project.task'].browse(tid).project_id
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
@@ -335,11 +356,11 @@ class AccountAnalyticLine(models.Model):
                     task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
                     if task_user:
                         fr = task_user[:1].fee_rate
-        if fr == None:
-            employee = self.env['hr.employee'].search([('user_id', '=', uid)])
-            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
-            if self.product_id and self.product_id != employee.product_id:
-                fr = self.product_id.lst_price
+        # if fr == None:
+        #     employee = self.env['hr.employee'].search([('user_id', '=', uid)])
+        #     fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
+        #     if self.product_id and self.product_id != employee.product_id:
+        #         fr = self.product_id.lst_price
         return fr
 
     @api.model
