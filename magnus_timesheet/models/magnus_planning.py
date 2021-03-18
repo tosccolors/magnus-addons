@@ -142,9 +142,12 @@ class MagnusPlanning(models.Model):
 
     def remove_planning_from_managers(self, empIds):
         # delete employee lines from manager's planning, which no longer belongs to manager
+        if not empIds:
+            return
         op = '!='
-        if len(empIds) > 1:
+        if not isinstance(empIds, (int, long)) and len(empIds) > 1:
             op = 'NOT IN'
+
         line_query = ("""
             DELETE FROM magnus_planning_analytic_line_rel 
                 WHERE planning_id = {0} AND analytic_line_id IN (
@@ -161,36 +164,38 @@ class MagnusPlanning(models.Model):
 
     def get_planning_from_employees(self):
         if not self.env.context.get('self_planning', False):
-            op, child_emp_ids = 'IN', tuple(set(self.get_employee_child_ids()) - set([self.employee_id.id]))
+            child_emp_ids = tuple(set(self.get_employee_child_ids()) - set([self.employee_id.id]))
+            op, child_emp_ids = ('IN', child_emp_ids) if len(child_emp_ids) > 1 else ('=', child_emp_ids and child_emp_ids[0] or False)
         else:
             op, child_emp_ids = '=', self.employee_id.id
 
         self.remove_planning_from_managers(child_emp_ids)
 
-        line_query = ("""
-                INSERT INTO
-                   magnus_planning_analytic_line_rel
-                   (planning_id, analytic_line_id)
-                    SELECT 
-                        {0}, aal.id 
-                      FROM account_analytic_line aal 
-                      WHERE 
-                        aal.week_id >= {1} AND aal.week_id <= {2}
-                        AND aal.id IN (
-		                    SELECT analytic_line_id FROM magnus_planning_analytic_line_rel WHERE planning_id IN 
-                            (SELECT id FROM magnus_planning WHERE employee_id {3} {4}))
-                    EXCEPT
-                        SELECT
-                          planning_id, analytic_line_id
-                          FROM magnus_planning_analytic_line_rel
-                """.format(
-                    self.id,
-                    self.week_from.id,
-                    self.week_to.id,
-                    op,
-                    child_emp_ids
-                    ))
-        self.env.cr.execute(line_query)
+        if child_emp_ids:
+            line_query = ("""
+                    INSERT INTO
+                       magnus_planning_analytic_line_rel
+                       (planning_id, analytic_line_id)
+                        SELECT 
+                            {0}, aal.id 
+                          FROM account_analytic_line aal 
+                          WHERE 
+                            aal.week_id >= {1} AND aal.week_id <= {2}
+                            AND aal.id IN (
+                                SELECT analytic_line_id FROM magnus_planning_analytic_line_rel WHERE planning_id IN 
+                                (SELECT id FROM magnus_planning WHERE employee_id {3} {4}))
+                        EXCEPT
+                            SELECT
+                              planning_id, analytic_line_id
+                              FROM magnus_planning_analytic_line_rel
+                    """.format(
+                        self.id,
+                        self.week_from.id,
+                        self.week_to.id,
+                        op,
+                        child_emp_ids
+                        ))
+            self.env.cr.execute(line_query)
 
 
     @api.one
