@@ -7,8 +7,7 @@
             <notebook position="inside">
                 <page string="Equipments"
                       name="page_equipment"
-                      attrs="{'invisible': [('equipment_ids', '=', [])]}"
-                >
+                      attrs="{'invisible': [('equipment_ids', '=', [])]}">
                     <field name="equipment_ids"
                            readonly="False"
                            context="{'tree_view_ref': 'account_asset_maintenance.hr_equipment_view_tree'}"

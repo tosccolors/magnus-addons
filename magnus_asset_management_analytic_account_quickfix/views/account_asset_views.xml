@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_account_asset_form_magnus" model="ir.ui.view">
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset_management.account_asset_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='account_analytic_id']" position="replace"/>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="analytic_account_id_2"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
