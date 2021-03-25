@@ -340,15 +340,14 @@ class AccountAnalyticLine(models.Model):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
-        #fr = 0.0
-        fr = None
+        fr = 0.0
+        # fr = None
         if uid and tid and date:
             task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
             if task_user and task_user.fee_rate:
                 fr = task_user.fee_rate
             #check standard task for fee earners
-            if fr == None:
-                fr = 0.0
+            else:
                 project_id = self.env['project.task'].browse(tid).project_id
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
@@ -427,7 +426,7 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', self.product_uom_id == uom_hour)
+            ts_line = vals.get('ts_line', self.product_uom_id == uom_hour and task_id and not planned)
             if ts_line:
                 unit_amount = vals.get('unit_amount', self.unit_amount)
                 vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
