@@ -28,16 +28,3 @@ class AccountAsset(models.Model):
         res['domain'] = [('asset_ids', 'in', self.ids)]
         res['context'] = {'default_asset_ids': [(6, 0, self.ids)]}
         return res
-
-
-class AccountAssetAsset(models.Model):
-    _inherit = 'account.asset.asset'
-
-    # override the button action to test domain bug
-    @api.multi
-    def button_open_equipment(self):
-        self.ensure_one()
-        res = self.env.ref('maintenance.hr_equipment_action').read()[0]
-        res['domain'] = [('asset_ids', 'in', self.ids)]
-        res['context'] = {'default_asset_ids': [(6, 0, self.ids)]}
-        return res
