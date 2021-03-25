@@ -8,9 +8,9 @@ class AccountAsset(models.Model):
         comodel_name="account.analytic.account", string="Analytic Account",
     )
 
-    @api.onchange('account_analytic_id_2')
+    @api.onchange('analytic_account_id_2')
     def onchange_analytic_account_id_2(self):
-        account_analytic_id = self.analytic_account_id_2
+        self.account_analytic_id = self.analytic_account_id_2
 
     @api.model
     def create(self, vals):
