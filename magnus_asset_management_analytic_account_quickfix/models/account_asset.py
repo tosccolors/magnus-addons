@@ -19,12 +19,3 @@ class AccountAsset(models.Model):
             analytic_account = self.env['account.analytic.account'].browse(vals["account_analytic_id"])
             vals['analytic_account_id_2'] = analytic_account.id
         return super(AccountAsset, self).create(vals)
-
-    #override the button action to test domain bug
-    @api.multi
-    def button_open_equipment(self):
-        self.ensure_one()
-        res = self.env.ref('maintenance.hr_equipment_action').read()[0]
-        res['domain'] = [('asset_ids', 'in', self.ids)]
-        res['context'] = {'default_asset_ids': [(6, 0, self.ids)]}
-        return res
