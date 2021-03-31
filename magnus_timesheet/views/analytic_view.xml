@@ -151,9 +151,12 @@
                                 '|', '&amp;',
                                 ('state', 'in', ['draft','open']),
                                 ('move_id','!=',False),
-                                ('state', 'not in', ['draft','delayed','write_off','invoice_created','invoiced','progress','change-chargecode']),
+                                ('chargeable', '=', True),
+                                '|',
+                                ('state', 'not in', ['draft','delayed','write-off','invoice_created','invoiced-by-fixed','invoiced','progress','change-chargecode']),
+                                 '&amp;',
                                 ('non_invoiceable_mileage', '=', False),
-                                ('chargeable', '=', True)
+                                ('product_uom_id', '=', %(product.product_uom_km)d)
                                 ]"/>
                         <separator string="State"/>
                         <filter name="draft" string="Draft"
