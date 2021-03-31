@@ -8,6 +8,7 @@ from odoo.exceptions import UserError, ValidationError
 from dateutil.rrule import (rrule)
 from dateutil.relativedelta import relativedelta
 from openerp.tools.float_utils import float_compare
+from ....addons.queue_job.job import job
 
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet_sheet.sheet"
@@ -379,13 +380,39 @@ class HrTimesheetSheet(models.Model):
         self.generate_km_lines()
         return res
 
+    @job
+    def _recompute_timesheet(self):
+        """Recompute this sheet and its lines. This function is called
+        asynchronically after create/write"""
+        for this in self:
+            this.modified(self._fields.keys())
+            this.mapped('timesheet_ids').modified(
+                self.env['account.analytic.line']._fields.keys()
+            )
+        self.recompute()
+
+    @api.model
+    def create(self, vals):
+        with self.env.norecompute():
+            result = super(
+                HrTimesheetSheet, self.with_context(_timesheet_write=True)
+            ).create(vals)
+        result.with_delay()._recompute_timesheet()
+        return result
+
     @api.one
     def write(self, vals):
-        result = super(HrTimesheetSheet, self).write(vals)
-        lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(
-            lambda line: line.unit_amount > 24 or line.unit_amount < 0)
-        for l in lines:
-            l.write({'unit_amount': 0})
+        with self.env.norecompute():
+            result = super(
+                HrTimesheetSheet, self.with_context(_timesheet_write=True)
+            ).write(vals)
+        self.with_delay()._recompute_timesheet()
+        self.env['account.analytic.line'].search([
+            ('sheet_id', '=', self.id),
+            '|',
+            ('unit_amount', '>', 24),
+            ('unit_amount', '<', 0),
+        ]).write({'unit_amount': 0})
         return result
 
     @api.multi
