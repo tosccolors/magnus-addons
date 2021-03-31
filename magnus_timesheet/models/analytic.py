@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # Copyright 2018 Magnus ((www.magnus.nl).)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
@@ -502,3 +503,16 @@ class AccountAnalyticLine(models.Model):
         ))
         self.env.cr.execute(list_query, where_clause_params)
         return True
+
+    @api.multi
+    def modified(self, fnames):
+        if not self.env.context.get('_timesheet_write'):
+            # disable modification triggers when writing timesheets
+            return super(AccountAnalyticLine, self).modified(fnames)
+
+    @api.multi
+    def _get_sale_order_line(self, vals=None):
+        if not self.env.context.get('_timesheet_write'):
+            # disable linking sale order lines to analytic lines on timesheets
+            return super(AccountAnalyticLine, self)._get_sale_order_line(vals=vals)
+        return dict(vals or {})

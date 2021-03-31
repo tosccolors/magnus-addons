@@ -54,7 +54,8 @@ thereof""",
                 'hr_timesheet_sheet_validators',
                 # 'connector_jira',
                 'web_domain_field',
-                'invoice_line_revenue_distribution_operating_unit'
+                'invoice_line_revenue_distribution_operating_unit',
+                'queue_job',
                 ],
 
     # always loaded
