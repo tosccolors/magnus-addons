@@ -397,7 +397,7 @@ class HrTimesheetSheet(models.Model):
             result = super(
                 HrTimesheetSheet, self.with_context(_timesheet_write=True)
             ).create(vals)
-        result.with_delay(description=vals)._recompute_timesheet()
+        result.with_delay(description=' '.join(["create", self.employee_id.name, self.display_name, self.date_from[:4]]))._recompute_timesheet()
         return result
 
     @api.one
@@ -406,7 +406,7 @@ class HrTimesheetSheet(models.Model):
             result = super(
                 HrTimesheetSheet, self.with_context(_timesheet_write=True)
             ).write(vals)
-        self.with_delay(description=vals)._recompute_timesheet()
+        self.with_delay(description=' '.join(["write",self.employee_id.name, self.display_name, self.date_from[:4]]))._recompute_timesheet()
         self.env['account.analytic.line'].search([
             ('sheet_id', '=', self.id),
             '|',
