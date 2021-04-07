@@ -380,7 +380,7 @@ class HrTimesheetSheet(models.Model):
         self.generate_km_lines()
         return res
 
-    @job
+    @job(default_channel='root.timesheet')
     def _recompute_timesheet(self, fields):
         """Recompute this sheet and its lines.
         This function is called asynchronically after create/write"""
@@ -392,7 +392,6 @@ class HrTimesheetSheet(models.Model):
                 self.env['account.analytic.line']._fields.keys()
             )
         self.recompute()
-        # TODO: emit a bus message to update __last_update on clients
 
     def _queue_recompute_timesheet(self, fields, call_method):
         """Queue a recomputation if appropriate"""
@@ -400,7 +399,8 @@ class HrTimesheetSheet(models.Model):
             return
         return self.with_delay(
             description=' '.join([call_method, self.employee_id.name, self.display_name, self.date_from[:4]]),
-            identity_key=self._name + ',' + ','.join(map(str, self.ids))
+            identity_key=self._name + ',' + ','.join(map(str, self.ids)) +
+            ',' + ','.join(fields)
         )._recompute_timesheet(fields)
 
     @api.model
