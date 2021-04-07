@@ -381,15 +381,27 @@ class HrTimesheetSheet(models.Model):
         return res
 
     @job
-    def _recompute_timesheet(self):
-        """Recompute this sheet and its lines. This function is called
-        asynchronically after create/write"""
+    def _recompute_timesheet(self, fields):
+        """Recompute this sheet and its lines.
+        This function is called asynchronically after create/write"""
         for this in self:
-            this.modified(self._fields.keys())
+            this.modified(fields)
+            if 'timesheet_ids' not in fields:
+                continue
             this.mapped('timesheet_ids').modified(
                 self.env['account.analytic.line']._fields.keys()
             )
         self.recompute()
+        # TODO: emit a bus message to update __last_update on clients
+
+    def _queue_recompute_timesheet(self, fields, call_method):
+        """Queue a recomputation if appropriate"""
+        if not fields or not self:
+            return
+        return self.with_delay(
+            description=' '.join([call_method, self.employee_id.name, self.display_name, self.date_from[:4]]),
+            identity_key=self._name + ',' + ','.join(map(str, self.ids))
+        )._recompute_timesheet(fields)
 
     @api.model
     def create(self, vals):
@@ -397,7 +409,7 @@ class HrTimesheetSheet(models.Model):
             result = super(
                 HrTimesheetSheet, self.with_context(_timesheet_write=True)
             ).create(vals)
-        result.with_delay()._recompute_timesheet()
+        result._queue_recompute_timesheet(self._fields.keys(),"create")
         return result
 
     @api.one
@@ -406,7 +418,7 @@ class HrTimesheetSheet(models.Model):
             result = super(
                 HrTimesheetSheet, self.with_context(_timesheet_write=True)
             ).write(vals)
-        self.with_delay()._recompute_timesheet()
+        self._queue_recompute_timesheet(vals.keys(),"write")
         self.env['account.analytic.line'].search([
             ('sheet_id', '=', self.id),
             '|',
