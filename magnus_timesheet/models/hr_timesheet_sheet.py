@@ -404,26 +404,25 @@ class HrTimesheetSheet(models.Model):
 
     @api.model
     def create(self, vals):
-        with self.env.norecompute():
-            result = super(
-                HrTimesheetSheet, self.with_context(_timesheet_write=True)
-            ).create(vals)
-        result._queue_recompute_timesheet(self._fields.keys())
+        result = super(
+            HrTimesheetSheet, self.with_context(_timesheet_write=True)
+        ).create(vals)
+        result._queue_recompute_timesheet(['timesheet_ids'])
         return result
 
     @api.one
     def write(self, vals):
-        with self.env.norecompute():
-            result = super(
-                HrTimesheetSheet, self.with_context(_timesheet_write=True)
-            ).write(vals)
-        self._queue_recompute_timesheet(vals.keys())
+        result = super(
+            HrTimesheetSheet, self.with_context(_timesheet_write=True)
+        ).write(vals)
         self.env['account.analytic.line'].search([
             ('sheet_id', '=', self.id),
             '|',
             ('unit_amount', '>', 24),
             ('unit_amount', '<', 0),
         ]).write({'unit_amount': 0})
+        if 'timesheet_ids' in vals:
+            self._queue_recompute_timesheet(['timesheet_ids'])
         return result
 
     @api.multi
