@@ -305,6 +305,8 @@ class HrTimesheetSheet(models.Model):
         if self.odo_log_id:
             self.env['fleet.vehicle.odometer'].sudo().search([('id', '=', self.odo_log_id.id)]).unlink()
             self.odo_log_id = False
+        if self.overtime_analytic_line_id:
+            self.overtime_analytic_line_id.unlink()
         return res
 
 
@@ -393,12 +395,12 @@ class HrTimesheetSheet(models.Model):
             )
         self.recompute()
 
-    def _queue_recompute_timesheet(self, fields, call_method):
+    def _queue_recompute_timesheet(self, fields):
         """Queue a recomputation if appropriate"""
         if not fields or not self:
             return
         return self.with_delay(
-            description=' '.join([call_method, self.employee_id.name, self.display_name, self.date_from[:4]]),
+            description=' '.join([self.employee_id.name, self.display_name, self.date_from[:4]]),
             identity_key=self._name + ',' + ','.join(map(str, self.ids)) +
             ',' + ','.join(fields)
         )._recompute_timesheet(fields)
