@@ -45,6 +45,7 @@ thereof""",
                 'magnus_date_range_week',
                 'product_uom_unece',
                 'magnus_project',
+                'magnus_hr',
                 'web_m2x_options',
                 'web_readonly_bypass',
                 'sale_timesheet',
@@ -54,7 +55,8 @@ thereof""",
                 'hr_timesheet_sheet_validators',
                 # 'connector_jira',
                 'web_domain_field',
-                'invoice_line_revenue_distribution_operating_unit'
+                'invoice_line_revenue_distribution_operating_unit',
+                'queue_job',
                 ],
 
     # always loaded

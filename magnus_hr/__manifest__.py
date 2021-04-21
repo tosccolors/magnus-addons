@@ -30,7 +30,7 @@ In the object hr. employee on the tab 'HR Settings' under the heading 'Status' c
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'hr', 'hr_employee_seniority', 'hr_contract'],
+    'depends': ['base', 'hr', 'hr_employee_seniority', 'hr_contract', 'magnus_crm'],
 
     # always loaded
     'data': [
