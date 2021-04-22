@@ -12,7 +12,6 @@
     "installable": True,
     "depends": [
         "magnus_equipment",
-        "account_asset_management",
         "magnus_operating_unit_asset_management"
     ],
     "data": [
