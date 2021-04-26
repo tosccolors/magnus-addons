@@ -62,7 +62,7 @@ class AnalyticInvoice(models.Model):
             ## we build the domains for the selection of analytic_lines for both regular and reconfirmed aal's
             time_domain_regular, time_domain_reconfirm = self._calculate_domain(aal_ids)
             ## we determine the grouping of analytic_lines in the user_total_lines
-            reg_fields_grouped, reg_grouped_by, reconfirmed_fields_grouped, reconfirmed_grouped_by = self._calculate_groupimg()
+            reg_fields_grouped, reg_grouped_by, reconfirmed_fields_grouped, reconfirmed_grouped_by = self._calculate_grouping()
             ## the actual reads of the selected analytic_lines
             result_regular = self.env['account.analytic.line'].read_group(
                 time_domain_regular,
@@ -387,6 +387,10 @@ class AnalyticInvoice(models.Model):
     )
     gb_task =fields.Boolean(
         'Group By Task',
+        default=False
+    )
+    gb_week = fields.Boolean(
+        'Group By Week',
         default=False
     )
     gb_month = fields.Boolean(
