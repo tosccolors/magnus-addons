@@ -62,6 +62,11 @@ class AnalyticLineStatus(models.TransientModel):
 
     @api.one
     def analytic_invoice_lines(self):
+        '''
+        this method is triggered by button in analytic entries tree to update selected analytic entries
+        for changing chargecode, delaying or invoicing
+        :return:
+        '''
         context = self.env.context.copy()
         analytic_ids = context.get('active_ids',[])
         analytic_lines = self.env['account.analytic.line'].browse(analytic_ids)
@@ -69,7 +74,7 @@ class AnalyticLineStatus(models.TransientModel):
         not_lookup_states = ['draft','progress', 'invoiced', 'delayed', 'write-off','change-chargecode']
         entries = analytic_lines.filtered(lambda a: a.state not in not_lookup_states)
         expense_entries = analytic_lines.filtered(lambda a: not a.project_id and not a.task_id and not a.sheet_id and a.state == 'draft')
-        entries = entries + expense_entries
+        entries += expense_entries
         no_invoicing_property_entries = entries.filtered(lambda al: not al.project_id.invoice_properties)
         if no_invoicing_property_entries and status == 'invoiceable':
             project_names = ','.join([al.project_id.name for al in no_invoicing_property_entries])
@@ -119,11 +124,10 @@ class AnalyticLineStatus(models.TransientModel):
 
                 analytic_invobj = analytic_invoice.search(search_domain, limit=1)
                 if analytic_invobj:
+                    ## we use the context to link this branch to the _compute_objects() method in analytic.invoice
                     ctx = self.env.context.copy()
                     ctx.update({'active_invoice_id': analytic_invobj.id})
                     analytic_invobj.with_context(ctx).partner_id = partner_id
-                    # analytic_invobj.with_context(ctx).month_id = month_id
-                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
                 else:
                     data = {
                         'partner_id': partner_id,
@@ -149,16 +153,13 @@ class AnalyticLineStatus(models.TransientModel):
         entries_ids = context.get('active_ids', [])
         if len(self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable')) > 0:
             raise UserError(_('Please select only Analytic Lines with state "To Be Invoiced".'))
-
         analytic_invoice = self.env['analytic.invoice']
         cond, rec = ("in", tuple(entries_ids)) if len(entries_ids) > 1 else ("=", entries_ids[0])
-
         sep_entries = self.env['account.analytic.line'].search([
             ('id', cond, rec),
             '|',
             ('project_id.invoice_properties.group_invoice', '=', False),
-            ('task_id.project_id.invoice_properties.group_invoice', '=', False)
-        ])
+            ('task_id.project_id.invoice_properties.group_invoice', '=', False)])
         if sep_entries:
             rec = list(set(entries_ids)-set(sep_entries.ids))
             cond, rec = ("IN", tuple(rec)) if len(rec) > 1 else ("=", rec and rec[0] or [])
@@ -175,11 +176,11 @@ class AnalyticLineStatus(models.TransientModel):
 
             #reconfirmed seperate entries
             self.env.cr.execute("""
-                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
-                            FROM account_analytic_line
-                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
-                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
-                                % (cond, rec))
+                SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
+                FROM account_analytic_line
+                WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
+                % (cond, rec))
 
             reconfirm_res = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res, False)
@@ -191,18 +192,18 @@ class AnalyticLineStatus(models.TransientModel):
                 FROM account_analytic_line
                 WHERE id %s %s AND date_of_last_wip IS NULL
                 GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
-                        % (cond1, rec1))
+                % (cond1, rec1))
 
             result1 = self.env.cr.fetchall()
             analytic_invoice_create(result1, True)
 
             # reconfirmed grouping entries
             self.env.cr.execute("""
-                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
-                            FROM account_analytic_line
-                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
-                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
-                                % (cond1, rec1))
+                SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
+                FROM account_analytic_line
+                WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
+                % (cond1, rec1))
 
             reconfirm_res1 = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res1, True)
@@ -320,7 +321,11 @@ class AnalyticLineStatus(models.TransientModel):
                         raise UserError(_('Please define receivable account for partner %s.') % (partner.name))
 
                     aml = []
-                    analytic_line_obj = acc_analytic_line.search([('id', 'in', analytic_lines_ids),('partner_id', '=', partner_id),('operating_unit_id', '=', operating_unit_id), ('wip_month_id', '=', month_id)])
+                    analytic_line_obj = acc_analytic_line.search([
+                        ('id', 'in', analytic_lines_ids),
+                        ('partner_id', '=', partner_id),
+                        ('operating_unit_id', '=', operating_unit_id),
+                        ('wip_month_id', '=', month_id)])
                     analytic_line_obj -= done_analytic_line
                     if self.wip_percentage > 0.0:
                         #Skip wip move creation when percantage is 0
@@ -364,7 +369,7 @@ class AnalyticLineStatus(models.TransientModel):
 
                     line_query = ("""
                                     UPDATE
-                                       account_analytic_line
+                                    account_analytic_line
                                     SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}, wip_month_id = {2}
                                     WHERE id {3} {4}
                                     """.format(

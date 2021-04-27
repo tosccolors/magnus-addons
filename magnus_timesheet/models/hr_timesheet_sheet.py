@@ -212,16 +212,6 @@ class HrTimesheetSheet(models.Model):
         string='Date To',
         store=True,
     )
-    ## with override of date fields as related of week_id not necessary anymore
-    # @api.onchange('week_id', 'date_from', 'date_to')
-    # def onchange_week(self):
-    #     self.date_from = self.week_id.date_start
-    #     self.date_to = self.week_id.date_end
-
-    #  @api.onchange('starting_mileage', 'business_mileage')
-    #  def onchange_private_mileage(self):
-    #      if self.private_mileage == 0:
-    #          self.end_mileage = self.starting_mileage + self.business_mileage
 
     @api.constrains('week_id', 'employee_id')
     def _check_sheet_date(self, forced_user_id=False):

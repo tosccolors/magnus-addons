@@ -83,15 +83,15 @@ class TaskUser(models.Model):
     _name = 'task.user'
 
     @api.one
-    @api.depends('product_id')
+    @api.depends('user_id.employee_ids.product_id', 'from_date')
+    def _compute_product(self):
+        if self.user_id.employee_ids.product_id:
+            self.product_id = self.user_id.employee_ids.product_id
+
+    @api.model
     def _default_fee_rate(self):
         if self.product_id:
             self.fee_rate = self.product_id.list_price
-
-    @api.model
-    def _default_product(self):
-        if self.user_id.employee_ids.product_id:
-            return self.user_id.employee_ids.product_id.id
 
     @api.model
     def _get_category_domain(self):
@@ -109,8 +109,9 @@ class TaskUser(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Fee rate Product',
-        default=_default_product,
-        domain=_get_category_domain
+        compute=_compute_product,
+        domain=_get_category_domain,
+        store=True
     )
     fee_rate = fields.Float(
         default=_default_fee_rate,

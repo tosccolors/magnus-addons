@@ -317,8 +317,11 @@ class AccountAnalyticLine(models.Model):
         if task_id and user_id:
             date_now = fields.Date.today()
             #task-358
-            taskUser = taskUserObj.search([('task_id', '=', task_id), ('from_date', '<=', date_now), ('user_id', '=', user_id)],
-                                          limit=1, order='from_date Desc')
+            taskUser = taskUserObj.search([
+                ('task_id', '=', task_id),
+                ('from_date', '<=', date_now),
+                ('user_id', '=', user_id)],
+                limit=1, order='from_date Desc')
             if taskUser and taskUser.product_id:
                 product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
             else:
@@ -326,8 +329,8 @@ class AccountAnalyticLine(models.Model):
                 project_id = self.env['project.task'].browse(task_id).project_id
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
-                    taskUser = taskUserObj.search([('task_id', '=', standard_task.id), ('user_id', '=', user_id)],
-                                                  limit=1)
+                    taskUser = taskUserObj.search([
+                        ('task_id', '=', standard_task.id), ('user_id', '=', user_id)], limit=1)
                     product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
 
         if user_id and not product_id:
