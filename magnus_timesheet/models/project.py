@@ -17,6 +17,17 @@ class Task(models.Model):
         if len(task) > 1 and self.standard:
             raise ValidationError(_('You can have only one task with the standard as true per project!'))
 
+    def _compute_uid(self):
+        self.user_ids = False
+
+    def _set_task_user_ids(self):
+        task_user_lines = []
+        task_user_uids = self.task_user_ids.mapped('user_id')
+        for uid in self.user_ids:
+            if uid not in task_user_uids:
+                task_user_lines.append((0, _, {'user_id': uid.id}))
+        self.task_user_ids = task_user_lines
+
     standard = fields.Boolean(
         string='Standard'
     )
@@ -28,6 +39,13 @@ class Task(models.Model):
         'task_id',
         string='Can register time',
         track_visibility='always'
+    )
+    user_ids = fields.Many2many(
+        'res.users',
+        string='user multi select',
+        track_visibility='always',
+        compute=_compute_uid,
+        inverse = '_set_task_user_ids'
     )
 
     @api.model
@@ -42,6 +60,15 @@ class Task(models.Model):
                 domain = ['|'] + domain + [('jira_compound_key', operator, name)]
             recs = self.search(domain + args, limit=limit)
         return recs.name_get()
+
+    # @api.onchange('user_ids')
+    # def onchange_user_ids(self):
+    #     task_user_lines = []
+    #     task_user_uids = self.task_user_ids.mapped('user_id')
+    #     for uid in self.user_ids:
+    #         if uid not in task_user_uids:
+    #             task_user_lines.append((0, _, {'user_id': uid.id}))
+    #     self.task_user_ids = task_user_lines
 
 
 class Project(models.Model):

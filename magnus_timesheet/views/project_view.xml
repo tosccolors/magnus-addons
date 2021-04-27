@@ -29,9 +29,18 @@
                 </field>
                 <page name="description_page" position="before">
                     <page name="users" string="Fee Earners">
-                        <group colspan="4" col="2">
+                        <group colspan="6" col="6">
+                        <group colspan="1" col="2">
+                            <field name="user_ids" >
+                                    <tree string="multiselect" create="true"
+                                          edit="true" delete="true" copy="false">
+                                        <field name="display_name" />
+                                    </tree>
+                            </field>
+                        </group>
+                        <group colspan="5" col="2">
                             <field name="task_user_ids" context="{'default_task_id':active_id}">
-                                    <tree string="Fee Earners" create="true"
+                                    <tree string="Fee Earners" editable="bottom" create="true"
                                           edit="true" delete="true" copy="false">
                                         <field name="user_id" />
                                         <field name="from_date" />
@@ -40,9 +49,21 @@
                                     </tree>
                             </field>
                         </group>
+                        </group>
                     </page>
                 </page>
             </field>
+        </record>
+        <record model="ir.ui.view" id="view_task_form_magnus">
+              <field name="name">project.task.form.magnus</field>
+              <field name="model">project.task</field>
+              <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited" />
+              <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+              <field name="arch" type="xml">
+                <field name="progress" position="after">
+                    <field name="standard" />
+                </field>
+              </field>
         </record>
 
     <!-- TaskUser -->
