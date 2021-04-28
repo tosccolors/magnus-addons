@@ -93,6 +93,13 @@ class AccountAnalyticLine(models.Model):
                     line.expenses = line.project_id.invoice_properties.expenses
             else:
                 line.project_mgr = line.account_id.project_ids.user_id or False
+            #All entries should mapped with planned and actual qty
+            if line.planned:
+                line.planned_qty = line.unit_amount
+                line.actual_qty = 0.0
+            else:
+                line.actual_qty = line.unit_amount
+                line.planned_qty = 0.0
             task = line.task_id
             user = line.user_id
             # only if task_id the remaining fields are computed
@@ -100,19 +107,13 @@ class AccountAnalyticLine(models.Model):
                 uou = user._get_operating_unit_id()
                 if uou:
                     line.operating_unit_id = uou
-                    if line.planned:
-                        line.planned_qty = line.unit_amount
-                        line.actual_qty = 0.0
+                    if line.month_of_last_wip:
+                        line.wip_month_id = line.month_of_last_wip
                     else:
-                        if line.month_of_last_wip:
-                            line.wip_month_id = line.month_of_last_wip
-                        else:
-                            line.wip_month_id = var_month_id
-                        if line.product_uom_id.id == uom_hrs:
-                            line.ts_line = True
-                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                        line.actual_qty = line.unit_amount
-                        line.planned_qty = 0.0
+                        line.wip_month_id = var_month_id
+                    if line.product_uom_id.id == uom_hrs:
+                        line.ts_line = True
+                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
 
     def find_daterange_week(self, date):
         """
@@ -309,6 +310,9 @@ class AccountAnalyticLine(models.Model):
     date_of_next_reconfirmation = fields.Date(
         "Date Of Next Reconfirmation"
     )
+    # field account_analytic_line_ids for display the account moves
+    move_line_ids = fields.Many2many('account.move.line', string="Move Line", readonly=True)
+    # wip_percentage = fields.Float("WIP percentage")
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
@@ -359,11 +363,6 @@ class AccountAnalyticLine(models.Model):
                     task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
                     if task_user:
                         fr = task_user[:1].fee_rate
-        # if fr == None:
-        #     employee = self.env['hr.employee'].search([('user_id', '=', uid)])
-        #     fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
-        #     if self.product_id and self.product_id != employee.product_id:
-        #         fr = self.product_id.lst_price
         return fr
 
     @api.model
@@ -519,3 +518,15 @@ class AccountAnalyticLine(models.Model):
             # disable linking sale order lines to analytic lines on timesheets
             return super(AccountAnalyticLine, self)._get_sale_order_line(vals=vals)
         return dict(vals or {})
+
+    # To display the Account move and reverse move in many2many list view for status = delayed record
+    @api.multi
+    def add_move_line(self, analytic_lines_ids, vals):
+        if False not in vals:
+            for move_id in vals:
+                move_line_ids = self.env['account.move.line'].search([('move_id', '=', move_id)])
+                for aal_id in analytic_lines_ids:
+                    analytic_line = self.env['account.analytic.line'].search([('id', 'in', aal_id)])
+                    for move_line_id in move_line_ids:
+                        analytic_line.move_line_ids = [(4, move_line_id.id)]
+        return True
