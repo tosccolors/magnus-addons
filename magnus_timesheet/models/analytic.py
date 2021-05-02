@@ -175,6 +175,15 @@ class AccountAnalyticLine(models.Model):
             res.update({'date': date})
         return res
 
+    @api.one
+    @api.depends('ml_aal_rel_ids')
+    def _wip_percentage(self):
+        if self.ml_aal_rel_ids:
+            self.wip_percentage = self.ml_aal_rel_ids[0].wip_percentage
+        else:
+            self.wip_percentage = False
+
+
     kilometers = fields.Integer(
         'Kilometers'
     )
@@ -310,9 +319,22 @@ class AccountAnalyticLine(models.Model):
     date_of_next_reconfirmation = fields.Date(
         "Date Of Next Reconfirmation"
     )
-    # field account_analytic_line_ids for display the account moves
-    move_line_ids = fields.Many2many('account.move.line', string="Move Line", readonly=True)
-    # wip_percentage = fields.Float("WIP percentage")
+    ml_aal_rel_ids = fields.One2many(
+        'account.move.line.account.analytic.line.rel',
+        'analytic_line_id',
+    )
+    wip_move_line_ids = fields.Many2many(
+        comodel_name='account.move.line',
+        relation='account_move_line_account_analytic_line_rel',
+        column1='analytic_line_id',
+        column2='move_line_id',
+        string="Linked Move Lines",
+        readonly=True,
+    )
+    wip_percentage = fields.Float(
+        compute=_wip_percentage,
+        string="WIP %"
+    )
 
     @api.model
     def get_task_user_product(self, task_id, user_id):
@@ -336,7 +358,6 @@ class AccountAnalyticLine(models.Model):
                     taskUser = taskUserObj.search([
                         ('task_id', '=', standard_task.id), ('user_id', '=', user_id)], limit=1)
                     product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
-
         if user_id and not product_id:
             user = self.env['res.users'].browse(user_id)
             employee = user._get_related_employees()
@@ -520,13 +541,13 @@ class AccountAnalyticLine(models.Model):
         return dict(vals or {})
 
     # To display the Account move and reverse move in many2many list view for status = delayed record
-    @api.multi
-    def add_move_line(self, analytic_lines_ids, vals):
-        if False not in vals:
-            for move_id in vals:
-                move_line_ids = self.env['account.move.line'].search([('move_id', '=', move_id)])
-                for aal_id in analytic_lines_ids:
-                    analytic_line = self.env['account.analytic.line'].search([('id', 'in', aal_id)])
-                    for move_line_id in move_line_ids:
-                        analytic_line.move_line_ids = [(4, move_line_id.id)]
-        return True
+    # @api.multi
+    # def add_move_line(self, analytic_lines_ids, vals):
+    #     if False not in vals:
+    #         for move_id in vals:
+    #             move_line_ids = self.env['account.move.line'].search([('move_id', '=', move_id)])
+    #             for aal_id in analytic_lines_ids:
+    #                 analytic_line = self.env['account.analytic.line'].search([('id', 'in', aal_id)])
+    #                 for move_line_id in move_line_ids:
+    #                     analytic_line.move_line_ids = [(4, move_line_id.id)]
+    #     return True

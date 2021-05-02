@@ -268,7 +268,7 @@
                                                     <td style='border-top:none;' width="20%"><span t-field="userLine.name"/></td>
                                                     <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
                                                     <t t-if="proLines.invoice_properties.specs_type != 'both'">
-                                                        <td style='border-top:none;' class="text-right" width="20%">
+                                                        <td t-if="userLine_value['hours'] > 0" style='border-top:none;' class="text-right" width="20%">
                                                             <span t-esc="o.value_conversion(-userLine_value['amount'] / userLine_value['hours'])"/>
                                                         </td>
                                                         <td style='border-top:none;' class="text-right" width="20%">

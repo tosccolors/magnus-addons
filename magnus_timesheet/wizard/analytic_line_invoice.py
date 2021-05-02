@@ -95,7 +95,7 @@ class AnalyticLineStatus(models.TransientModel):
             if status == 'delayed' and self.wip:
                 # self.validate_entries_month(analytic_ids)
                 # self.update_line_fee_rates(analytic_ids)
-                self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids,notupdatestate)
+                self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids, notupdatestate)
             if status == 'invoiceable':
                 # self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
@@ -110,11 +110,9 @@ class AnalyticLineStatus(models.TransientModel):
                 partner = self.env['res.partner'].browse(partner_id)
                 month_id = res[2]
                 project_operating_unit_id = res[3]
-
                 if link_project:
                     project_id = res[4]
                     partner_id = self.env['project.project'].browse(project_id).invoice_address.id
-
                 search_domain = [
                     ('partner_id', '=', partner_id),
                     ('account_analytic_ids', 'in', analytic_account_ids),
@@ -126,7 +124,6 @@ class AnalyticLineStatus(models.TransientModel):
                     search_domain += [('link_project', '=', True)]
                 else:
                     search_domain += [('link_project', '=', False)]
-
                 analytic_invobj = analytic_invoice.search(search_domain, limit=1)
                 if analytic_invobj:
                     ## we use the context to link this branch to the _compute_objects() method in analytic.invoice
@@ -152,8 +149,6 @@ class AnalyticLineStatus(models.TransientModel):
                     if link_project:
                         data.update({'project_id': project_id, 'link_project': True})
                     analytic_invoice.create(data)
-
-
         context = self.env.context.copy()
         entries_ids = context.get('active_ids', [])
         if len(self.env['account.analytic.line'].browse(entries_ids).filtered(lambda a: a.state != 'invoiceable')) > 0:
@@ -175,10 +170,8 @@ class AnalyticLineStatus(models.TransientModel):
                 WHERE id %s %s AND date_of_last_wip IS NULL 
                 GROUP BY partner_id, month_id, project_operating_unit_id"""
                 % (cond, rec))
-
             result = self.env.cr.fetchall()
             analytic_invoice_create(result, False)
-
             #reconfirmed seperate entries
             self.env.cr.execute("""
                 SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
@@ -186,10 +179,8 @@ class AnalyticLineStatus(models.TransientModel):
                 WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
                 GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
                 % (cond, rec))
-
             reconfirm_res = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res, False)
-
         if sep_entries:
             cond1, rec1 = ("IN", tuple(sep_entries.ids)) if len(sep_entries) > 1 else ("=", sep_entries.id)
             self.env.cr.execute("""
@@ -198,10 +189,8 @@ class AnalyticLineStatus(models.TransientModel):
                 WHERE id %s %s AND date_of_last_wip IS NULL
                 GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
                 % (cond1, rec1))
-
             result1 = self.env.cr.fetchall()
             analytic_invoice_create(result1, True)
-
             # reconfirmed grouping entries
             self.env.cr.execute("""
                 SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
@@ -209,7 +198,6 @@ class AnalyticLineStatus(models.TransientModel):
                 WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
                 GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
                 % (cond1, rec1))
-
             reconfirm_res1 = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res1, True)
 
@@ -244,10 +232,8 @@ class AnalyticLineStatus(models.TransientModel):
         res = []
         if line.unit_amount == 0:
             return res
-
         analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.account_id.tag_ids]
         amount = abs(self._calculate_fee_rate(line))
-
         move_line_debit = {
             'date_maturity': line.date,
             'partner_id': line.partner_id.id,
@@ -263,11 +249,10 @@ class AnalyticLineStatus(models.TransientModel):
             'analytic_account_id': line.account_id.id,
             'analytic_tag_ids': analytic_tag_ids,
             'operating_unit_id': line.operating_unit_id and line.operating_unit_id.id or False,
-            'user_id': line.user_id and line.user_id.id or False
+            'user_id': line.user_id and line.user_id.id or False,
+            'aal_ml_rel_ids': [(0,0,{'analytic_line_id': line.id, 'wip_percentage': self.wip_percentage})]
         }
-
         res.append(move_line_debit)
-
         move_line_credit = move_line_debit.copy()
         move_line_credit.update({
             'debit': 0.0,
@@ -280,7 +265,7 @@ class AnalyticLineStatus(models.TransientModel):
 
     @job
     @api.multi
-    def prepare_account_move(self, analytic_lines_ids,notupdatestate):
+    def prepare_account_move(self, analytic_lines_ids, notupdatestate):
         """ Creates analytics related financial move lines """
         acc_analytic_line = self.env['account.analytic.line']
         done_analytic_line = self.env['account.analytic.line']
@@ -337,14 +322,13 @@ class AnalyticLineStatus(models.TransientModel):
                         ('operating_unit_id', '=', operating_unit_id),
                         ('wip_month_id', '=', month_id)])
                     analytic_line_obj -= done_analytic_line
-                    # if self.wip_percentage > 0.0:
-                    #creates wip moves for all percentages
-                    for aal in analytic_line_obj:
-                        if not aal.product_id.property_account_wip_id:
-                            raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
-                        for ml in self._prepare_move_line(aal):
-                            aml.append(ml)
-
+                    if self.wip_percentage > 0.0:
+                    #creates wip moves
+                        for aal in analytic_line_obj:
+                            if not aal.product_id.property_account_wip_id:
+                                raise UserError(_('Please define WIP account for product %s.') % (aal.product_id.name))
+                            for ml in self._prepare_move_line(aal):
+                                aml.append(ml)
                     line = [(0, 0, l) for l in aml]
 
                     move_vals = {
@@ -362,25 +346,17 @@ class AnalyticLineStatus(models.TransientModel):
                     ctx_nolang = ctx.copy()
                     ctx_nolang.pop('lang', None)
                     move = account_move.with_context(ctx_nolang).create(move_vals)
-                    move.is_wip_move=True
-                    move.wip_percentage=self.wip_percentage
-                    for line in move.line_ids:
-                        line.wip_percentage=self.wip_percentage
                     if move:
                         move._post_validate()
                         move.post()
-
                         account_move |= move
-
                     cond = '='
                     rec = analytic_line_obj.ids[0]
                     if len(analytic_line_obj) > 1:
                         cond = 'IN'
                         rec = tuple(analytic_line_obj.ids)
-
                     first_of_next_month_date = (datetime.strptime(date_end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
                     wip_month_id = analytic_line_obj[0].find_daterange_month(first_of_next_month_date)
-
                     line_query = ("""
                                     UPDATE
                                     account_analytic_line
@@ -394,9 +370,8 @@ class AnalyticLineStatus(models.TransientModel):
                                     rec))
                     self.env.cr.execute(line_query)
                     done_analytic_line |= analytic_line_obj
-
         except Exception, e:
-            # update the analytic line record into there previous state when job get failed in delay
+            # update the analytic line records into their previous state when job fails in delay
             for id, state in notupdatestate.iteritems():
                 self.env.cr.execute("""
                                 UPDATE account_analytic_line SET state = '%s' WHERE id=%s
@@ -405,13 +380,8 @@ class AnalyticLineStatus(models.TransientModel):
                 self.env.invalidate_all()
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))
-        vals = [am.id for am in account_move]
-        # creates wip reversal moves for all percentages
-        reverse_move = self.wip_reversal(account_move)
-        for rm in reverse_move:
-            vals.append(rm.id)
-        # Adding moves to each record
-        self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
+        # creates wip reversal moves
+        self.wip_reversal(account_move)
         return "WIP moves amd Reversals successfully created. \n "
 
     @job
@@ -422,9 +392,9 @@ class AnalyticLineStatus(models.TransientModel):
             try:
                 tot_credit = sum(move.line_ids.mapped('credit'))
                 tot_debit = sum(move.line_ids.mapped('debit'))
-                reconcile = True if move.wip_percentage and (tot_credit or tot_debit) else False
+                reconcile = True if (tot_credit or tot_debit) else False
                 date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
-                reverse_move= move.create_reversals(
+                reverse_move = move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
                     reconcile=reconcile)

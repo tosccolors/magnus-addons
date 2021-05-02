@@ -8,13 +8,46 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
 
+class MoveLineAnalyticLine(models.Model):
+    _name = 'account.move.line.account.analytic.line.rel'
+
+    move_line_id = fields.Many2one(
+        'account.move.line'
+    )
+    analytic_line_id = fields.Many2one(
+        'account.analytic.line'
+    )
+    wip_percentage = fields.Float(
+        "WIP Percentage"
+    )
+
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
+
+    @api.one
+    @api.depends('aal_ml_rel_ids')
+    def _wip_percentage(self):
+        self.wip_percentage = self.aal_ml_rel_ids[0].wip_percentage
 
     user_id = fields.Many2one(
         'res.users',
         string='Timesheet User'
     )
+    aal_ml_rel_ids = fields.One2many(
+        'account.move.line.account.analytic.line.rel',
+        'move_line_id',
+    )
+    wip_analytic_line_ids = fields.Many2many(
+        comodel_name='account.analytic.line',
+        relation='account_move_line_account_analytic_line_rel',
+        column1='move_line_id',
+        column2='analytic_line_id',
+        string='Linked Analytic Lines',
+        readonly=True
+    )
+    wip_percentage = fields.Float(
+        compute=_wip_percentage,
+        string="WIP %")
 
 
     @api.multi
@@ -39,8 +72,6 @@ class AccountMoveLine(models.Model):
 
 class AccountMove(models.Model):
     _inherit = "account.move"
-
-    wip_percentage = fields.Integer("WIP percentage")
 
     # override post(), when first post, nothing extra. When move.name exists,
     # it cannot be first posting. Then 'OU-balancing' lines are unlinked.
@@ -99,5 +130,3 @@ class AccountMove(models.Model):
                 wip_line.debit = line.credit
                 wip_line.credit = line.debit
         return wip_move
-
-
