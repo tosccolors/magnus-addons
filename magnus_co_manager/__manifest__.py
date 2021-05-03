@@ -10,7 +10,6 @@
     'depends': ['magnus_expense', 'magnus_timesheet'],
     'summary': 'Employee,Department',
     'data': [
-        'security/security.xml',
         'security/ir_rule.xml',
         'views/hr_views.xml',
     ],
