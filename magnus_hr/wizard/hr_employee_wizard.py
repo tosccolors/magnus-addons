@@ -26,7 +26,7 @@ class HREmployeeWizard(models.TransientModel):
     login = fields.Char("Login")
     ref = fields.Char("Internal Reference")
     # Field to store the parent department based on the operating unit selected
-    parent_department_id = fields.Many2one("hr.department","Parent Department")
+    parent_department_id = fields.Many2one("hr.department", "Parent Department")
     # Based on the parent department the child department along with parent will be displayed in the below field
     department_id = fields.Many2one("hr.department","Department")
     default_operating_unit_id = fields.Many2one("operating.unit","Default operating unit", domain=_get_ou_domain)
@@ -98,6 +98,7 @@ class HREmployeeWizard(models.TransientModel):
         res_partner_bank = self.env['res.partner.bank']
         account_payment_term = self.env['account.payment.term']
         account_payment_mode = self.env['account.payment.mode']
+        ctx = self._context or {}
         
         firstname = self.firstname
         lastname = self.lastname
@@ -182,6 +183,9 @@ class HREmployeeWizard(models.TransientModel):
                           'product_id':product_id,
                           'parent_id':parent_id,
                          })
+        if ctx.get('nmbrs_id'):
+            emp_dict.update({'employee_numbersid': ctx['nmbrs_id']})
+
         employee_id = hr_employee.create(emp_dict)
 
         holiday_dict.update({'holiday_status_id':hr_leave_type.id,

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_operating_unit_form_inherits_nmbrs_interface" model="ir.ui.view">
+        <field name="name">operating.unit.form</field>
+        <field name="model">operating.unit</field>
+        <field name="inherit_id" ref="operating_unit.view_operating_unit_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="nmbrs_id" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
