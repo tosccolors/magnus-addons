@@ -31,7 +31,7 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
                 operating_unit = analytic_accounts_nmbrs.search([('analytic_account_id_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids[0].id
             line_info = {
                 #'id': line.attrib['id'],
-                'account_id': chart_of_accounts.search([('code', '=', line[0].text)]).id,
+                'account_id': chart_of_accounts.search([('code', '=', line[0].text), ('company_id', '=', 1)]).id,
                 'analytic_account_id': analytic_account,
                 'operating_unit_id': operating_unit or False,
                 'credit': float(line[2].text) if line[3].text == 'credit' else 0.0,
@@ -87,6 +87,7 @@ class PayrollEntry(models.Model):
 
 class MappingNmbrsAnalyticAccount(models.Model):
     _name = "mapping.nmbrs.analytic.account"
+
     analytic_account_id_nmbrs = fields.Char("id_nmbrs")
     analytic_account_name_nmbrs = fields.Char("Analytic Account Name Nmbrs")
     analytic_account_odoo = fields.Many2one("account.analytic.account", string="Analytic Account Odoo")
@@ -108,3 +109,31 @@ class MappingNmbrsAnalyticAccount(models.Model):
             vals = {'analytic_account_id_nmbrs': nmbrs_id, 'analytic_account_name_nmbrs': name}
             self.create(vals)
         return True
+
+class PayrollRunsNmbrs(models.Model):
+    _name = "payroll.runs.nmbrs"
+    _description = "Helper object to load available payroll runs from NMBRs"
+
+    run_id_nmbrs = fields.Char("Run ID NMBRs")
+    period = fields.Char("Period")
+    operating_unit = fields.Many2one("operating.unit", string="Operating Unit")
+
+    def fetch_payroll_runs_nmbrs(self, operating_unit_nmbrs_id):
+        config = self.env['nmbrs.interface.config'].search([])[0]
+        user = config.api_user
+        token = config.api_key
+        authentication_v3 = {'Username': user, 'Token': token, 'Domain': 'magnus'}
+        client = Client(config.endpoint_company_service)
+        nmbrs_pay_roll_runs = client.service.Run_GetList(
+            _soapheaders={'AuthHeaderWithDomain': authentication_v3},
+            CompanyId=operating_unit_nmbrs_id,
+            Year='2021'
+        )
+        nr_runs = len(nmbrs_pay_roll_runs)
+        for i in range(nr_runs):
+            self.create({
+                'run_id_nmbrs': nmbrs_pay_roll_runs[i]['ID'],
+                'period': nmbrs_pay_roll_runs[i]['Description'],
+                'operating_unit': operating_unit_nmbrs_id
+            })
+
