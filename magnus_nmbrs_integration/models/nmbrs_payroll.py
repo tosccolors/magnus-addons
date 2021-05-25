@@ -18,7 +18,7 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
         api_response = client.service.Journals_GetByRunCostCenter(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             CompanyId=self.operating_unit_nmbrs_id,
-            RunId=109319L
+            RunId=130755L
         )
         chart_of_accounts = self.env['account.account']
         analytic_accounts_nmbrs = self.env['mapping.nmbrs.analytic.account']
@@ -40,6 +40,7 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
                 'ref': line[4].text
             }
             lines[i + 1] = line_info
+
         return lines
 
 
@@ -65,12 +66,13 @@ class PayrollEntry(models.Model):
             'ref': self.reference,
             'journal_id': self.journal.id,
         }
-        move = self.env['account.move'].create(move_data)
+        ctx = dict(self._context, check_move_validity=False)
+        move = self.env['account.move'].with_context(ctx).create(move_data)
         #move.post()
         for line in lines:
             vals = lines[line]
             vals['move_id'] = move.id
-            self.env['account.move.line'].create(vals)
+            self.env['account.move.line'].with_context(ctx).create(vals)
         #write_ctx = dict(self._context, allow_asset_line_update=True)
         #line.with_context(write_ctx).write({'move_id': move.id})
         #created_move_ids.append(move.id)
