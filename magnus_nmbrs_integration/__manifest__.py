@@ -27,6 +27,8 @@
         'views/hr_views.xml',
         'views/payroll_view.xml',
         'wizard/hr_employee_wizard_view.xml',
+        'wizard/nmbrs_analytic_account_wizard.xml',
+        'wizard/nmbrs_payroll_run_wizard.xml',
         'views/template_view.xml',
         'views/api_config_view.xml'
     ],

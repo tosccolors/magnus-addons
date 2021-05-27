@@ -15,7 +15,7 @@ import datetime
 # from lxml import etree
 # from dicttoxml import dicttoxml
 
-class HrEmployeeFromOdooToNmbrs(models.Model):
+class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     _name = 'create.employee.from.odoo.to.nmbrs'
 
     first_name = fields.Char("First name")
