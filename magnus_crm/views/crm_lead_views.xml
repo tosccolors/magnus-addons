@@ -501,7 +501,6 @@
       </record>
       
       
-      
 	<record model="ir.ui.view" id="view_create_opportunity_simplified_inherit">
         <field name="name">crm.lead.quick.view</field>
         <field name="model">crm.lead</field>
@@ -509,6 +508,12 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                <field name="operating_unit_id"/>
+                <field name="department_id"/>
+            </xpath>
+            <xpath expr="//field[@name='planned_revenue']" position="after">
+               <field name="probability"/>
+                <field name="proposition"/>
+                <field name="date_deadline"/>
             </xpath>
         </field>
       </record>
