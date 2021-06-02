@@ -10,6 +10,7 @@ class NMBRsPayrollRunWizard(models.TransientModel):
     operating_unit = fields.Many2one("operating.unit", string="Operating Unit")
     year = fields.Char(string="Year")
 
+    @api.multi
     def fetch_payroll_runs_nmbrs(self):
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user
@@ -22,6 +23,7 @@ class NMBRsPayrollRunWizard(models.TransientModel):
             Year=self.year
         )
         nr_runs = len(nmbrs_pay_roll_runs)
+        current_runs = self.env['payroll.runs.nmbrs']
         if nr_runs > 0:
             for run in nmbrs_pay_roll_runs:
                 run_dict = {
@@ -30,4 +32,5 @@ class NMBRsPayrollRunWizard(models.TransientModel):
                     'operating_unit': self.operating_unit.id,
                     'imported': False
                 }
-                self.env['payroll.runs.nmbrs'].create(run_dict)
+                if not current_runs.search([('run_id_nmbrs', '=', run['ID'])]):
+                    self.env['payroll.runs.nmbrs'].create(run_dict)

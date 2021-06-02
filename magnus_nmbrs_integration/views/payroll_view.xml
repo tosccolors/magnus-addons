@@ -102,7 +102,7 @@
     <menuitem
         id="configure_analytic_account_mapping"
         action="open_view_analytic_account_mapping"
-        parent="menu_payroll"
-        sequence="1"/>
+        parent="menu_nmbrs_mappings"
+        sequence="2"/>
     </data>
 </odoo>

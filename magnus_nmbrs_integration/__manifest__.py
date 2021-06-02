@@ -16,21 +16,23 @@
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
     'category': 'Report',
-    'version': '0.1',
+    'version': '0.3',
     'installable': True,
     # any module necessary for this one to work correctly
-    'depends': ['hr', 'operating_unit', 'magnus_hr'],
+    'depends': ['operating_unit', 'magnus_hr', 'magnus_fleet'],
 
     # always loaded
     'data': [
+        'views/api_config_view.xml',
         'views/operating_unit_view.xml',
         'views/hr_views.xml',
         'views/payroll_view.xml',
+        'views/nmbrs_fleet_view.xml',
         'wizard/hr_employee_wizard_view.xml',
         'wizard/nmbrs_analytic_account_wizard.xml',
         'wizard/nmbrs_payroll_run_wizard.xml',
-        'views/template_view.xml',
-        'views/api_config_view.xml'
+        'wizard/nmbrs_fleet_wizard.xml',
+        'views/template_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

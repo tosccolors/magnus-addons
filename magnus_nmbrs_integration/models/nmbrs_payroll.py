@@ -11,6 +11,7 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
     operating_unit_nmbrs_id = fields.Char("NMBRS ID")
     payroll_run = fields.Many2one("payroll.runs.nmbrs")
 
+    @api.multi
     def fetch_payroll_entry(self):
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user
@@ -86,6 +87,7 @@ class PayrollEntry(models.Model):
                          }
         return res
 
+    @api.multi
     def fetch_journal_entry(self):
         data = {'operating_unit_nmbrs_id': self.operating_unit.nmbrs_id, 'payroll_run': self.payroll_run.id}
         api_service = self.env['payroll.journal.entry.nmbrs.to.odoo'].sudo().create(data)

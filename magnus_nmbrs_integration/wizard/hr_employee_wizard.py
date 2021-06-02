@@ -8,12 +8,12 @@ class HREmployeeWizard(models.TransientModel):
     send_to_nmbrs = fields.Boolean(string="Create employee in Nmbrs as well")
     start_date_contract = fields.Date(string="Start date of contract")
     operating_unit_nmbrs = fields.Many2one("operating.unit", string="Operating Unit for Nmbrs")
-    bsn = fields.Char("BSN")
-    gross_salary = fields.Char("Salary")
-    fte = fields.Char("FTE (1, 0.8 etc)")
-    pension_contrib_employee = fields.Char("Pension Contribution Employee")
-    pension_contrib_employer = fields.Char("Pension Contribution Employer")
-    health_insurance_contrib = fields.Char("Health Insurance Contribution")
+    # bsn = fields.Char("BSN")
+    # gross_salary = fields.Float("Salary")
+    # fte = fields.Char("FTE (1, 0.8 etc)")
+    # pension_contrib_employee = fields.Char("Pension Contribution Employee")
+    # pension_contrib_employer = fields.Char("Pension Contribution Employer")
+    # health_insurance_contrib = fields.Char("Health Insurance Contribution")
     marital_status = fields.Selection([('Gehuwd', 'Married'), ('Ongehuwd', 'Unmarried')], string="Marital Status")
     #Adress for nmbrs
     street_nmbrs = fields.Char("Street Nmbrs")
@@ -23,6 +23,7 @@ class HREmployeeWizard(models.TransientModel):
     housenr_addition_nmbrs = fields.Char("")
     nationality = fields.Many2one('hr.nmbrs.nationality', string="Nationality")
 
+    @api.multi
     def fetch_employee_data(self):
         employee_data = {
             'first_name': self.firstname,
@@ -30,12 +31,13 @@ class HREmployeeWizard(models.TransientModel):
             'start_date': self.start_date_contract,
             'company_id': self.operating_unit_nmbrs.nmbrs_id,
             'gender': self.gender_nmbrs(),
+            # 'gross_salary': self.gross_salary,
             'marital_status': self.marital_status,
             'mobile': self.mobile,
             'email': self.email,
             'birthday': self.birthday,
             'place_of_birth': self.place_of_birth,
-            'bsn': self.bsn,
+            # 'bsn': self.bsn,
             'acc_number': self.acc_number,
             'bic': self.bank_name_id.bic,
             'unprotected_mode': True,

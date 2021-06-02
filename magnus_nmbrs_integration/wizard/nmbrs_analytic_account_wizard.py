@@ -9,6 +9,7 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
 
     operating_unit = fields.Many2one("operating.unit", string="Operating Unit")
 
+    @api.multi
     def fetch_analytic_accounts_nmbrs(self):
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user
@@ -21,6 +22,7 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
         )
         if len(nmbrs_analytic_accounts) > 0:
             vals = []
+            current_analytic_accounts = self.env['mapping.nmbrs.analytic.account']
             for analytic_account in nmbrs_analytic_accounts:
                 nmbrs_id = analytic_account['Code']
                 name = analytic_account['Description']
@@ -29,4 +31,5 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
                     'analytic_account_name_nmbrs': name,
                     'operating_unit': self.operating_unit.id
                 }
-                self.env['mapping.nmbrs.analytic.account'].create(vals)
+                if not current_analytic_accounts.search([('analytic_account_id_nmbrs', '=', nmbrs_id)]):
+                    self.env['mapping.nmbrs.analytic.account'].create(vals)

@@ -24,7 +24,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     company_id = fields.Char("Company ID")
     gender = fields.Char("Gender")
     email = fields.Char("email")
-    bsn = fields.Char("BSN")
+    # bsn = fields.Char("BSN")
     mobile = fields.Char("Mobile")
     birthday = fields.Date("Birthday")
     place_of_birth = fields.Char("Place of birth")
@@ -39,20 +39,21 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     zip = fields.Char("ZIP")
     city = fields.Char("City")
     country_code_address = fields.Char("Country Code of Address")
-    gross_salary = fields.Char("Gross Salary")
-    fte = fields.Char("FTE (1, 0.8 etc)")
-    pension_contrib_employee = fields.Char("Pension Contribution Employee")
-    pension_contrib_employer = fields.Char("Pension Contribution Employer")
-    health_insurance_contrib = fields.Char("Health Insurance Contribution")
+    # gross_salary = fields.Float("Gross Salary")
+    # fte = fields.Char("FTE (1, 0.8 etc)")
+    # pension_contrib_employee = fields.Char("Pension Contribution Employee")
+    # pension_contrib_employer = fields.Char("Pension Contribution Employer")
+    # health_insurance_contrib = fields.Char("Health Insurance Contribution")
     unprotected_mode = fields.Boolean("Unprotected Mode")
 
+    @api.multi
     def insert_employee(self):
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user
         token = config.api_key
         authentication_v3 = {'Username': user, 'Token': token, 'Domain': 'magnus'}
         client = Client(config.endpoint_employee_service)
-        nmbrs_id = client.service.Employee_Insert(
+        nmbrs_id = client.service.Employee_InsertBasedOnDefault(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             StartDate=self.start_date,
             FirstName=self.first_name,
@@ -61,18 +62,18 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
             UnprotectedMode=self.unprotected_mode
         )
         nmbrs_data = client.service.PersonalInfo_GetCurrent(
-            _soapheaders={'AuthHeaderWithDomain': self.authentication_v3},
+            _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
         )
         nmbrs_nr = nmbrs_data['EmployeeNumber']
 
         client.service.PersonalInfo_UpdateCurrent(
-            _soapheaders={'AuthHeaderWithDomain': self.authentication_v3},
+            _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
             PersonalInfo={
                 'Id': nmbrs_id,
                 'EmployeeNumber': nmbrs_nr,
-                'BSN': self.bsn,
+                # 'BSN': self.bsn,
                 'Number': nmbrs_nr,
                 'FirstName': self.first_name,
                 'LastName': self.last_name,
@@ -89,7 +90,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
         )
 
         client.service.BankAccount_InsertCurrent(
-        _soapheaders={'AuthHeaderWithDomain': self.authentication_v3},
+        _soapheaders={'AuthHeaderWithDomain': authentication_v3},
         EmployeeId=nmbrs_id,
         #UnprotectedMode=True,
         BankAccount={
@@ -103,7 +104,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
         )
 
         client.service.Address_InsertCurrent(
-            _soapheaders={'AuthHeaderWithDomain': self.authentication_v3},
+            _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
             Address={
                 'Id': nmbrs_id,
@@ -117,6 +118,17 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
                 'Type': 'HomeAddress',
                 }
             )
+
+        # client.service.Salary_Update(
+        #     _soapheaders={'AuthHeaderWithDomain': authentication_v3},
+        #     EmployeeId=nmbrs_id,
+        #     Salary={
+        #         'Value': self.gross_salary,
+        #         'Type': 'Bruto_Salaris_Fulltime'
+        #     },
+        #     Start=self.start_date
+        # )
+
         return nmbrs_id
 
 

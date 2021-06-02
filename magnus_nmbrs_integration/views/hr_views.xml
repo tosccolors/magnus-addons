@@ -30,7 +30,7 @@
         <menuitem
             id="menu_nmbrs_country_code"
             action="open_view_nmbrs_country_settings"
-            parent="menu_nmbrs_settings"
+            parent="menu_nmbrs_mappings"
             sequence="1"/>
         </data>
 </odoo>

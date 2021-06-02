@@ -14,13 +14,13 @@
 				<field name="send_to_nmbrs" />
 				<field name="start_date_contract" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
 				<field name="operating_unit_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-				<field name="bsn" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
+<!--				<field name="bsn" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
 				<field name="marital_status" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
 			    <field name="nationality" options="{'no_create': True, 'no_create_edit':True}" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-			  	<field name="gross_salary" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-			  	<field name="fte" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-			  	<field name="pension_contrib_employee" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-			  	<field name="pension_contrib_employer" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
+<!--			  	<field name="gross_salary" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
+<!--			  	<field name="fte" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
+<!--			  	<field name="pension_contrib_employee" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
+<!--			  	<field name="pension_contrib_employer" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
 			  </group>
 			  <group cols="4">
 				<field name="street_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}" />

@@ -3,6 +3,7 @@
     <data>
         <menuitem id="menu_nmbrs" name="NMBRs"/>
         <menuitem id="menu_nmbrs_header" name="NMBRs Configuration" parent="menu_nmbrs"/>
+        <menuitem id="menu_nmbrs_mappings" name="NMBRs Mappings" parent="menu_nmbrs"/>
 
         <record id="view_form_nmbrs_data_connector" model="ir.ui.view">
             <field name="name">NMBRs interface</field>
@@ -44,5 +45,6 @@
                   parent="menu_nmbrs_header"
                   action="config_nmbrs_connector"
                   sequence="2"/>
+
     </data>
 </odoo>
