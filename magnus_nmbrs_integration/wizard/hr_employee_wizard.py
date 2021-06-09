@@ -7,7 +7,7 @@ class HREmployeeWizard(models.TransientModel):
 
     send_to_nmbrs = fields.Boolean(string="Create employee in Nmbrs as well")
     start_date_contract = fields.Date(string="Start date of contract")
-    operating_unit_nmbrs = fields.Many2one("operating.unit", string="Operating Unit for Nmbrs")
+    # operating_unit_nmbrs = fields.Many2one("operating.unit", string="Operating Unit for Nmbrs")
     # bsn = fields.Char("BSN")
     # gross_salary = fields.Float("Salary")
     # fte = fields.Char("FTE (1, 0.8 etc)")
@@ -22,6 +22,7 @@ class HREmployeeWizard(models.TransientModel):
     housenr_nmbrs = fields.Char("House number")
     housenr_addition_nmbrs = fields.Char("")
     nationality = fields.Many2one('hr.nmbrs.nationality', string="Nationality")
+    analytic_account = fields.Many2one('account.analytic.account', string="Analytic Account")
 
     @api.multi
     def fetch_employee_data(self):
@@ -29,7 +30,7 @@ class HREmployeeWizard(models.TransientModel):
             'first_name': self.firstname,
             'last_name': self.lastname,
             'start_date': self.start_date_contract,
-            'company_id': self.operating_unit_nmbrs.nmbrs_id,
+            'company_id': self.default_operating_unit_id.nmbrs_id,
             'gender': self.gender_nmbrs(),
             # 'gross_salary': self.gross_salary,
             'marital_status': self.marital_status,
@@ -42,6 +43,7 @@ class HREmployeeWizard(models.TransientModel):
             'bic': self.bank_name_id.bic,
             'unprotected_mode': True,
             'street': self.street_nmbrs,
+            'analytic_account': self.analytic_account.id,
             'country_code_address': self.country_id.code,
             'housenumber': self.housenr_nmbrs,
             'housenumber_addition': self.housenr_addition_nmbrs or "",
@@ -80,10 +82,16 @@ class HREmployeeWizard(models.TransientModel):
     @api.multi
     def create_employee(self):
         if self.send_to_nmbrs:
+            employee_id = super(HREmployeeWizard, self).create_employee()
             employee_data = self.fetch_employee_data()
+            employee_data['employee_number'] = self.env['hr.employee'].browse(employee_id).identification_id
             api_service = self.env['create.employee.from.odoo.to.nmbrs'].sudo().create(employee_data)
             nmbrs_id = api_service.insert_employee()
-            ctx = self._context.copy()
-            ctx.update({'nmbrs_id': nmbrs_id})
-            self = self.with_context(ctx)
-        return super(HREmployeeWizard, self).create_employee()
+            employee_data['employee_number'] = self.env['hr.employee'].browse(employee_id).write({'employee_numbersid': nmbrs_id})
+
+    @api.multi
+    @api.onchange('department_id')
+    def onchange_department_id(self):
+        res = {}
+        res['domain'] = {'analytic_account': [('department_id.id', '=', self.department_id.id)]}
+        return res

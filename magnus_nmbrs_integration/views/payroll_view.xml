@@ -25,6 +25,7 @@
         <field name="arch" type="xml">
             <tree string="Analytic Account Mapping" editable="top">
                 <field name="analytic_account_id_nmbrs"/>
+                <field name="analytic_account_code_nmbrs"/>
                 <field name="analytic_account_name_nmbrs"/>
                 <field name="analytic_account_odoo"/>
             </tree>

@@ -183,8 +183,8 @@ class HREmployeeWizard(models.TransientModel):
                           'product_id':product_id,
                           'parent_id':parent_id,
                          })
-        if ctx.get('nmbrs_id'):
-            emp_dict.update({'employee_numbersid': ctx['nmbrs_id']})
+        # if ctx.get('nmbrs_id'):
+        #     emp_dict.update({'employee_numbersid': ctx['nmbrs_id']})
 
         employee_id = hr_employee.create(emp_dict)
 
@@ -223,7 +223,7 @@ class HREmployeeWizard(models.TransientModel):
             list_role.append((0, 0, data))
         hr_user_id.write({'role_line_ids':list_role})
             
-        return True
+        return employee_id.id
     
 class UsersRoleWizard(models.TransientModel):
     _name= "users.role.wizard"

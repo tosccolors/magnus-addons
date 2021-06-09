@@ -59,7 +59,8 @@ class FleetChangesFromOdooToNMBRs(models.TransientModel):
         client = Client(config.endpoint_employee_service)
 
         for change in nmbrs_fleet_object.browse(context.get('active_ids', [])):
-            fiscal_value = vehicle_object.browse(change.vehicle.id).car_value
+            vehicle = vehicle_object.browse(change.vehicle.id)
+            fiscal_value = vehicle.car_value
             fiscal_addition = change.fiscal_addition_nmbrs.fiscal_addition_nmbrs_id
             employee_id_nmbrs = change.nmbrs_id
             license_plate = change.license_plate

@@ -24,12 +24,15 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
             vals = []
             current_analytic_accounts = self.env['mapping.nmbrs.analytic.account']
             for analytic_account in nmbrs_analytic_accounts:
-                nmbrs_id = analytic_account['Code']
+                nmbrs_id = analytic_account['Id']
                 name = analytic_account['Description']
+                nmbrs_code = analytic_account['Code']
                 vals = {
                     'analytic_account_id_nmbrs': nmbrs_id,
+                    'analytic_account_code_nmbrs': nmbrs_code,
                     'analytic_account_name_nmbrs': name,
-                    'operating_unit': self.operating_unit.id
+                    'operating_unit': self.operating_unit.id,
+                    'nmbrs_code': nmbrs_code
                 }
                 if not current_analytic_accounts.search([('analytic_account_id_nmbrs', '=', nmbrs_id)]):
                     self.env['mapping.nmbrs.analytic.account'].create(vals)

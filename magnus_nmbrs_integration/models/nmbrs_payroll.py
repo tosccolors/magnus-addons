@@ -29,9 +29,9 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
         lines = []
         for i in range(len(root[0][1])):
             line = root[0][1][i]
-            analytic_account = analytic_accounts_nmbrs.search([('analytic_account_id_nmbrs', '=', line[1].text)]).analytic_account_odoo.id
+            analytic_account = analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.id
             if analytic_account:
-                operating_unit = analytic_accounts_nmbrs.search([('analytic_account_id_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids[0].id
+                operating_unit = analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids[0].id
             line_info = {
                 'account_id': chart_of_accounts.search([('code', '=', line[0].text), ('company_id', '=', 1)]).id,
                 'analytic_account_id': analytic_account,
@@ -39,7 +39,7 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
                 'credit': float(line[2].text) if line[3].text == 'credit' else 0.0,
                 'debit': float(line[2].text) if line[3].text == 'debit' else 0.0,
                 'name': line[4].text,
-                'ref': line[4].text
+                # 'ref': line[4].text
             }
             lines.append([0, 0, line_info])
         return lines
@@ -78,8 +78,7 @@ class PayrollEntry(models.Model):
     @api.multi
     @api.onchange('operating_unit')
     def onchange_operating_unit(self):
-        res ={}
-        # In order to display the child ids, we need to get the parent id first
+        res = {}
         res['domain'] = {'payroll_run': ['&',
                                          ('operating_unit.id', '=', self.operating_unit.id),
                                          ('imported', '=', False)
@@ -100,7 +99,8 @@ class PayrollEntry(models.Model):
 class MappingNmbrsAnalyticAccount(models.Model):
     _name = "mapping.nmbrs.analytic.account"
 
-    analytic_account_id_nmbrs = fields.Char("id_nmbrs")
+    analytic_account_id_nmbrs = fields.Char("NMBRs ID")
+    analytic_account_code_nmbrs = fields.Char("NMBRs Code")
     analytic_account_name_nmbrs = fields.Char("Analytic Account Name Nmbrs")
     analytic_account_odoo = fields.Many2one("account.analytic.account", string="Analytic Account Odoo")
     operating_unit = fields.Many2one("operating.unit", string="Operating Unit")

@@ -25,3 +25,8 @@ class NMBRsFleetFiscalAdditionMapping(models.Model):
 
     fiscal_addition = fields.Float("Fiscal Addition")
     fiscal_addition_nmbrs_id = fields.Char("NMBRs ID")
+
+class FleetVehicle(models.Model):
+    _inherit = "fleet.vehicle"
+
+    nmbrs_id = fields.Char("NMBRs ID")

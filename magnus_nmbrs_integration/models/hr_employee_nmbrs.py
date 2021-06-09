@@ -19,6 +19,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     _name = 'create.employee.from.odoo.to.nmbrs'
 
     first_name = fields.Char("First name")
+    employee_number = fields.Char("Nmbrs number")
     last_name = fields.Char("Last name")
     start_date = fields.Date("Start date")
     company_id = fields.Char("Company ID")
@@ -39,6 +40,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     zip = fields.Char("ZIP")
     city = fields.Char("City")
     country_code_address = fields.Char("Country Code of Address")
+    analytic_account = fields.Many2one('account.analytic.account', string="Analytic Account")
     # gross_salary = fields.Float("Gross Salary")
     # fte = fields.Char("FTE (1, 0.8 etc)")
     # pension_contrib_employee = fields.Char("Pension Contribution Employee")
@@ -53,7 +55,11 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
         token = config.api_key
         authentication_v3 = {'Username': user, 'Token': token, 'Domain': 'magnus'}
         client = Client(config.endpoint_employee_service)
-        nmbrs_id = client.service.Employee_InsertBasedOnDefault(
+        mapping_analytic_account_nmbrs_object = analytic_account_nmbrs_id = self.env['mapping.nmbrs.analytic.account'].search([('analytic_account_odoo', '=', self.analytic_account.id)])
+        analytic_account_nmbrs_id = mapping_analytic_account_nmbrs_object.analytic_account_id_nmbrs
+        analytic_account_nmbrs_code = mapping_analytic_account_nmbrs_object.analytic_account_code_nmbrs
+        analytic_account_nmbrs_description = mapping_analytic_account_nmbrs_object.analytic_account_name_nmbrs
+        nmbrs_id = client.service.Employee_Insert(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             StartDate=self.start_date,
             FirstName=self.first_name,
@@ -65,16 +71,16 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
         )
-        nmbrs_nr = nmbrs_data['EmployeeNumber']
+#        nmbrs_nr = nmbrs_data['EmployeeNumber']
 
         client.service.PersonalInfo_UpdateCurrent(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
             PersonalInfo={
                 'Id': nmbrs_id,
-                'EmployeeNumber': nmbrs_nr,
+                'EmployeeNumber': self.employee_number,
                 # 'BSN': self.bsn,
-                'Number': nmbrs_nr,
+                'Number': self.employee_number,
                 'FirstName': self.first_name,
                 'LastName': self.last_name,
                 'Nickname': self.first_name,
@@ -92,13 +98,11 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
         client.service.BankAccount_InsertCurrent(
         _soapheaders={'AuthHeaderWithDomain': authentication_v3},
         EmployeeId=nmbrs_id,
-        #UnprotectedMode=True,
         BankAccount={
             'Id': nmbrs_id,
-            'Number': nmbrs_nr,
+            'Number': self.employee_number,
             'IBAN': self.acc_number,
             'BIC': self.bic,
-            #'Name': 'RABOBANK',
             'Type': 'Bankrekening1'
             }
         )
@@ -119,16 +123,24 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
                 }
             )
 
-        # client.service.Salary_Update(
-        #     _soapheaders={'AuthHeaderWithDomain': authentication_v3},
-        #     EmployeeId=nmbrs_id,
-        #     Salary={
-        #         'Value': self.gross_salary,
-        #         'Type': 'Bruto_Salaris_Fulltime'
-        #     },
-        #     Start=self.start_date
-        # )
-
+        client.service.CostCenter_UpdateCurrent(
+            _soapheaders={'AuthHeaderWithDomain': authentication_v3},
+            EmployeeId=nmbrs_id,
+            CostCenters={
+                'EmployeeCostCenter':
+                {
+                    'Id': analytic_account_nmbrs_id,
+                    'CostCenter': {
+                        'Code': analytic_account_nmbrs_code,
+                        # 'Description': analytic_account_nmbrs_description,
+                        # 'Id': None
+                    },
+                    'Kostensoort': None,
+                    'Percentage': 100,
+                    'Default': True
+                }
+            }
+        )
         return nmbrs_id
 
 
