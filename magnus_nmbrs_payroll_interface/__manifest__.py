@@ -24,6 +24,7 @@
     # always loaded
     'data': [
         'security/security.xml',
+        'security/ir.model.access.csv',
         'views/payroll_view.xml',
         'wizard/nmbrs_payroll_run_wizard.xml',
         'views/template_view.xml',

@@ -95,6 +95,7 @@ class PayrollEntry(models.Model):
         self.created_move = move
         self.move_id = move
 
+
 class PayrollRunsNmbrs(models.Model):
     _name = "payroll.runs.nmbrs"
     _description = "Helper object to load available payroll runs from NMBRs"
