@@ -2,13 +2,14 @@ from odoo import api, fields, models, _
 from zeep import Client, Settings
 import datetime
 import xml.etree.ElementTree as ET
+from odoo.exceptions import UserError, ValidationError
 import os
 
 
 class PayrollJournalEntryNmbrsToOdoo(models.Model):
     _name = 'payroll.journal.entry.nmbrs.to.odoo'
 
-    operating_unit_nmbrs_id = fields.Char("NMBRS ID")
+    operating_unit = fields.Many2one("operating.unit")
     payroll_run = fields.Many2one("payroll.runs.nmbrs")
 
     @api.multi
@@ -20,7 +21,7 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
         client = Client(config.endpoint_company_service)
         api_response = client.service.Journals_GetByRunCostCenter(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
-            CompanyId=self.operating_unit_nmbrs_id,
+            CompanyId=self.operating_unit.nmbrs_id,
             RunId=self.payroll_run.run_id_nmbrs
         )
         chart_of_accounts = self.env['account.account']
@@ -29,13 +30,24 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
         lines = []
         for i in range(len(root[0][1])):
             line = root[0][1][i]
-            analytic_account = analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.id
+            analytic_account = analytic_accounts_nmbrs.search(
+                [
+                    '&',
+                    ('analytic_account_code_nmbrs', '=', line[1].text),
+                    ('operating_unit', '=', self.operating_unit.id)
+                ]
+            ).analytic_account_odoo
             if analytic_account:
-                operating_unit = analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids[0].id
+                if not analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids:
+                    raise UserError(_('Analytic account %s has no operating unit!') % analytic_account.name)
+                else:
+                    line_operating_unit = analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids[0].id
+            # else:
+            #     raise UserError(_('Analytic account %s in NMBRs is not mapped to an analytic account in Odoo!') % analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_name_nmbrs)
             line_info = {
                 'account_id': chart_of_accounts.search([('code', '=', line[0].text), ('company_id', '=', 1)]).id,
-                'analytic_account_id': analytic_account,
-                'operating_unit_id': operating_unit or False,
+                'analytic_account_id': analytic_account.id,
+                'operating_unit_id': line_operating_unit or False,
                 'credit': float(line[2].text) if line[3].text == 'credit' else 0.0,
                 'debit': float(line[2].text) if line[3].text == 'debit' else 0.0,
                 'name': line[4].text,
@@ -88,7 +100,7 @@ class PayrollEntry(models.Model):
 
     @api.multi
     def fetch_journal_entry(self):
-        data = {'operating_unit_nmbrs_id': self.operating_unit.nmbrs_id, 'payroll_run': self.payroll_run.id}
+        data = {'operating_unit': self.operating_unit.id, 'payroll_run': self.payroll_run.id}
         api_service = self.env['payroll.journal.entry.nmbrs.to.odoo'].sudo().create(data)
         lines = api_service.fetch_payroll_entry()
         move = self.create_move(lines)
