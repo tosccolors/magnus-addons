@@ -32,16 +32,15 @@ class PayrollJournalEntryNmbrsToOdoo(models.Model):
             line = root[0][1][i]
             analytic_account = analytic_accounts_nmbrs.search(
                 [
-                    '&',
-                    ('analytic_account_code_nmbrs', '=', line[1].text),
-                    ('operating_unit', '=', self.operating_unit.id)
+                    ('operating_unit.id', '=', self.operating_unit.id),
+                    ('analytic_account_code_nmbrs', '=', line[1].text)
                 ]
             ).analytic_account_odoo
             if analytic_account:
-                if not analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids:
+                if not analytic_account.operating_unit_ids:
                     raise UserError(_('Analytic account %s has no operating unit!') % analytic_account.name)
                 else:
-                    line_operating_unit = analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_odoo.operating_unit_ids[0].id
+                    line_operating_unit = analytic_account.operating_unit_ids[0].id
             # else:
             #     raise UserError(_('Analytic account %s in NMBRs is not mapped to an analytic account in Odoo!') % analytic_accounts_nmbrs.search([('analytic_account_code_nmbrs', '=', line[1].text)]).analytic_account_name_nmbrs)
             line_info = {
