@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-    <menuitem id="menu_payroll"
-        parent="account.menu_finance"
-        name="Payroll"
-        sequence="5" />
 
     <record id="view_payroll_runs" model="ir.ui.view">
         <field name="name">payroll.runs.nmbrs.tree</field>
@@ -73,13 +69,13 @@
     <menuitem
         id="fetch_payroll_runs"
         action="open_view_payroll_runs"
-        parent="menu_payroll"
+        parent="magnus_nmbrs_base.menu_payroll"
         groups="nmbrs_payroll_interface"
         sequence="1"/>
     <menuitem
         id="fetch_payroll_entry"
         action="open_view_nmbrs_journal_entries"
-        parent="menu_payroll"
+        parent="magnus_nmbrs_base.menu_payroll"
         groups="nmbrs_payroll_interface"
         sequence="1"/>
     </data>

@@ -46,5 +46,10 @@
                   action="config_nmbrs_connector"
                   sequence="2"/>
 
+        <menuitem id="menu_payroll"
+        parent="account.menu_finance"
+        name="Payroll"
+        sequence="5" />
+
     </data>
 </odoo>

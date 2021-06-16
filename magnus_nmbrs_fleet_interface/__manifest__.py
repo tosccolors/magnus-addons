@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Magnus NMBRs Payroll Interface",
+    'name': "Magnus NMBRs Fleet Interface",
 
     'summary': """
-        Provides an interface to load journal entries directly from NMBRs into Odoo""",
+        Provides an interface push fleet changes from Odoo to NMBRs """,
 
     'description': """
-        Provides an interface to load journal entries directly from NMBRs into Odoo
+        Provides an interface push fleet changes from Odoo to NMBRs
     """,
 
     'author': "Magnus - Hayo Bos",
@@ -19,15 +19,15 @@
     'version': '0.3',
     'installable': True,
     # any module necessary for this one to work correctly
-    'depends': ['magnus_nmbrs_base', 'analytic', 'account'],
+    'depends': ['magnus_fleet', 'magnus_nmbrs_employee_interface'],
 
     # always loaded
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
-        'views/payroll_view.xml',
-        'wizard/nmbrs_payroll_run_wizard.xml',
-        'views/template_view.xml',
+        'views/nmbrs_fleet_view.xml',
+        'wizard/nmbrs_fleet_wizard.xml',
+        'views/template_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
