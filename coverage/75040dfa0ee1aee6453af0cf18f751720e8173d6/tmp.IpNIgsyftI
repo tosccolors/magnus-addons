@@ -1,0 +1,238 @@
+2021-06-23 13:20:06,954 7303 INFO ? odoo: Odoo version 10.0
+2021-06-23 13:20:06,955 7303 INFO ? odoo: Using configuration file at /tmp/etc/odoo.cfg
+2021-06-23 13:20:06,955 7303 INFO ? odoo: addons paths: ['/home/runner/.local/share/Odoo/addons/10.0', u'/tmp/parts/odoo/odoo/addons', u'/tmp/parts/odoo/addons', u'/tmp/modules', u'/tmp/parts/account-analytic', u'/tmp/parts/account-closing', u'/tmp/parts/account-consolidation', u'/tmp/parts/account-fiscal-rule', u'/tmp/parts/account-financial-reporting', u'/tmp/parts/account-financial-tools', u'/tmp/parts/account-invoicing', u'/tmp/parts/bank-payment', u'/tmp/parts/bank-statement-import', u'/tmp/parts/calendar', u'/tmp/parts/connector', u'/tmp/parts/connector-cmis', u'/tmp/parts/connector-telephony', u'/tmp/parts/contract', u'/tmp/parts/community-data-files', u'/tmp/parts/crm', u'/tmp/parts/data-protection', u'/tmp/parts/e-commerce', u'/tmp/parts/edi', u'/tmp/parts/event', u'/tmp/parts/geospatial', u'/tmp/parts/hr', u'/tmp/parts/hr-timesheet', u'/tmp/parts/intrastat-extrastat', u'/tmp/parts/knowledge', u'/tmp/parts/l10n-netherlands', u'/tmp/parts/multi-company', u'/tmp/parts/management-system', u'/tmp/parts/margin-analysis', u'/tmp/parts/partner-contact', u'/tmp/parts/project', u'/tmp/parts/project-agile', u'/tmp/parts/project-reporting', u'/tmp/parts/product-attribute', u'/tmp/parts/product-variant', u'/tmp/parts/queue', u'/tmp/parts/reporting-engine', u'/tmp/parts/report-print-send', u'/tmp/parts/rest-framework', u'/tmp/parts/sale-financial', u'/tmp/parts/sale-reporting', u'/tmp/parts/sale-workflow', u'/tmp/parts/server-auth', u'/tmp/parts/social', u'/tmp/parts/vertical-isp', u'/tmp/parts/web', u'/tmp/parts/webkit-tools', u'/tmp/parts/website-cms', u'/tmp/parts/account-reconcile', u'/tmp/parts/misc', u'/tmp/parts/magnus-addons', u'/tmp/parts/connector-jira', u'/tmp/parts/server-tools', u'/tmp/parts/mis-builder', u'/tmp/parts/connector-interfaces', u'/tmp/parts/operating-unit', u'/tmp/parts/onestein']
+2021-06-23 13:20:06,955 7303 INFO ? odoo: database: default@default:default
+2021-06-23 13:20:06,976 7303 INFO ? odoo.service.server: HTTP service (werkzeug) running on fv-az234-557.ttime0pjliqehc41rytrnjys4d.xx.internal.cloudapp.net:8069
+2021-06-23 13:20:06,990 7303 INFO runner odoo.modules.loading: loading 1 modules...
+2021-06-23 13:20:07,119 7303 INFO runner odoo.modules.loading: 1 modules loaded in 0.13s, 0 queries
+2021-06-23 13:20:07,251 7303 INFO runner odoo.modules.loading: updating modules list
+2021-06-23 13:20:22,086 7303 INFO runner odoo.modules.loading: loading 61 modules...
+2021-06-23 13:20:22,315 7303 INFO runner odoo.addons.report.models.report: You need Wkhtmltopdf to print a pdf version of the reports.
+2021-06-23 13:20:22,738 7303 WARNING runner py.warnings: /tmp/parts/connector-jira/connector_jira/models/jira_backend/common.py:15: CryptographyDeprecationWarning: Python 2 is no longer supported by the Python core team. Support for it is now deprecated in cryptography, and will be removed in the next release.
+  from cryptography.hazmat.backends import default_backend
+
+2021-06-23 13:20:22,850 7303 INFO runner odoo.modules.loading: 61 modules loaded in 0.76s, 0 queries
+2021-06-23 13:20:22,951 7303 INFO runner odoo.modules.loading: loading 82 modules...
+2021-06-23 13:20:23,940 7303 INFO runner odoo.modules.registry: module data_time_tracker: creating or updating database tables
+2021-06-23 13:20:24,167 7303 INFO runner odoo.modules.loading: loading data_time_tracker/security/ir.model.access.csv
+2021-06-23 13:20:24,274 7303 INFO runner odoo.modules.loading: loading data_time_tracker/wizard/tracker_wizard_view.xml
+2021-06-23 13:20:24,364 7303 INFO runner odoo.modules.loading: loading data_time_tracker/views/data_time_tracking_view.xml
+2021-06-23 13:20:25,143 7303 INFO runner odoo.modules.registry: module web_domain_field: creating or updating database tables
+2021-06-23 13:20:25,258 7303 INFO runner odoo.modules.loading: loading web_domain_field/views/web_domain_field.xml
+2021-06-23 13:20:26,091 7303 INFO runner odoo.modules.registry: module web_m2x_options: creating or updating database tables
+2021-06-23 13:20:26,142 7303 INFO runner odoo.modules.loading: loading web_m2x_options/views/view.xml
+2021-06-23 13:20:26,983 7303 INFO runner odoo.modules.registry: module magnus_date_range_week: creating or updating database tables
+2021-06-23 13:20:27,136 7303 INFO runner odoo.modules.loading: loading magnus_date_range_week/data/date_range_type.xml
+2021-06-23 13:20:27,167 7303 INFO runner odoo.modules.loading: loading magnus_date_range_week/views/date_range_type.xml
+2021-06-23 13:20:27,945 7303 INFO runner odoo.modules.registry: module web_notify: creating or updating database tables
+2021-06-23 13:20:27,985 7303 INFO runner odoo.addons.auth_crypt.models.res_users: Hashing passwords, may be slow for databases with many users...
+2021-06-23 13:20:28,067 7303 INFO runner odoo.modules.loading: loading web_notify/views/web_notify.xml
+2021-06-23 13:20:28,413 7303 INFO runner odoo.modules.module: odoo.addons.web_notify.tests.test_res_users running tests.
+2021-06-23 13:20:28,414 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: test_notify_admin_allowed_other_user (odoo.addons.web_notify.tests.test_res_users.TestResUsers)
+2021-06-23 13:20:28,439 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: test_notify_info (odoo.addons.web_notify.tests.test_res_users.TestResUsers)
+2021-06-23 13:20:28,447 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: test_notify_many (odoo.addons.web_notify.tests.test_res_users.TestResUsers)
+2021-06-23 13:20:28,463 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: test_notify_other_user (odoo.addons.web_notify.tests.test_res_users.TestResUsers)
+2021-06-23 13:20:28,482 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: test_notify_warning (odoo.addons.web_notify.tests.test_res_users.TestResUsers)
+2021-06-23 13:20:28,490 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: test_notify_with_action (odoo.addons.web_notify.tests.test_res_users.TestResUsers)
+2021-06-23 13:20:28,497 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: Ran 6 tests in 0.083s
+2021-06-23 13:20:28,497 7303 INFO runner odoo.addons.web_notify.tests.test_res_users: OK
+2021-06-23 13:20:29,034 7303 INFO runner odoo.modules.registry: module analytic_base_department: creating or updating database tables
+2021-06-23 13:20:29,205 7303 INFO runner odoo.models: Storing computed values of account.analytic.line fields account_department_id
+2021-06-23 13:20:29,291 7303 INFO runner odoo.modules.loading: loading analytic_base_department/views/analytic.xml
+2021-06-23 13:20:29,400 7303 INFO runner odoo.modules.module: odoo.addons.analytic_base_department.tests.test_line_department running tests.
+2021-06-23 13:20:29,401 7303 INFO runner odoo.addons.analytic_base_department.tests.test_line_department: test_default_department (odoo.addons.analytic_base_department.tests.test_line_department.LineDepartmentCase)
+2021-06-23 13:20:29,401 7303 INFO runner odoo.addons.analytic_base_department.tests.test_line_department: ` In a new users form, a user set only the firstname.
+2021-06-23 13:20:29,419 7303 INFO runner odoo.addons.analytic_base_department.tests.test_line_department: Ran 1 test in 0.018s
+2021-06-23 13:20:29,419 7303 INFO runner odoo.addons.analytic_base_department.tests.test_line_department: OK
+2021-06-23 13:20:30,053 7303 INFO runner odoo.modules.registry: module partner_sector: creating or updating database tables
+2021-06-23 13:20:30,189 7303 INFO runner odoo.models: Computing parent left and right for table res_partner_sector...
+2021-06-23 13:20:30,295 7303 INFO runner odoo.addons.auth_crypt.models.res_users: Hashing passwords, may be slow for databases with many users...
+2021-06-23 13:20:30,418 7303 INFO runner odoo.modules.loading: loading partner_sector/security/ir.model.access.csv
+2021-06-23 13:20:30,518 7303 INFO runner odoo.modules.loading: loading partner_sector/security/partner_sector_security.xml
+2021-06-23 13:20:30,805 7303 INFO runner odoo.modules.loading: loading partner_sector/views/res_partner_sector_view.xml
+2021-06-23 13:20:30,870 7303 INFO runner odoo.modules.loading: loading partner_sector/views/res_partner_view.xml
+2021-06-23 13:20:31,331 7303 INFO runner odoo.modules.loading: loading partner_sector/views/base_config_settings.xml
+2021-06-23 13:20:31,409 7303 INFO runner odoo.modules.loading: loading partner_sector/views/sale_config_settings.xml
+2021-06-23 13:20:31,915 7303 INFO runner odoo.modules.module: odoo.addons.partner_sector.tests.test_res_partner_sector running tests.
+2021-06-23 13:20:31,924 7303 INFO runner odoo.addons.partner_sector.tests.test_res_partner_sector: test_check_recursion (odoo.addons.partner_sector.tests.test_res_partner_sector.TestResPartnerSector)
+2021-06-23 13:20:31,938 7303 INFO runner odoo.addons.partner_sector.tests.test_res_partner_sector: test_check_sectors (odoo.addons.partner_sector.tests.test_res_partner_sector.TestResPartnerSector)
+2021-06-23 13:20:32,017 7303 INFO runner odoo.addons.partner_sector.tests.test_res_partner_sector: test_name (odoo.addons.partner_sector.tests.test_res_partner_sector.TestResPartnerSector)
+2021-06-23 13:20:32,025 7303 INFO runner odoo.addons.partner_sector.tests.test_res_partner_sector: Ran 3 tests in 0.109s
+2021-06-23 13:20:32,025 7303 INFO runner odoo.addons.partner_sector.tests.test_res_partner_sector: OK
+2021-06-23 13:20:32,576 7303 INFO runner odoo.modules.registry: module product_uom_unece: creating or updating database tables
+2021-06-23 13:20:32,650 7303 INFO runner odoo.modules.loading: loading product_uom_unece/data/unece.xml
+2021-06-23 13:20:32,718 7303 INFO runner odoo.modules.loading: loading product_uom_unece/views/product_uom.xml
+2021-06-23 13:20:33,499 7303 INFO runner odoo.modules.registry: module account_fiscal_month: creating or updating database tables
+2021-06-23 13:20:33,642 7303 INFO runner odoo.modules.loading: loading account_fiscal_month/data/date_range_type.xml
+2021-06-23 13:20:33,658 7303 INFO runner odoo.modules.loading: loading account_fiscal_month/views/date_range_type.xml
+2021-06-23 13:20:33,854 7303 INFO runner odoo.modules.module: odoo.addons.account_fiscal_month.tests.test_account_fiscal_month running tests.
+2021-06-23 13:20:33,855 7303 INFO runner odoo.addons.account_fiscal_month.tests.test_account_fiscal_month: test_01_delete_type_fiscal_month (odoo.addons.account_fiscal_month.tests.test_account_fiscal_month.TestAccountFiscalMonth)
+2021-06-23 13:20:33,899 7303 INFO runner odoo.addons.account_fiscal_month.tests.test_account_fiscal_month: test_02_search_date_range (odoo.addons.account_fiscal_month.tests.test_account_fiscal_month.TestAccountFiscalMonth)
+2021-06-23 13:20:33,923 7303 INFO runner odoo.addons.account_fiscal_month.tests.test_account_fiscal_month: Ran 2 tests in 0.068s
+2021-06-23 13:20:33,923 7303 INFO runner odoo.addons.account_fiscal_month.tests.test_account_fiscal_month: OK
+2021-06-23 13:20:34,451 7303 INFO runner odoo.modules.registry: module account_fiscal_year: creating or updating database tables
+2021-06-23 13:20:34,588 7303 INFO runner odoo.modules.loading: loading account_fiscal_year/data/date_range_type.xml
+2021-06-23 13:20:34,605 7303 INFO runner odoo.modules.loading: loading account_fiscal_year/views/date_range_type.xml
+2021-06-23 13:20:34,790 7303 INFO runner odoo.modules.loading: loading account_fiscal_year/security/ir.model.access.csv
+2021-06-23 13:20:34,915 7303 INFO runner odoo.modules.module: odoo.addons.account_fiscal_year.tests.test_account_fiscal_year running tests.
+2021-06-23 13:20:34,915 7303 INFO runner odoo.addons.account_fiscal_year.tests.test_account_fiscal_year: test_compute_fiscalyear (odoo.addons.account_fiscal_year.tests.test_account_fiscal_year.TestAccountFiscalYear)
+2021-06-23 13:20:34,916 7303 INFO runner odoo.addons.account_fiscal_year.tests.test_account_fiscal_year: ` Check that a call to that Odoo's method returns the dates from a fiscal year date range if one exists for the given date
+2021-06-23 13:20:34,943 7303 INFO runner odoo.addons.account_fiscal_year.tests.test_account_fiscal_year: Ran 1 test in 0.027s
+2021-06-23 13:20:34,943 7303 INFO runner odoo.addons.account_fiscal_year.tests.test_account_fiscal_year: OK
+2021-06-23 13:20:35,587 7303 INFO runner odoo.modules.registry: module hr_employee_seniority: creating or updating database tables
+2021-06-23 13:20:35,705 7303 INFO runner odoo.modules.loading: loading hr_employee_seniority/views/employee_views.xml
+2021-06-23 13:20:35,944 7303 INFO runner odoo.modules.module: odoo.addons.hr_employee_seniority.tests.test_employee_seniority running tests.
+2021-06-23 13:20:35,945 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: test_contract_start_date_only_supplied (odoo.addons.hr_employee_seniority.tests.test_employee_seniority.TestHrEmployeeSeniority)
+2021-06-23 13:20:36,265 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: test_days_in_contract (odoo.addons.hr_employee_seniority.tests.test_employee_seniority.TestHrEmployeeSeniority)
+2021-06-23 13:20:36,664 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: test_inital_employment_before_first_contract_date (odoo.addons.hr_employee_seniority.tests.test_employee_seniority.TestHrEmployeeSeniority)
+2021-06-23 13:20:36,974 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: test_initial_employment_date_only_supplied (odoo.addons.hr_employee_seniority.tests.test_employee_seniority.TestHrEmployeeSeniority)
+2021-06-23 13:20:37,162 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: test_multiple_contracts_with_interval (odoo.addons.hr_employee_seniority.tests.test_employee_seniority.TestHrEmployeeSeniority)
+2021-06-23 13:20:37,548 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: test_multiple_contracts_with_no_interval (odoo.addons.hr_employee_seniority.tests.test_employee_seniority.TestHrEmployeeSeniority)
+2021-06-23 13:20:37,952 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: Ran 6 tests in 2.007s
+2021-06-23 13:20:37,952 7303 INFO runner odoo.addons.hr_employee_seniority.tests.test_employee_seniority: OK
+2021-06-23 13:20:38,548 7303 INFO runner odoo.modules.registry: module project_department: creating or updating database tables
+2021-06-23 13:20:38,650 7303 INFO runner odoo.models: Storing computed values of project.task fields project_department_id
+2021-06-23 13:20:38,765 7303 INFO runner odoo.modules.loading: loading project_department/views/project.xml
+2021-06-23 13:20:39,762 7303 INFO runner odoo.modules.registry: module crm_sector: creating or updating database tables
+2021-06-23 13:20:39,900 7303 INFO runner odoo.modules.loading: loading crm_sector/views/crm_lead_view.xml
+2021-06-23 13:20:40,368 7303 INFO runner odoo.modules.module: odoo.addons.crm_sector.tests.test_crm_lead running tests.
+2021-06-23 13:20:40,368 7303 INFO runner odoo.addons.crm_sector.tests.test_crm_lead: test_check_sectors (odoo.addons.crm_sector.tests.test_crm_lead.TestCrmLead)
+2021-06-23 13:20:40,420 7303 INFO runner odoo.addons.crm_sector.tests.test_crm_lead: test_lead_create_contact (odoo.addons.crm_sector.tests.test_crm_lead.TestCrmLead)
+2021-06-23 13:20:40,704 7303 INFO runner odoo.addons.crm_sector.tests.test_crm_lead: Ran 2 tests in 0.335s
+2021-06-23 13:20:40,704 7303 INFO runner odoo.addons.crm_sector.tests.test_crm_lead: OK
+2021-06-23 13:20:41,319 7303 INFO runner odoo.modules.registry: module invoice_line_revenue_distribution_operating_unit: creating or updating database tables
+2021-06-23 13:20:41,753 7303 INFO runner odoo.modules.loading: loading invoice_line_revenue_distribution_operating_unit/views/views.xml
+2021-06-23 13:20:42,817 7303 INFO runner odoo.modules.registry: module hr_timesheet_sheet_validators: creating or updating database tables
+2021-06-23 13:20:42,911 7303 INFO runner odoo.modules.loading: loading hr_timesheet_sheet_validators/security/hr_timesheet_sheet_security.xml
+2021-06-23 13:20:42,990 7303 INFO runner odoo.modules.loading: loading hr_timesheet_sheet_validators/views/hr_timesheet_sheet_view.xml
+2021-06-23 13:20:43,183 7303 INFO runner odoo.addons.base.ir.ir_translation: module hr_timesheet_sheet_validators: loading translation file (en_US) for language en_US
+2021-06-23 13:20:43,184 7303 INFO runner odoo.tools.translate: loading /tmp/parts/misc/hr_timesheet_sheet_validators/i18n/en_US.po
+2021-06-23 13:20:43,270 7303 INFO runner odoo.modules.module: odoo.addons.hr_timesheet_sheet_validators.tests.test_hr_timesheet_sheet_validators running tests.
+2021-06-23 13:20:43,270 7303 INFO runner odoo.addons.hr_timesheet_sheet_validators.tests.test_hr_timesheet_sheet_validators: test_timesheet_methods (odoo.addons.hr_timesheet_sheet_validators.tests.test_hr_timesheet_sheet_validators.TestComputeWorkdays)
+2021-06-23 13:20:44,028 7303 INFO runner odoo.models.unlink: User #1 deleted mail.followers records with IDs: [350]
+2021-06-23 13:20:44,295 7303 INFO runner odoo.models.unlink: User #1 deleted mail.followers records with IDs: [351]
+2021-06-23 13:20:44,510 7303 INFO runner odoo.addons.hr_timesheet_sheet_validators.tests.test_hr_timesheet_sheet_validators: Ran 1 test in 1.240s
+2021-06-23 13:20:44,511 7303 INFO runner odoo.addons.hr_timesheet_sheet_validators.tests.test_hr_timesheet_sheet_validators: OK
+2021-06-23 13:20:45,036 7303 INFO runner odoo.modules.registry: module hr_timesheet_task: creating or updating database tables
+2021-06-23 13:20:45,088 7303 INFO runner odoo.modules.loading: loading hr_timesheet_task/views/hr_timesheet_assets.xml
+2021-06-23 13:20:45,272 7303 INFO runner odoo.modules.loading: loading hr_timesheet_task/views/hr_timesheet_view.xml
+2021-06-23 13:20:46,133 7303 INFO runner odoo.modules.registry: module magnus_crm: creating or updating database tables
+2021-06-23 13:20:46,230 7303 INFO runner odoo.sql_db: bad query: ALTER TABLE "crm_lead" ALTER COLUMN "operating_unit_id" SET NOT NULL
+2021-06-23 13:20:46,230 7303 WARNING runner odoo.models: WARNING: unable to set column operating_unit_id of table crm_lead not null !
+Try to re-run: openerp-server --update=module
+If it doesn't work, update records and execute manually:
+ALTER TABLE crm_lead ALTER COLUMN operating_unit_id SET NOT NULL
+Traceback (most recent call last):
+  File "/tmp/parts/odoo/odoo/models.py", line 2538, in _auto_init
+    cr.execute('ALTER TABLE "%s" ALTER COLUMN "%s" SET NOT NULL' % (self._table, name))
+  File "/tmp/parts/odoo/odoo/sql_db.py", line 154, in wrapper
+    return f(self, *args, **kwargs)
+  File "/tmp/parts/odoo/odoo/sql_db.py", line 231, in execute
+    res = self._obj.execute(query, params)
+NotNullViolation: column "operating_unit_id" of relation "crm_lead" contains null values
+
+2021-06-23 13:20:46,594 7303 INFO runner odoo.models: Storing computed values of crm.monthly.revenue fields company_currency, department_id, operating_unit_id, partner_id, project_id, sector_id, user_id
+2021-06-23 13:20:46,595 7303 INFO runner odoo.models: Storing computed values of crm.revenue.split fields department_id, name, operating_unit_id, partner_id, project_id, user_id
+2021-06-23 13:20:46,645 7303 INFO runner odoo.modules.loading: loading magnus_crm/security/crm_security.xml
+2021-06-23 13:20:47,235 7303 INFO runner odoo.modules.loading: loading magnus_crm/security/ir.model.access.csv
+2021-06-23 13:20:48,005 7303 INFO runner odoo.modules.loading: loading magnus_crm/views/crm_lead_views.xml
+2021-06-23 13:20:48,073 7303 WARNING runner odoo.models: @onchange('expected_revenue', 'percentage', 'lead_id.probability') parameters must be field names
+2021-06-23 13:20:49,004 7303 INFO runner odoo.modules.loading: loading magnus_crm/views/crm_menus.xml
+2021-06-23 13:20:50,344 7303 INFO runner odoo.modules.registry: module magnus_project: creating or updating database tables
+2021-06-23 13:20:50,750 7303 INFO runner odoo.modules.loading: loading magnus_project/security/magnus_security.xml
+2021-06-23 13:20:51,082 7303 INFO runner odoo.modules.loading: loading magnus_project/security/ir.model.access.csv
+2021-06-23 13:20:51,143 7303 INFO runner odoo.modules.loading: loading magnus_project/views/project_views.xml
+2021-06-23 13:20:51,552 7303 INFO runner odoo.modules.loading: loading magnus_project/views/hr_timesheet_views.xml
+2021-06-23 13:20:51,567 7303 INFO runner odoo.modules.loading: loading magnus_project/views/menuitem.xml
+2021-06-23 13:20:52,411 7303 INFO runner odoo.modules.registry: module hr_timesheet_task_required: creating or updating database tables
+2021-06-23 13:20:52,469 7303 INFO runner odoo.modules.loading: loading hr_timesheet_task_required/views/account_analytic_line.xml
+2021-06-23 13:20:52,603 7303 INFO runner odoo.modules.loading: loading hr_timesheet_task_required/views/assets.xml
+2021-06-23 13:20:52,755 7303 INFO runner odoo.modules.loading: loading hr_timesheet_task_required/views/hr_timesheet_sheet.xml
+2021-06-23 13:20:53,500 7303 WARNING runner odoo.fields: Field users.role.wizard.role_id with unknown comodel_name 'res.users.role'
+2021-06-23 13:20:53,674 7303 INFO runner odoo.modules.registry: module magnus_hr: creating or updating database tables
+2021-06-23 13:20:54,063 7303 INFO runner odoo.modules.loading: loading magnus_hr/views/hr_views.xml
+2021-06-23 13:20:54,441 7303 INFO runner odoo.modules.loading: loading magnus_hr/wizard/hr_employee_wizard_view.xml
+2021-06-23 13:20:54,498 7303 INFO runner odoo.modules.loading: loading magnus_hr/views/template_view.xml
+2021-06-23 13:20:55,719 7303 INFO runner odoo.modules.registry: module magnus_timesheet: creating or updating database tables
+2021-06-23 13:20:56,840 7303 INFO runner odoo.addons.auth_crypt.models.res_users: Hashing passwords, may be slow for databases with many users...
+2021-06-23 13:20:58,071 7303 INFO runner odoo.models: Storing computed values of hr_timesheet_sheet.sheet fields business_mileage, overtime_hours, overtime_hours_delta, private_mileage
+2021-06-23 13:20:58,073 7303 INFO runner odoo.models: Storing computed values of analytic.user.total fields company_id, department_id
+2021-06-23 13:20:58,074 7303 INFO runner odoo.models: Storing computed values of analytic.invoice fields account_analytic_ids, date_to, invoice_properties, state, task_user_ids
+2021-06-23 13:20:58,074 7303 INFO runner odoo.models: Storing computed values of account.analytic.line fields actual_qty, chargeable, correction_charge, day_name, expenses, line_fee_rate, month_id, operating_unit_id, planned_qty, project_mgr, project_operating_unit_id, ts_line, week_id, wip_month_id
+2021-06-23 13:20:58,076 7303 INFO runner odoo.models: Storing computed values of fleet.vehicle.odometer fields value_period
+2021-06-23 13:20:58,077 7303 INFO runner odoo.models: Storing computed values of magnus.standby.planning fields department_id, user_id
+2021-06-23 13:20:58,077 7303 INFO runner odoo.models: Storing computed values of magnus.planning fields user_id
+2021-06-23 13:20:58,343 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/data/cron_data.xml
+2021-06-23 13:20:58,366 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/data/data.xml
+2021-06-23 13:20:58,486 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/security/magnus_security.xml
+2021-06-23 13:21:00,461 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/security/ir.model.access.csv
+2021-06-23 13:21:00,837 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/wizard/analytic_line_invoice_view.xml
+2021-06-23 13:21:00,905 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/wizard/change_chargecode_view.xml
+2021-06-23 13:21:00,971 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/wizard/planning_wizard_view.xml
+2021-06-23 13:21:01,029 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/report/hr_chargeability_report.xml
+2021-06-23 13:21:01,152 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/report/status_time_report.xml
+2021-06-23 13:21:01,257 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/report/overtime_balance_report.xml
+2021-06-23 13:21:01,368 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/report/crm_pipeline_actuals_report.xml
+2021-06-23 13:21:01,473 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/hr_timesheet_view.xml
+2021-06-23 13:21:01,848 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/project_timesheet_view.xml
+2021-06-23 13:21:01,949 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/project_view.xml
+2021-06-23 13:21:02,199 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/hr_timesheet_assets.xml
+2021-06-23 13:21:02,379 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/hr_view.xml
+2021-06-23 13:21:02,650 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/analytic_view.xml
+2021-06-23 13:21:03,108 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/fleet_view.xml
+2021-06-23 13:21:03,206 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/magnus_planning_views.xml
+2021-06-23 13:21:03,526 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/magnus_planning_templates.xml
+2021-06-23 13:21:03,735 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/analytic_invoice.xml
+2021-06-23 13:21:03,917 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/product_view.xml
+2021-06-23 13:21:04,012 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/menuitem.xml
+2021-06-23 13:21:04,129 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/account_move_view.xml
+2021-06-23 13:21:04,443 7303 INFO runner odoo.modules.loading: loading magnus_timesheet/views/invoice_view.xml
+2021-06-23 13:21:06,410 7303 INFO runner odoo.modules.module: odoo.addons.magnus_timesheet.tests.test_magnus_timesheet running tests.
+2021-06-23 13:21:06,410 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: test_actions (odoo.addons.magnus_timesheet.tests.test_magnus_timesheet.TestMagnusTimesheet)
+2021-06-23 13:21:06,411 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` Test actions to be run on timesheets
+2021-06-23 13:21:06,417 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ERROR
+2021-06-23 13:21:06,420 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: test_full_flow (odoo.addons.magnus_timesheet.tests.test_magnus_timesheet.TestMagnusTimesheet)
+2021-06-23 13:21:06,420 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` Test the full flow of a sheet from begin to end
+2021-06-23 13:21:06,425 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ERROR
+2021-06-23 13:21:06,428 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: test_timesheet_create (odoo.addons.magnus_timesheet.tests.test_magnus_timesheet.TestMagnusTimesheet)
+2021-06-23 13:21:06,428 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` Test functions called during create of one timesheet
+2021-06-23 13:21:06,432 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ERROR
+2021-06-23 13:21:06,434 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ======================================================================
+2021-06-23 13:21:06,434 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ERROR: test_actions (odoo.addons.magnus_timesheet.tests.test_magnus_timesheet.TestMagnusTimesheet)
+2021-06-23 13:21:06,434 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` Test actions to be run on timesheets
+2021-06-23 13:21:06,434 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: Traceback (most recent call last):
+2021-06-23 13:21:06,434 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: `   File "/tmp/parts/magnus-addons/magnus_timesheet/tests/test_magnus_timesheet.py", line 14, in setUp
+2021-06-23 13:21:06,435 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: `     'unit_of_time': WEEKLY,
+2021-06-23 13:21:06,435 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` NameError: global name 'WEEKLY' is not defined
+2021-06-23 13:21:06,435 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ======================================================================
+2021-06-23 13:21:06,435 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ERROR: test_full_flow (odoo.addons.magnus_timesheet.tests.test_magnus_timesheet.TestMagnusTimesheet)
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` Test the full flow of a sheet from begin to end
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: Traceback (most recent call last):
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: `   File "/tmp/parts/magnus-addons/magnus_timesheet/tests/test_magnus_timesheet.py", line 14, in setUp
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: `     'unit_of_time': WEEKLY,
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` NameError: global name 'WEEKLY' is not defined
+2021-06-23 13:21:06,436 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ======================================================================
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ERROR: test_timesheet_create (odoo.addons.magnus_timesheet.tests.test_magnus_timesheet.TestMagnusTimesheet)
+2021-06-23 13:21:06,436 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` Test functions called during create of one timesheet
+2021-06-23 13:21:06,437 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: Traceback (most recent call last):
+2021-06-23 13:21:06,437 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: `   File "/tmp/parts/magnus-addons/magnus_timesheet/tests/test_magnus_timesheet.py", line 14, in setUp
+2021-06-23 13:21:06,437 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: `     'unit_of_time': WEEKLY,
+2021-06-23 13:21:06,437 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: ` NameError: global name 'WEEKLY' is not defined
+2021-06-23 13:21:06,437 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: Ran 3 tests in 0.024s
+2021-06-23 13:21:06,437 7303 ERROR runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet: FAILED
+2021-06-23 13:21:06,437 7303 INFO runner odoo.addons.magnus_timesheet.tests.test_magnus_timesheet:  (errors=3)
+2021-06-23 13:21:06,437 7303 ERROR runner odoo.modules.module: Module magnus_timesheet: 0 failures, 3 errors
+2021-06-23 13:21:06,494 7303 INFO runner odoo.modules.loading: 82 modules loaded in 43.54s, 3564 queries
+2021-06-23 13:21:06,784 7303 WARNING runner odoo.modules.loading: The model my.wizard has no access rules, consider adding one. E.g. access_my_wizard,access_my_wizard,model_my_wizard,base.group_user,1,0,0,0
+2021-06-23 13:21:06,784 7303 WARNING runner odoo.modules.loading: The model task.user has no access rules, consider adding one. E.g. access_task_user,access_task_user,model_task_user,base.group_user,1,0,0,0
+2021-06-23 13:21:06,785 7303 WARNING runner odoo.modules.loading: The model invoice.schedule.lines has no access rules, consider adding one. E.g. access_invoice_schedule_lines,access_invoice_schedule_lines,model_invoice_schedule_lines,base.group_user,1,0,0,0
+2021-06-23 13:21:06,785 7303 WARNING runner odoo.modules.loading: The model overtime.balance.report has no access rules, consider adding one. E.g. access_overtime_balance_report,access_overtime_balance_report,model_overtime_balance_report,base.group_user,1,0,0,0
+2021-06-23 13:21:06,785 7303 WARNING runner odoo.modules.loading: The model crm.pipeline.actuals.report has no access rules, consider adding one. E.g. access_crm_pipeline_actuals_report,access_crm_pipeline_actuals_report,model_crm_pipeline_actuals_report,base.group_user,1,0,0,0
+2021-06-23 13:21:07,387 7303 ERROR runner odoo.modules.loading: At least one test failed when loading the modules.
+2021-06-23 13:21:08,110 7303 INFO runner odoo.modules.loading: All post-tested in 0.00s, 0 queries
+2021-06-23 13:21:08,111 7303 INFO runner odoo.models: Computing parent left and right for table ir_ui_menu...
+2021-06-23 13:21:08,219 7303 INFO runner odoo.models: Computing parent left and right for table res_partner_sector...
+2021-06-23 13:21:08,220 7303 INFO runner odoo.models: Computing parent left and right for table product_category...
+2021-06-23 13:21:08,224 7303 INFO runner odoo.modules.registry: Registry changed, signaling through the database
+2021-06-23 13:21:08,225 7303 INFO runner odoo.service.server: Initiating shutdown
+2021-06-23 13:21:08,225 7303 INFO runner odoo.service.server: Hit CTRL-C again or send a second signal to force the shutdown.
