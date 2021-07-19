@@ -41,9 +41,9 @@ class FleetVehicle(models.Model):
 
     def fetch_model_id(self, rdw_brand_name, rdw_model):
         #fetch brand
-        brand_id = self.env["fleet.vehicle.model.brand"].search([("name", "ilike", rdw_brand_name)]).id
+        brand_id = self.env["fleet.vehicle.model.brand"].search([("name", "ilike", rdw_brand_name)])[0].id
         if brand_id:
-            model_id = self.env["fleet.vehicle.model"].search(['&', ("brand_id", "=", brand_id), ("name", 'ilike', rdw_model)]).id
+            model_id = self.env["fleet.vehicle.model"].search(['&', ("brand_id", "=", brand_id), ("name", 'ilike', rdw_model)])[0].id
             return model_id
         return None
 
