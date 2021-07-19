@@ -1,9 +1,9 @@
 from odoo import api, fields, models, _
-from zeep import Client, Settings
-import re
+from zeep import Client
 
 
 class NMBRsAnalyticAccountWizard(models.TransientModel):
+    """This is a transient model, used to show a form to fetch the analytic accounts from NMBRs"""
     _name= "nmbrs.analytic.account.wizard"
     _description = "Wizard to fetch analytic accounts from nmbrs"
 
@@ -11,6 +11,10 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
 
     @api.multi
     def fetch_analytic_accounts_nmbrs(self):
+        """
+        This function loads the analytic accounts from NMBRs for the selected Operating unit. There is a check
+        to prevent double loading. The user can subsequently create the mapping in the UI using the list view.
+        """
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user
         token = config.api_key

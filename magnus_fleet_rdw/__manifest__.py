@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Magnus NMBRs Fleet Interface",
+    'name': "Magnus Fleet RDW",
 
     'summary': """
-        Provides an interface push fleet changes from Odoo to NMBRs """,
+        Provides a simple interface to fetch RDW data using the RDW API """,
 
     'description': """
-        Provides an interface push fleet changes from Odoo to NMBRs
+        Provides a simple interface to fetch RDW data using the RDW API
     """,
 
     'author': "Magnus - Hayo Bos",
@@ -19,21 +19,17 @@
     'version': '0.3',
     'installable': True,
     # any module necessary for this one to work correctly
-    'depends': ['magnus_fleet_rdw', 'magnus_nmbrs_employee_interface'],
+    'depends': ['magnus_fleet'],
 
     # always loaded
     'data': [
-        'security/security.xml',
-        'security/ir.model.access.csv',
-        'views/nmbrs_fleet_view.xml',
-        'wizard/nmbrs_fleet_wizard.xml',
-        'views/template_view.xml'
+        'views/fleet_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
         # 'demo/demo.xml',
     ],
     'qweb': [
-        "static/src/xml/qweb.xml",
+        # "static/src/xml/qweb.xml",
     ],
 }

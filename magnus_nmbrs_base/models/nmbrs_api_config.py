@@ -6,6 +6,10 @@ _logger = logging.getLogger(__name__)
 
 
 class NmbrsInterfaceConfig(models.Model):
+    '''
+    The interface config model is used to set the API user credentials and set the various endpoints. Use
+    api-sandbox.nmbrs.nl/... for the sandbox, and use api.nmbrs.nl/... for the production server
+    '''
     _name = 'nmbrs.interface.config'
     _description = 'NMBRs interface configuration'
 
@@ -18,6 +22,7 @@ class NmbrsInterfaceConfig(models.Model):
     # show only first record to configure, no options to create an additional one
     @api.multi
     def default_view(self):
+        """Function that creates the form content. By default the sandbox endpoints are used."""
         configurations = self.search([])
         if not configurations:
             endpoint_employee_service = 'https://api-sandbox.nmbrs.nl/soap/v3/EmployeeService.asmx?WSDL'
@@ -30,7 +35,7 @@ class NmbrsInterfaceConfig(models.Model):
             configuration = self.id
             _logger.info("Pubble order interface configuration record created")
         else:
-            configuration = configurations[0].id
+            configuration = configurations[0].id # Only the first record of the table is used, as there can only be one configuration
         action = {
             "type": "ir.actions.act_window",
             "res_model": "nmbrs.interface.config",

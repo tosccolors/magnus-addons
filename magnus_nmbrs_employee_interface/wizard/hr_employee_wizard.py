@@ -3,19 +3,12 @@ import re
 
 
 class HREmployeeWizard(models.TransientModel):
+    """Some additions to the preexisting employee wizard (magnus-addons) to facilitate inserting the employee in NMBRs"""
     _inherit = "hr.employee.wizard"
 
     send_to_nmbrs = fields.Boolean(string="Create employee in Nmbrs as well")
     start_date_contract = fields.Date(string="Start date of contract")
-    # operating_unit_nmbrs = fields.Many2one("operating.unit", string="Operating Unit for Nmbrs")
-    # bsn = fields.Char("BSN")
-    # gross_salary = fields.Float("Salary")
-    # fte = fields.Char("FTE (1, 0.8 etc)")
-    # pension_contrib_employee = fields.Char("Pension Contribution Employee")
-    # pension_contrib_employer = fields.Char("Pension Contribution Employer")
-    # health_insurance_contrib = fields.Char("Health Insurance Contribution")
     marital_status = fields.Selection([('Gehuwd', 'Married'), ('Ongehuwd', 'Unmarried')], string="Marital Status")
-    #Adress for nmbrs
     street_nmbrs = fields.Char("Street Nmbrs")
     postal_code_nmbrs = fields.Char("Postal Code Nmbrs")
     city_nmbrs = fields.Char("City Nmbrs")
@@ -26,19 +19,18 @@ class HREmployeeWizard(models.TransientModel):
 
     @api.multi
     def fetch_employee_data(self):
+        """Collects the relevant data and returns a dict"""
         employee_data = {
             'first_name': self.firstname,
             'last_name': self.lastname,
             'start_date': self.start_date_contract,
             'company_id': self.default_operating_unit_id.nmbrs_id,
             'gender': self.gender_nmbrs(),
-            # 'gross_salary': self.gross_salary,
             'marital_status': self.marital_status,
             'mobile': self.mobile,
             'email': self.email,
             'birthday': self.birthday,
             'place_of_birth': self.place_of_birth,
-            # 'bsn': self.bsn,
             'acc_number': self.acc_number,
             'bic': self.bank_name_id.bic,
             'unprotected_mode': True,
@@ -53,6 +45,7 @@ class HREmployeeWizard(models.TransientModel):
         return employee_data
 
     def gender_nmbrs(self):
+        """A small conversion function between 'other' in Odoo and 'undefined' in NMBRs"""
         if self.gender == 'other':
             return 'undefined'
         else:
@@ -60,6 +53,7 @@ class HREmployeeWizard(models.TransientModel):
 
     @api.onchange('street')
     def _on_change_street(self):
+        """Converses the address info to a number proof format"""
         if self.street:
             self.street_nmbrs = re.sub(r'\d+', '', self.street)
             self.housenr_nmbrs = [int(s) for s in re.findall(r'-?\d+\.?\d*', self.street)][0]
@@ -81,6 +75,8 @@ class HREmployeeWizard(models.TransientModel):
 
     @api.multi
     def create_employee(self):
+        """If the box "send to NMBRs" is ticked, then call create a create.employee.from.odoo.to.nmbrs record, and
+        use functions from this object to insert the employee in nmbrs"""
         if self.send_to_nmbrs:
             employee_id = super(HREmployeeWizard, self).create_employee()
             employee_data = self.fetch_employee_data()
@@ -92,6 +88,7 @@ class HREmployeeWizard(models.TransientModel):
     @api.multi
     @api.onchange('department_id')
     def onchange_department_id(self):
+        """Function that sets a domain on the selectable analytic accounts based on the selected department"""
         res = {}
         res['domain'] = {'analytic_account': [('department_id.id', '=', self.department_id.id)]}
         return res

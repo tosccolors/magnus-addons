@@ -1,21 +1,9 @@
 from odoo import api, fields, models, _
-# import odoo.addons.decimal_precision as dp
-# from odoo.exceptions import UserError
-from requests import Session
-from requests.auth import HTTPBasicAuth
 from zeep import Client, Settings
-import os
-from zeep.transports import Transport
-# from zeep.plugins import HistoryPlugin
-# from odoo.addons.queue_job.job import job, related_action
-# from odoo.addons.queue_job.exception import FailedJobError
-# from unidecode import unidecode
-import datetime
-# from suds.plugin import MessagePlugin
-# from lxml import etree
-# from dicttoxml import dicttoxml
+
 
 class HrEmployeeFromOdooToNmbrs(models.TransientModel):
+    """Transient model used to insert an employee in NMBRs"""
     _name = 'create.employee.from.odoo.to.nmbrs'
 
     first_name = fields.Char("First name")
@@ -25,7 +13,6 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     company_id = fields.Char("Company ID")
     gender = fields.Char("Gender")
     email = fields.Char("email")
-    # bsn = fields.Char("BSN")
     mobile = fields.Char("Mobile")
     birthday = fields.Date("Birthday")
     place_of_birth = fields.Char("Place of birth")
@@ -41,11 +28,6 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     city = fields.Char("City")
     country_code_address = fields.Char("Country Code of Address")
     analytic_account = fields.Many2one('account.analytic.account', string="Analytic Account")
-    # gross_salary = fields.Float("Gross Salary")
-    # fte = fields.Char("FTE (1, 0.8 etc)")
-    # pension_contrib_employee = fields.Char("Pension Contribution Employee")
-    # pension_contrib_employer = fields.Char("Pension Contribution Employer")
-    # health_insurance_contrib = fields.Char("Health Insurance Contribution")
     unprotected_mode = fields.Boolean("Unprotected Mode")
 
     @api.multi
@@ -59,6 +41,8 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
         analytic_account_nmbrs_id = mapping_analytic_account_nmbrs_object.analytic_account_id_nmbrs
         analytic_account_nmbrs_code = mapping_analytic_account_nmbrs_object.analytic_account_code_nmbrs
         analytic_account_nmbrs_description = mapping_analytic_account_nmbrs_object.analytic_account_name_nmbrs
+
+        #Create the emplyoee in NMBRs
         nmbrs_id = client.service.Employee_Insert(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             StartDate=self.start_date,
@@ -67,12 +51,12 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
             CompanyId=self.company_id,
             UnprotectedMode=self.unprotected_mode
         )
-        nmbrs_data = client.service.PersonalInfo_GetCurrent(
-            _soapheaders={'AuthHeaderWithDomain': authentication_v3},
-            EmployeeId=nmbrs_id,
-        )
-#        nmbrs_nr = nmbrs_data['EmployeeNumber']
+        # nmbrs_data = client.service.PersonalInfo_GetCurrent(
+        #     _soapheaders={'AuthHeaderWithDomain': authentication_v3},
+        #     EmployeeId=nmbrs_id,
+        # )
 
+        #Update employee info
         client.service.PersonalInfo_UpdateCurrent(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
@@ -95,6 +79,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
             }
         )
 
+        #Update bank account
         client.service.BankAccount_InsertCurrent(
         _soapheaders={'AuthHeaderWithDomain': authentication_v3},
         EmployeeId=nmbrs_id,
@@ -107,6 +92,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
             }
         )
 
+        #Insert adress
         client.service.Address_InsertCurrent(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
@@ -123,6 +109,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
                 }
             )
 
+        #Update analytic account of salary costs
         client.service.CostCenter_UpdateCurrent(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             EmployeeId=nmbrs_id,
@@ -141,10 +128,11 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
                 }
             }
         )
-        return nmbrs_id
+        return nmbrs_id #Is catched in wizard, and saved on employee
 
 
 class NmbrsNationality(models.Model):
+    """Object to facilitate a mapping between the nationalities in NMBRs and Odoo"""
     _name = "hr.nmbrs.nationality"
     _rec_name = "nationality"
 

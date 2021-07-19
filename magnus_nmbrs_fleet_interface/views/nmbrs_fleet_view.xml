@@ -40,7 +40,23 @@
                 <field name="license_plate"/>
                 <field name="from_date"/>
                 <field name="to_date"/>
+                <field name="nmbrs_date"/>
+                <field name="end_contract"/>
             </tree>
+        </field>
+    </record>
+
+    <record id="fleet_vehicle_view_form_inherit_rdw" model="ir.ui.view">
+      <field name="name">fleet.vehicle.form</field>
+      <field name="model">fleet.vehicle</field>
+      <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='rdw_handelsnaam']" position="after">
+<!--                <div class="o_row">-->
+                    <field name="nmbrs_id" string="NMBRs ID" readonly="1"/>
+<!--                    <button name="get_nmbrs_vehicle_id" type="object" string="Generate NMBRs ID"/>-->
+<!--                </div>-->
+            </xpath>
         </field>
     </record>
 
