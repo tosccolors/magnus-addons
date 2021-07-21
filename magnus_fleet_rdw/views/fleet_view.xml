@@ -6,7 +6,7 @@
       <field name="model">fleet.vehicle</field>
       <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
         <field name="arch" type="xml">
-       	 	<xpath expr="//label[@for='tag_ids']" position="after">
+       	 	<xpath expr="//field[@name='tag_ids']" position="after">
                 <button name="fetch_data_from_rdw" type="object" string="Fetch RDW Data"/>
             </xpath>
             <xpath expr="//field[@name='color']" position="after">

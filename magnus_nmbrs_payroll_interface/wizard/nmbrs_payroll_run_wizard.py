@@ -1,9 +1,12 @@
 from odoo import api, fields, models, _
-from zeep import Client, Settings
-import re
+from zeep import Client
 
 
 class NMBRsPayrollRunWizard(models.TransientModel):
+    """
+    This is transient model to facilitate the payroll run wizard. Note: this model is about the runs, not the journal
+    entries of the runs.
+    """
     _name = "nmbrs.payroll.runs.wizard"
     _description = "Wizard to fetch payroll runs from nmbrs"
 
@@ -12,6 +15,9 @@ class NMBRsPayrollRunWizard(models.TransientModel):
 
     @api.multi
     def fetch_payroll_runs_nmbrs(self):
+        """
+        This method is used to retrieve the payroll run info from numbers. Note: the payroll entry is loaded elsewhere.
+        """
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user
         token = config.api_key

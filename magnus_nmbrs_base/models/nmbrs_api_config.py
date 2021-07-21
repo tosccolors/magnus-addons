@@ -28,10 +28,11 @@ class NmbrsInterfaceConfig(models.Model):
             endpoint_employee_service = 'https://api-sandbox.nmbrs.nl/soap/v3/EmployeeService.asmx?WSDL'
             endpoint_debtor_service = 'https://api-sandbox.nmbrs.nl/soap/v3/DebtorService.asmx?WSDL'
             endpoint_company_service = 'https://api-sandbox.nmbrs.nl/soap/v3/CompanyService.asmx?WSDL'
-            self.write({'endpoint_employee_service': endpoint_employee_service,
-                        'endpoint_debtor_service': endpoint_debtor_service,
-                        'endpoint_company_service': endpoint_company_service
-                        })
+            self.write({
+                'endpoint_employee_service': endpoint_employee_service,
+                'endpoint_debtor_service': endpoint_debtor_service,
+                'endpoint_company_service': endpoint_company_service
+            })
             configuration = self.id
             _logger.info("Pubble order interface configuration record created")
         else:

@@ -29,13 +29,13 @@ class Task(models.Model):
         string='Can register time',
         track_visibility='always'
     )
-    # user_ids = fields.Many2many(
-    #     'res.users',
-    #     string='user multi select',
-    #     track_visibility='always',
-    #     # compute=_compute_uid,
-    #     inverse = '_set_task_user_ids'
-    # )
+    user_ids = fields.Many2many(
+        'res.users',
+        string='user multi select',
+        track_visibility='always',
+        # compute=_compute_uid,
+        inverse = '_set_task_user_ids'
+    )
 
 
     @api.model

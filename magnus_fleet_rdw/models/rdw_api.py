@@ -13,7 +13,7 @@ class VehicleFromRDW(models.Model):
     def fetch_rdw_data(self):
         rdw_data = requests.get('https://opendata.rdw.nl/resource/m9d7-ebf2.json?kenteken=' + self.license_plate)
         rdw_data_brandstof = requests.get('https://opendata.rdw.nl/resource/8ys7-d773.json?Kenteken=' + self.license_plate)
-        if not rdw_data:
+        if not rdw_data.text[1:-2] == u'':
             raise Warning(
                 _('Car is not present in RDW Open Data database, please fill details manually.'))
         rdw_data_dict = json.loads(rdw_data.text[1:-2])
