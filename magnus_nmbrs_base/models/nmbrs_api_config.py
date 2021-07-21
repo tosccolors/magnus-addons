@@ -6,10 +6,10 @@ _logger = logging.getLogger(__name__)
 
 
 class NmbrsInterfaceConfig(models.Model):
-    '''
+    """
     The interface config model is used to set the API user credentials and set the various endpoints. Use
     api-sandbox.nmbrs.nl/... for the sandbox, and use api.nmbrs.nl/... for the production server
-    '''
+    """
     _name = 'nmbrs.interface.config'
     _description = 'NMBRs interface configuration'
 

@@ -46,7 +46,7 @@
         </field>
     </record>
 
-    <record id="fleet_vehicle_view_form_inherit_rdw" model="ir.ui.view">
+    <record id="fleet_vehicle_view_form_inherit_nmbrs_fleet" model="ir.ui.view">
       <field name="name">fleet.vehicle.form</field>
       <field name="model">fleet.vehicle</field>
       <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>

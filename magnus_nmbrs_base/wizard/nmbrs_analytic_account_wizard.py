@@ -3,7 +3,9 @@ from zeep import Client
 
 
 class NMBRsAnalyticAccountWizard(models.TransientModel):
-    """This is a transient model, used to show a form to fetch the analytic accounts from NMBRs"""
+    """
+    This is a transient model, used to show a form to fetch the analytic accounts from NMBRs.
+    """
     _name= "nmbrs.analytic.account.wizard"
     _description = "Wizard to fetch analytic accounts from nmbrs"
 

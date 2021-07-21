@@ -13,6 +13,9 @@ class FleetVehicle(models.Model):
     rdw_handelsnaam = fields.Char("RDW Handelsnaam")
 
     def fetch_data_from_rdw(self):
+        """
+        This function creates an vehicle_from_rdw object, and then uses a function from this object to fetch the RDW data.
+        """
         rdw_data = self.env['vehicle.from.rdw'].create({'license_plate': re.sub('-', '',self.license_plate)})
         rdw_data_dict = rdw_data.fetch_rdw_data()
         self.update({
@@ -40,7 +43,6 @@ class FleetVehicle(models.Model):
     # def fetch_transmission_type(self, rdw_transmission_type):
 
     def fetch_model_id(self, rdw_brand_name, rdw_model):
-        #fetch brand
         brand_id = self.env["fleet.vehicle.model.brand"].search([("name", "ilike", rdw_brand_name)])[0].id
         if brand_id:
             model_id = self.env["fleet.vehicle.model"].search(['&', ("brand_id", "=", brand_id), ("name", 'ilike', rdw_model)])[0].id
@@ -57,5 +59,3 @@ class FleetVehicle(models.Model):
             else:
                 raise Warning(
                     _('Please enter a license plate'))
-
-
