@@ -27,7 +27,8 @@ class VehicleFromRDW(models.Model):
             'doors': rdw_data_dict.get('aantal_deuren'),
             'seats': rdw_data_dict.get('aantal_zitplaatsen'),
             'fuel_type': rdw_data_brandstof_dict.get('brandstof_omschrijving'),
-            'co2': rdw_data_brandstof_dict.get('co2_uitstoot_gecombineerd')
+            'co2': rdw_data_brandstof_dict.get('co2_uitstoot_gecombineerd'),
+            'power': rdw_data_brandstof_dict.get('nettomaximumvermogen')
         }
         return data
 

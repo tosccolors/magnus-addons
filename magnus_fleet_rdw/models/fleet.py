@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models, _
-from odoo.exceptions import Warning
+from odoo.exceptions import Warning, UserError
 import re
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
@@ -18,6 +18,10 @@ class FleetVehicle(models.Model):
         """
         rdw_data = self.env['vehicle.from.rdw'].create({'license_plate': re.sub('-', '',self.license_plate)})
         rdw_data_dict = rdw_data.fetch_rdw_data()
+        model_id = self.fetch_model_id(rdw_data_dict['brand'], rdw_data_dict['type'])
+        if not model_id:
+            raise UserError(
+                _('Please first create a vehicle model with brand %s and model %s' % (rdw_data_dict['brand'], rdw_data_dict['type'])))
         self.update({
             'color': rdw_data_dict['color'],
             'seats': rdw_data_dict['seats'],
@@ -27,25 +31,26 @@ class FleetVehicle(models.Model):
             'co2': rdw_data_dict['co2'],
             'car_value': rdw_data_dict['fiscal_value'],
             'fuel_type': self.fetch_fuel_type(rdw_data_dict['fuel_type']),
-            'model_id': self.fetch_model_id(rdw_data_dict['brand'], rdw_data_dict['type'])
+            'model_id': model_id,
+            'power': int(float(rdw_data_dict['power'])),
+            'horsepower': int(1.362 * float(rdw_data_dict['power']))
         })
 
     def fetch_fuel_type(self, rdw_fuel_type):
         if rdw_fuel_type == "Benzine":
             return "gasoline"
-        elif rdw_fuel_type =="Diesel":
+        elif rdw_fuel_type == "Diesel":
             return "diesel"
         elif rdw_fuel_type == "Elektriciteit":
             return "electric"
         else:
             return None
 
-    # def fetch_transmission_type(self, rdw_transmission_type):
-
     def fetch_model_id(self, rdw_brand_name, rdw_model):
         brand_id = self.env["fleet.vehicle.model.brand"].search([("name", "ilike", rdw_brand_name)])[0].id
-        if brand_id:
-            model_id = self.env["fleet.vehicle.model"].search(['&', ("brand_id", "=", brand_id), ("name", 'ilike', rdw_model)])[0].id
+        found_models = self.env["fleet.vehicle.model"].search(['&', ("brand_id", "=", brand_id), ("name", 'ilike', rdw_model)])
+        if brand_id and found_models:
+            model_id = found_models[0].id
             return model_id
         return None
 
