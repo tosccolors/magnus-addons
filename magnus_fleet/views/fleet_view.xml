@@ -8,9 +8,9 @@
         <field name="arch" type="xml">
         <field name="car_value" position="after">
        	 	<label for="fiscal_addition"/>
-            <div class="o_row">
-                <field name="fiscal_addition"/><span>%%</span>
-            </div>
+<!--            <div class="o_row">-->
+<!--                <field name="fiscal_addition"/><span>%%</span>-->
+<!--            </div>-->
         </field>
         <field name="vin_sn" position="after">
        	 	<label for="hoem_work_distance"/>
