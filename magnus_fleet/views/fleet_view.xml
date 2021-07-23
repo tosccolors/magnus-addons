@@ -82,7 +82,7 @@
   <menuitem
     id="configure_fiscal_addition_mapping"
     action="action_open_view_fiscal_addition_mapping"
-    parent="fleet.fleet_configuration"/>
+    parent="fleet.menu_fleet_reporting"/>
 
 	<menuitem id="mileage_report_menu" name="Mileage Report" parent="fleet.menu_fleet_reporting" sequence="99" action="action_mileage_report"/>
 
