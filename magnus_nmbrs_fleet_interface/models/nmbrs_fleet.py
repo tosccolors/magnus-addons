@@ -6,6 +6,14 @@ import xml.etree.ElementTree as ET
 import os
 
 
+class FiscalAdditionMapping(models.Model):
+    """
+    Mapping table for fiscal addition mapping between NMBRs and Odoo
+    """
+    _inherit = "fleet.fiscal.addition.mapping"
+
+    fiscal_addition_nmbrs_id = fields.Char("NMBRs ID")
+
 class NMBRsFleet(models.Model):
     """
     Model used to show the latest fleet changes
@@ -27,14 +35,6 @@ class NMBRsFleet(models.Model):
         string="Fiscal Addition NMBRs",
         readonly=True
     )
-
-class FiscalAdditionMapping(models.Model):
-    """
-    Mapping table for fiscal addition mapping between NMBRs and Odoo
-    """
-    _inherit = "fleet.fiscal.addition.mapping"
-
-    fiscal_addition_nmbrs_id = fields.Char("NMBRs ID")
 
 class FleetVehicle(models.Model):
     _inherit = "fleet.vehicle"
