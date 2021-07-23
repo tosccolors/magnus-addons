@@ -30,7 +30,7 @@ class NMBRsFleet(models.Model):
     nmbrs_date = fields.Date("NMBRs Date")
     nmbrs_id = fields.Char("NMBRs ID")
     end_contract = fields.Boolean("Employee stops leasing?")
-    fiscal_addition_nmbrs = fields.Many2one(
+    fiscal_addition_nmbrs_id = fields.Many2one(
         "fleet.fiscal.addition.mapping",
         string="Fiscal Addition NMBRs",
         readonly=True

@@ -29,7 +29,7 @@
                 <field name="employee"/>
                 <field name="nmbrs_id"/>
                 <field name="vehicle"/>
-                <field name="fiscal_addition_nmbrs"/>
+                <field name="fiscal_addition_nmbrs_id"/>
                 <field name="license_plate"/>
                 <field name="from_date"/>
                 <field name="to_date"/>

@@ -15,7 +15,7 @@ class NMBRsFleetwizard(models.TransientModel):
     def fetch_recently_changed_leases(self):
         """"""
         line_query = ("""          DELETE FROM nmbrs_fleet;
-                                   INSERT INTO nmbrs_fleet (driver, vehicle, license_plate, from_date, to_date, employee, nmbrs_id, fiscal_addition_nmbrs)
+                                   INSERT INTO nmbrs_fleet (driver, vehicle, license_plate, from_date, to_date, employee, nmbrs_id, fiscal_addition_nmbrs_id)
                                     SELECT 
                                            res_partner.id AS driver,
                                            fleet_vehicle.id AS vehicle,
@@ -24,7 +24,7 @@ class NMBRsFleetwizard(models.TransientModel):
                                            date_to AS to_date,
                                            hr_employee.id AS employee,
                                            hr_employee.employee_numbersid AS nmbrs_id,
-                                           fleet_vehicle.fiscal_addition_id AS fiscal_addition_nmbrs
+                                           fleet_vehicle.fiscal_addition_id AS fiscal_addition_nmbrs_id
                                     FROM data_time_tracker
                                     INNER JOIN fleet_vehicle on model_ref = fleet_vehicle.id
                                     INNER JOIN res_partner on relation_ref = res_partner.id
