@@ -51,6 +51,7 @@ class FleetVehicle(models.Model):
     # fiscal_addition = fields.Float("Fiscal Addition")
     hoem_work_distance = fields.Integer("Home/Work Distance")
     location = fields.Integer("Personal Contribution")
+    fiscal_addition_id = fields.Many2one("fleet.fiscal.addition.mapping", string="Fiscal Addition")
 
     @api.depends('log_contracts')
     def _compute_contract_reminder(self):

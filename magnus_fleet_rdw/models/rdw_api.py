@@ -31,4 +31,3 @@ class VehicleFromRDW(models.Model):
             'power': rdw_data_brandstof_dict.get('nettomaximumvermogen')
         }
         return data
-

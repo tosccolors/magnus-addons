@@ -15,7 +15,7 @@
     'version': '1.0',
     'installable': True,
     # any module necessary for this one to work correctly
-    'depends': ['magnus_fleet_rdw'],
+    'depends': ['magnus_fleet', 'magnus_fleet_rdw'],
 
     # always loaded
     'data': [

@@ -24,15 +24,13 @@ class NMBRsFleetwizard(models.TransientModel):
                                            date_to AS to_date,
                                            hr_employee.id AS employee,
                                            hr_employee.employee_numbersid AS nmbrs_id,
-                                           fleet_vehicle.fiscal_addition AS fiscal_addition_nmbrs
+                                           fleet_vehicle.fiscal_addition_id AS fiscal_addition_nmbrs
                                     FROM data_time_tracker
                                     INNER JOIN fleet_vehicle on model_ref = fleet_vehicle.id
                                     INNER JOIN res_partner on relation_ref = res_partner.id
                                     INNER JOIN res_users on res_partner.id = res_users.partner_id
                                     INNER JOIN resource_resource res_res on res_res.user_id = res_users.id
                                     INNER JOIN hr_employee on hr_employee.resource_id = res_res.id
-                                    --LEFT OUTER JOIN nmbrs_fleet_fiscal_addition_mapping fama on CAST(fama.fiscal_addition AS TEXT) = CAST(fleet_vehicle.fiscal_addition AS TEXT)
-                                    --LEFT OUTER JOIN nmbrs_fleet_fiscal_addition_mapping fama on fama.fiscal_addition = fleet_vehicle.fiscal_addition
                                     WHERE data_time_tracker.model = 'fleet.vehicle' 
                                     AND (
                                     (date_to >= {0} AND date_to <= {1}) OR
@@ -65,7 +63,7 @@ class FleetChangesFromOdooToNMBRs(models.TransientModel):
             brand = vehicle.rdw_brand
             co2_emission = int(float(vehicle.co2))
             model = vehicle.rdw_handelsnaam
-            fiscal_addition = vehicle.fiscal_addition.fiscal_addition_nmbrs_id
+            fiscal_addition = vehicle.fiscal_addition_id.fiscal_addition_nmbrs_id
             employee_id_nmbrs = change.nmbrs_id
             license_plate = change.license_plate
             date = change.from_date
