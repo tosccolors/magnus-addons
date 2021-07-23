@@ -19,7 +19,9 @@
 
     # always loaded
     'data': [
-        'views/fleet_view.xml'
+        'security/security.xml',
+        'security/ir.model.access.csv',
+        'views/fleet_view.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

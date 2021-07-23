@@ -14,6 +14,7 @@ Features
 Configuration
 =============
 * This module does not require any configuration.
+
 Security
 ========
-* There is no security implemented for this module.
+* The authorisation group RDW API Rights is added, providing rights to click the ``Fetch data from rdw`` button, and to create the necessary ``vehicle.from.rdw`` model

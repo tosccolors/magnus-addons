@@ -7,7 +7,7 @@
       <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
         <field name="arch" type="xml">
        	 	<xpath expr="//field[@name='tag_ids']" position="after">
-                <button name="fetch_data_from_rdw" type="object" string="Fetch RDW Data"/>
+                <button name="fetch_data_from_rdw" type="object" string="Fetch RDW Data" groups="magnus_fleet_rdw.rdw_api_rights"/>
             </xpath>
             <xpath expr="//field[@name='color']" position="after">
                 <field name="rdw_brand" string="RDW Merk"/>
