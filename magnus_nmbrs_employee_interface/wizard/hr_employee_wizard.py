@@ -77,18 +77,19 @@ class HREmployeeWizard(models.TransientModel):
     def create_employee(self):
         """If the box "send to NMBRs" is ticked, then call create a create.employee.from.odoo.to.nmbrs record, and
         use functions from this object to insert the employee in nmbrs"""
+        employee_id = super(HREmployeeWizard, self).create_employee()
         if self.send_to_nmbrs:
-            employee_id = super(HREmployeeWizard, self).create_employee()
             employee_data = self.fetch_employee_data()
             employee_data['employee_number'] = self.env['hr.employee'].browse(employee_id).identification_id
             api_service = self.env['create.employee.from.odoo.to.nmbrs'].sudo().create(employee_data)
             nmbrs_id = api_service.insert_employee()
             employee_data['employee_number'] = self.env['hr.employee'].browse(employee_id).write({'employee_numbersid': nmbrs_id})
+        return employee_id
 
     @api.multi
     @api.onchange('department_id')
     def onchange_department_id(self):
         """Function that sets a domain on the selectable analytic accounts based on the selected department"""
         res = {}
-        res['domain'] = {'analytic_account': [('department_id.id', '=', self.department_id.id)]}
+        res['domain'] = {'analytic_account': [('department_id', '=', self.department_id.id)]}
         return res
