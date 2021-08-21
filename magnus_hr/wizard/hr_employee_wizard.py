@@ -78,16 +78,16 @@ class HREmployeeWizard(models.TransientModel):
         return res
 
     @api.multi
-    def write_res_partner(self, partner_id):
+    def create_partner(self):
         """ partner creation"""
-        # firstname = self.firstname
-        # lastname = self.lastname
+        firstname = self.firstname
+        lastname = self.lastname
         account_payment_term_id = self.env['account.payment.term'].search([('name','=','Immediate Payment')],limit=1)
         account_payment_mode_id = self.env['account.payment.mode'].search([('name','=','SEPA Credit Transfer (Outbound)')],limit=1)
         partner = {
-            # 'name': firstname +' '+ lastname if firstname and lastname else '',
-                     # 'lastname':lastname,
-                     # 'firstname':firstname,
+            'name': firstname +' '+ lastname if firstname and lastname else '',
+                     'lastname':lastname,
+                     'firstname':firstname,
                      'street': self.street,
                      'zip': self.zip,
                      'city': self.city,
@@ -101,31 +101,28 @@ class HREmployeeWizard(models.TransientModel):
                      'property_supplier_payment_term_id': account_payment_term_id and account_payment_term_id.id ,
                      'supplier_payment_mode_id':account_payment_mode_id and account_payment_mode_id.id,
                      'lang':'nl_NL'}
-        # partner_id = self.env['res.partner'].create(partner)
-        partner_id.write(partner)
-        # return partner_id
-        return
+        partner_id = self.env['res.partner'].create(partner)
+        return partner_id
 
     @api.multi
-    def create_user(self):
-        list_role = []
+    def create_user(self, partner_id):
+        list_role = [(5, False, False)]
         for role_line in self.role_line_ids:
             data = {'role_id': role_line.role_id.id,
-                    'date_from': role_line.from_date,
-                    'date_to': role_line.to_date,
-                    # 'is_enable': True
+                    'date_from': role_line.from_date or False,
+                    'date_to': role_line.to_date or False
                     }
             list_role.append((0, 0, data))
         user = {'lastname': self.lastname,
                 'firstname': self.firstname,
                 'login': self.login,
-                # 'partner_id': partner_id and partner_id.id,
+                'partner_id': partner_id and partner_id.id,
                 'company_id': self.env.user.company_id.id,
                 'default_operating_unit_id': self.default_operating_unit_id and self.default_operating_unit_id.id,
-                'operating_unit_ids': [(0, 0, self.operating_unit_ids and self.operating_unit_ids.ids)]
+                'operating_unit_ids': [(6, 0, self.operating_unit_ids and self.operating_unit_ids.ids)],
+                'role_line_ids': list_role
                 }
         user_id = self.env['res.users'].create(user)
-        user_id.write({'role_line_ids': list_role})
         return user_id
 
     @api.multi
@@ -146,7 +143,8 @@ class HREmployeeWizard(models.TransientModel):
     def create_employee(self, user_id, res_partner_bank_id):
         firstname = self.firstname
         lastname = self.lastname
-        employee = {'name': firstname +' '+ lastname if firstname and lastname else '',
+        employee = {
+                     'name': firstname +' '+ lastname if firstname and lastname else '',
                      'firstname': firstname,
                      'lastname': lastname,
                      'work_email': self.email,
@@ -162,12 +160,12 @@ class HREmployeeWizard(models.TransientModel):
                      'initial_employment_date': self.initial_employment_date,
                      'official_date_of_employment': self.official_date_of_employment,
                      'temporary_contract': self.temporary_contract,
-                     'category_ids': [(0, 0, self.category_ids.ids)],
+                     'category_ids': [(6, 0, self.category_ids.ids)],
                      'external': self.external,
                      'product_id': self.product_id and self.product_id.id,
                      'parent_id': self.parent_id and self.parent_id.id,
                      }
-        return self.env['hr.employee'].create(employee)
+        return self.env['hr.employee'].create(employee), employee
 
     @api.multi
     def create_holiday(self, employee_id):
@@ -185,11 +183,10 @@ class HREmployeeWizard(models.TransientModel):
     @api.multi
     def create_all(self):
         """ Partner, user, bank, holiday and Employee creation """
-        user_id = self.create_user()
-        partner_id = user_id.partner_id
-        self.write_res_partner(partner_id)
+        partner_id = self.create_partner()
+        user_id = self.create_user(partner_id)
         res_partner_bank_id = self.create_res_partner_bank(partner_id)
-        employee_id = self.create_employee(user_id, res_partner_bank_id)
+        employee_id, emp_dict = self.create_employee(user_id, res_partner_bank_id)
         self.create_holiday(employee_id)
         return
 

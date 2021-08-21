@@ -83,7 +83,7 @@ class HREmployeeWizard(models.TransientModel):
             employee_data['employee_number'] = self.env['hr.employee'].browse(employee_id).identification_id
             api_service = self.env['create.employee.from.odoo.to.nmbrs'].sudo().create(employee_data)
             nmbrs_id = api_service.insert_employee()
-            employee_data['employee_number'] = self.env['hr.employee'].browse(employee_id).write({'employee_numbersid': nmbrs_id})
+            self.env['hr.employee'].browse(employee_id).write({'employee_numbersid': nmbrs_id})
         return employee_id
 
     @api.multi
