@@ -117,7 +117,6 @@ class HREmployeeWizard(models.TransientModel):
                 'firstname': self.firstname,
                 'login': self.login,
                 'partner_id': partner_id and partner_id.id,
-                'company_id': self.env.user.company_id.id,
                 'default_operating_unit_id': self.default_operating_unit_id and self.default_operating_unit_id.id,
                 'operating_unit_ids': [(6, 0, self.operating_unit_ids and self.operating_unit_ids.ids)],
                 'role_line_ids': list_role
@@ -165,7 +164,7 @@ class HREmployeeWizard(models.TransientModel):
                      'product_id': self.product_id and self.product_id.id,
                      'parent_id': self.parent_id and self.parent_id.id,
                      }
-        return self.env['hr.employee'].create(employee), employee
+        return self.env['hr.employee'].create(employee)
 
     @api.multi
     def create_holiday(self, employee_id):
@@ -186,9 +185,9 @@ class HREmployeeWizard(models.TransientModel):
         partner_id = self.create_partner()
         user_id = self.create_user(partner_id)
         res_partner_bank_id = self.create_res_partner_bank(partner_id)
-        employee_id, emp_dict = self.create_employee(user_id, res_partner_bank_id)
+        employee_id = self.create_employee(user_id, res_partner_bank_id)
         self.create_holiday(employee_id)
-        return
+        return employee_id
 
 
 
