@@ -5,6 +5,8 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime, timedelta
+from odoo.src.odoo.tools import safe_eval
+
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
@@ -109,6 +111,17 @@ class AccountInvoice(models.Model):
     def action_invoice_open(self):
         res = super(AccountInvoice, self).action_invoice_open()
         if self.type in ('out_invoice'):
+            if self.move_id:
+                intercompany_revenue_lines = self.move_id.line_ids.filtered(
+                                            lambda l: l.operating_unit_id != self.operating_unit_id and
+                                            l.account_id.user_type_id in (
+                                                self.env.ref('account.data_account_type_other_income'),
+                                                self.env.ref('account.data_account_type_revenue')))
+                if intercompany_revenue_lines:
+                    state_move_id = self.set_move_to_draft()
+                    self.move_id.add_invoiced_revenue_to_move(intercompany_revenue_lines, self.operating_unit_id.id)
+                    if state_move_id == 'posted':
+                        self.move_id.post()
             analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
             if not analytic_invoice_id:
                 return res
@@ -120,6 +133,16 @@ class AccountInvoice(models.Model):
             if inv_date != period_date and self.move_id:
                 self.action_wip_move_create()
         return res
+
+    def set_move_to_draft(self):
+        if self.move_id.status == 'posted':
+            if self.move_id.journal_id.update_posted:
+                raise UserError(_('Please allow to cancel entries from this journal.'))
+            self.move_id.state = 'draft'
+            return 'posted'
+        return 'draft'
+
+
 
     @api.model
     def get_wip_default_account(self):
@@ -212,12 +235,6 @@ class AccountInvoiceLine(models.Model):
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
 
-    # @api.multi
-    # def write(self, vals):
-    #     res = super(AccountInvoiceLine, self).write(vals)
-    #     self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes() #Issue: Vat creation double after invoice date change
-    #     return res
-
     @api.model
     def default_get(self, fields):
         res = super(AccountInvoiceLine, self).default_get(fields)
@@ -229,10 +246,20 @@ class AccountInvoiceLine(models.Model):
                 res['analytic_invoice_id'] = analytic_invoice_id.id
         return res
 
-#    @api.onchange('product_id')
-#    def _onchange_product_id(self):
-#        if self.analytic_invoice_id:
-#            self.invoice_id = self.env['account.invoice'].browse(self.analytic_invoice_id.invoice_ids.id)
-#        return super(AccountInvoiceLine, self)._onchange_product_id()
+   @api.onchange('product_id')
+   def _onchange_product_id(self):
+       res = super(AccountInvoiceLine, self)._onchange_product_id()
+       if self.type in 'out_invoice' and \
+          self.operating_unit_id != self.invoice_id.operating_unit_id and \
+          self.account_id.user_type_id in (
+                                            self.env.ref('account.data_account_type_other_income'),
+                                            self.env.ref('account.data_account_type_revenue')
+                                        ):
+           account = self.account_id
+           self.account_id = self.env['inter.ou.account.mapping']._get_mapping_dict(
+                                                                self.company_id, 'regular_to_inter'
+                                                                )(account)
+
+       return res
 
 
