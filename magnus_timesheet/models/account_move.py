@@ -54,6 +54,23 @@ class AccountMove(models.Model):
         return res
 
     @api.multi
+    def add_invoiced_revenue_to_move(self, intercompany_revenue_lines, operating_unit_id):
+        self.ensure_one()
+        mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
+        mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
+        for line in intercompany_revenue_lines:
+            revenue_line = line.copy({
+                'account_id': mapping(line.account_id).id,
+                'operating_unit_id': operating_unit_id
+                })
+            cost_line = line.copy({
+                'account_id': mapping2(line.account_id).id,
+                'operating_unit_id': operating_unit_id,
+                'debit': line.credit,
+                'credit': line.debit
+                })
+
+    @api.multi
     def wip_move_create(self, wip_journal, name, ar_account_id, ref=None):
         self.ensure_one()
         move_date = datetime.strptime(self.date, "%Y-%m-%d")
@@ -99,3 +116,44 @@ class AccountMove(models.Model):
         return wip_move
 
 
+class InteroOUAccountMapping(models.Model):
+    _name = 'inter.ou.account.mapping'
+    _description = 'Inter Operating Unit Account Mapping'
+    _rec_name = 'account_id'
+
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env['res.company']._company_default_get(
+            'inter.ou.account.mapping'))
+    account_id = fields.Many2one(
+        'account.account', string='Regular Revenue Account',
+        domain=[('deprecated', '=', False)], required=True)
+    inter_ou_account_id = fields.Many2one(
+        'account.account', string='Inter OU Account',
+        domain=[('deprecated', '=', False)], required=True)
+    cost_account_id = fields.Many2one(
+        'account.account', string='Regular Cost of Sales Account',
+        domain=[('deprecated', '=', False)], required=True)
+
+    @api.model
+    def _get_mapping_dict(self, company_id, maptype):
+        """return a dict with:
+        key = ID of account,
+        value = ID of mapped_account"""
+        mappings = self.search([
+            ('company_id', '=', company_id),
+            ])
+        mapping = {}
+        if maptype == 'regular_to_inter':
+            for item in mappings:
+                mapping[item.account_id.id] = item.inter_ou_account_id.id
+        if maptype == 'inter_to_regular':
+            for item in mappings:
+                mapping[item.inter_ou_account_id.id] = item.account_id.id
+        if maptype == 'regular_to_cost':
+            for item in mappings:
+                mapping[item.account_id.id] = item.cost_account_id.id
+        if maptype == 'inter_to_cost':
+            for item in mappings:
+                mapping[item.inter_ou_account_id.id] = item.cost_account_id.id
+        return mapping
