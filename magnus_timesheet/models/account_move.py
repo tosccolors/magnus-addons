@@ -65,6 +65,7 @@ class AccountMove(models.Model):
                         'account_id': mapping[line.account_id.id],
                         'operating_unit_id': operating_unit_id,
                         'user_id': False,
+                        'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
                 })
                 ## cost_line =
                 line.with_context(wip=True).copy({
@@ -72,7 +73,8 @@ class AccountMove(models.Model):
                         'operating_unit_id': operating_unit_id,
                         'debit': line.credit,
                         'credit': line.debit,
-                        'user_id': False
+                        'user_id': False,
+                        'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
                 })
             else:
                 raise UserError(_('The mapping from account "%s" does not exist or is incomplete.') % (line.account_id.name))
