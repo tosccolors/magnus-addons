@@ -60,14 +60,14 @@ class AccountMove(models.Model):
         mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
         for line in intercompany_revenue_lines:
             if line.account_id.id in mapping and line.account_id.id in mapping2:
-                ## revenue_line
+                ## revenue line
                 line.with_context(wip=True).copy({
                         'account_id': mapping[line.account_id.id],
                         'operating_unit_id': operating_unit_id,
                         'user_id': False,
                         'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
                 })
-                ## cost_line =
+                ## intercompany cost of sales line
                 line.with_context(wip=True).copy({
                         'account_id': mapping2[line.account_id.id],
                         'operating_unit_id': operating_unit_id,
