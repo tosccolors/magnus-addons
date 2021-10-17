@@ -59,16 +59,24 @@ class AccountMove(models.Model):
         mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
         mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
         for line in intercompany_revenue_lines:
-            revenue_line = line.copy({
-                'account_id': mapping(line.account_id).id,
-                'operating_unit_id': operating_unit_id
+            if line.account_id.id in mapping and line.account_id.id in mapping2:
+                ## revenue_line
+                line.with_context(wip=True).copy({
+                        'account_id': mapping[line.account_id.id],
+                        'operating_unit_id': operating_unit_id,
+                        'user_id': False,
                 })
-            cost_line = line.copy({
-                'account_id': mapping2(line.account_id).id,
-                'operating_unit_id': operating_unit_id,
-                'debit': line.credit,
-                'credit': line.debit
+                ## cost_line =
+                line.with_context(wip=True).copy({
+                        'account_id': mapping2[line.account_id.id],
+                        'operating_unit_id': operating_unit_id,
+                        'debit': line.credit,
+                        'credit': line.debit,
+                        'user_id': False
                 })
+            else:
+                raise UserError(_('The mapping from account "%s" does not exist or is incomplete.') % (line.account_id.name))
+
 
     @api.multi
     def wip_move_create(self, wip_journal, name, ar_account_id, ref=None):
@@ -121,19 +129,33 @@ class InteroOUAccountMapping(models.Model):
     _description = 'Inter Operating Unit Account Mapping'
     _rec_name = 'account_id'
 
+    @api.model
+    def _get_revenuw_account_domain(self):
+        ids = [self.env.ref('account.data_account_type_other_income').id,
+               self.env.ref('account.data_account_type_revenue').id]
+        return [('deprecated', '=', False), ('user_type_id', 'in', ids)]
+
+    @api.model
+    def _get_cost_of_sales_account_domain(self):
+        ids = [self.env.ref('account.data_account_type_direct_costs').id]
+        return [('deprecated', '=', False), ('user_type_id', 'in', ids)]
+
     company_id = fields.Many2one(
         'res.company', string='Company', required=True,
         default=lambda self: self.env['res.company']._company_default_get(
             'inter.ou.account.mapping'))
     account_id = fields.Many2one(
         'account.account', string='Regular Revenue Account',
-        domain=[('deprecated', '=', False)], required=True)
+        domain=_get_revenuw_account_domain,
+        required=True)
     inter_ou_account_id = fields.Many2one(
         'account.account', string='Inter OU Account',
-        domain=[('deprecated', '=', False)], required=True)
+        domain=_get_revenuw_account_domain,
+        required=True)
     cost_account_id = fields.Many2one(
-        'account.account', string='Regular Cost of Sales Account',
-        domain=[('deprecated', '=', False)], required=True)
+        'account.account', string='Intercompany Cost of Sales Account',
+        domain=_get_cost_of_sales_account_domain,
+        required=True)
 
     @api.model
     def _get_mapping_dict(self, company_id, maptype):
@@ -141,8 +163,7 @@ class InteroOUAccountMapping(models.Model):
         key = ID of account,
         value = ID of mapped_account"""
         mappings = self.search([
-            ('company_id', '=', company_id),
-            ])
+            ('company_id', '=', company_id.id)])
         mapping = {}
         if maptype == 'regular_to_inter':
             for item in mappings:

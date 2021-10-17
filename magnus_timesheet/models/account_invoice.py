@@ -5,7 +5,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime, timedelta
-from odoo.src.odoo.tools import safe_eval
 
 
 class AccountJournal(models.Model):
@@ -135,8 +134,8 @@ class AccountInvoice(models.Model):
         return res
 
     def set_move_to_draft(self):
-        if self.move_id.status == 'posted':
-            if self.move_id.journal_id.update_posted:
+        if self.move_id.state == 'posted':
+            if not self.move_id.journal_id.update_posted:
                 raise UserError(_('Please allow to cancel entries from this journal.'))
             self.move_id.state = 'draft'
             return 'posted'
@@ -246,20 +245,19 @@ class AccountInvoiceLine(models.Model):
                 res['analytic_invoice_id'] = analytic_invoice_id.id
         return res
 
-   @api.onchange('product_id')
-   def _onchange_product_id(self):
-       res = super(AccountInvoiceLine, self)._onchange_product_id()
-       if self.type in 'out_invoice' and \
-          self.operating_unit_id != self.invoice_id.operating_unit_id and \
-          self.account_id.user_type_id in (
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        res = super(AccountInvoiceLine, self)._onchange_product_id()
+        if self.invoice_id.type in 'out_invoice' and \
+           self.operating_unit_id != self.invoice_id.operating_unit_id and \
+           self.account_id.user_type_id in (
                                             self.env.ref('account.data_account_type_other_income'),
                                             self.env.ref('account.data_account_type_revenue')
                                         ):
            account = self.account_id
            self.account_id = self.env['inter.ou.account.mapping']._get_mapping_dict(
                                                                 self.company_id, 'regular_to_inter'
-                                                                )(account)
-
-       return res
+                                                                )[account.id]
+        return res
 
 
