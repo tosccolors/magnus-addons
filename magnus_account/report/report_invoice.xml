@@ -229,9 +229,6 @@
                         <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.bic or ''), bank_acc))"/>
                     </span>
                 </span>
-                <t t-if="o.operating_unit_id.id in [6,7,8,11]">
-                    <p style="padding-left:85px;padding-right:15px;padding-top:30px;" ><strong>Please be aware that we have a new bank account!</strong></p>
-                </t>
             </div>
 
 
