@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <menuitem
+            id="menu_nmbrs_settings"
+            name="NMBRs Configuration"
+            parent="hr.menu_hr_root"
+            sequence="30"/>
+
+
+        <record id="open_view_nmbrs_country_settings" model="ir.actions.act_window">
+            <field name="name">NMBRs Country Code Mapping</field>
+            <field name="res_model">hr.nmbrs.nationality</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+
+        <record id="view_nmbrs_country_settings" model="ir.ui.view">
+            <field name="name">hr.nmbrs.nationality.list</field>
+            <field name="model">hr.nmbrs.nationality</field>
+            <field eval="8" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Country">
+                    <field name="nationality"/>
+                     <field name ="country_code_nmbrs"/>
+                </tree>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_nmbrs_country_code"
+            action="open_view_nmbrs_country_settings"
+            parent="magnus_nmbrs_base.menu_nmbrs_mappings"
+            sequence="1"/>
+        </data>
+</odoo>
