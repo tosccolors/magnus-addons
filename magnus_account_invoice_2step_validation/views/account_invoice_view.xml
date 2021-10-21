@@ -15,7 +15,7 @@
             </xpath>
 
             <xpath expr="//button[@name='action_invoice_auth']" position="replace">
-                <button name="action_invoice_auth" states="open" string="Authorize" type="object" class="oe_highlight" attrs="{'invisible':[('current_user_auth', '=', False)]}" groups="account_invoice_2step_validation.authorize"/>
+                <button name="action_invoice_auth" string="Authorize" type="object" class="oe_highlight" attrs="{'invisible':['|',('current_user_auth', '=', False),('state','!=','open')]}" groups="account_invoice_2step_validation.authorize"/>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="attributes">
                 <attribute name="groups">account.group_account_user,account_invoice_2step_validation.authorize,account_invoice_2step_validation.verification</attribute>
