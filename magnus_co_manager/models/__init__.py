@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-import hr
-import magnus_planning
+import hr, magnus_planning, hr_timesheet_sheet
+

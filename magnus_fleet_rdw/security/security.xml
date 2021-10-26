@@ -1,0 +1,9 @@
+
+<odoo>
+    <data>
+        <record id="rdw_api_rights" model="res.groups">
+        <field name="category_id" ref="fleet.module_fleet_category"/>
+            <field name="name">RDW API Rights</field>
+        </record>
+    </data>
+</odoo>

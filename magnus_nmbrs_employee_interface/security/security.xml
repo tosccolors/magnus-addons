@@ -1,0 +1,9 @@
+
+<odoo>
+    <data>
+        <record id="nmbrs_employee_interface" model="res.groups">
+        <field name="category_id" ref="magnus_nmbrs_base.module_category_nmbrs_interface"/>
+            <field name="name">NMBRs Employee Interface</field>
+        </record>
+    </data>
+</odoo>

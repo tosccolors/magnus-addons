@@ -6,7 +6,8 @@
         Solves analytic account issue with the asset module""",
 
     'description': """
-        Solves analytic account issue with the asset module
+        Solves analytic account issue with the asset module, do not install when migrating to 12!! 
+        Set account_asset.account_analytic = account_asset.analytic_account_2 when this module was installed on Odoo 10. 
     """,
 
     'author': "Magnus - Hayo Bos",
@@ -19,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['magnus_operating_unit_asset_management', 'magnus_assets_equipment_link'],
+    'depends': ['magnus_assets_equipment_link'],
 
     # always loaded
     'data': [

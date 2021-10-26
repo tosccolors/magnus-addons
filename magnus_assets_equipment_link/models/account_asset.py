@@ -51,6 +51,8 @@ class AccountAsset(models.Model):
                         'invoice_line_id': line.id,
                         'cost': line.price_subtotal / line.quantity,
                         'partner_id': line.invoice_id.partner_id.id,
+                        'owner_user_id': line.user_id.id,
+                        'purchase_date': line.invoice_id.date_invoice
                     }
                     equipments += equipments.create(equipment_data)
                 res.write({'equipment_ids': [(4, x) for x in equipments.ids]})
