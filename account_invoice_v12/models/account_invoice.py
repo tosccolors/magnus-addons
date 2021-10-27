@@ -69,6 +69,9 @@ class AccountInvoice(models.Model):
         values = dict(custom_values or {}, partner_id=partner_id, source_email=email_from)
         if journal:
             values['journal_id'] = journal.id
+            # v10 addition, support operating units
+            if 'operating_unit_id' in self._fields:
+                values['operating_unit_id'] = journal.operating_unit_id.id
         # Passing `type` in context so that _default_journal(...) can correctly set journal for new vendor bill
         invoice = super(AccountInvoice, self.with_context(type=values.get('type') or 'in_invoice')).message_new(msg_dict, values)
 

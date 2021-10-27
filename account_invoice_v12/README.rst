@@ -7,4 +7,4 @@ This addon backports several features from the v12 ``account`` module:
 
 Further, the following additional features are added not present in standard v12:
 
-- TODO: support operating units
+- support operating units
