@@ -15,6 +15,8 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     source_email = fields.Char(string='Source Email', track_visibility='onchange')
+    vendor_bill_id = fields.Many2one('account.invoice', string='Vendor Bill',
+        help="Auto-complete from a past bill.")
 
     @api.model
     def message_new(self, msg_dict, custom_values=None):
@@ -101,3 +103,17 @@ class AccountInvoice(models.Model):
             email_brackets = "<%s>" % email_address
             partners = Partner.search([('email', 'ilike', email_brackets)] + extra_domain, limit=1)
         return partners.id
+
+    # Load all Vendor Bill lines
+    @api.onchange('vendor_bill_id')
+    def _onchange_vendor_bill(self):
+        if not self.vendor_bill_id:
+            return {}
+        self.currency_id = self.vendor_bill_id.currency_id
+        new_lines = self.env['account.invoice.line']
+        for line in self.vendor_bill_id.invoice_line_ids:
+            new_lines += new_lines.new(line.read(None, load='_classic_write')[0])
+        self.invoice_line_ids += new_lines
+        self.payment_term_id = self.vendor_bill_id.payment_term_id
+        self.vendor_bill_id = False
+        return {}

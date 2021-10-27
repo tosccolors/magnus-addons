@@ -11,6 +11,14 @@
         <field name="origin" position="after">
             <field name="source_email" />
         </field>
+        <field name="reference" position="after">
+            <field
+                name="vendor_bill_id"
+                domain="[('partner_id','child_of', [partner_id]), ('state','in',('open','in_payment','paid')), ('type','=','in_invoice')]"
+                string="Auto-Complete" placeholder="Select an old vendor bill"
+                options="{'no_create': True}" context="{'show_total_amount': True}"
+            />
+        </field>
     </field>
 </record>
 
