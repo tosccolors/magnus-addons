@@ -322,14 +322,26 @@ class HrTimesheetSheet(models.Model):
                 'vehicle_id': vehicle.id
             })
         date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
+        TOT = 0
+        GTM = self.employee_id.user_id.has_group("magnus_timesheet.group_timesheet_manager")
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
             hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id), ('task_id.standby', '=', False)]).mapped('unit_amount'))
             if hour < 0 or hour > 24:
                 raise UserError(_('Logged hours should be 0 to 24.'))
             if not self.employee_id.timesheet_no_8_hours_day:
-                if i < 5 and float_compare(hour, 8, precision_digits=3, precision_rounding=None) < 0:
-                    raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
+                if i < 5:
+                    if float_compare(hour, 8, precision_digits=3, precision_rounding=None) < 0:
+                        raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
+                    elif not GTM and hour > 8:
+                        OT = hour - 8
+                        TOT += OT
+                        if OT > 4:
+                            raise UserError(_('Each day maximum 4 hours overtime allowed from Monday to Friday.'))
+                else:
+                    TOT += hour
+                if not GTM and TOT > 8:
+                    raise UserError(_('Maximum 8 hours overtime allowed in a week.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
     @api.one
@@ -553,6 +565,7 @@ class HrTimesheetSheet(models.Model):
                  FROM account_analytic_line
                  WHERE sheet_id = %(sheet_aal)s
                  )
+             AND pp.allow_timesheets = TRUE
              ;"""
 
         self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
