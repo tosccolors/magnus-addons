@@ -16,7 +16,7 @@ class AnalyticInvoice(models.Model):
 
 
     @api.one
-    @api.depends('partner_id', 'account_analytic_ids', 'month_id')
+    @api.depends('account_analytic_ids', 'month_id')
     def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
@@ -45,7 +45,7 @@ class AnalyticInvoice(models.Model):
             self.revenue_line_ids = []
 
     @api.one
-    @api.depends('partner_id', 'month_id', 'gb_week', 'project_operating_unit_id', 'project_id', 'link_project')
+    @api.depends('month_id', 'gb_week', 'project_operating_unit_id', 'project_id', 'link_project')
     def _compute_objects(self):
         task_user_obj = self.env['task.user']
         # global taskUserIds
@@ -61,22 +61,19 @@ class AnalyticInvoice(models.Model):
                         project_id = self.env['project.task'].browse(task_id).project_id.id or False
                     vals = {
                         'name': '/',
-                        'user_id': item.get('user_id')[0] if item.get(
-                            'user_id') != False else False,
+                        'user_id': item.get('user_id')[0] if item.get('user_id') != False else False,
                         'task_id': item.get('task_id')[0] if item.get('task_id') != False else False,
                         'project_id': project_id,
-                        'account_id': item.get('account_id')[0] if item.get(
-                            'account_id') != False else False,
+                        'account_id': item.get('account_id')[0] if item.get('account_id') != False else False,
                         # 'gb_month_id': item.get('month_id')[0] if item.get(
                         #     'month_id') != False else False,
 
                         'unit_amount': item.get('unit_amount'),
-                        'product_id': item.get('product_id'),
+                        'product_id': item.get('product_id')[0] if item.get('product_id') != False else False,
                         'operating_unit_id': item.get('operating_unit_id'),
                         'project_operating_unit_id': item.get('project_operating_unit_id'),
                         'line_fee_rate': item.get('line_fee_rate'),
                     }
-
                     if reconfirmed_entries:
                         vals.update({'gb_month_id':item.get('month_of_last_wip')[0] if item.get(
                             'month_of_last_wip') != False else False})
@@ -84,16 +81,12 @@ class AnalyticInvoice(models.Model):
                         vals.update({
                             'gb_month_id': item.get('month_id')[0] if item.get('month_id') != False else False,
                             'gb_week_id': item.get('week_id')[0] if self.gb_week and item.get('week_id') != False else False})
-
-                    # if item.get('month_id') != False else False,
-
-                    # aut_id = self.env['analytic.user.total'].create(vals)
                     aal_domain = time_domain + [
                         ('user_id', '=', vals['user_id']),
                         ('task_id', '=', vals['task_id']),
                         ('account_id', '=', vals['account_id']),
+                        ('product_id', '=', vals['product_id']),
                         ('line_fee_rate', '=', vals['line_fee_rate']),
-                        # ('month_id', '=', vals['gb_month_id']),
                     ]
                     if reconfirmed_entries:
                         aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
@@ -101,14 +94,13 @@ class AnalyticInvoice(models.Model):
                         aal_domain += [('month_id', '=', vals['gb_month_id'])]
                         if vals['gb_week_id']:
                             aal_domain += [('week_id', '=', vals['gb_week_id'])]
-
                     childData = []
                     for aal in self.env['account.analytic.line'].search(aal_domain):
                         task_user_domain = [('from_date', '<=', aal.date), ('user_id', '=', aal.user_id.id)]
                         task_user_lines = task_user_obj.search(task_user_domain+[('task_id', '=', aal.task_id.id)])
                         if not task_user_lines:
                             task_user_lines = task_user_obj.search(task_user_domain+
-                                                                   [('task_id', '=', aal.task_id.project_id.task_ids.filtered('standard').id)])
+                                            [('task_id', '=', aal.task_id.project_id.task_ids.filtered('standard').id)])
                         if task_user_lines:
                             task_user_ids += task_user_lines.ids
                         childData.append((4, aal.id))
@@ -142,10 +134,6 @@ class AnalyticInvoice(models.Model):
                     [(6, 0, analytic_accounts.ids)]
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
-            # if self.month_id:
-            #     domain = self.month_id.get_domain('date')
-            #     domain += [('account_id', 'in', account_analytic_ids)]
-            # else:
             domain = [('account_id', 'in', account_analytic_ids)]
             if self.project_operating_unit_id:
                 domain += [('project_operating_unit_id', '=', self.project_operating_unit_id.id)]
