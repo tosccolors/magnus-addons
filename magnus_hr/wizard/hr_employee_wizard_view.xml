@@ -30,8 +30,8 @@
       				<field name="default_operating_unit_id"/>
       				<field name="operating_unit_ids" widget="many2many_tags"/>
       				<field name="parent_department_id" invisible="1"/>
-              <field name="department_id"/>
-              <field name="leave_hours" />
+				    <field name="department_id"/>
+				    <field name="leave_hours" />
       				<field name="product_id" domain="[('categ_id.name','=','Fee Rate')]"/>
       			</group>
       		</group>
@@ -45,7 +45,7 @@
                      <div class="o_address_format">
                          <field name="street" placeholder="Street..." class="o_address_street" required="1"/>
                          <field name="zip" placeholder="ZIP" class="o_address_zip" required="1"/>
-                          <field name="city" placeholder="City" class="o_address_city" required="1"/>
+						 <field name="city" placeholder="City" class="o_address_city" required="1"/>
                          <field name="country_id" placeholder="Country" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}" required="1"/>
                      </div>
       			</group>
@@ -70,7 +70,7 @@
       			</field>
       		</group>
       		<footer>
-                <button name="create_employee" string="Create Employee" type="object" class="btn-primary"/> 
+                <button name="create_all" string="Create Employee" type="object" class="btn-primary"/>
                 <button string="Cancel" class="btn-default" special="cancel"/>   
             </footer>
       	</sheet>

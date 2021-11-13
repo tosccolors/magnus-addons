@@ -54,6 +54,33 @@ class AccountMove(models.Model):
         return res
 
     @api.multi
+    def add_invoiced_revenue_to_move(self, intercompany_revenue_lines, operating_unit_id):
+        self.ensure_one()
+        mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
+        mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
+        for line in intercompany_revenue_lines:
+            if line.account_id.id in mapping and line.account_id.id in mapping2:
+                ## revenue line
+                line.with_context(wip=True).copy({
+                        'account_id': mapping[line.account_id.id],
+                        'operating_unit_id': operating_unit_id,
+                        'user_id': False,
+                        'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
+                })
+                ## intercompany cost of sales line
+                line.with_context(wip=True).copy({
+                        'account_id': mapping2[line.account_id.id],
+                        'operating_unit_id': operating_unit_id,
+                        'debit': line.credit,
+                        'credit': line.debit,
+                        'user_id': False,
+                        'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
+                })
+            else:
+                raise UserError(_('The mapping from account "%s" does not exist or is incomplete.') % (line.account_id.name))
+
+
+    @api.multi
     def wip_move_create(self, wip_journal, name, ar_account_id, ref=None):
         self.ensure_one()
         move_date = datetime.strptime(self.date, "%Y-%m-%d")
@@ -99,3 +126,57 @@ class AccountMove(models.Model):
         return wip_move
 
 
+class InteroOUAccountMapping(models.Model):
+    _name = 'inter.ou.account.mapping'
+    _description = 'Inter Operating Unit Account Mapping'
+    _rec_name = 'account_id'
+
+    @api.model
+    def _get_revenuw_account_domain(self):
+        ids = [self.env.ref('account.data_account_type_other_income').id,
+               self.env.ref('account.data_account_type_revenue').id]
+        return [('deprecated', '=', False), ('user_type_id', 'in', ids)]
+
+    @api.model
+    def _get_cost_of_sales_account_domain(self):
+        ids = [self.env.ref('account.data_account_type_direct_costs').id]
+        return [('deprecated', '=', False), ('user_type_id', 'in', ids)]
+
+    company_id = fields.Many2one(
+        'res.company', string='Company', required=True,
+        default=lambda self: self.env['res.company']._company_default_get(
+            'inter.ou.account.mapping'))
+    account_id = fields.Many2one(
+        'account.account', string='Regular Revenue Account',
+        domain=_get_revenuw_account_domain,
+        required=True)
+    inter_ou_account_id = fields.Many2one(
+        'account.account', string='Inter OU Account',
+        domain=_get_revenuw_account_domain,
+        required=True)
+    cost_account_id = fields.Many2one(
+        'account.account', string='Intercompany Cost of Sales Account',
+        domain=_get_cost_of_sales_account_domain,
+        required=True)
+
+    @api.model
+    def _get_mapping_dict(self, company_id, maptype):
+        """return a dict with:
+        key = ID of account,
+        value = ID of mapped_account"""
+        mappings = self.search([
+            ('company_id', '=', company_id.id)])
+        mapping = {}
+        if maptype == 'regular_to_inter':
+            for item in mappings:
+                mapping[item.account_id.id] = item.inter_ou_account_id.id
+        if maptype == 'inter_to_regular':
+            for item in mappings:
+                mapping[item.inter_ou_account_id.id] = item.account_id.id
+        if maptype == 'regular_to_cost':
+            for item in mappings:
+                mapping[item.account_id.id] = item.cost_account_id.id
+        if maptype == 'inter_to_cost':
+            for item in mappings:
+                mapping[item.inter_ou_account_id.id] = item.cost_account_id.id
+        return mapping
