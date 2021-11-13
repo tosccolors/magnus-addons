@@ -205,8 +205,8 @@ class AccountInvoiceLine(models.Model):
         index=True
     )
 
-    @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
     @api.multi
+    @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
     def _compute_operating_unit(self):
         super(AccountInvoiceLine, self)._compute_operating_unit()
         for line in self.filtered('user_id'):
@@ -229,10 +229,9 @@ class AccountInvoiceLine(models.Model):
                 res['analytic_invoice_id'] = analytic_invoice_id.id
         return res
 
-#    @api.onchange('product_id')
-#    def _onchange_product_id(self):
-#        if self.analytic_invoice_id:
-#            self.invoice_id = self.env['account.invoice'].browse(self.analytic_invoice_id.invoice_ids.id)
-#        return super(AccountInvoiceLine, self)._onchange_product_id()
+    @api.onchange('user_task_total_line_id.fee_rate')
+    def _onchange_fee_rate(self):
+        if self.user_task_total_line_id.fee_rate:
+            self.price_unit = self.user_task_total_line_id.fee_rate
 
 
