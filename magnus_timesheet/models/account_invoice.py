@@ -109,28 +109,28 @@ class AccountInvoice(models.Model):
     @api.multi
     def action_invoice_open(self):
         res = super(AccountInvoice, self).action_invoice_open()
-        if self.type in ('out_invoice'):
-            if self.move_id:
-                intercompany_revenue_lines = self.move_id.line_ids.filtered(
-                                            lambda l: l.operating_unit_id != self.operating_unit_id and
+        to_process_invoices = self.filtered(lambda inv: inv.type in ('out_invoice', 'out_refund'))
+        for invoice in to_process_invoices:
+            if invoice.move_id:
+                intercompany_revenue_lines = invoice.move_id.line_ids.filtered(
+                                            lambda l: l.operating_unit_id != invoice.operating_unit_id and
                                             l.account_id.user_type_id in (
                                                 self.env.ref('account.data_account_type_other_income'),
                                                 self.env.ref('account.data_account_type_revenue')))
                 if intercompany_revenue_lines:
-                    state_move_id = self.set_move_to_draft()
-                    self.move_id.add_invoiced_revenue_to_move(intercompany_revenue_lines, self.operating_unit_id.id)
+                    state_move_id = invoice.set_move_to_draft()
+                    invoice.move_id.add_invoiced_revenue_to_move(intercompany_revenue_lines, self.operating_unit_id.id)
                     if state_move_id == 'posted':
-                        self.move_id.post()
-            analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
-            if not analytic_invoice_id:
-                return res
-            # if invoicing period doesn't lie in same month
-            period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-            cur_date = datetime.now().date().strftime("%Y-%m")
-            invoice_date = self.date or self.date_invoice
-            inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
-            if inv_date != period_date and self.move_id:
-                self.action_wip_move_create()
+                        invoice.move_id.post()
+            analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
+            if analytic_invoice_id and invoice.type != 'out_refund':
+                # if invoicing period doesn't lie in same month
+                period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+                cur_date = datetime.now().date().strftime("%Y-%m")
+                invoice_date = invoice.date or invoice.date_invoice
+                inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
+                if inv_date != period_date and invoice.move_id:
+                    invoice.action_wip_move_create()
         return res
 
     def set_move_to_draft(self):
