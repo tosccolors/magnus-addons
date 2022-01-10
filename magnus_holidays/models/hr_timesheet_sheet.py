@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError, Warning
 
 class HrTimesheetSheet(models.Model):
-    _inherit = "hr_timesheet_sheet.sheet"
+    _inherit = "hr_timesheet.sheet"
 
     def merge_leave_request(self, date, data):
         previous_date = datetime.strftime(date - timedelta(days=1), "%Y-%m-%d")
@@ -17,13 +17,13 @@ class HrTimesheetSheet(models.Model):
             ('type', '=', 'remove'),
             ('state', '=', 'written'),
         ]
-        previous_leave_request = self.env['hr.holidays'].search(domain)
+        previous_leave_request = self.env['hr.leave'].search(domain)
         if previous_leave_request:
             # Merge LR by updating date_to and number_of_hours_temp
             previous_leave_request.write({'date_to': date, 'number_of_hours_temp': data['number_of_hours_temp'] + previous_leave_request.number_of_hours_temp})
         else:
             # Create new LR from timesheet
-            self.env['hr.holidays'].create(data)
+            self.env['hr.leave'].create(data)
 
     def create_leave_request(self, leave_type, hour, date):
         # Data to create leave requests from timesheet
@@ -45,7 +45,7 @@ class HrTimesheetSheet(models.Model):
             ('type', '=', 'remove'),
             ('state', 'not in', ['cancel', 'refuse']),
         ]
-        leave_request = self.env['hr.holidays'].search(domain)
+        leave_request = self.env['hr.leave'].search(domain)
         if leave_request:
             date_start = datetime.strptime(leave_request.date_from, "%Y-%m-%d %H:%M:%S").date()
             date_end = datetime.strptime(leave_request.date_to, "%Y-%m-%d %H:%M:%S").date()
@@ -74,10 +74,10 @@ class HrTimesheetSheet(models.Model):
                         # Update LR with date_to
                         splitted_leave_request.write({'date_to': date - timedelta(days=1), 'date_from': date_start})
         if not leave_request:
-            self.env['hr.holidays'].create(data)
+            self.env['hr.leave'].create(data)
 
     def get_leave_type(self, hour):
-        leave_types = self.env['hr.holidays.status'].filtered('date_start').search([], order='date_start')
+        leave_types = self.env['hr.leave.status'].filtered('date_start').search([], order='date_start')
         if not leave_types:
             raise ValidationError(_('Please create some leave types to apply for leave.\nNote: For one of the selected project the Holiday Consumption is true.'))
         leave_type = False
@@ -93,7 +93,7 @@ class HrTimesheetSheet(models.Model):
     def action_timesheet_done(self):
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         if self.timesheet_ids:
-            date_from = datetime.strptime(self.date_from, "%Y-%m-%d").date()
+            date_from = datetime.strptime(str(self.date_start), "%Y-%m-%d").date()
             for i in range(7):
                 date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
                 hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id), ('sheet_id.employee_id', '=', self.employee_id.id), ('project_id.holiday_consumption', '=', True)]).mapped('unit_amount'))
@@ -106,7 +106,7 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_draft(self):
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        leave_request = self.env['hr.holidays'].search([('name', '=', 'Time report'), ('employee_id', '=', self.employee_id.id), ('date_from', '>=', self.week_id.date_start), ('date_from', '<=', self.week_id.date_end), ('type', '=', 'remove'), ('state', '=', 'written')])
+        leave_request = self.env['hr.leave'].search([('name', '=', 'Time report'), ('employee_id', '=', self.employee_id.id), ('date_from', '>=', self.week_id.date_start), ('date_from', '<=', self.week_id.date_end), ('type', '=', 'remove'), ('state', '=', 'written')])
         if leave_request:
             leave_request.write({'state': 'draft'})
             leave_request.unlink()

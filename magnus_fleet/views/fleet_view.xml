@@ -7,9 +7,9 @@
       <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
         <field name="arch" type="xml">
         <field name="car_value" position="after">
-       	 	<label for="fiscal_addition_id"/>
+       	 	<label for="fiscal_addition"/>
             <div class="o_row">
-                <field name="fiscal_addition_id"/><span>%%</span>
+                <field name="fiscal_addition"/><span>%%</span>
             </div>
         </field>
         <field name="vin_sn" position="after">
@@ -44,8 +44,8 @@
     </record>
     
 	<record id="hr_timesheet_sheet_pivot_view_report" model="ir.ui.view">
-         <field name="name">hr_timesheet_sheet.sheet.pivot</field>
-         <field name="model">hr_timesheet_sheet.sheet</field>
+         <field name="name">hr_timesheet.sheet.pivot</field>
+         <field name="model">hr_timesheet.sheet</field>
          <field name="arch" type="xml">
              <pivot string="Mileage Report">
                 <field name="business_mileage" type="measure"/>
@@ -54,38 +54,16 @@
              </pivot>
          </field>
 	</record>
-
-      <record id="action_open_view_fiscal_addition_mapping" model="ir.actions.act_window">
-        <field name="name">Mapping Fiscal Addition</field>
-        <field name="res_model">fleet.fiscal.addition.mapping</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree</field>
-    </record>
-
-      <record id="view_fiscal_addition_mapping" model="ir.ui.view">
-        <field name="name">fleet.fiscal.addition.mapping.tree</field>
-        <field name="model">fleet.fiscal.addition.mapping</field>
-        <field name="arch" type="xml">
-            <tree string="Fiscal Addition Mapping" editable="top">
-                <field name="fiscal_addition"/>
-            </tree>
-        </field>
-    </record>
+	  
 
     <record id="action_mileage_report" model="ir.actions.act_window">
             <field name="name">Mileage Report</field>
-            <field name="res_model">hr_timesheet_sheet.sheet</field>
+            <field name="res_model">hr_timesheet.sheet</field>
             <field name="view_mode">pivot,graph</field>
             <field name="view_id" ref="hr_timesheet_sheet_pivot_view_report"/>
         </record>
 
-  <menuitem
-    id="configure_fiscal_addition_mapping"
-    action="action_open_view_fiscal_addition_mapping"
-    parent="fleet.fleet_vehicles"/>
-
 	<menuitem id="mileage_report_menu" name="Mileage Report" parent="fleet.menu_fleet_reporting" sequence="99" action="action_mileage_report"/>
-
-
+     
   </data>
 </odoo>

@@ -31,10 +31,7 @@ odoo.define('magnus_timesheet.sheet', function (require) {
                     name: 'project',
                     type: 'many2one',
                     modifiers: '{"required": true}',
-                    options: '{"no_create_edit":true, "create": false, "no_quick_create": true}',
-                    domain: [
-                        ['allow_timesheets','=',true]
-                    ],
+                    options: '{"no_create_edit":true, "create": false, "no_quick_create": true}'
                 },
             });
 

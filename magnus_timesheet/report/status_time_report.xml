@@ -10,8 +10,6 @@
                     <field name="week_id" />
                     <field name="state" />
                     <field name="validators" />
-                    <field name="department_id"/>
-                    <field name="operating_unit_id" />
                 </tree>
             </field>
         </record>

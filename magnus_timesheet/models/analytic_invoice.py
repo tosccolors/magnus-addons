@@ -20,7 +20,7 @@ class AnalyticInvoice(models.Model):
     def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
             account_analytic_ids = self.account_analytic_ids.ids
-            hrs = self.env.ref('product.product_uom_hour').id
+            hrs = self.env.ref('uom.product_uom_hour').id
             domain = [('account_id', 'in', account_analytic_ids)]
             if self.month_id:
                 domain += self.month_id.get_domain('date')
@@ -156,7 +156,7 @@ class AnalyticInvoice(models.Model):
                            ('project_id.invoice_properties.group_invoice', '=', True),
                            ('task_id.project_id.invoice_properties.group_invoice', '=', True)
                            ]
-            hrs = self.env.ref('product.product_uom_hour').id
+            hrs = self.env.ref('uom.product_uom_hour').id
             time_domain = domain + [
                 ('chargeable', '=', True),
                 ('product_uom_id', '=', hrs),

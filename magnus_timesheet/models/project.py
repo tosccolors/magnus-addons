@@ -29,27 +29,16 @@ class Task(models.Model):
         string='Can register time',
         track_visibility='always'
     )
-    # user_ids = fields.Many2many(
-    #     'res.users',
-    #     string='user multi select',
-    #     track_visibility='always',
-    #     # compute=_compute_uid,
-    #     inverse = '_set_task_user_ids'
-    # )
 
-
-    @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
-        args = args or []
-        recs = self.browse()
-        if name:
-            recs = self.search([('name', '=', name)] + args, limit=limit)
-        if not recs:
-            domain = [('name', operator, name)]
-            if 'jira_compound_key' in self._fields:
-                domain = ['|'] + domain + [('jira_compound_key', operator, name)]
-            recs = self.search(domain + args, limit=limit)
-        return recs.name_get()
+    # @api.model
+    # def name_search(self, name, args=None, operator='ilike', limit=100):
+    #     args = args or []
+    #     recs = self.browse()
+    #     if name:
+    #         recs = self.search([('name', '=', name)] + args, limit=limit)
+    #     if not recs:
+    #         recs = self.search(['|',('name', operator, name), ('jira_compound_key', operator, name)] + args, limit=limit)
+    #     return recs.name_get()
 
 
 class Project(models.Model):
@@ -126,8 +115,12 @@ class TaskUser(models.Model):
     )
 
     from_date = fields.Date(
-        string='From Date',
-        default=datetime.today()
+        string='From Date'
+        # default=datetime.today()
+    )
+    user_ids = fields.Many2many(
+        'res.users',
+        string='Consultants',
     )
 
     @api.onchange('user_id')
@@ -237,7 +230,7 @@ class ProjectInvoicingProperties(models.Model):
         if project:
             analytic_lines = self.env['account.analytic.line'].search([
                 ('project_id', 'in', project.ids),
-                ('product_uom_id', '=', self.env.ref('product.product_uom_km').id)
+                ('product_uom_id', '=', self.env.ref('uom.product_uom_km').id)
             ])
             if analytic_lines:
                 non_invoiceable_mileage = False if self.invoice_mileage else True
@@ -248,4 +241,4 @@ class ProjectInvoicingProperties(models.Model):
                     rec = tuple(analytic_lines.ids)
                 self.env.cr.execute("""
                     UPDATE account_analytic_line SET product_uom_id = %s, non_invoiceable_mileage = %s WHERE id %s %s
-                """ % (self.env.ref('product.product_uom_km').id, non_invoiceable_mileage, cond, rec))
+                """ % (self.env.ref('uom.product_uom_km').id, non_invoiceable_mileage, cond, rec))

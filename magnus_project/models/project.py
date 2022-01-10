@@ -21,6 +21,8 @@ class Project(models.Model):
         string='Contract/Analytic',
         )
     wbso = fields.Boolean('WBSO')
+    linked_operating_unit = fields.Boolean(string="Linked Operating Unit",related="analytic_account_id.linked_operating_unit")
+    operating_unit_ids = fields.Many2many('operating.unit',string="Operating Units",related="analytic_account_id.operating_unit_ids")
 
     @api.multi
     def name_get(self):
@@ -45,22 +47,9 @@ class AccountAnalyticAccount(models.Model):
 class Task(models.Model):
     _inherit = "project.task"
 
-    @api.multi
-    @api.depends('description')
-    def parse_description(self):
-        import re
-        text = re.compile('<.*?>')
-        for res in self:
-            desc = res.description
-            message = ''
-            if desc and desc != '<p><br></p>':
-                message = re.sub(text, '', desc)
-            res.parsed_description = message
-
     standby = fields.Boolean('Standby')
     outof_office_hours_week = fields.Boolean('Out of office hours week')
     outof_office_hours_weekend = fields.Boolean('Out of office hours weekend')
-    parsed_description = fields.Char(compute=parse_description)
 
     @api.model
     def default_get(self, fields):

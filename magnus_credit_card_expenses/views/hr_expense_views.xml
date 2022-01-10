@@ -30,13 +30,13 @@
         <record id="hr_expense_form_view_inherit" model="ir.ui.view">
             <field name="name">hr.expense.form</field>
             <field name="model">hr.expense</field>
-            <field name="inherit_id" ref="hr_expense.hr_expense_form_view"></field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_view_form"></field>
             <field eval="25" name="priority"/>
             <field name="arch" type="xml">
             	<field name="payment_mode" position="attributes">
             		<attribute name="invisible">True</attribute>
             	</field>
-            	<label for="payment_mode" position="attributes">
+            	<label for="payment_mode" position="attributes">a
             		<attribute name="invisible">True</attribute>
             	</label>
             	<field name="currency_id" position="attributes">
@@ -97,6 +97,7 @@
               </p>
             </field>
         </record>
+
 
 
     <record id="action_hr_expense_refused_expenses" model="ir.actions.act_window">
@@ -208,7 +209,7 @@
     <record id="hr_expense.hr_expense_actions_my_unsubmitted" model="ir.actions.act_window">
         <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card','=',False)]</field>
     </record>
-    <record id="hr_expense.action_hr_expense_refused_expenses" model="ir.actions.act_window">
+    <record id="action_hr_expense_refused_expenses" model="ir.actions.act_window">
         <field name="domain">[('employee_id.user_id', '=', uid),('is_from_crdit_card','=',False)]</field>
     </record>
     <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">

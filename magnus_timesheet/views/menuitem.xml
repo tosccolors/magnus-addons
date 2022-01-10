@@ -8,7 +8,7 @@
                   parent="menu_analytic_invoicing"
                   sequence="2"/>
         <menuitem id="menu_action_analytic_invoice"
-                  action="action_view_analytic_invoice" name="Draft Invoices"
+                  action="magnus_timesheet.action_view_analytic_invoice" name="Draft Invoices"
                   parent="menu_analytic" sequence="20" />
         <menuitem id="menu_analytic_entries" name="Analytic"
                   parent="menu_analytic_invoicing"

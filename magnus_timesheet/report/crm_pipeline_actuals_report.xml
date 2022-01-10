@@ -6,7 +6,6 @@
             <field name="arch" type="xml">
                 <pivot string="Pipeline Actuals">
                     <field name="lead_id" type="row"/>
-                    <!--<field name="month" type="col"/>-->
                     <field name="total_revenue" string="Revenue Split" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                     <field name="magnus_blue_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                     <field name="magnus_red_bv_amount" type="measure" widget="monetary" options="{'currency_field': 'company_currency'}"/>
@@ -58,7 +57,8 @@
             <!--field name="context">{'search_default_internal_emp_filter':1}</field-->
         </record>
 
-        <menuitem id="crm_pipeline_actuals_report_menu" name="Pipeline Actuals"
-            parent="sales_team.menu_sale_report" action="action_crm_pipeline_actuals_report" sequence="10"/>
+        <!-- <menuitem id="crm_pipeline_actuals_report_menu" name="Pipeline Actuals"
+            parent="sales_team.menu_sale_report" action="action_crm_pipeline_actuals_report" sequence="10"/> -->
+            <!--  raise ValueError('External ID not found in the system: %s' % xmlid) commented -->
 
 </odoo>

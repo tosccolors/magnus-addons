@@ -10,4 +10,6 @@ from . import fleet
 from . import res_users
 from . import analytic
 from . import hr_employee
+from . import timesheet_analytic_line
 from . import magnus_planning
+
