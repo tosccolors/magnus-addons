@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-
-        <menuitem action="project_invoicing_properties_action" id="menu_project_invoicing_properties_act" parent="project.menu_project_config" groups="group_magnus_invoicing"/>
-
-</odoo>

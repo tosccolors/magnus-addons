@@ -1,3 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_nmbrs_fleet,access_nmbrs_fleet,model_nmbrs_fleet,nmbrs_fleet_interface,1,1,1,1
-

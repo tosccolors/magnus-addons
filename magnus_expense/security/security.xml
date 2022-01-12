@@ -1,9 +1,0 @@
-<odoo>
-    <data>
-      <record id="group_hr_expense_partner" model="res.groups">
-      <field name="name">Partner</field>
-      <field name="implied_ids" eval="[(4, ref('hr_expense.group_hr_expense_user'))]"/>
-      <field name="category_id" ref="base.module_category_hr_expense"/>
-    </record>
-    </data>
-</odoo>
