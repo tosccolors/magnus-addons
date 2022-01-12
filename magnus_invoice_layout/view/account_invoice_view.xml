@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="view_account_invoice_form_inherits" model="ir.ui.view">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form" />
+            <field name="priority" eval="90" />
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[1]" position="after">
+                    <page string="Invoice Description">
+                        <div class="oe_clear">
+                            <label for="invoice_description"/>
+                        </div>
+                        <field name="invoice_description" class="oe_inline" placeholder="Add description" />
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_res_company_form_inherits" model="ir.ui.view">
+            <field name="name">res.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form" />
+            <field name="priority" eval="90" />
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/notebook/page[1]" position="inside">
+                    <separator string="Background Image for Report"/>
+                    <field name="report_background_image" widget="image" class="oe_avatar oe_left"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

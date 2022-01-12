@@ -1,0 +1,420 @@
+<odoo>
+    <data>
+
+        <record id="magnus_planning_tree" model="ir.ui.view">
+            <field name="name">magnus.planning.tree</field>
+            <field name="model">magnus.planning</field>
+            <field name="arch" type="xml">
+                <tree
+                    string="Planning Sheets"
+                >
+                    <field name="employee_id"/>
+                    <field name="name" string="Period"/>
+                    <field name="department_id" invisible="1"/>
+                    <!--<field name="date_start" invisible="1"/>-->
+                    <!--<field name="date_end" invisible="1"/>-->
+                    <!--<field name="reviewer_id"/>-->
+                    <field name="total_time" widget="float_time"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="magnus_planning_tree_my" model="ir.ui.view">
+            <field name="name">magnus.planning.tree.my</field>
+            <field name="model">magnus.planning</field>
+            <field name="inherit_id" ref="magnus_planning_tree"/>
+            <field name="mode">primary</field>
+            <field name="priority">1000</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='employee_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="magnus_planning_form" model="ir.ui.view">
+            <field name="name">magnus.planning.form</field>
+            <field name="model">magnus.planning</field>
+            <field name="arch" type="xml">
+                <form string="planning">
+                    <field name="user_id" invisible="1"/>
+                    <!--<field name="review_policy" invisible="1"/>-->
+                    <header>
+                        <button class="oe_stat_button" name="compute_planning_lines" type="object" string="Update Planning" />
+                        <button class="oe_stat_button" name="%(magnus_timesheet.action_view_view_planning_wizard)d" string="Change Planning Period"  type="action" target="new" context="{'active_planning_quarter':planning_quarter}"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="employee_id" class="oe_edit_only"/>
+                            <h1><field name="employee_id" class="oe_inline" placeholder="Employee's Name"/></h1>
+                        </div>
+                        <group>
+                            <group name="weeks">
+                                <label for="planning_quarter" string="Planning Period"/>
+                                <div><field name="planning_quarter"/></div>
+                                <label for="week_to" string="Timesheet Period" invisible="1"/>
+                                <div style="display: inline;" invisible="1"><field name="week_from" class="oe_inline"/> to <field name="week_to" invisible="1" class="oe_inline"/></div>
+                            </group>
+                            <!--<group name="dates">
+                                <label for="date_start" string="Timesheet Period" invisible="1"/>
+                                <div style="display: inline;"><field name="date_start" class="oe_inline" /> to <field name="date_end" class="oe_inline"/></div>
+                            </group>-->
+
+                            <group name="details">
+                                <field name="company_id" groups="base.group_multi_company" force_save="1"/>
+                                <field name="department_id" invisible="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Summary">
+                                <group name="Sheet" class="magnus_planning_summary">
+                                    <field name="line_ids" nolabel="1"
+                                           widget="x2many_2d_matrix"
+                                           field_x_axis="value_x"
+                                           field_y_axis="value_y"
+                                           field_value="unit_amount"
+                                           x_axis_clickable="0"
+                                           y_axis_clickable="1">
+                                        <!-- Well this is embarrassing... we need to set a huge limit for records to be fetched in
+                                        order to make sure that all rows are going to be displayed. At least until we find a method to
+                                        dynamically define the limit.-->
+                                        <tree limit="1000000">
+                                            <field name="value_x"/>
+                                            <field name="value_y"/>
+                                            <field name="unit_amount" widget="float_time"/>
+                                            <field name="planning_id"/>
+                                            <field name="date"/>
+                                            <field name="employee_id"/>
+                                            <field name="project_id"/>
+                                            <field name="company_id" groups="base.group_multi_company"/>
+                                            <field name="new_line_id" invisible="1"/>
+                                            <!--  Don't remove last fields, they are technically needed for the widget to work properly.-->
+                                        </tree>
+                                    </field>
+                                    <group class="oe_edit_only">
+                                        <field
+                                            name="add_line_project_id"
+                                            domain="[('company_id', '=', company_id), ('allow_timesheets', '=', True)]"
+                                            required="0"
+                                        />
+                                        <field
+                                            name="add_line_emp_id"
+                                            attrs="{'invisible': [('add_line_project_id', '=', False)]}"
+                                            required="0"
+                                        />
+                                        <button name="button_add_line"
+                                                type="object"
+                                                string="Add new line"
+                                                class="oe_highlight"
+                                                attrs="{'invisible': [('add_line_project_id', '=', False)]}"
+                                        />
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Details">
+                                <field
+                                    name="planning_analytic_ids"
+                                    nolabel="1"
+                                    context="{'user_id': user_id}">
+                                    <tree editable="bottom" string="Planning Activities">
+                                        <field name="date"/>
+                                        <field name="week_id"/>
+                                        <field name="employee_id" readonly="1"/>
+                                        <field name="project_id" required="1"/>
+                                        <field name="name"/>
+                                        <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>
+                                        <field name="user_id" invisible="1"/>
+                                    </tree>
+                                    <form string="Planning Activities">
+                                        <group>
+                                            <field name="date"/>
+                                            <field name="name"/>
+                                            <field name="employee_id" readonly="1"/>
+                                            <field name="project_id" required="1"/>
+                                            <field name="unit_amount" widget="float_time" string="Hours"/>
+                                            <field name="user_id" invisible="1"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="act_view_magnus_planning" model="ir.actions.act_window">
+            <field name="name">My Planning</field>
+            <field name="res_model">magnus.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                new timesheet.
+              </p><p>
+                You must record timesheets every day and confirm at the end
+                of the week. Once the timesheet is confirmed, it should be
+                validated by a manager.
+              </p><p>
+                Timesheets can also be invoiced to customers, depending on the
+                configuration of each project's related contract.
+              </p>
+            </field>
+        </record>
+
+        <menuitem action="ir_actions_server_timesheet_planning_employee" id="menu_act_magnus_planning" parent="hr_timesheet.menu_hr_time_tracking"
+             sequence="4" groups="magnus_timesheet.group_magnus_planning_officer"/>
+
+        <menuitem action="ir_actions_server_timesheet_planning_self" id="menu_act_magnus_self_planning" parent="hr_timesheet.menu_hr_time_tracking"
+             sequence="3" groups="magnus_timesheet.group_magnus_planning_user"/>
+
+        <record id="magnus_planning_form_my" model="ir.ui.view">
+            <field name="name">magnus.planning.form.my</field>
+            <field name="model">magnus.planning</field>
+            <field name="inherit_id" ref="magnus_planning_form"/>
+            <field name="mode">primary</field>
+            <field name="priority">1000</field>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_title')]" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_magnus_planning_kanban" model="ir.ui.view">
+            <field name="name">magnus.planning.kanban</field>
+            <field name="model">magnus.planning</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" create="0">
+                    <field name="employee_id"/>
+                    <!--<field name="date_start" invisible="1"/>
+                    <field name="date_end" invisible="1"/>-->
+                    <field name="name"/>
+                    <field name="total_time"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click container">
+                                <div class="row no-gutters">
+                                    <div class="col-2">
+                                        <img t-att-src="kanban_image('hr.employee', 'image_small', record.employee_id.raw_value)"
+                                            t-att-title="record.employee_id.value"
+                                            t-att-alt="record.employee_id.value"
+                                            width="40" height="40"
+                                            class="oe_kanban_avatar float-left mr4"/>
+                                    </div>
+                                    <div class="col-10">
+                                        <strong class="o_kanban_record_title"><t t-esc="record.employee_id.value"/></strong>
+                                        <div class="text-muted o_kanban_record_subtitle">
+                                            <t t-esc="record.name.value"/>
+                                        </div>
+                                        <div class="o_dropdown_kanban dropdown" groups="base.group_user">
+                                            <a role="button" class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" href="#" aria-label="Dropdown menu" title="Dropdown menu">
+                                                <span class="fa fa-ellipsis-v"/>
+                                            </a>
+                                            <div class="dropdown-menu" role="menu">
+                                                <a t-if="widget.editable" role="menuitem" type="edit" class="dropdown-item">Edit</a>
+                                                <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row no-gutters justify-content-end">
+                                    <div class="col-3"><span class="text-muted text-nowrap">Period</span></div>
+                                    <div class="col-7"><t t-esc="record.planning_quarter.date_start.value"/> - <t t-esc="record.planning_quarter.date_end.value"/></div>
+                                    <div class="w-100"></div>
+                                    <div class="col-3"><span class="text-muted text-nowrap">Total time</span></div>
+                                    <div class="col-7"><t t-esc="record.total_time.value" t-options="{'widget': 'float_time'}"/></div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+
+
+
+        <record id="act_magnus_planning_my_planning" model="ir.actions.act_window">
+            <field name="name">My Planning Sheets</field>
+            <field name="res_model">magnus.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+            <field name="context">{'self_planning': 1}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                 New planning.
+                </p><p>
+                 You must record timesheets in the sheet every day and confirm at the end
+                 of the reporting period. Once the planning is confirmed, it should be
+                 validated by a reviewer.
+                </p><p>
+                 Planning Sheets can also be invoiced to customers, depending on
+                 the configuration of each project's related contract.
+                </p>
+            </field>
+        </record>
+
+        <record id="act_magnus_planning_my_planning_tree" model="ir.actions.act_window.view">
+            <field name="view_mode">tree</field>
+            <field name="sequence" eval="4"/>
+            <field name="view_id" ref="magnus_planning_tree_my"/>
+            <field name="act_window_id" ref="act_magnus_planning_my_planning"/>
+        </record>
+
+        <record id="act_magnus_planning_my_planning_form" model="ir.actions.act_window.view">
+            <field name="view_mode">form</field>
+            <field name="sequence" eval="5"/>
+            <field name="view_id" ref="magnus_planning_form_my"/>
+            <field name="act_window_id" ref="act_magnus_planning_my_planning"/>
+        </record>
+
+        <record id="act_magnus_planning_all_plannings" model="ir.actions.act_window">
+            <field name="name">My Employee's Planning Sheets</field>
+            <field name="res_model">magnus.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <!--<field name="search_view_id" ref="view_magnus_planning_filter"/>-->
+            <!-- <field name="domain">['|',('employee_id.user_id', '=', uid),('employee_id.parent_id.user_id', '=', uid)]</field> -->
+            <field name="context">{'all_planning': 1}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                 Planning Sheets.
+                </p><p>
+                 Employees must record timesheets in the sheet every day and confirm at the end
+                 of the reporting period. Once the planning is confirmed, it should be
+                 validated by a reviewer.
+                </p><p>
+                 Planning Sheets can also be invoiced to customers, depending on
+                 the configuration of each project's related contract.
+                </p>
+            </field>
+        </record>
+
+        <menuitem
+            action="act_magnus_planning_my_planning"
+            id="menu_act_magnus_planning_my_planning"
+            parent="hr_timesheet.menu_hr_time_tracking"
+            sequence="3"
+        />
+
+        <menuitem
+            action="act_magnus_planning_all_plannings"
+            id="menu_act_magnus_planning_all_plannings"
+            parent="hr_timesheet.menu_hr_time_tracking"
+            sequence="4"
+            groups="hr_timesheet.group_timesheet_manager"
+        />
+
+        <record id="act_magnus_planning_to_review" model="ir.actions.act_window">
+            <field name="name">Planning Sheets to Review</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">magnus.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" eval="False"/>
+            <field name="context">{'search_default_to_review':1}</field>
+            <!--<field name="domain">[('can_review','=',True)]</field>-->
+            <!--<field name="search_view_id" ref="view_magnus_planning_filter"/>-->
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Timesheets to review.
+              </p><p>
+                Employees must record timesheets every day and confirm at the end
+                of the reporting period. Once the planning is confirmed, it should be
+                validated by a reviewer.
+              </p><p>
+                Timesheets can also be invoiced to customers, depending on the
+                configuration of each project's related contract.
+              </p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_hr_to_review"
+            name="To Review"
+            parent="hr_timesheet.timesheet_menu_root"
+            sequence="7"
+        />
+
+        <menuitem
+            action="act_magnus_planning_to_review"
+            id="menu_act_magnus_planning_to_review"
+            parent="menu_hr_to_review"
+            sequence="11"
+        />
+
+
+
+        <record id="standby_planning_form_calender" model="ir.ui.view">
+            <field name="name">magnus.standby.planning.form</field>
+            <field name="model">magnus.standby.planning</field>
+            <field name="arch" type="xml">
+                <form string="Standby-Planing">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="employee_id" domain="[('external', '=', False), ('user_id', '!=', False)]"/>
+                                <field name="department_id"/>
+                                <label for="date_from" string="Date Range"/>
+                                <div>
+                                    <div>
+                                        <field name="date_from" class="oe_inline"/>
+                                        <label for="date_to" string="-" class="oe_inline"/>
+                                        <field name="date_to" class="oe_inline"/>
+                                    </div>
+                                </div>
+                                
+                                <label for="note" string="Summary"/>
+                                <field name="note" nolabel="1" placeholder="Add a note..."/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="standby_planning_calendar_view" model="ir.ui.view">
+            <field name="name">magnus.standby.planning.calendar</field>
+            <field name="model">magnus.standby.planning</field>
+            <field name="arch" type="xml">
+                <!-- <calendar string="Standby-Planing" color="employee_id" date_start="date_from" date_stop="date_to" mode="month" quick_add="False" avatar_model="hr.employee" event_open_popup="%(magnus_timesheet.standby_planning_form_calender)"> -->
+                <calendar string="Standby-Planing" color="employee_id" date_start="date_from" date_stop="date_to" mode="month" quick_add="False" event_open_popup="%(magnus_timesheet.standby_planning_form_calender)">
+                    <field name="display_name"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="view_magnus_standby_planning_tree" model="ir.ui.view">
+            <field name="name">magnus.standby.planning.tree</field>
+            <field name="model">magnus.standby.planning</field>
+            <field name="arch" type="xml">
+                <tree string="Plannings">
+                    <field name="employee_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_standby_planning" model="ir.actions.act_window">
+            <field name="name">Stand-By Planning</field>
+            <field name="res_model">magnus.standby.planning</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar,tree</field>
+            <field name="view_id" ref="standby_planning_calendar_view"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to record activities.
+              </p><p>
+                You can track Standby Planning.
+              </p>
+            </field>
+        </record>
+
+
+        <menuitem id="stand_by_planing_menu" parent="hr_timesheet.menu_hr_time_tracking" sequence="99" action="action_standby_planning" groups="hr.group_hr_user,hr.group_hr_manager"/>
+
+
+    </data>
+</odoo>

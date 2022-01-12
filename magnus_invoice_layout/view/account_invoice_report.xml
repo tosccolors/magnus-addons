@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <report auto="False"
+            id="account.account_invoices"
+            model="account.invoice"
+            name="account.invoice.custom"
+            rml="magnus_invoice_layout/report/report_account_invoice_print.rml"
+            string="Invoices"
+            report_type="pdf"
+            attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+            attachment_use="True"
+            usage="default"
+            header="False"/>
+
+    </data>
+</odoo>

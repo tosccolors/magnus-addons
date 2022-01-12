@@ -1,0 +1,5 @@
+id,name,chart_template_id/id
+megis-oe.fiscal_position_template_domestic,Binnenland,megis-oe.megis-oe_chart_template
+megis-oe.fiscal_position_template_transferred,BTW verlegd,megis-oe.megis-oe_chart_template
+megis-oe.fiscal_position_template_eu,EU landen,megis-oe.megis-oe_chart_template
+megis-oe.fiscal_position_template_non_eu,Niet-EU landen,megis-oe.megis-oe_chart_template

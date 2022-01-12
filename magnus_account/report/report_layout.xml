@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_qweb_operating_unit.external_layout_ou">
+        <!-- Multicompany -->
+        <t t-if="not o and doc">
+            <t t-set="o" t-value="doc"/>
+        </t>
+        <t t-if="o and 'company_id' in o">
+            <t t-set="company" t-value="o.company_id"></t>
+        </t>
+        <t t-if="not o or not 'company_id' in o">
+            <t t-set="company" t-value="res_company"></t>
+        </t>
+
+        <t t-call="report_qweb_operating_unit.external_layout_header_ou" />
+        <t t-raw="0" />
+        <!--<t t-call="report_qweb_operating_unit.external_layout_footer_ou" />-->
+    </template>
+
+    <template id="report_qweb_operating_unit.external_layout_header_ou">
+        <div class="header">
+            <div class="row">
+                <div class="row backgroundimage" style="position:relative;font-size:3em;
+                            width:100%;height:100%;z-index:1000;padding-left:5px;">
+                    <img t-if="o.operating_unit_id.logo" t-att-src="'data:image/png;base64,%s' % o.operating_unit_id.report_background_image1"
+                            style="width:100%; display: block;"/>
+
+                </div>
+            </div>
+        </div>
+    </template>
+</odoo>

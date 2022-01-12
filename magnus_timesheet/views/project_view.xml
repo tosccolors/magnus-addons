@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    <!-- Project -->
+        <record id="project_invoice_form_inherited" model="ir.ui.view">
+          <field name="name">Inherit project form : Invoicing Data</field>
+          <field name="model">project.project</field>
+          <field name="inherit_id" ref="hr_timesheet.project_invoice_form"/>
+          <field name="priority">24</field>
+          <field name="arch" type="xml">
+            <xpath expr="//label[@for='allow_timesheets']" position="after">
+              <separator/>
+              <field name="overtime" class="oe_inline" string="Overtime Taken"/>
+              <label for="overtime"/>
+              <field name="overtime_hrs" class="oe_inline" string="Overtime hours"/>
+              <label for="overtime_hrs"/>
+            </xpath>
+          </field>
+        </record>
+
+    <!-- Task -->
+        <record id="view_task_form_inherit" model="ir.ui.view">
+            <field name="name">project.task.form</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                    <attribute name="domain">[('is_company','=',True)]</attribute>
+                </field>
+                <page name="description_page" position="before">
+                    <page name="users" string="Fee Earners">
+                        <group colspan="4" col="2">
+                            <field name="task_user_ids" context="{'default_task_id':active_id}">
+                                    <tree string="Fee Earners" create="true"
+                                          edit="true" delete="true" copy="false">
+                                    <field name="user_id" />
+                                    <field name="from_date" />
+                                    <field name="product_id"/>
+                                    <field name="fee_rate"/>
+                                </tree>
+                                <form string="Fee Earners">
+                                    <group>
+                                        <field name="user_id" invisible="0"/>
+                                        <!--<field name="user_ids" widget="many2many_tags"/>-->
+                                        <field name="from_date" />
+                                        <field name="product_id"/>
+                                        <field name="fee_rate"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </group>
+                    </page>
+                </page>
+            </field>
+        </record>
+
+    <!-- TaskUser -->
+        <record id="view_task_user_tree" model="ir.ui.view">
+            <field name="name">task.user.tree</field>
+            <field name="model">task.user</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="from_date"/>
+                    <field name="fee_rate"/>
+                    <field name="task_id"/>
+                </tree>
+            </field>
+        </record>
+
+    <!-- ProjectInvoicingProperties -->
+        <record model="ir.ui.view" id="project_invoicing_period_form_inherited">
+            <field name="name">Invoicing Properties</field>
+            <field name="model">project.invoicing.properties</field>
+            <field name="inherit_id" ref="magnus_project.project_invoicing_Period_form_view"/>
+            <field name="arch" type="xml">
+                <field name="fixed_fee_capped" position="after">
+                    <field name="invoice_mileage" />
+                    <field name="group_invoice" />
+                    <field name="group_by_fee_rate"/>
+                    <field name="group_by_month"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

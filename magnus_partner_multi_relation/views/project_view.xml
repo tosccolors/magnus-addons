@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="project_invoicing_Period_form_view">
+            <field name="name">Invoicing Properties</field>
+            <field name="model">project.invoicing.properties</field>
+            <field name="inherit_id" ref="magnus_account.project_invoicing_Period_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='custom_header_footer']" position="after">
+                    <group name="partner_relation" string="Relations">
+                        <field name="relation_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

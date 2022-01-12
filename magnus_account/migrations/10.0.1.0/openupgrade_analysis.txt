@@ -1,0 +1,17 @@
+---Fields in module 'magnus_account'---
+magnus_account / account.analytic.line    / datum_naar_slam (date)        : previously in module megis_account_slam
+magnus_account / account.analytic.line    / regel_naar_slam (boolean)     : previously in module megis_account_slam
+magnus_account / account.invoice          / invoice_description (text)    : previously in module magnus_invoice_layout
+magnus_account / account.journal          / slam_relevant (boolean)       : previously in module megis_account_slam
+magnus_account / res.company              / report_background_image (binary): previously in module magnus_invoice_layout
+---XML records in module 'magnus_account'---
+NEW ir.actions.report.xml: account.account_invoices
+NEW ir.ui.view: magnus_account.invoice_supplier_form_inherit2
+NEW ir.ui.view: magnus_account.invoice_supplier_formwh1
+NEW ir.ui.view: magnus_account.invoice_treewh1
+NEW ir.ui.view: magnus_account.view_account_analytic_line_form_slam
+NEW ir.ui.view: magnus_account.view_account_analytic_line_tree_slam
+NEW ir.ui.view: magnus_account.view_account_invoice_form_inherits
+NEW ir.ui.view: magnus_account.view_account_journal_form_slam
+NEW ir.ui.view: magnus_account.view_account_journal_tree_slam
+NEW ir.ui.view: magnus_account.view_res_company_form_inherits

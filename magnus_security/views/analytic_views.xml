@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="hr_timesheet_line_security_tree" model="ir.ui.view">
+            <field name="name">Timesheet</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+               <tree string="Timesheet" editable="bottom">
+                    <field name="date"/>
+                    <field name="name"/>
+                    <field name="project_id"/>
+                    <field name="task_id" domain="[('project_id','=',project_id)]"/>
+                    <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>
+                    <field name="kilometers" style="border-color:#7F8C8D;"/>
+                    <field name="user_id" invisible="1"/>
+               </tree>
+            </field>
+        </record>
+    </data>
+</odoo>

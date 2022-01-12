@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_invoice_document_magnus" inherit_id="account.report_invoice_document">
+
+            <xpath expr="//table[1]//thead//th[@class='hidden']" position="replace">
+                <th>Source Document</th>
+            </xpath>
+            <xpath expr="//table[1]//tbody//td[@class='hidden']" position="replace">
+                <td><span t-field="l.origin"/></td>
+            </xpath>
+            <xpath expr="//div[@t-if='len(o.tax_line_ids) > 0']" position="after">
+                <t t-set="project_ids" t-value="o.invoice_line_ids.mapped('project_id')"/>
+                <t t-set="add_specs_invoice_report" t-value="project_ids.filtered(lambda p: p.correction_charge and p.specs_invoice_report)"/>
+
+                    <div class="row" t-if="len(add_specs_invoice_report) > 0">
+
+                        <div class="col-xs-6" style="page-break-inside:avoid;">
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr class="border-black">
+                                        <th width="15%">Employee</th>
+                                        <th class="text-right" width="15%">Project</th>
+                                        <th class="text-right" width="20%">Task</th>
+                                        <th class="text-right" width="40%">Timesheet Date</th>
+                                        <th class="text-right" width="10%">Timesheet hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o._get_timesheet_by_group()" t-as="aalines">
+                                        <t t-set="project" t-value="aalines[0]"/>
+                                        <t t-set="user" t-value="aalines[1]"/>
+                                        <t t-set="rspan" t-value="len(aalines_value)+1"/>
+                                        <td t-att-rowspan="rspan" width="20%">
+                                            <span t-field="user.name"/>
+                                        </td>
+                                        <td t-att-rowspan="rspan" class="text-right" width="20%">
+                                            <span t-field="project.name"/>
+                                        </td>
+                                        <tr t-foreach="aalines_value" t-as="aal_val">
+                                            <td class="text-right" width="20%">
+                                                <span t-field="aal_val.task_id.name"/>
+                                            </td>
+                                            <td class="text-right" width="30%">
+                                                <span t-field="aal_val.sheet_id.date_from" t-options='{"widget": "date"}'/>
+                                                 -<span t-field="aal_val.sheet_id.date_to" t-options='{"widget": "date"}'/>
+                                            </td>
+                                            <td class="text-right" width="10%">
+                                                <t t-esc="'%02d:%02d' % (int(aal_val.unit_amount), aal_val.unit_amount % 1 * 60)" />
+                                            </td>
+                                        </tr>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+            </xpath>
+
+        </template>
+
+    </data>
+</odoo>

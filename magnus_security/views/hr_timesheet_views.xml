@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="hr_timesheet_sheet_security_form_inherited" model="ir.ui.view">
+            <field name="name">hr.timesheet.sheet.form</field>
+            <field name="model">hr_timesheet.sheet</field>
+            <field name="inherit_id" ref="magnus_timesheet.hr_timesheet_sheet_form_inherited"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='timesheet_ids']/tree" position="replace">
+                </xpath>
+                <!-- <xpath expr="//field[@name='timesheet_ids']" position="attributes">
+                    <attribute name="context">{'employee_id': employee_id, 'user_id':user_id, 'timesheet_date_from': date_from, 'timesheet_date_to': date_to, 'tree_view_ref' : 'magnus_security.hr_timesheet_line_security_tree'}</attribute>
+                </xpath> -->
+                <!-- date to and date from not present in view so commented -->
+            </field>
+        </record>
+
+
+
+    </data>
+</odoo>

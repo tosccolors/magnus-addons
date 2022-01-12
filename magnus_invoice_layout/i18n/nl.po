@@ -1,0 +1,53 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* magnus_invoice_layout
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-11 11:29+0000\n"
+"PO-Revision-Date: 2016-03-11 11:29+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: magnus_invoice_layout
+#: field:account.invoice,invoice_description:0
+msgid "Description"
+msgstr "Omschrijving"
+
+#. module: magnus_invoice_layout
+#: model:ir.model,name:magnus_invoice_layout.model_res_company
+msgid "Companies"
+msgstr "Bedrijven"
+
+#. module: magnus_invoice_layout
+#: view:res.company:0
+#: field:res.company,report_background_image:0
+msgid "Background Image for Report"
+msgstr "Achtergrond afbeelding voor factuur"
+
+#. module: magnus_invoice_layout
+#: view:account.invoice:0
+msgid "Invoice Description"
+msgstr "Factuur omschrijving"
+
+#. module: magnus_invoice_layout
+#: help:res.company,report_background_image:0
+msgid "Set Background Image for Report"
+msgstr "Stel achtergrond afbeelding in voor factuur"
+
+#. module: magnus_invoice_layout
+#: view:account.invoice:0
+msgid "Add description"
+msgstr "Voeg omschrijving toe..."
+
+#. module: magnus_invoice_layout
+#: model:ir.model,name:magnus_invoice_layout.model_account_invoice
+msgid "Invoice"
+msgstr "Factuur"
+
