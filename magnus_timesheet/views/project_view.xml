@@ -37,6 +37,8 @@
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
+                                        <field name="ic_fee_rate"/>
+                                        <field name="margin"/>
                                     </tree>
                             </field>
                         </group>
@@ -55,6 +57,8 @@
                     <field name="product_id"/>
                     <field name="from_date"/>
                     <field name="fee_rate"/>
+                    <field name="ic_fee_rate"/>
+                    <field name="margin"/>
                     <field name="task_id"/>
                 </tree>
             </field>

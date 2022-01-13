@@ -53,31 +53,31 @@ class AccountMove(models.Model):
         res = super(AccountMove, self).post()
         return res
 
-    @api.multi
-    def add_invoiced_revenue_to_move(self, intercompany_revenue_lines, operating_unit_id):
-        self.ensure_one()
-        mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
-        mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
-        for line in intercompany_revenue_lines:
-            if line.account_id.id in mapping and line.account_id.id in mapping2:
-                ## revenue line
-                line.with_context(wip=True).copy({
-                        'account_id': mapping[line.account_id.id],
-                        'operating_unit_id': operating_unit_id,
-                        'user_id': False,
-                        'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
-                })
-                ## intercompany cost of sales line
-                line.with_context(wip=True).copy({
-                        'account_id': mapping2[line.account_id.id],
-                        'operating_unit_id': operating_unit_id,
-                        'debit': line.credit,
-                        'credit': line.debit,
-                        'user_id': False,
-                        'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
-                })
-            else:
-                raise UserError(_('The mapping from account "%s" does not exist or is incomplete.') % (line.account_id.name))
+    # @api.multi
+    # def add_invoiced_revenue_to_move(self, intercompany_revenue_lines, operating_unit_id):
+    #     self.ensure_one()
+    #     mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
+    #     mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
+    #     for line in intercompany_revenue_lines:
+    #         if line.account_id.id in mapping and line.account_id.id in mapping2:
+    #             ## revenue line
+    #             line.with_context(wip=True).copy({
+    #                     'account_id': mapping[line.account_id.id],
+    #                     'operating_unit_id': operating_unit_id,
+    #                     'user_id': False,
+    #                     'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
+    #             })
+    #             ## intercompany cost of sales line
+    #             line.with_context(wip=True).copy({
+    #                     'account_id': mapping2[line.account_id.id],
+    #                     'operating_unit_id': operating_unit_id,
+    #                     'debit': line.credit,
+    #                     'credit': line.debit,
+    #                     'user_id': False,
+    #                     'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name
+    #             })
+    #         else:
+    #             raise UserError(_('The mapping from account "%s" does not exist or is incomplete.') % (line.account_id.name))
 
 
     @api.multi

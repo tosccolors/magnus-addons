@@ -38,6 +38,10 @@ class AccountInvoice(models.Model):
         ondelete='restrict',
         copy=False
     )
+    ic_lines = fields.Boolean(
+        string='IC lines generated',
+        default=False
+    )
 
     def compute_target_invoice_amount(self):
         try:
@@ -108,20 +112,11 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def action_invoice_open(self):
-        res = super(AccountInvoice, self).action_invoice_open()
         to_process_invoices = self.filtered(lambda inv: inv.type in ('out_invoice', 'out_refund'))
+        if to_process_invoices:
+            to_process_invoices.action_create_ic_lines()
+        res = super(AccountInvoice, self).action_invoice_open()
         for invoice in to_process_invoices:
-            if invoice.move_id:
-                intercompany_revenue_lines = invoice.move_id.line_ids.filtered(
-                                            lambda l: l.operating_unit_id != invoice.operating_unit_id and
-                                            l.account_id.user_type_id in (
-                                                self.env.ref('account.data_account_type_other_income'),
-                                                self.env.ref('account.data_account_type_revenue')))
-                if intercompany_revenue_lines:
-                    state_move_id = invoice.set_move_to_draft()
-                    invoice.move_id.add_invoiced_revenue_to_move(intercompany_revenue_lines, self.operating_unit_id.id)
-                    if state_move_id == 'posted':
-                        invoice.move_id.post()
             analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
             if analytic_invoice_id and invoice.type != 'out_refund':
                 # if invoicing period doesn't lie in same month
@@ -132,6 +127,60 @@ class AccountInvoice(models.Model):
                 if inv_date != period_date and invoice.move_id:
                     invoice.action_wip_move_create()
         return res
+
+    @api.multi
+    def action_create_ic_lines(self):
+        mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
+        mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
+        for invoice in self:
+            if invoice.ic_lines:
+                continue
+            intercompany_revenue_lines = invoice.invoice_line_ids.filtered(
+                lambda l: l.user_id._get_operating_unit_id() != invoice.operating_unit_id and
+                            l.account_id.user_type_id in (
+                                  self.env.ref('account.data_account_type_other_income'),
+                                  self.env.ref('account.data_account_type_revenue')))
+            if intercompany_revenue_lines:
+                for line in intercompany_revenue_lines:
+                    if line.account_id.id in mapping and line.account_id.id in mapping2:
+                        ## revenue line
+                        revenue_line = line.copy({
+                            'account_id': mapping[line.account_id.id],
+                            'operating_unit_id': invoice.operating_unit_id.id,
+                            'user_id': False,
+                            'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
+                            'ic_line': True
+                        })
+                        revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
+                                                 line.user_task_total_line_id.fee_rate
+
+                        # revenue_line.invoice_line_tax_ids.compute_all(revenue_line.price_unit, currency=None, quantity=revenue_line.quantity, product=None, partner=None)
+                        ## intercompany cost of sales line
+                        cost_line = line.copy({
+                            'account_id': mapping2[line.account_id.id],
+                            'product_id': False,
+                            'operating_unit_id': invoice.operating_unit_id.id,
+                            'price_unit': - line.price_unit,
+                            'user_id': False,
+                            'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
+                            'ic_line': True
+                        })
+                        cost_line.invoice_line_tax_ids = [(6,0,[])],
+                        line.invoice_line_tax_ids = [(6,0,[])],
+                    else:
+                        raise UserError(
+                            _('The mapping from account "%s" does not exist or is incomplete.') % (
+                                line.account_id.name))
+            invoice.ic_lines = True
+
+    @api.multi
+    def action_delete_ic_lines(self):
+        for invoice in self.filtered('ic_lines'):
+            invoice.invoice_line_ids.filtered('ic_line').unlink()
+            # for line in invoice.invoice_line_ids:
+            #     line._set_taxes()
+            invoice.ic_lines = False
+
 
     def set_move_to_draft(self):
         if self.move_id.state == 'posted':
@@ -162,7 +211,7 @@ class AccountInvoice(models.Model):
             date_end = inv.month_id.date_end
             new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
             if inv.move_id:
-                wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id, inv.number)
+                wip_move = inv.move_id.wip_move_create(wip_journal, new_name, inv.account_id.id, inv.number)
             wip_move.post()
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id
@@ -225,6 +274,10 @@ class AccountInvoiceLine(models.Model):
         string='Grouped Analytic line',
         ondelete='cascade',
         index=True
+    )
+    ic_line = fields.Boolean(
+        string='IC line',
+        default=False
     )
 
     @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
