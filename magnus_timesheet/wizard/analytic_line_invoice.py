@@ -375,7 +375,7 @@ class AnalyticLineStatus(models.TransientModel):
                                     rec))
                     self.env.cr.execute(line_query)
                     done_analytic_line |= analytic_line_obj
-
+        
         except Exception, e:
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))

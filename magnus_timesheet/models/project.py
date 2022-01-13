@@ -96,6 +96,12 @@ class TaskUser(models.Model):
         if self.product_id:
             self.fee_rate = self.product_id.list_price
 
+    @api.one
+    @api.depends('fee_rate','ic_fee_rate')
+    def _compute_margin(self):
+        if self.fee_rate and self.ic_fee_rate:
+            self.margin = self.fee_rate - self.ic_fee_rate
+
     @api.model
     def _default_product(self):
         if self.user_id.employee_ids.product_id:
@@ -124,7 +130,14 @@ class TaskUser(models.Model):
         default=_default_fee_rate,
         string='Fee Rate',
     )
-
+    ic_fee_rate = fields.Float(
+        default=_default_fee_rate,
+        string='Intercompany Fee Rate',
+    )
+    margin = fields.Float(
+        compute=_compute_margin,
+        string='Margin',
+    )
     from_date = fields.Date(
         string='From Date',
         default=datetime.today()

@@ -495,7 +495,8 @@ class AnalyticInvoice(models.Model):
 
         invoice_line_vals.update({
             'account_analytic_id': line.account_id and line.account_id.id or False,
-            'price_unit': line.fee_rate,
+            'price_unit': line.fee_rate if line.operating_unit_id == line.project_operating_unit_id else
+                            line.ic_fee_rate,
             'analytic_invoice_id': line.analytic_invoice_id.id,
             'origin': line.task_id.project_id.po_number
                         if line.task_id and line.task_id.project_id and line.task_id.project_id.correction_charge
@@ -800,6 +801,8 @@ class AnalyticUserTotal(models.Model):
             task_user = task_user.search([('id', 'in', task_user.ids)], limit=1, order='from_date Desc')
             self.fee_rate = fr = task_user.fee_rate
             self.amount = - self.unit_amount * fr
+            self.ic_fee_rate = ic_fr = task_user.ic_fee_rate
+            self.ic_amount = - self.unit_amount * ic_fr
         else:
             self.fee_rate = fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)
             self.amount = - self.unit_amount * fr
@@ -825,9 +828,17 @@ class AnalyticUserTotal(models.Model):
         compute=_compute_fee_rate,
         string='Fee Rate'
     )
+    ic_fee_rate = fields.Float(
+        compute=_compute_fee_rate,
+        string='Intercompany Fee Rate'
+    )
     amount = fields.Float(
         compute=_compute_fee_rate,
         string='Amount'
+    )
+    ic_amount = fields.Float(
+        compute=_compute_fee_rate,
+        string='Intercompany Amount'
     )
     detail_ids = fields.One2many(
         'account.analytic.line',
