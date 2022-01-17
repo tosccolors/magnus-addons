@@ -12,7 +12,7 @@
           <group name="nmbrs">
 			  <group cols="4">
 				<field name="send_to_nmbrs" />
-				<field name="start_date_contract" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
+<!--				<field name="start_date_contract" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
 				  <field name="analytic_account" options="{'no_create': True, 'no_create_edit':True}" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
 <!--				<field name="operating_unit_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
 <!--				<field name="bsn" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
@@ -27,8 +27,8 @@
 				<field name="street_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}" />
 				<field name="housenr_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
 				<field name="housenr_addition_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-				<field name="postal_code_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
-				<field name="city_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>
+<!--				<field name="postal_code_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
+<!--				<field name="city_nmbrs" attrs="{'invisible':[('send_to_nmbrs','=',False)]}"/>-->
 			  </group>
           </group>
 		  </xpath>
