@@ -163,22 +163,29 @@ class AccountInvoice(models.Model):
                             'price_unit': - line.price_unit,
                             'user_id': False,
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
-                            'ic_line': True
+                            'ic_line': True,
+                            'cost_line': True,
                         })
-                        cost_line.invoice_line_tax_ids = [(6,0,[])],
-                        line.invoice_line_tax_ids = [(6,0,[])],
+                        cost_line.invoice_line_tax_ids = [(6,0,[])]
+                        line.invoice_line_tax_ids = [(6,0,[])]
                     else:
                         raise UserError(
                             _('The mapping from account "%s" does not exist or is incomplete.') % (
                                 line.account_id.name))
+            if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
+                invoice.compute_taxes()
             invoice.ic_lines = True
 
     @api.multi
     def action_delete_ic_lines(self):
         for invoice in self.filtered('ic_lines'):
             invoice.invoice_line_ids.filtered('ic_line').unlink()
-            # for line in invoice.invoice_line_ids:
-            #     line._set_taxes()
+            for line in invoice.invoice_line_ids:
+                price_unit = line.price_unit
+                line._set_taxes()
+                line.price_unit = price_unit
+            if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
+                invoice.compute_taxes()
             invoice.ic_lines = False
 
 
@@ -277,6 +284,10 @@ class AccountInvoiceLine(models.Model):
     )
     ic_line = fields.Boolean(
         string='IC line',
+        default=False
+    )
+    cost_line = fields.Boolean(
+        string='Cost line',
         default=False
     )
 

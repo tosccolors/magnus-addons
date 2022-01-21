@@ -44,7 +44,7 @@
                             groups="base.group_no_one"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree" position="attributes">
-                    <attribute name="decoration-danger">"ic_line==False"</attribute>
+                    <attribute name="decoration-danger">ic_line==False</attribute>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='origin']" position="attributes">
                     <attribute name="invisible">False</attribute>
