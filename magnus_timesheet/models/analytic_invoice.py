@@ -211,6 +211,7 @@ class AnalyticInvoice(models.Model):
             'product_id',
             'unit_amount',
             'line_fee_rate',
+            'operating_unit_id',
             'project_operating_unit_id']
         grouped_by = [
             'user_id',
@@ -218,6 +219,7 @@ class AnalyticInvoice(models.Model):
             'account_id',
             'product_id',
             'line_fee_rate',
+            'operating_unit_id',
             'project_operating_unit_id']
         reg_fields_grouped = fields_grouped + ['month_id', 'week_id']
         reg_grouped_by = grouped_by + ['month_id']
@@ -228,22 +230,23 @@ class AnalyticInvoice(models.Model):
         return reg_fields_grouped, reg_grouped_by, reconfirmed_fields_grouped, reconfirmed_grouped_by
 
     def _prepare_user_total(self, item, reconfirmed_entries=False):
-        task_id = item.get('task_id')[0] if item.get('task_id') != False else False
+        task_id = item.get('task_id')[0] if item.get('task_id', False) else False
         project_id = False
         if task_id:
             project_id = self.env['project.task'].browse(task_id).project_id.id or False
         vals = {
             'name': '/',
-            'user_id': item.get('user_id')[0] if item.get('user_id') != False else False,
-            'task_id': item.get('task_id')[0] if item.get('task_id') != False else False,
+            'user_id': item.get('user_id')[0] if item.get('user_id', False) else False,
+            'task_id': item.get('task_id')[0] if item.get('task_id', False) else False,
             'project_id': project_id,
-            'account_id': item.get('account_id')[0] if item.get('account_id') != False else False,
+            'account_id': item.get('account_id')[0] if item.get('account_id', False) else False,
             'unit_amount': item.get('unit_amount'),
-            'product_id': item.get('product_id')[0] if item.get('product_id') != False else False,
-            'operating_unit_id': item.get('operating_unit_id')[0] if item.get('operating_unit_id') != False else False,
+            'product_id': item.get('product_id')[0] if item.get('product_id', False) else False,
+            'operating_unit_id': item.get('operating_unit_id')[0] if item.get('operating_unit_id', False) else False,
             'project_operating_unit_id': item.get('project_operating_unit_id')[0] if item.get(
-                                                                    'project_operating_unit_id') != False else False,
-            'line_fee_rate': item.get('line_fee_rate')}
+                                                                    'project_operating_unit_id', False) else False,
+            'line_fee_rate': item.get('line_fee_rate')
+        }
         if reconfirmed_entries:
             vals.update({'gb_month_id': item.get('month_of_last_wip')[0] if item.get(
                 'month_of_last_wip') != False else False})
