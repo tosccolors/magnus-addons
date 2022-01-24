@@ -49,7 +49,7 @@ class AccountInvoice(models.Model):
             UOMHrs = self.env.ref('product.product_uom_hour').id
             invoice_line_ids = self.invoice_line_ids
             if self.ic_lines:
-                invoice_line_ids = self.invoice_line_ids.filtered(lambda l: l.cost_line)
+                invoice_line_ids = self.invoice_line_ids.filtered(lambda l: l.revenue_line)
             if uom_hrs:
                 for line in invoice_line_ids.filtered(lambda l: l.uom_id.id == UOMHrs):
                     quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)

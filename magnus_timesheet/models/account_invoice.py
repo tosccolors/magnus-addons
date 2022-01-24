@@ -149,7 +149,8 @@ class AccountInvoice(models.Model):
                             'operating_unit_id': invoice.operating_unit_id.id,
                             'user_id': False,
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
-                            'ic_line': True
+                            'ic_line': True,
+                            'revenue_line': True,
                         })
                         revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
                                                  line.user_task_total_line_id.fee_rate
@@ -164,7 +165,6 @@ class AccountInvoice(models.Model):
                             'user_id': False,
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
                             'ic_line': True,
-                            'cost_line': True,
                         })
                         cost_line.invoice_line_tax_ids = [(6,0,[])]
                         line.invoice_line_tax_ids = [(6,0,[])]
@@ -286,8 +286,8 @@ class AccountInvoiceLine(models.Model):
         string='IC line',
         default=False
     )
-    cost_line = fields.Boolean(
-        string='Cost line',
+    revenue_line = fields.Boolean(
+        string='Revenue line',
         default=False
     )
 
