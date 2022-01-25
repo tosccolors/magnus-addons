@@ -130,7 +130,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def action_create_ic_lines(self):
-        mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
+        # mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
         mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
         for invoice in self:
             if invoice.ic_lines:
@@ -141,11 +141,16 @@ class AccountInvoice(models.Model):
                                   self.env.ref('account.data_account_type_other_income'),
                                   self.env.ref('account.data_account_type_revenue')))
             if intercompany_revenue_lines:
+                fpos = self.fiscal_position_id
+                company = self.company_id
+                type = self.type
                 for line in intercompany_revenue_lines:
-                    if line.account_id.id in mapping and line.account_id.id in mapping2:
+                    product = line.product_id
+                    product_revenue_account = line.get_invoice_line_account(type, product, fpos, company)
+                    if product_revenue_account and product_revenue_account.id and line.account_id.id in mapping2:
                         ## revenue line
                         revenue_line = line.copy({
-                            'account_id': mapping[line.account_id.id],
+                            'account_id': product_revenue_account.id,
                             'operating_unit_id': invoice.operating_unit_id.id,
                             'user_id': False,
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
