@@ -44,7 +44,7 @@
                             groups="base.group_no_one"/>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree" position="attributes">
-                    <attribute name="decoration-danger">ic_line==False</attribute>
+                    <attribute name="decoration-danger">revenue_line==False</attribute>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='origin']" position="attributes">
                     <attribute name="invisible">False</attribute>
@@ -52,6 +52,7 @@
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='operating_unit_id']" position="before">
                     <field name="user_id"/>
                     <field name="ic_line" invisible="1"/>
+                    <field name="revenue_line" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='payment_term_id']" position="after">
                     <field name="month_id" />
