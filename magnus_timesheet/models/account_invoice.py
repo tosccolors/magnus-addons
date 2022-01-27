@@ -177,9 +177,9 @@ class AccountInvoice(models.Model):
                         raise UserError(
                             _('The mapping from account "%s" does not exist or is incomplete.') % (
                                 line.account_id.name))
+                invoice.ic_lines = True
             if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
                 invoice.compute_taxes()
-            invoice.ic_lines = True
 
     @api.multi
     def action_delete_ic_lines(self):
