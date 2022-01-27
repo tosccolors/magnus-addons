@@ -48,7 +48,7 @@ class AccountInvoice(models.Model):
         if type == 'project':
             UOMHrs = self.env.ref('product.product_uom_hour').id
             invoice_line_ids = self.invoice_line_ids
-            if self.ic_lines:
+            if self.ic_lines or (self.refund_invoice_id and self.refund_invoice_id.ic_lines):
                 invoice_line_ids = self.invoice_line_ids.filtered(lambda l: l.revenue_line)
             if uom_hrs:
                 for line in invoice_line_ids.filtered(lambda l: l.uom_id.id == UOMHrs):
