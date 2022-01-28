@@ -141,6 +141,13 @@ class AccountInvoice(models.Model):
                                   self.env.ref('account.data_account_type_other_income'),
                                   self.env.ref('account.data_account_type_revenue')))
             if intercompany_revenue_lines:
+                regular_revenue_lines = invoice.invoice_line_ids.filtered(
+                    lambda l: l.user_id._get_operating_unit_id() == invoice.operating_unit_id and
+                              l.account_id.user_type_id in (
+                                  self.env.ref('account.data_account_type_other_income'),
+                                  self.env.ref('account.data_account_type_revenue')))
+                if regular_revenue_lines:
+                    regular_revenue_lines.revenue_line = True
                 fpos = self.fiscal_position_id
                 company = self.company_id
                 type = self.type
