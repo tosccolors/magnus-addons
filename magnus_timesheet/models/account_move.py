@@ -16,6 +16,10 @@ class AccountMoveLine(models.Model):
         string='Timesheet User'
     )
 
+    intercompany_line = fields.Boolean(
+        'Intercompany Line',
+        related='partner_id.trading_partner',
+    )
 
     @api.multi
     @api.constrains('operating_unit_id', 'analytic_account_id','user_id')

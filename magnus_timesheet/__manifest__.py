@@ -87,6 +87,7 @@ thereof""",
         'views/account_move_view.xml',
         'views/invoice_view.xml',
         'views/inter_ou_account_mapping_view.xml',
+        'views/res_partner_view.xml',
     ],
     'installable': True,
     # only loaded in demonstration mode
