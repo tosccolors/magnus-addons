@@ -113,7 +113,8 @@ class AccountInvoice(models.Model):
     @api.multi
     def action_invoice_open(self):
         to_process_invoices = self.filtered(lambda inv: inv.type in ('out_invoice', 'out_refund'))
-        if to_process_invoices:
+        timesheet_user = self.invoice_line_ids.mapped('user_id')
+        if to_process_invoices and timesheet_user:
             to_process_invoices.action_create_ic_lines()
         res = super(AccountInvoice, self).action_invoice_open()
         for invoice in to_process_invoices:
@@ -135,6 +136,11 @@ class AccountInvoice(models.Model):
         for invoice in self:
             if invoice.ic_lines:
                 continue
+            timesheet_user = invoice.invoice_line_ids.mapped('user_id')
+            if not timesheet_user:
+                raise UserError(
+                    _('No timesheet user attached to invoice, cannot create intercompany lines!'))
+
             intercompany_revenue_lines = invoice.invoice_line_ids.filtered(
                 lambda l: l.user_id._get_operating_unit_id() != invoice.operating_unit_id and
                             l.account_id.user_type_id in (
