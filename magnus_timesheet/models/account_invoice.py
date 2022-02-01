@@ -139,14 +139,14 @@ class AccountInvoice(models.Model):
             if invoice.ic_lines:
                 continue
             timesheet_user = invoice.invoice_line_ids.mapped('user_id')
-            if not timesheet_user:
-                invoice.invoice_line_ids.write({'revenue_line':True})
-                continue
             intercompany_revenue_lines = invoice.invoice_line_ids.filtered(
                 lambda l: l.user_id._get_operating_unit_id() != invoice.operating_unit_id and
                             l.account_id.user_type_id in (
                                   self.env.ref('account.data_account_type_other_income'),
                                   self.env.ref('account.data_account_type_revenue')))
+            if not timesheet_user or not intercompany_revenue_lines:
+                invoice.invoice_line_ids.write({'revenue_line':True})
+                continue
             if intercompany_revenue_lines:
                 regular_revenue_lines = invoice.invoice_line_ids.filtered(
                     lambda l: l.user_id._get_operating_unit_id() == invoice.operating_unit_id and
