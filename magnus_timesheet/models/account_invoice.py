@@ -117,7 +117,7 @@ class AccountInvoice(models.Model):
         if to_process_invoices and timesheet_user:
             to_process_invoices.action_create_ic_lines()
         elif not timesheet_user:
-            self.invoice_line_ids.revenue_line = True
+            self.invoice_line_ids.write({'revenue_line':True})
         res = super(AccountInvoice, self).action_invoice_open()
         for invoice in to_process_invoices:
             analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
@@ -156,7 +156,7 @@ class AccountInvoice(models.Model):
                                   self.env.ref('account.data_account_type_other_income'),
                                   self.env.ref('account.data_account_type_revenue')))
                 if regular_revenue_lines:
-                    regular_revenue_lines.revenue_line = True
+                    regular_revenue_lines.write({'revenue_line': True})
                 fpos = self.fiscal_position_id
                 company = self.company_id
                 type = self.type
