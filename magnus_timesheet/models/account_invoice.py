@@ -116,6 +116,8 @@ class AccountInvoice(models.Model):
         timesheet_user = self.invoice_line_ids.mapped('user_id')
         if to_process_invoices and timesheet_user:
             to_process_invoices.action_create_ic_lines()
+        elif not timesheet_user:
+            self.invoice_line_ids.revenue_line = True
         res = super(AccountInvoice, self).action_invoice_open()
         for invoice in to_process_invoices:
             analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
@@ -138,6 +140,7 @@ class AccountInvoice(models.Model):
                 continue
             timesheet_user = invoice.invoice_line_ids.mapped('user_id')
             if not timesheet_user:
+                invoice.invoice_line_ids.revenue_line = True
                 raise UserError(
                     _('No timesheet user attached to invoice, cannot create intercompany lines!'))
 
