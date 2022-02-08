@@ -153,12 +153,12 @@ class MagnusPlanning(models.Model):
 		else:
 			op, child_emp_ids = '=', self.employee_id.id
 
-		# print("------child emp ids",child_emp_ids)
+		print("------child emp ids",child_emp_ids)
 
 		self.remove_planning_from_managers(child_emp_ids)
 
 		if child_emp_ids:
-			# print("--------executing query")
+			print("--------executing query")
 			line_query = ("""
 					INSERT INTO
 					   magnus_planning_analytic_line_rel
@@ -182,17 +182,19 @@ class MagnusPlanning(models.Model):
 						op,
 						child_emp_ids
 						))
-			# print("-fetch from employee query",line_query)
+			print("-fetch from employee query",line_query)
 			self.env.cr.execute(line_query)
 
 	@api.one
 	def _compute_planning_lines(self):
 		self_planning = self.env.context.get('self_planning', False)
 		self.planning_ids_compute = False
-		# print("------self plannig",self_planning)
+		print("------self plannig",self_planning)
 		if self_planning:
+			print("--------planning from manager")
 			self.get_planning_from_managers()
 		elif self.employee_id.user_id.has_group("magnus_timehseet.group_magnus_planning_officer") or self.employee_id.user_id.has_group("hr.group_hr_user") or self.employee_id.user_id.has_group("hr.group_hr_manager"):
+			print("--------planning from either one of them")
 			self.get_planning_from_employees()
 		else:
 			print("--------planning from manager 2")
@@ -204,16 +206,22 @@ class MagnusPlanning(models.Model):
 
 	@api.onchange('add_line_project_id')
 	def compute_employee_domain(self):
+		print("----all context",self.env.context)
 		my_planning = self.env.context.get('default_self_planning')
 		user = self.employee_id.user_id
+		print("------user id",user)
+		print("------My Planning",my_planning)
 		domain = [('user_id', '=', user.id)]
 		# employee_id = self.env['hr.employee'].search([('user_id','=',user.id)])
 
 		if not my_planning:
+			print("---------not my planning")
 			domain = ['|', '|', ('department_id.manager_id.user_id', '=', user.id),
 					  ('department_id.parent_id.manager_id.user_id', '=', user.id),
 					  ('parent_id.user_id', '=', user.id)]
+		print("-----domainsssss",domain)
 		emp_list = self.env['hr.employee'].search(domain).ids
+		print("------employeeee",emp_list)
 		res = {
 			'domain': {
 				'add_line_emp_id': [('id', 'in', emp_list)],
@@ -796,7 +804,7 @@ class MagnusPlanning(models.Model):
 		if not self.add_line_project_id:
 			return
 		values = self._prepare_empty_analytic_line()
-		# print("----------values form empty analytic line",values)
+		print("----------values form empty analytic line",values)
 		new_line_unique_id = self._get_new_line_unique_id()
 		existing_unique_ids = list(set(
 			[frozenset(line.get_unique_id().items()) for line in self.line_ids]
@@ -804,8 +812,8 @@ class MagnusPlanning(models.Model):
 		if existing_unique_ids:
 			self.delete_empty_lines(False)
 		if frozenset(new_line_unique_id.items()) not in existing_unique_ids:
-			# print("------------values",values)
-			# print(" add line context print",self.env.context)
+			print("------------values",values)
+			print(" add line context print",self.env.context)
 			# self.planning_ids |= \
 			#     self.env['account.analytic.line']._planning_create(values)
 			self.planning_analytic_ids |= \
@@ -1040,7 +1048,7 @@ class PlanningLine(models.TransientModel):
 				'title': _("Warning"),
 				'message': _("Save the planning Sheet first."),
 			}}
-		# print("---planning line employee id",sheet.employee_id.name)
+		print("---planning line employee id",sheet.employee_id.name)
 		# in planning line itself current employee id is being showed. Track this and save employee id for each line
 		sheet.add_new_line(self)
 
@@ -1104,7 +1112,7 @@ class SheetNewAnalyticLine(models.TransientModel):
 				'unit_amount': diff_amount,
 			})
 			# self.env['account.analytic.line']._planning_create(new_ts_values)
-			# print('-----------new ts values',new_ts_values)
+			print('-----------new ts values',new_ts_values)
 			planning_analytic_ids = self.env['timesheet.analytic.line']._planning_create(new_ts_values)
 			planning_analytic_ids |= sheet.planning_analytic_ids
 			sheet._sheet_write(

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+  	<record id="fleet_vehicle_view_form_inherit_rdw" model="ir.ui.view">
+      <field name="name">fleet.vehicle.form</field>
+      <field name="model">fleet.vehicle</field>
+      <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+       	 	<xpath expr="//field[@name='tag_ids']" position="after">
+                <button name="fetch_data_from_rdw" type="object" string="Fetch RDW Data" groups="magnus_fleet_rdw.rdw_api_rights"/>
+            </xpath>
+            <xpath expr="//field[@name='color']" position="after">
+                <field name="rdw_brand" string="RDW Merk"/>
+                <field name="rdw_handelsnaam" string="RDW Handelsnaam"/>
+            </xpath>
+        </field>
+    </record>
+  </data>
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_nmbrs_interface_config,access_nmbrs_interface_config,model_nmbrs_interface_config,nmbrs_interface_config,1,1,1,0
+access_mapping_nmbrs_analytic_account,access_mapping_nmbrs_analytic_account,model_mapping_nmbrs_analytic_account,nmbrs_interface_config,1,1,1,1
