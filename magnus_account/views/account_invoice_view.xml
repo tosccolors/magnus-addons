@@ -48,7 +48,7 @@
                                placeholder="Add description" />
                     </page>
                 </xpath>
-                <xpath expr="//notebook/page[@name='other_info']/group/group[2]/field[@name='name']" position="after">
+                <xpath expr="//notebook/page[@name='other_info']/group/group[2]/field[@name='origin']" position="after">
                     <field name="date"/>
                 </xpath>
                 <xpath expr="//button[@name='action_invoice_sent']" position="after">

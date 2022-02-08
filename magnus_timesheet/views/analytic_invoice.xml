@@ -39,6 +39,8 @@
                            readonly="0"
                            context="{'tree_view_ref' : 'magnus_timesheet.view_task_user_tree'}"
                            />
+                    <field name="company_id" invisible="1"/>
+                    <field name="type" invisible="1"/>
 
                     <separator string="Invoice Lines"/>
                     <field name="journal_id" invisible="1"/>
@@ -180,15 +182,15 @@
                  <search string="Analytic Invoice Search">
                      <field name="partner_id" string="Customer"/>
                      <field name="month_id"/>
-                        <filter string="Draft"
+                        <filter name="draft" string="Draft"
                                 domain="[
                                 ('state', '=', 'draft'),
                                 ]"/>
-                        <filter string="In Progress"
+                        <filter name="in_progress" string="In Progress"
                                 domain="[
                                 ('state', '=', 'open'),
                                 ]"/>
-                        <filter string="Invoiced"
+                        <filter name="invoiced" string="Invoiced"
                                 domain="[
                                 ('state', '=', 'invoiced'),
                                 ]"/>
@@ -197,7 +199,7 @@
                                 icon="terp-personal" domain="[]" context="{'group_by':'project_operating_unit_id'}"/>
                         <filter name="customer" string="Customer"
                                 icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
-                        <filter string="Month" icon="terp-go-today" domain="[]"
+                        <filter name="month" string="Month" icon="terp-go-today" domain="[]"
                                 context="{'group_by':'month_id'}"/>
                     </group>
                  </search>
@@ -228,8 +230,5 @@
             <field name="view_id" ref="view_analytic_invoice_form"/>
             <field name="act_window_id" ref="action_view_analytic_invoice"/>
         </record>
-
-
-
     </data>
 </odoo>

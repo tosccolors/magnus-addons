@@ -214,7 +214,7 @@ msgid "Bank Account Number to which the invoice will be paid. A Company bank acc
 msgstr "Bankrekeningnummer waarop de factuur wordt betaald. Een bedrijfsbankrekening als dit een klant- of leveranciersfactuur is, anders een relatie bankrekeningnummer."
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_business_mileage
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_business_mileage
 msgid "Business Mileage"
 msgstr "Business Mileage"
 
@@ -273,7 +273,7 @@ msgid "Change Planning Period"
 msgstr "Change Planning Period"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_overtime_hours_delta
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_overtime_hours_delta
 msgid "Change in Overtime Hours"
 msgstr "Change in Overtime Hours"
 
@@ -461,9 +461,9 @@ msgid "Date"
 msgstr "Datum"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_analytic_invoice_date_from
-#: model:ir.model.fields,field_description:magnus_timesheet.field_magnus_planning_date_from
-#: model:ir.model.fields,field_description:magnus_timesheet.field_magnus_standby_planning_date_from
+#: model:ir.model.fields,field_description:magnus_timesheet.field_analytic_invoice_date_start
+#: model:ir.model.fields,field_description:magnus_timesheet.field_magnus_planning_date_start
+#: model:ir.model.fields,field_description:magnus_timesheet.field_magnus_standby_planning_date_start
 msgid "Date From"
 msgstr "Datum vanaf"
 
@@ -635,7 +635,7 @@ msgid "Employee's Name"
 msgstr "Naam werknemer"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_end_mileage
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_end_mileage
 msgid "End Mileage"
 msgstr "End Mileage"
 
@@ -1285,7 +1285,7 @@ msgid "Number of unread messages"
 msgstr "Aantal ongelezen berichten"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_odo_log_id
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_odo_log_id
 msgid "Odo Log ID"
 msgstr "Odo Log ID"
 
@@ -1381,13 +1381,13 @@ msgid "Overtime Balance Report Search"
 msgstr "Overtime Balance Report Search"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_overtime_analytic_line_id
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_overtime_analytic_line_id
 msgid "Overtime Entry"
 msgstr "Overtime Entry"
 
 #. module: magnus_timesheet
 #: model:ir.model.fields,field_description:magnus_timesheet.field_hr_employee_overtime_hours
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_overtime_hours
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_overtime_hours
 #: model:ir.model.fields,field_description:magnus_timesheet.field_project_project_overtime_hrs
 msgid "Overtime Hours"
 msgstr "Overtime Hours"
@@ -1619,7 +1619,7 @@ msgid "Practice"
 msgstr "Practice"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_private_mileage
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_private_mileage
 msgid "Private Mileage"
 msgstr "Private Mileage"
 
@@ -1817,8 +1817,8 @@ msgid "Standby-Planing"
 msgstr "Standby-Planing"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_starting_mileage
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_starting_mileage_editable
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_starting_mileage
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_starting_mileage_editable
 msgid "Starting Mileage"
 msgstr "Starting Mileage"
 
@@ -2012,7 +2012,7 @@ msgid "Time lines"
 msgstr "Time lines"
 
 #. module: magnus_timesheet
-#: model:ir.model,name:magnus_timesheet.model_hr_timesheet_sheet_sheet
+#: model:ir.model,name:magnus_timesheet.model_hr_timesheet_sheet
 #: model:ir.ui.view,arch_db:magnus_timesheet.hr_timesheet_line_forecating_tree
 msgid "Timesheet"
 msgstr "Urenstaat"
@@ -2040,7 +2040,7 @@ msgid "Timesheet User"
 msgstr "Timesheet User"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_week_id
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_week_id
 #: model:ir.ui.view,arch_db:magnus_timesheet.hr_timesheet_line_forecating_tree
 #: model:ir.ui.view,arch_db:magnus_timesheet.hr_timesheet_line_tree_inherited
 msgid "Timesheet Week"
@@ -2224,7 +2224,7 @@ msgid "Validators"
 msgstr "Validators"
 
 #. module: magnus_timesheet
-#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_sheet_vehicle
+#: model:ir.model.fields,field_description:magnus_timesheet.field_hr_timesheet_sheet_vehicle
 msgid "Vehicle"
 msgstr "Voertuig"
 

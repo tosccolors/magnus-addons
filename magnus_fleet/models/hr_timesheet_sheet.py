@@ -9,7 +9,7 @@ from dateutil.rrule import (rrule)
 from dateutil.relativedelta import relativedelta
 
 class HrTimesheetSheet(models.Model):
-    _inherit = "hr_timesheet_sheet.sheet"
+    _inherit = "hr_timesheet.sheet"
     _order = "week_id desc"
 
     @api.multi

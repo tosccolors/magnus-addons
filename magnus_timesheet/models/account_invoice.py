@@ -6,7 +6,6 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime, timedelta
 
-
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
@@ -37,10 +36,6 @@ class AccountInvoice(models.Model):
         index=True,
         ondelete='restrict',
         copy=False
-    )
-    ic_lines = fields.Boolean(
-        string='IC lines generated',
-        default=False
     )
 
     def compute_target_invoice_amount(self):
@@ -112,182 +107,31 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def action_invoice_open(self):
-        to_process_invoices = self.filtered(lambda inv: inv.type in ('out_invoice', 'out_refund'))
-        timesheet_user = self.invoice_line_ids.mapped('user_id')
-        if to_process_invoices and timesheet_user:
-            to_process_invoices.action_create_ic_lines()
-        elif not timesheet_user:
-            self.invoice_line_ids.write({'revenue_line':True})
         res = super(AccountInvoice, self).action_invoice_open()
-        for invoice in to_process_invoices:
-            analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
-            if analytic_invoice_id and invoice.type != 'out_refund':
-                # if invoicing period doesn't lie in same month
-                period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
-                cur_date = datetime.now().date().strftime("%Y-%m")
-                invoice_date = invoice.date or invoice.date_invoice
-                inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
-                if inv_date != period_date and invoice.move_id:
-                    invoice.action_wip_move_create()
+        if self.type in ('out_invoice'):
+            analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
+            if not analytic_invoice_id:
+                return res
+            # if invoicing period doesn't lie in same month
+            period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+            cur_date = datetime.now().date().strftime("%Y-%m")
+            invoice_date = self.date or self.date_invoice
+            inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
+            if inv_date != period_date and self.move_id:
+                self.action_wip_move_create()
+            #if analytic invoice move_line_id then update account_analytic_line_ids field for model account.analytic.line
+            if self.move_id:
+                val=[self.move_id.id,self.wip_move_id.id,self.wip_move_id.reversal_id.id]
+                for move_id in val:
+                    move_line = self.env['account.move.line'].search([('move_id', '=', move_id)])
+                    for inv_analytic_line in self.invoice_line_ids:
+                        for analytic_inv_line in inv_analytic_line.user_task_total_line_id.detail_ids:
+                            analytic_line = self.env['account.analytic.line'].sudo().search(
+                                [('id', '=', analytic_inv_line.id)])
+                            for mov_line_id in move_line:
+                                if (mov_line_id.id != False):
+                                    analytic_line.account_analy_line_ids = [(4, mov_line_id.id)]
         return res
-
-    @api.multi
-    def action_create_ic_lines(self):
-        mapping = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_regular')
-        mapping2 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'inter_to_cost')
-        mapping3 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'regular_to_inter')
-        mapping4 = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, 'regular_to_cost')
-
-        for invoice in self:
-
-            def _get_fee_rate_from_aa(line, aa, user, inv_date):
-                if not aa or not (
-                        aa and aa.project_ids):
-                    raise UserError(
-                        _('Cannot create intercompany lines, no Ananlytic account or Project attached for, "%s" .') % (line.name))
-                std_task = aa.project_ids[0].task_ids.filtered('standard')
-                if not std_task:
-                    raise UserError(
-                        _('No Standard task found for "%s" .') % (aa.project_ids[0].name))
-
-                date = inv_date or datetime.now().date()
-                taskUserObj = self.env['task.user'].get_task_user_obj(std_task.id, user.id, date)
-                return taskUserObj
-
-            if invoice.ic_lines:
-                continue
-
-            timesheet_user = invoice.invoice_line_ids.mapped('user_id')
-            if not timesheet_user:
-                invoice.invoice_line_ids.write({'revenue_line':True})
-                continue
-
-            intercompany_revenue_lines = invoice.invoice_line_ids.filtered(
-                lambda l: l.user_id and l.user_id._get_operating_unit_id() != invoice.operating_unit_id and
-                            l.account_id.user_type_id in (
-                                  self.env.ref('account.data_account_type_other_income'),
-                                  self.env.ref('account.data_account_type_revenue')))
-            if not intercompany_revenue_lines:
-                invoice.invoice_line_ids.write({'revenue_line': True})
-                continue
-
-            if intercompany_revenue_lines:
-                regular_revenue_lines = invoice.invoice_line_ids.filtered(
-                    lambda l: l.user_id and l.user_id._get_operating_unit_id() == invoice.operating_unit_id and
-                              l.account_id.user_type_id in (
-                                  self.env.ref('account.data_account_type_other_income'),
-                                  self.env.ref('account.data_account_type_revenue')))
-                if regular_revenue_lines:
-                    regular_revenue_lines.write({'revenue_line': True})
-
-                fpos = self.fiscal_position_id
-                company = self.company_id
-                type = self.type
-                for line in intercompany_revenue_lines:
-
-                    product = line.product_id
-                    product_revenue_account = line.get_invoice_line_account(type, product, fpos, company)
-                    if (product_revenue_account and product_revenue_account.id or line.account_id.id in mapping) and line.account_id.id in mapping2:
-                        ## revenue line
-                        revenue_acc = product_revenue_account.id if product_revenue_account else mapping[line.account_id.id]
-                        revenue_line = line.copy({
-                            'account_id': revenue_acc,
-                            'operating_unit_id': invoice.operating_unit_id.id,
-                            'user_id': False,
-                            'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
-                            'ic_line': True,
-                            'revenue_line': True,
-                        })
-
-                        revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
-                                                 line.user_task_total_line_id.fee_rate
-
-                        if not line.product_id and line.user_id:
-                            taskUserObj = _get_fee_rate_from_aa(line, line.account_analytic_id, line.user_id,
-                                                                invoice.date_invoice)
-                            revenue_line.price_unit = taskUserObj and taskUserObj.fee_rate or line.price_unit
-
-                        # revenue_line.invoice_line_tax_ids.compute_all(revenue_line.price_unit, currency=None, quantity=revenue_line.quantity, product=None, partner=None)
-                        ## intercompany cost of sales line
-                        cost_line = line.copy({
-                            'account_id': mapping2[line.account_id.id],
-                            'product_id': False,
-                            'operating_unit_id': invoice.operating_unit_id.id,
-                            'price_unit': - line.price_unit,
-                            'user_id': False,
-                            'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
-                            'ic_line': True,
-                        })
-                        cost_line.invoice_line_tax_ids = [(6,0,[])]
-                        line.invoice_line_tax_ids = [(6,0,[])]
-                    elif line.account_id.id in mapping3 and line.account_id.id in mapping4:
-                        if not line.user_id:
-                            line.revenue_line = True
-                            continue
-
-                        taskUserObj = _get_fee_rate_from_aa(line, line.account_analytic_id, line.user_id, invoice.date_invoice)
-                        if not taskUserObj :
-                            raise UserError(
-                                _('Intercompany fee rate not define for "%s" .') % (
-                                    line.account_analytic_id.name))
-
-                        ic_fee_rate = taskUserObj.ic_fee_rate
-
-                        intercompany_line = line.copy({
-                            'account_id': mapping3[line.account_id.id],
-                            'operating_unit_id': invoice.operating_unit_id.id,
-                            'user_id': line.user_id.id,
-                            'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
-                            'ic_line': False,
-                            'revenue_line': False,
-                            'price_unit': ic_fee_rate,
-                        })
-
-                        ## intercompany cost of sales line
-                        cost_line = line.copy({
-                            'account_id': mapping4[line.account_id.id],
-                            'product_id': False,
-                            'operating_unit_id': invoice.operating_unit_id.id,
-                            'price_unit': - ic_fee_rate,
-                            'user_id': False,
-                            'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
-                            'ic_line': True,
-                        })
-                        cost_line.invoice_line_tax_ids = [(6, 0, [])]
-                        intercompany_line.invoice_line_tax_ids = [(6, 0, [])]
-                        line.ic_line = True
-                        line.revenue_line = True
-                        line.user_id = False
-                    else:
-                        raise UserError(
-                            _('The mapping from account "%s" does not exist or is incomplete.') % (
-                                line.account_id.name))
-                invoice.ic_lines = True
-            if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
-                invoice.compute_taxes()
-
-    @api.multi
-    def action_delete_ic_lines(self):
-        for invoice in self.filtered('ic_lines'):
-            invoice.invoice_line_ids.filtered('ic_line').unlink()
-            for line in invoice.invoice_line_ids:
-                price_unit = line.price_unit
-                line._set_taxes()
-                line.price_unit = price_unit
-            # if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
-                invoice.compute_taxes()
-            invoice.ic_lines = False
-
-
-    def set_move_to_draft(self):
-        if self.move_id.state == 'posted':
-            if not self.move_id.journal_id.update_posted:
-                raise UserError(_('Please allow to cancel entries from this journal.'))
-            self.move_id.state = 'draft'
-            return 'posted'
-        return 'draft'
-
-
 
     @api.model
     def get_wip_default_account(self):
@@ -308,7 +152,7 @@ class AccountInvoice(models.Model):
             date_end = inv.month_id.date_end
             new_name = sequence.with_context(ir_sequence_date=date_end).next_by_id()
             if inv.move_id:
-                wip_move = inv.move_id.wip_move_create(wip_journal, new_name, inv.account_id.id, inv.number)
+                wip_move = inv.move_id.wip_move_create( wip_journal, new_name, inv.account_id.id, inv.number)
             wip_move.post()
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id
@@ -372,21 +216,19 @@ class AccountInvoiceLine(models.Model):
         ondelete='cascade',
         index=True
     )
-    ic_line = fields.Boolean(
-        string='IC line',
-        default=False
-    )
-    revenue_line = fields.Boolean(
-        string='Revenue line',
-        default=False
-    )
 
-    @api.multi
     @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
+    @api.multi
     def _compute_operating_unit(self):
         super(AccountInvoiceLine, self)._compute_operating_unit()
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
+
+    # @api.multi
+    # def write(self, vals):
+    #     res = super(AccountInvoiceLine, self).write(vals)
+    #     self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes() #Issue: Vat creation double after invoice date change
+    #     return res
 
     @api.model
     def default_get(self, fields):
@@ -399,24 +241,10 @@ class AccountInvoiceLine(models.Model):
                 res['analytic_invoice_id'] = analytic_invoice_id.id
         return res
 
-    @api.onchange('user_task_total_line_id.fee_rate')
-    def _onchange_fee_rate(self):
-        if self.user_task_total_line_id.fee_rate:
-            self.price_unit = self.user_task_total_line_id.fee_rate
-
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        res = super(AccountInvoiceLine, self)._onchange_product_id()
-        if self.invoice_id.type in 'out_invoice' and \
-           self.operating_unit_id != self.invoice_id.operating_unit_id and \
-           self.account_id.user_type_id in (
-                                            self.env.ref('account.data_account_type_other_income'),
-                                            self.env.ref('account.data_account_type_revenue')
-                                        ):
-           account = self.account_id
-           self.account_id = self.env['inter.ou.account.mapping']._get_mapping_dict(
-                                                                self.company_id, 'regular_to_inter'
-                                                                )[account.id]
-        return res
+#    @api.onchange('product_id')
+#    def _onchange_product_id(self):
+#        if self.analytic_invoice_id:
+#            self.invoice_id = self.env['account.invoice'].browse(self.analytic_invoice_id.invoice_ids.id)
+#        return super(AccountInvoiceLine, self)._onchange_product_id()
 
 

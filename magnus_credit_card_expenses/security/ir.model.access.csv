@@ -4,7 +4,7 @@ access_hr_credit_expense_user,hr.expense.credit.user,hr_expense.model_hr_expense
 access_hr_credit_expense_sheet_user,hr.expense.sheet.credit.user,hr_expense.model_hr_expense_sheet,group_credit_card_expenses,1,1,1,1
 access_product_product_hr_credit_expense_user,product.product.hr.expense.credit.user,product.model_product_product,group_credit_card_expenses,1,1,1,1
 access_product_template_hr_credit_expense_user,product.template.hr.expense.credit.user,product.model_product_template,group_credit_card_expenses,1,1,1,1
-access_product_uom_hr_credit_expense_user,product.uom.hr.expense.credit.user,product.model_product_uom,group_credit_card_expenses,1,1,1,1
+access_product_uom_hr_credit_expense_user,product.uom.hr.expense.credit.user,uom.model_uom_uom,group_credit_card_expenses,1,1,1,1
 access_account_journal_credit_user,account.journal.credit.user,account.model_account_journal,group_credit_card_expenses,1,1,1,1
 access_account_invoice_credit_user,account.invoice.credit.user,account.model_account_invoice,group_credit_card_expenses,1,1,1,1
 access_account_invoice_line_credit_user,account.invoice.line.credit.user,account.model_account_invoice_line,group_credit_card_expenses,1,1,1,1
@@ -17,7 +17,7 @@ access_hr_credit_expense_officer,hr.expense.credit.officer,hr_expense.model_hr_e
 access_hr_credit_expense_sheet_officer,hr.expense.sheet.officer.user,hr_expense.model_hr_expense_sheet,group_credit_card_expenses_officer,1,1,1,1
 access_product_product_hr_credit_expense_officer,product.product.hr.expense.credit.officer,product.model_product_product,group_credit_card_expenses_officer,1,1,1,1
 access_product_template_hr_credit_expense_officer,product.template.hr.expense.credit.officer,product.model_product_template,group_credit_card_expenses_officer,1,1,1,1
-access_product_uom_hr_credit_expense_officer,product.uom.hr.expense.credit.officer,product.model_product_uom,group_credit_card_expenses_officer,1,1,1,1
+access_product_uom_hr_credit_expense_officer,product.uom.hr.expense.credit.officer,uom.model_uom_uom,group_credit_card_expenses_officer,1,1,1,1
 access_account_journal_credit_officer,account.journal.credit.officer,account.model_account_journal,group_credit_card_expenses_officer,1,1,1,1
 access_account_invoice_credit_officer,account.invoice.credit.officer,account.model_account_invoice,group_credit_card_expenses_officer,1,1,1,1
 access_account_invoice_line_credit_officer,account.invoice.line.credit.officer,account.model_account_invoice_line,group_credit_card_expenses_officer,1,1,1,1

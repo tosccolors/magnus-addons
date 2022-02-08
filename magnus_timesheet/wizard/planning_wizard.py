@@ -17,7 +17,7 @@ class PlanningWizard(models.TransientModel):
             period = doc.xpath("//field[@name='name']")[0]
             date = datetime.now().date()
             month_start_date = date.replace(day=1)
-            domain = [('type_id.calender_week', '=', False), ('type_id.fiscal_year', '=', False),
+            domain = [('type_id.calender_week', '=', False),
                  ('type_id.fiscal_month', '=', False), ('date_start', '>=', month_start_date)]
 
             cur_quarter = ctx.get('active_planning_quarter', False)
@@ -48,7 +48,7 @@ class PlanningWizard(models.TransientModel):
             'res_model': 'magnus.planning',
             'view_id': False,
             'type': 'ir.actions.act_window',
-            'context': {'readonly_by_pass': True}
+            # 'context': {'readonly_by_pass': True}
         }
         if len(planning) == 1:
             value['res_id'] = planning.ids[0]
@@ -58,7 +58,7 @@ class PlanningWizard(models.TransientModel):
             week_from, week_to = planning_obj.fetch_weeks_from_planning_quarter(self.name)
             planning = self.env['magnus.planning'].browse(self.env.context.get('active_id')).copy(default={'planning_quarter': self.name.id, 'week_from': week_from, 'week_to': week_to, 'planning_ids':False})
             planning.onchange_planning_quarter()
-            planning.onchange_week()
+            # planning.onchange_week()
             planning.compute_planning_lines()
             value['res_id'] = planning.ids[0]
         return value

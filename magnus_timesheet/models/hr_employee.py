@@ -24,7 +24,7 @@ class Employee(models.Model):
     @api.one
     def _get_overtime_hours(self):
         self.overtime_hours = sum(
-            self.env['hr_timesheet_sheet.sheet'].search([('employee_id', '=', self.id)]).mapped('overtime_hours'))
+            self.env['hr_timesheet.sheet'].search([('employee_id', '=', self.id)]).mapped('overtime_hours'))
 
     planning_week = fields.Boolean(
         string="Planning by week"

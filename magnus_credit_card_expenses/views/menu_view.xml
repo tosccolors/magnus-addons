@@ -5,8 +5,8 @@
         <menuitem id="menu_hr_expense_my_expenses_credit_card" name="My Expenses" sequence="1" parent="menu_credit_card_expense_root" groups="group_credit_card_expenses"/>
          <menuitem id="menu_hr_expense_my_expenses_to_submit_credit_card" name="Expenses to Submit" sequence="1" parent="menu_hr_expense_my_expenses_credit_card" action="magnus_credit_card_expenses.hr_expense_actions_my_unsubmitted_credit_card"/>
          <menuitem id="menu_hr_expense_my_expenses_refused_credit_card" name="Refused Expenses" sequence="2" parent="menu_hr_expense_my_expenses_credit_card" action="magnus_credit_card_expenses.action_hr_expense_refused_expenses" groups="group_credit_card_expenses"/>
-         <menuitem id="menu_hr_expense_sheet_my_reports_credit_card" name="Expense Reports" sequence="3" parent="menu_hr_expense_my_expenses_credit_card" action="hr_expense.action_hr_expense_sheet_my_all" load_xmlid="True"/>
-        <menuitem id="menu_hr_expense_sheet_my_reports_credit_card" name="Expense Reports" sequence="3" parent="menu_hr_expense_my_expenses_credit_card" action="action_hr_expense_sheet_my_all_crdit_card" load_xmlid="True" groups="group_credit_card_expenses"/>
+<!--         <menuitem id="menu_hr_expense_sheet_my_reports_credit_card" name="Expense Reports" sequence="3" parent="menu_hr_expense_my_expenses_credit_card" action="hr_expense.action_hr_expense_sheet_my_all" load_xmlid="True"/>-->
+<!--        <menuitem id="menu_hr_expense_sheet_my_reports_credit_card" name="Expense Reports" sequence="3" parent="menu_hr_expense_my_expenses_credit_card" action="action_hr_expense_sheet_my_all_crdit_card" load_xmlid="True" groups="group_credit_card_expenses"/>-->
 
 
         <menuitem id="menu_hr_expense_to_approve_credit_card" name="To Approve" sequence="2" parent="menu_credit_card_expense_root" groups="group_credit_card_expenses,group_credit_card_expenses_officer"/>

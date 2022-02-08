@@ -267,15 +267,15 @@ class Lead(models.Model):
 
         values.update({'partner_contact_id': contact_id, 'partner_name': part.name})
 
-        if part.sector_id:
+        if part.industry_id:
             values.update({
-                'sector_id': part.sector_id,
-                'secondary_sector_ids': [(6, 0, part.secondary_sector_ids.ids)],
+                'industry_id': part.industry_id,
+                'secondary_industry_ids': [(6, 0, part.secondary_industry_ids.ids)],
             })
         else:
             values.update({
-                'sector_id': False,
-                'secondary_sector_ids': False,
+                'industry_id': False,
+                'secondary_industry_ids': False,
             })
         return {'value' : values}
 
@@ -334,7 +334,7 @@ class MonthlyRevenue(models.Model):
     computed_line = fields.Boolean(string="Computed line")
     project_id = fields.Many2one('project.project', related='lead_id.project_id', string='Project', store=True)
     partner_id = fields.Many2one('res.partner', related='lead_id.partner_id', string='Customer', store=True)
-    sector_id = fields.Many2one('res.partner.sector', related='lead_id.sector_id', string='Main Sector', store=True)
+    industry_id = fields.Many2one('res.partner.industry', related='lead_id.industry_id', string='Main Sector', store=True)
     department_id = fields.Many2one('hr.department', related='lead_id.department_id', string='Practice', store=True)
     operating_unit_id = fields.Many2one('operating.unit', related='lead_id.operating_unit_id', string='Operating Unit', store=True)
 

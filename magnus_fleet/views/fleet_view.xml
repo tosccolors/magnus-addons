@@ -43,9 +43,9 @@
         </field>
     </record>
     
-	<record id="hr_timesheet_sheet_pivot_view_report" model="ir.ui.view">
-         <field name="name">hr_timesheet_sheet.sheet.pivot</field>
-         <field name="model">hr_timesheet_sheet.sheet</field>
+	<record id="hr_timesheet_pivot_view_report" model="ir.ui.view">
+         <field name="name">hr_timesheet.sheet.pivot</field>
+         <field name="model">hr_timesheet.sheet</field>
          <field name="arch" type="xml">
              <pivot string="Mileage Report">
                 <field name="business_mileage" type="measure"/>
@@ -74,9 +74,9 @@
 
     <record id="action_mileage_report" model="ir.actions.act_window">
             <field name="name">Mileage Report</field>
-            <field name="res_model">hr_timesheet_sheet.sheet</field>
+            <field name="res_model">hr_timesheet.sheet</field>
             <field name="view_mode">pivot,graph</field>
-            <field name="view_id" ref="hr_timesheet_sheet_pivot_view_report"/>
+            <field name="view_id" ref="hr_timesheet_pivot_view_report"/>
         </record>
 
   <menuitem

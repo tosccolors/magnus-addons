@@ -1,5 +1,5 @@
 <odoo>
-    <data>
+    <data noupdate="1">
       <record id="group_hr_expense_partner" model="res.groups">
       <field name="name">Partner</field>
       <field name="implied_ids" eval="[(4, ref('hr_expense.group_hr_expense_user'))]"/>

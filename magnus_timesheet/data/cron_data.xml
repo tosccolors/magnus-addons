@@ -11,10 +11,12 @@
             <field name="interval_type">months</field>
             <field name="numbercall">-1</field>
             <field eval="False" name="doall"/>
-            <field eval="'account.analytic.line'" name="model"/>
-            <field eval="'run_reconfirmation_process'" name="function"/>
-            <field eval="'()'" name="args"/>
-            <field eval="False" name="active"/>
+            <!-- <field eval="'account.analytic.line'" name="model"/> -->
+            <field name="model_id" ref="model_account_analytic_line"/>
+            <field name="code">model.run_reconfirmation_process()</field>
+            <!-- <field eval="'run_reconfirmation_process'" name="function"/> -->
+            <!-- <field eval="'()'" name="args"/>
+            <field eval="False" name="active"/> -->
         </record>
 
     </data>

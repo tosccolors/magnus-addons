@@ -30,13 +30,17 @@ In the object hr. employee on the tab 'HR Settings' under the heading 'Status' c
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'hr', 'hr_employee_seniority', 'hr_contract', 'magnus_crm'],
+    'depends': ['base', 'hr', 
+    # 'hr_employee_seniority', commented coz the source module not found
+    'hr_employee_service',
+     'hr_contract'],
 
     # always loaded
     'data': [
         'views/hr_views.xml',
         'wizard/hr_employee_wizard_view.xml',
-        'views/template_view.xml',
+        'views/template_view.xml', 
+        
     ],
     
     'installable': True,

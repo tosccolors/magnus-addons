@@ -33,13 +33,20 @@
                             <field name="task_user_ids" context="{'default_task_id':active_id}">
                                     <tree string="Fee Earners" create="true"
                                           edit="true" delete="true" copy="false">
-                                        <field name="user_id" />
+                                    <field name="user_id" />
+                                    <field name="from_date" />
+                                    <field name="product_id"/>
+                                    <field name="fee_rate"/>
+                                </tree>
+                                <form string="Fee Earners">
+                                    <group>
+                                        <field name="user_id" invisible="0"/>
+                                        <!--<field name="user_ids" widget="many2many_tags"/>-->
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
-                                        <field name="ic_fee_rate"/>
-                                        <field name="margin"/>
-                                    </tree>
+                                    </group>
+                                </form>
                             </field>
                         </group>
                     </page>
@@ -57,8 +64,6 @@
                     <field name="product_id"/>
                     <field name="from_date"/>
                     <field name="fee_rate"/>
-                    <field name="ic_fee_rate"/>
-                    <field name="margin"/>
                     <field name="task_id"/>
                 </tree>
             </field>

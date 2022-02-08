@@ -8,7 +8,8 @@
       <field name="model">hr.employee</field>
       <field name="inherit_id" ref="hr.view_employee_form"/>
       <field name="arch" type="xml">
-        <field name="calendar_id" position="after">
+        <!-- <field name="calendar_id" position="after"> -->
+        <field name="resource_calendar_id" position="after">
           <field name="external"/>
           <field name="supplier_id" attrs="{'invisible': [('external', '=', False)]}"/>
           <field name="mentor_id"/>
@@ -28,9 +29,6 @@
             <field name="personnel_number" />
             <field name="employee_numbersid" />
           </group>
-          <group string="Klippa" name="klippa">
-            <field name="klippa_user" />
-          </group>
         </xpath>
         <xpath expr="//field[@name='marital']" position="after">
           <field name="has_private_car"/>
@@ -41,9 +39,11 @@
     <record id="hr_employee_view_form_inherited" model="ir.ui.view">
         <field name="name">hr.employee.form.seniority</field>
         <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr_employee_seniority.hr_employee_view_form_inherit"/>
+        <!-- <field name="inherit_id" ref="hr_employee_seniority.hr_employee_view_form_inherit"/> -->
+        <field name="inherit_id" ref="hr_employee_service.view_employee_form_inherit_extension"/>
         <field name="arch" type="xml">
-          <xpath expr="//field[@name='length_of_service']" position="after">
+          <!-- <xpath expr="//field[@name='length_of_service']" position="after"> -->
+          <xpath expr="//field[@name='service_hire_date']" position="before">
             <field name="official_date_of_employment" />
             <field name="temporary_contract" />
             <field name="end_date_of_employment" />
@@ -57,7 +57,8 @@
       <field name="model">hr.employee</field>
       <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
       <field name="arch" type="xml">
-        <xpath expr="//field[@name='vehicle_distance']" position="after">
+        <!-- <xpath expr="//field[@name='vehicle_distance']" position="after"> -->
+        <xpath expr="//field[@name='vehicle']" position="after">
           <field name="parttime" />
           <field name="allocated_leaves" />
         </xpath>
@@ -65,7 +66,7 @@
     </record>
     
     <!-- Added employee wizard button on kanban view -->
-    <record id="hr_hr_employee_view_form2_inherited" model="ir.ui.view">
+    <!-- <record id="hr_hr_employee_view_form2_inherited" model="ir.ui.view">
       <field name="name">hr.hr.employee.view.form2</field>
       <field name="model">hr.employee</field>
       <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
@@ -75,7 +76,7 @@
           <field name="allocated_leaves" />
         </xpath>
       </field>
-    </record>
+    </record> -->
 
 
   </data>

@@ -46,12 +46,9 @@ class AccountInvoice(models.Model):
                 else:
                     result[line.account_analytic_id] = [line]
         if type == 'project':
-            UOMHrs = self.env.ref('product.product_uom_hour').id
-            invoice_line_ids = self.invoice_line_ids
-            if self.ic_lines or (self.refund_invoice_id and self.refund_invoice_id.ic_lines):
-                invoice_line_ids = self.invoice_line_ids.filtered(lambda l: l.revenue_line)
+            UOMHrs = self.env.ref('uom.product_uom_hour').id
             if uom_hrs:
-                for line in invoice_line_ids.filtered(lambda l: l.uom_id.id == UOMHrs):
+                for line in self.invoice_line_ids.filtered(lambda l: l.uom_id.id == UOMHrs):
                     quantity = line.uom_id._compute_quantity(line.quantity, line.uom_id)
                     price_subtotal = line.uom_id._compute_price(line.price_subtotal, line.uom_id)
                     if line.account_analytic_id in result:
@@ -60,7 +57,7 @@ class AccountInvoice(models.Model):
                     else:
                         result[line.account_analytic_id] = {'tot_hrs':quantity, 'sub_total':price_subtotal}
             else:
-                for line in invoice_line_ids.filtered(lambda l: not l.uom_id or l.uom_id.id != UOMHrs):
+                for line in self.invoice_line_ids.filtered(lambda l: not l.uom_id or l.uom_id.id != UOMHrs):
                     if line.account_analytic_id in result:
                         result[line.account_analytic_id].append(line)
                     else:

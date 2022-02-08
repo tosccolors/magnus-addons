@@ -40,7 +40,7 @@ class HrExpense(models.Model):
         return res
 
     @api.multi
-    def submit_expenses(self):
+    def action_submit_expenses(self):
         if any(expense.state != 'draft' for expense in self):
             raise UserError(_("You cannot report twice the same line!"))
         if len(self.mapped('employee_id')) != 1:
@@ -55,7 +55,7 @@ class HrExpense(models.Model):
         }
 
     @api.multi
-    def view_sheet(self):
+    def action_view_sheet(self):
         res = super(HrExpense, self).view_sheet()
         res['flags'] = {'initial_mode': 'edit'}
         return res
@@ -65,13 +65,14 @@ class HrExpense(models.Model):
         if self.analytic_account_id and self.analytic_account_id.linked_operating_unit:
             self.operating_unit_id = self.analytic_account_id.operating_unit_ids.ids[0]
 
-    def _prepare_move_line(self, line):
-        move_line = super(HrExpense, self)._prepare_move_line(line)
-        if move_line.get('analytic_account_id', False):
-            move_line.update({'customer_charge_expense': self.customer_charge_expense})
-        if self.analytic_tag_ids:
-            move_line.update({'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)]})
-        return move_line
+    # <----code commeted fuction not in odoo12-------->
+    # def _prepare_move_line(self, line):
+    #     move_line = super(HrExpense, self)._prepare_move_line(line)
+    #     if move_line.get('analytic_account_id', False):
+    #         move_line.update({'customer_charge_expense': self.customer_charge_expense})
+    #     if self.analytic_tag_ids:
+    #         move_line.update({'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)]})
+    #     return move_line
 
     @api.multi
     def write(self, vals):
@@ -89,7 +90,8 @@ class HrExpenseSheet(models.Model):
 
     # added new status Approved by partner
 
-    state = fields.Selection([('submit', 'Submitted'),
+    state = fields.Selection([('draft', 'Draft'),
+                              ('submit', 'Submitted'),
                               ('approve', 'Approved By Manager'),
                               ('approve_partner','Approved By Partner'),
                               ('post', 'Posted'),
@@ -134,7 +136,7 @@ class HrExpenseSheet(models.Model):
     def approve_partner_expense_sheets(self):
         if not self.env.user.has_group('magnus_expense.group_hr_expense_partner'):
             raise UserError(_("Only Partner can approve expenses"))
-        self.write({'state': 'approve_partner', 'responsible_id': self.env.user.id})
+        self.write({'state': 'approve_partner', 'user_id': self.env.user.id})
 
 
     # updated by expense sheets move create which are in  status Approved By Partner
@@ -172,7 +174,7 @@ class HrExpenseSheet(models.Model):
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'tree,kanban,form,pivot,graph',
-            #'domain': "['&',('employee_id.department_id.id', 'in', %s),('state','=','approve')]" % child_departs,
+            'domain': "['&',('employee_id.department_id.id', 'in', %s),('state','=','approve')]" % child_departs,
             'res_model': 'hr.expense.sheet',
             'target': 'current'
             }

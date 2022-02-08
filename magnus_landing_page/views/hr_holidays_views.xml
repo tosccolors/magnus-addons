@@ -1,14 +1,14 @@
 <odoo>
     <data>
-        <record id="view_holiday_landing_apge" model="ir.ui.view">
-            <field name="name">hr.holidays.landing_page_tree</field>
-            <field name="model">hr.holidays</field>
+        <record id="view_holiday_landing_page" model="ir.ui.view">
+            <field name="name">hr.leave.landing_page_tree</field>
+            <field name="model">hr.leave</field>
             <field name="arch" type="xml">
                 <tree decoration-danger="state == 'refuse'" decoration-info="state == 'draft'" string="Leaves Summary">
                     <field name="employee_id"/>
                     <field name="category_id" invisible="1"/>
                     <field name="department_id" invisible="1"/>
-                    <field name="type"/>
+                    <field name="holiday_type"/>
                     <field name="name"/>
                     <field name="number_of_hours" string="Approved Hours" sum="Remaining Hours"/>
                     <field name="date_from"/>

@@ -2,8 +2,8 @@
     <data>
     <!-- explicit form view definition -->
 
-        <record model="ir.ui.view" id="magnus_landing_page.list">
-            <field name="name">hr.employee.landing_page.form</field>
+        <record model="ir.ui.view" id="magnus_landing_page_list">
+            <field name="name">hr.employee.landing.page.form</field>
             <field name="model">hr.employee.landing_page</field>
             <field name="arch" type="xml">
                 <form create="false" edit="false" copy="false" delete="false">
@@ -132,15 +132,15 @@
 
     <!--<menuitem id="landing_page_main_menu" name="Landing Page" parent="base.menu_reporting_dashboard" sequence="70"/>-->
         <menuitem
-            id="mail.mail_channel_menu_root_chat"
+            id="mail.menu_root_discuss"
             name="Discuss"
-            action="mail.mail_channel_action_client_chat"
+            action="mail.action_discuss"
             web_icon="mail,static/description/icon.png"
             groups="base.group_user"
             sequence="2"/>
 
     <menuitem id="landing_page_root" name="Magnus Landing Page" sequence="1"/>
-    <menuitem id="landing_page_main_menu" name="Magnus Landing Page" parent="landing_page_root" sequence="1"/>
+    <menuitem id="landing_page_main_menu" web_icon="mail,static/description/icon.png" name="Magnus Landing Page" parent="landing_page_root" sequence="1"/>
 
 
     <menuitem name="Landing Page" id="magnus_landing_page.menu_1_list" parent="landing_page_main_menu"

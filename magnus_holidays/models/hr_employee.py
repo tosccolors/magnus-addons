@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api, _
+from odoo.tools.float_utils import float_round
 
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
@@ -11,16 +12,12 @@ class HrEmployee(models.Model):
 
     @api.multi
     def _compute_leaves_count(self):
-        leaves = self.env['hr.holidays'].read_group([
+        all_leaves = self.env['hr.leave.report'].read_group([
             ('employee_id', 'in', self.ids),
-            ('holiday_status_id.limit', '=', False),
-            ('state', '!=', 'refuse')],
-            fields=['number_of_hours', 'employee_id'],
-            groupby=['employee_id']
-        )
-        mapping = dict(
-            [(leave['employee_id'][0], leave['number_of_hours'])
-             for leave in leaves]
-        )
+            ('holiday_status_id.allocation_type', '!=', 'no'),
+            ('holiday_status_id.active', '=', 'True'),
+            ('state', '!=', 'refuse')
+        ], fields=['number_of_days', 'employee_id'], groupby=['employee_id'])
+        mapping = dict([(leave['employee_id'][0], leave['number_of_days']) for leave in all_leaves])
         for employee in self:
-            employee.leaves_count = mapping.get(employee.id)
+            employee.leaves_count = float_round(mapping.get(employee.id, 0), precision_digits=2)

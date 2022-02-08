@@ -7,22 +7,6 @@ class StatusTimeReport(models.Model):
     _auto = False
     _description = 'Status Time Report'
 
-    @api.one
-    @api.depends('department_id')
-    def _get_atmost_parent_ou(self):
-        # calling atmost parent's operating unit
-        self.env.cr.execute("""
-                SELECT * FROM (WITH RECURSIVE    
-                ancestors (id,parent_id) AS(
-                SELECT id,parent_id,operating_unit_id FROM hr_department where id = %s                 
-                UNION
-                SELECT hr_department.id,hr_department.parent_id,hr_department.operating_unit_id 
-                FROM ancestors, hr_department WHERE hr_department.id = ancestors.parent_id
-                )TABLE ancestors )parents
-                WHERE parent_id IS NULL""" % (self.department_id.id))
-        dept_parent_ids = [x[2] for x in self.env.cr.fetchall() if x[2]]
-        self.operating_unit_id = dept_parent_ids[0]
-
     employee_id = fields.Many2one(
         'hr.employee',
         string='Employee',
@@ -34,19 +18,13 @@ class StatusTimeReport(models.Model):
         readonly=True
     )
     sheet_id = fields.Many2one(
-        'hr_timesheet_sheet.sheet',
+        'hr_timesheet.sheet',
         string='Employee',
         readonly=True
     )
     department_id = fields.Many2one(
         'hr.department',
         string='Department',
-        readonly=True
-    )
-    operating_unit_id = fields.Many2one(
-        'operating.unit',
-        compute='_get_atmost_parent_ou',
-        string='Operating Unit',
         readonly=True
     )
     state = fields.Char(
@@ -85,22 +63,22 @@ class StatusTimeReport(models.Model):
                 dr.id as week_id,
                 hrc.id as employee_id, 
                 hrc.department_id as department_id,  
-                hrc.external as external,
+                -- hrc.external as external,
                 hrc.timesheet_optional as ts_optional,
                 string_agg(rp.name,',' ORDER BY rp.name ASC) as validators,
                 htsss.state as state
             FROM date_range dr
             CROSS JOIN  hr_employee hrc
-            LEFT JOIN hr_timesheet_sheet_sheet htsss 
+            LEFT JOIN hr_timesheet_sheet htsss 
             ON (dr.id = htsss.week_id and hrc.id = htsss.employee_id)
             LEFT JOIN hr_department hd 
             ON (hd.id = hrc.department_id)
-            LEFT JOIN hr_timesheet_sheet_sheet_res_users_rel validators 
-            ON (htsss.id = validators.hr_timesheet_sheet_sheet_id)
+            LEFT JOIN hr_timesheet_sheet_res_users_rel validators 
+            ON (htsss.id = validators.hr_timesheet_sheet_id)
             LEFT JOIN res_users ru 
             ON (validators.res_users_id = ru.id)
             LEFT JOIN res_partner rp 
-            ON (rp.id = ru.partner_id)            
+            ON (rp.id = ru.partner_id)
             WHERE dr.type_id = %s 
             AND hrc.official_date_of_employment < dr.date_start
             AND (
