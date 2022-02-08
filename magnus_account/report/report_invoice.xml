@@ -229,9 +229,6 @@
                         <strong>BIC:</strong> <span t-esc="', '.join(map(lambda b: (b.bank_id.bic or ''), bank_acc))"/>
                     </span>
                 </span>
-                <t t-if="o.operating_unit_id.id in [6,7,8,11]">
-                    <p style="padding-left:85px;padding-right:15px;padding-top:30px;" ><strong>Please be aware that we have a new bank account!</strong></p>
-                </t>
             </div>
 
 
@@ -271,7 +268,7 @@
                                                     <td style='border-top:none;' width="20%"><span t-field="userLine.name"/></td>
                                                     <td style='border-top:none;' class="text-right" width="20%"><span t-esc="o.value_conversion(userLine_value['hours'])"></span></td>
                                                     <t t-if="proLines.invoice_properties.specs_type != 'both'">
-                                                        <td style='border-top:none;' class="text-right" width="20%">
+                                                        <td t-if="userLine_value['hours'] > 0" style='border-top:none;' class="text-right" width="20%">
                                                             <span t-esc="o.value_conversion(-userLine_value['amount'] / userLine_value['hours'])"/>
                                                         </td>
                                                         <td style='border-top:none;' class="text-right" width="20%">

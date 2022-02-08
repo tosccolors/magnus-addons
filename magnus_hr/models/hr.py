@@ -13,7 +13,10 @@ class Employee(models.Model):
     temporary_contract = fields.Date('Temporary Contract')
     end_date_of_employment = fields.Date('End Date of Employment')
     external = fields.Boolean('External')
-    supplier_id = fields.Many2one('res.partner', domain=[('supplier', '=', True), ('company_type', '=', 'company')], string='Supplier')
+    supplier_id = fields.Many2one('res.partner',
+                                  domain=[('supplier', '=', True),
+                                          ('company_type', '=', 'company')],
+                                  string='Supplier')
     mentor_id = fields.Many2one('hr.employee', string='Mentor')
     parttime = fields.Integer('Parttime')
     allocated_leaves = fields.Integer('Allocated Leaves')
@@ -24,9 +27,7 @@ class Employee(models.Model):
     personnel_number = fields.Char('Personnel Number')
     employee_numbersid = fields.Char('Employee NMBRs ID')
     date_last_promotion = fields.Date('Date of last Promotion')
-    klippa_user = fields.Boolean(
-        string="Employee uses Klippa"
-    )
+    klippa_user = fields.Boolean(string="Employee uses Klippa")
     has_private_car = fields.Boolean(string="Employee has a private car")
     leave_hours = fields.Float(string="Leave Hours")
 

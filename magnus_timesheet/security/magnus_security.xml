@@ -46,5 +46,10 @@
             <field name="global" eval="True"/>
             <field name="domain_force">['|','|','|',('employee_id.department_id.manager_id.user_id','=',user.id),('employee_id.department_id.parent_id.manager_id.user_id','=',user.id),('employee_id.parent_id.user_id','=',user.id),('employee_id.user_id','=',user.id)]</field>
         </record>
+        <record id="inter_ou_account_mapping_multi_company_rule" model="ir.rule">
+            <field name="name">Inter OU Account Mapping Multi-Company</field>
+            <field name="model_id" ref="model_inter_ou_account_mapping"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'child_of', [user.company_id.id])]</field>
+        </record>
     </data>
 </odoo>

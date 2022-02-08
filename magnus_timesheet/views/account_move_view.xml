@@ -10,6 +10,7 @@
                 <field name="user_id"
                        options="{'no_create': True}"
                        />
+                <field name="intercompany_line"/>
             </xpath>
         </field>
     </record>
@@ -23,6 +24,7 @@
                 <field name="user_id"
                        options="{'no_create': True}"
                        />
+                <field name="intercompany_line"/>
             </xpath>
         </field>
     </record>

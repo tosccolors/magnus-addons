@@ -175,11 +175,11 @@ class AnalyticLineStatus(models.TransientModel):
 
             #reconfirmed seperate entries
             self.env.cr.execute("""
-                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
-                            FROM account_analytic_line
-                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
-                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
-                                % (cond, rec))
+                SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id
+                FROM account_analytic_line
+                WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                GROUP BY partner_id, month_of_last_wip, project_operating_unit_id"""
+                % (cond, rec))
 
             reconfirm_res = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res, False)
@@ -191,18 +191,18 @@ class AnalyticLineStatus(models.TransientModel):
                 FROM account_analytic_line
                 WHERE id %s %s AND date_of_last_wip IS NULL
                 GROUP BY partner_id, month_id, project_operating_unit_id, project_id"""
-                        % (cond1, rec1))
+                % (cond1, rec1))
 
             result1 = self.env.cr.fetchall()
             analytic_invoice_create(result1, True)
 
             # reconfirmed grouping entries
             self.env.cr.execute("""
-                            SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
-                            FROM account_analytic_line
-                            WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
-                            GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
-                                % (cond1, rec1))
+                SELECT array_agg(account_id), partner_id, month_of_last_wip, project_operating_unit_id, project_id
+                FROM account_analytic_line
+                WHERE id %s %s AND date_of_last_wip IS NOT NULL AND month_of_last_wip IS NOT NULL 
+                GROUP BY partner_id, month_of_last_wip, project_operating_unit_id, project_id"""
+                % (cond1, rec1))
 
             reconfirm_res1 = self.env.cr.fetchall()
             analytic_invoice_create(reconfirm_res1, True)
@@ -364,7 +364,7 @@ class AnalyticLineStatus(models.TransientModel):
 
                     line_query = ("""
                                     UPDATE
-                                       account_analytic_line
+                                    account_analytic_line
                                     SET date_of_last_wip = {0}, date_of_next_reconfirmation = {1}, month_of_last_wip = {2}, wip_month_id = {2}
                                     WHERE id {3} {4}
                                     """.format(
@@ -375,7 +375,7 @@ class AnalyticLineStatus(models.TransientModel):
                                     rec))
                     self.env.cr.execute(line_query)
                     done_analytic_line |= analytic_line_obj
-
+        
         except Exception, e:
             raise FailedJobError(
                 _("The details of the error:'%s'") % (unicode(e)))

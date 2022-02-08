@@ -38,7 +38,7 @@
         <record id="act_hr_timesheet_line_forecast" model="ir.actions.act_window">
             <field name="name">Staffing &amp; Forecast</field>
             <field name="res_model">account.analytic.line</field>
-            <field name="domain">[('project_id', '!=', False), ('planned', '=', True),'|',('correction_charge', '=', True),('chargeable', '=', True)]</field>
+            <field name="domain">[('project_id', '!=', False), ('planned', '=', True)]</field>
             <field name="context">{"search_default_today":1}</field>
             <field name="view_mode">tree,pivot</field>
             <field name="search_view_id" ref="hr_timesheet.hr_timesheet_line_search"/>

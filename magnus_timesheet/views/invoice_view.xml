@@ -29,6 +29,13 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_form" />
             <field name="arch" type="xml">
+                <xpath expr="//sheet/group/group[1]"  position="inside">
+                    <field name="ic_lines" invisible="1"/>
+                    <button name="action_create_ic_lines" type="object" string="Create Intercompany Lines"
+                            groups="base.group_no_one" attrs="{'invisible': ['|',('ic_lines','!=', False ),('state', 'not in', ('draft','proforma2'))]}"/>
+                    <button name="action_delete_ic_lines" type="object" string="Reset Intercompany Lines"
+                            groups="base.group_no_one" attrs="{'invisible': ['|',('ic_lines','=', False ),('state', 'not in', ('draft','proforma2'))]}"/>
+                </xpath>
                 <xpath expr="//sheet/group/group[2]"  position="inside">
                     <field name="target_invoice_amount"/>
                     <button name="compute_target_invoice_amount" type="object" states="draft" string="Calculate Target"
@@ -36,11 +43,16 @@
                     <button name="reset_target_invoice_amount" type="object" states="draft" string="Reset Invoice Amount"
                             groups="base.group_no_one"/>
                 </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/tree" position="attributes">
+                    <attribute name="decoration-danger">revenue_line==False</attribute>
+                </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='origin']" position="attributes">
                     <attribute name="invisible">False</attribute>
                 </xpath>
                 <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='operating_unit_id']" position="before">
                     <field name="user_id"/>
+                    <field name="ic_line" invisible="1"/>
+                    <field name="revenue_line" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='payment_term_id']" position="after">
                     <field name="month_id" />

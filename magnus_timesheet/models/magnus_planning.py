@@ -204,7 +204,7 @@ class MagnusPlanning(models.Model):
         self.planning_ids_compute = False
         if self_planning:
             self.get_planning_from_managers()
-        elif self.employee_id.user_id.has_group("magnus_timehseet.group_magnus_planning_officer") or self.employee_id.user_id.has_group("hr.group_hr_user") or self.employee_id.user_id.has_group("hr.group_hr_manager"):
+        elif self.employee_id.user_id.has_group("magnus_timesheet.group_magnus_planning_officer") or self.employee_id.user_id.has_group("hr.group_hr_user") or self.employee_id.user_id.has_group("hr.group_hr_manager"):
             self.get_planning_from_employees()
         else:
             self.get_planning_from_managers()
