@@ -1,3 +1,4 @@
+/*
 odoo.define('magnus_hr.KanbanView', function (require) {
 "use strict";
 
@@ -37,3 +38,4 @@ odoo.define('magnus_hr.KanbanView', function (require) {
     });
 });
 
+*/
