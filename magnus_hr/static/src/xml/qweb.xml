@@ -2,9 +2,9 @@
 <templates>
   <t t-extend="KanbanView.buttons">
         <t t-jquery="div" t-operation="append">
-          <t t-if="widget.model=='hr.employee'">
+          <!-- <t t-if="widget.model=='hr.employee'"> -->
             <button class="btn btn-sm btn-primary add_employee_wizard" type="button">Employee Wizard</button>
-          </t>
+          <!-- </t> -->
         </t>
     </t>
 </templates>
