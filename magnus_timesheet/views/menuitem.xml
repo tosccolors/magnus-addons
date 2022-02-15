@@ -3,7 +3,8 @@
         <!-- Top menu item -->
         <menuitem name="Analytic Invoicing"
                   id="menu_analytic_invoicing"
-                  sequence="40"/>
+                  sequence="40"
+                  web_icon="magnus_timesheet,static/description/icon.png"/>
         <menuitem id="menu_analytic" name="Time and Billing"
                   parent="menu_analytic_invoicing"
                   sequence="2"/>
