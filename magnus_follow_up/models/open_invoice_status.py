@@ -32,11 +32,11 @@ class CreditControlStatus(models.TransientModel):
     processed = fields.Boolean(string='Done') 
 
     @api.multi
-    def accept(self) :
-    	for line in self:
-	        line.processed = True
-	        for lines in line.latest_credit_control_line_id:
-	        	lines.state='sent'   #i.e. Done
+    def accept(self):
+        for line in self:
+            line.processed = True
+            for lines in line.latest_credit_control_line_id:
+                lines.state='sent'   #i.e. Done
         return
 
     #show records selected by sql query
@@ -49,9 +49,9 @@ class CreditControlStatus(models.TransientModel):
             last_cc_action =self.env['credit.control.line'].search([('invoice_id','=',invoice.id)], order='date desc', limit=1)
             cc_actions = self.env['credit.control.line'].search([('invoice_id','=',invoice.id)])
             if last_cc_action.state in ['sent', 'done'] :
-            	processed = True
+                processed = True
             else :
-            	processed = False
+                processed = False
             vals = {'company_id'           : invoice.company_id.id,
                     'operating_unit_id'    : invoice.operating_unit_id.id,
                     'invoice_id'           : invoice.id,
@@ -71,7 +71,7 @@ class CreditControlStatus(models.TransientModel):
                    }
             #sign correction
             if invoice.type=='out_invoice' and invoice.amount_total_company_signed < 0 :
-            	vals['amount_total_company_signed'] = -vals['amount_total_company_signed']
+                vals['amount_total_company_signed'] = -vals['amount_total_company_signed']
             self.create(vals)
         #prepare for showing. (note: show all records because when using res_id no search filter appears and no button is possible)
         res_ids = self.search([]).ids
