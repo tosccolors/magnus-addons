@@ -25,7 +25,7 @@ class FleetVehicleContract(models.Model):
     
     @api.multi
     def write(self,vals):
-        if vals.get('lease_period') > 0:
+        if int(vals.get('lease_period')) > 0:
             start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
             end_date = start_date + relativedelta(months=vals.get('lease_period'))
             vals.update({'expiration_date':end_date})
@@ -48,10 +48,10 @@ class FleetVehicleContract(models.Model):
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
     
-    # fiscal_addition = fields.Float("Fiscal Addition")
+    fiscal_addition = fields.Float("Fiscal Addition")
     hoem_work_distance = fields.Integer("Home/Work Distance")
     location = fields.Integer("Personal Contribution")
-    fiscal_addition_id = fields.Many2one("fleet.fiscal.addition.mapping", string="Fiscal Addition")
+
 
     @api.depends('log_contracts')
     def _compute_contract_reminder(self):

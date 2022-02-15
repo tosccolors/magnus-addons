@@ -39,7 +39,6 @@ In the object hr. employee on the tab 'HR Settings' under the heading 'Status' c
     'data': [
         'views/hr_views.xml',
         'wizard/hr_employee_wizard_view.xml',
-        'views/template_view.xml', 
         
     ],
     

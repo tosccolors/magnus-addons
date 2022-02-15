@@ -11,6 +11,7 @@
     'author': 'Magnus, Odoo Community Association (OCA)',
     'website': 'https://www.magnus.nl',
     'depends': [
+        'fleet',
         'magnus_timesheet'
     ],
     'data': [
