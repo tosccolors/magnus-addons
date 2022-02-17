@@ -113,7 +113,7 @@ class PayrollEntry(models.Model):
                 'operating_unit_id': line_operating_unit or False,
                 'credit': float(line[2].text) if line[3].text == 'credit' else 0.0,
                 'debit': float(line[2].text) if line[3].text == 'debit' else 0.0,
-                'name': line[4].text,
+                'name': line[4].text if line[4] else '/',
                 # 'ref': line[4].text
             }
             lines.append([0, 0, line_info])
