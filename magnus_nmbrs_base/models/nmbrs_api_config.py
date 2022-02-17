@@ -34,7 +34,7 @@ class NmbrsInterfaceConfig(models.Model):
                 'endpoint_company_service': endpoint_company_service
             })
             configuration = self.id
-            _logger.info("Pubble order interface configuration record created")
+            _logger.info("Nmbrs order interface configuration record created")
         else:
             configuration = configurations[0].id # Only the first record of the table is used, as there can only be one configuration
         action = {
