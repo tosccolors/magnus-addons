@@ -81,7 +81,7 @@ class PayrollEntry(models.Model):
         This method uses the NMBRs API to fetch the payroll entry lines.
         """
         config = self.env['nmbrs.interface.config'].search([])[0]
-        if not config.operating_unit.nmbrs_id:
+        if not self.operating_unit.nmbrs_id:
             raise Warning(_("You need to set the Nmbrs ID for the operating unit in Odoo"))
         user = config.api_user
         token = config.api_key
