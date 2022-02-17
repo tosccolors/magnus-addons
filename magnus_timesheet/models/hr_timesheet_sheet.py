@@ -62,26 +62,24 @@ class HrTimesheetSheet(models.Model):
 					return False
 		return False
 
-	# @api.model
-	# def default_get(self, fields):
-	#     rec = super(HrTimesheetSheet, self).default_get(fields)
-	#     week = self.get_week_to_submit()
-	#     if week:
-	#         rec.update({'week_id': week.id})
-	#     else:
-	#         if self._uid == SUPERUSER_ID:
-	#             raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
-	#         else:
-	#             raise UserError(_('Please contact administrator.'))
-	#     return rec
+	@api.model
+	def default_get(self, fields):
+	    rec = super(HrTimesheetSheet, self).default_get(fields)
+	    week = self.get_week_to_submit()
+	    if week:
+	        rec.update({'week_id': week.id})
+	    else:
+	        if self._uid == SUPERUSER_ID:
+	            raise UserError(_('Please generate Date Ranges.\n Menu: Settings > Technical > Date Ranges > Generate Date Ranges.'))
+	        else:
+	            raise UserError(_('Please contact administrator.'))
+	    return rec
 
 	def _get_week_domain(self):
 		emp_id = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
 		emp_id = emp_id.id if emp_id else False
 		timesheets = self.env['hr_timesheet.sheet'].search([('employee_id', '=', emp_id)])
-		# print("----------print timesheet of this employee",emp_id)
 		logged_weeks = timesheets.mapped('week_id').ids if timesheets else []
-		# print("----------print timesheet generrated",logged_weeks)
 		date_range_type_cw_id = self.env.ref(
 			'magnus_date_range_week.date_range_calender_week').id
 		return [('type_id','=', date_range_type_cw_id), ('active','=',True), ('id', 'not in', logged_weeks)]

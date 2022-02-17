@@ -11,6 +11,7 @@ class DateRangeType(models.Model):
     _inherit = 'date.range.type'
 
     calender_week = fields.Boolean(string="Is calender week?", readonly=True)
+    fiscal_year = fields.Boolean(string="Is Fiscal Year?", readonly=True)
 
     @api.multi
     def unlink(self):
