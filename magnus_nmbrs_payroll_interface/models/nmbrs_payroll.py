@@ -111,7 +111,7 @@ class PayrollEntry(models.Model):
                     line_operating_unit = analytic_account.operating_unit_ids[0].id
             line_info = {
                 'account_id': chart_of_accounts.search([('code', '=', line[0].text), ('company_id', '=', 1)]).id,
-                'analytic_account_id': analytic_account.id,
+                'analytic_account_id': analytic_account.id or False,
                 'operating_unit_id': line_operating_unit or False,
                 'credit': float(line[2].text) if line[3].text == 'credit' else 0.0,
                 'debit': float(line[2].text) if line[3].text == 'debit' else 0.0,
