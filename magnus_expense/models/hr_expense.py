@@ -172,7 +172,7 @@ class HrExpenseSheet(models.Model):
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'tree,kanban,form,pivot,graph',
-            'domain': "['&',('employee_id.department_id.id', 'in', %s),('state','=','approve')]" % child_departs,
+            #'domain': "['&',('employee_id.department_id.id', 'in', %s),('state','=','approve')]" % child_departs,
             'res_model': 'hr.expense.sheet',
             'target': 'current'
             }

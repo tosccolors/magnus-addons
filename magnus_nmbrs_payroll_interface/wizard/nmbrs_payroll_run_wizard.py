@@ -19,6 +19,8 @@ class NMBRsPayrollRunWizard(models.TransientModel):
         This method is used to retrieve the payroll run info from numbers. Note: the payroll entry is loaded elsewhere.
         """
         config = self.env['nmbrs.interface.config'].search([])[0]
+        if not self.operating_unit.nmbrs_id:
+            raise Warning(_("You need to set the Nmbrs ID for the operating unit in Odoo"))
         user = config.api_user
         token = config.api_key
         authentication_v3 = {'Username': user, 'Token': token, 'Domain': 'magnus'}
