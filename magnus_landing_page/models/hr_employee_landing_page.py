@@ -85,7 +85,7 @@ class hr_employee_landing_page(models.TransientModel):
         current_year = datetime.now()
         first_date = str(current_year.year) + '-1-1'
         last_date = str(current_year.year) + '-12-31'
-        hr_timesheet = self.env['hr_timesheet.sheet']
+        hr_timesheet = self.env['hr_timesheet_sheet.sheet']
 
         # compute private milage, Note: private_mileage is an computed field can't be calulated through SQl
         self.private_km_balance = sum(hr_timesheet.search([('employee_id', '=', self.employee_id.id),'&',('week_id.date_start','>=',first_date),('week_id.date_end','<=',last_date)]).mapped('private_mileage'))
