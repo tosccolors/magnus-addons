@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <template id="report_qweb_operating_unit.external_layout_ou">
-        <!-- Multicompany -->
-        <t t-if="not o and doc">
-            <t t-set="o" t-value="doc"/>
-        </t>
-        <t t-if="o and 'company_id' in o">
-            <t t-set="company" t-value="o.company_id"></t>
-        </t>
-        <t t-if="not o or not 'company_id' in o">
-            <t t-set="company" t-value="res_company"></t>
-        </t>
-
-        <t t-call="report_qweb_operating_unit.external_layout_header_ou" />
-        <t t-raw="0" />
-        <!--<t t-call="report_qweb_operating_unit.external_layout_footer_ou" />-->
-    </template>
-
-    <template id="report_qweb_operating_unit.external_layout_header_ou">
+    <template id="external_layout_magnus_header_ou">
         <div class="header">
             <div class="row">
                 <div class="row backgroundimage" style="position:relative;font-size:3em;
@@ -29,5 +11,30 @@
                 </div>
             </div>
         </div>
+        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <t t-call="web.address_layout"/>
+            <t t-raw="0"/>
+        </div>
     </template>
+    
+    <template id="external_layout_magnus">
+        <t t-if="not o" t-set="o" t-value="doc"/>
+
+        <t t-if="not company">
+            <!-- Multicompany -->
+            <t t-if="company_id">
+                <t t-set="company" t-value="company_id"/>
+            </t>
+            <t t-elif="o and 'company_id' in o">
+                <t t-set="company" t-value="o.company_id.sudo()"/>
+            </t>
+            <t t-else="else">
+                <t t-set="company" t-value="res_company"/>
+            </t>
+        </t>
+
+        <t t-call="magnus_account.external_layout_magnus_header_ou"><t t-raw="0"/></t>
+    </template>
+
+
 </odoo>

@@ -14,17 +14,21 @@
             <!--usage="default"-->
             <!--header="False"/>-->
 
-        <report auto="False"
+        <!-- <report 
             id="account.account_invoices"
             model="account.invoice"
             string="Invoices" report_type="qweb-pdf"
             name="magnus_account.report_invoice_magnus_account"
             file="magnus_account.report_invoice_magnus_account"
-            paperformat="operating_unit_report_layout.paperformat_ou_layout"
             attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
-            attachment_use="True"
-            usage="default"
-            header="False"/>
-
+            /> -->
+            <report 
+            id="account_invoices_magnus"
+            model="account.invoice"
+            string="Invoices" report_type="qweb-pdf"
+            name="magnus_account.report_invoice_magnus_account"
+            file="magnus_account.report_invoice_magnus_account"
+            attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+            />
     </data>
 </odoo>

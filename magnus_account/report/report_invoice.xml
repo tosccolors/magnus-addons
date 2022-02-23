@@ -4,7 +4,8 @@
 
 
 <template id="report_invoice_document_magnus_account">
-    <t t-call="report_qweb_operating_unit.external_layout_ou">
+    <t t-call="magnus_account.external_layout_magnus">
+    <!-- <t t-call="web.external_layout"> -->
 
         <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
         <t t-set="proforma_invoice" t-value="o.state=='proforma' or o.state=='proforma2'"/>
@@ -46,53 +47,56 @@
             <t t-set="invoice_project" t-value="o.get_invoice_project()"/>
 
 
-            <div style="padding-left:85px;padding-right:15px;">
-                <div class="row" style="padding:0px;padding-right:15px;border-bottom:1px solid black;">
-                    <div class="col-xs-7" style="padding:0px;">
-                         <div class="col-xs-3" style="padding:0px;">
-                             <span>Date</span><br/>
+            <div style="padding-left:85px;padding-right:15px;border-bottom:1px solid black;">
+                <table>
+                    <tr>
+                        <td colspan="2"><span>Date</span><br/>
                              <span>Invoice</span><br/>
                              <span>Reference</span><br/>
                              <span>Your VAT</span><br/>
                              <span>Our VAT</span><br/>
                              <span t-if="not sale_inv">Month</span><br/>
                              <br/>
-                         </div>
-                         <div class="col-xs-2" style="padding:0px;">
-                             <span><strong>:</strong></span><br/>
-                             <span><strong>:</strong></span><br/>
-                             <span><strong>:</strong></span><br/>
-                             <span><strong>:</strong></span><br/>
-                             <span><strong>:</strong></span><br/>
-                             <span t-if="not sale_inv"><strong>:</strong></span><br/>
-                             <br/>
-                         </div>
-                         <div class="col-xs-7" style="padding:0px;">
-                             <span t-field="o.date_invoice"/><br/>
-                             <span t-field="o.number"/><br/>
-                             <span t-if="sale_inv" t-field="o.invoice_line_ids[0].account_analytic_id.project_ids[0].po_number"/>
-                             <t t-if="not sale_inv">
-                                 <t t-if="analytic_invoice_id">
-                                    <span t-if="not analytic_invoice_id[0].project_id" t-field="o.name"/>
-                                    <span t-if="analytic_invoice_id[0].project_id" t-field="analytic_invoice_id[0].project_id.po_number"/>
+                        </td>
+                        <td style="text-center">
+                             <div style="margin-left:10px">
+                                <span><strong>:</strong></span><br/>
+                                <span><strong>:</strong></span><br/>
+                                 <span><strong>:</strong></span><br/>
+                                 <span><strong>:</strong></span><br/>
+                                 <span><strong>:</strong></span><br/>
+                                 <span t-if="not sale_inv"><strong>:</strong></span><br/>
+                                 <br/>
+                             </div>
+                        </td>
+                        <td style="text-right">
+                            <div style="margin-left:10px">
+                                <span t-field="o.date_invoice"/><br/>
+                                 <span t-field="o.number"/><br/>
+                                 <span t-if="sale_inv" t-field="o.invoice_line_ids[0].account_analytic_id.project_ids[0].po_number"/>
+                                 <t t-if="not sale_inv">
+                                     <t t-if="analytic_invoice_id">
+                                        <span t-if="not analytic_invoice_id[0].project_id" t-field="o.name"/>
+                                        <span t-if="analytic_invoice_id[0].project_id" t-field="analytic_invoice_id[0].project_id.po_number"/>
+                                     </t>
+                                     <t t-if="not analytic_invoice_id">
+                                        <span t-if="invoice_project" t-field="invoice_project.po_number"/>
+                                     </t>
+                                     <br/>
                                  </t>
-                                 <t t-if="not analytic_invoice_id">
-                                    <span t-if="invoice_project" t-field="invoice_project.po_number"/>
+                                 <span t-field="o.partner_id.vat"/><br/>
+                                 <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
+                                       t-field="o.operating_unit_id.partner_id.vat"/><br/>
+                                 <t t-if="analytic_invoice_id and not sale_inv">
+                                     <span t-field="analytic_invoice_id[0].month_id.calender_name"/>
+                                    <span t-esc="time.strftime('%Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/>
                                  </t>
                                  <br/>
-                             </t>
-                             <span t-field="o.partner_id.vat"/><br/>
-                             <span t-if="o.operating_unit_id and o.operating_unit_id.partner_id and o.operating_unit_id.partner_id.vat"
-                                   t-field="o.operating_unit_id.partner_id.vat"/><br/>
-                             <t t-if="analytic_invoice_id and not sale_inv">
-                                 <span t-field="analytic_invoice_id[0].month_id.calender_name"/>
-                                <span t-esc="time.strftime('%Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/>
-                             </t>
-                             <br/>
-                             <br/>
-                         </div>
-                    </div>
-                </div>
+                                 <br/>
+                             </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
             <br/>
 
@@ -376,13 +380,14 @@
 
 
 
-<template id="report_invoice_magnus_account">
-    <t t-call="report.html_container">
-        <t t-foreach="docs" t-as="o">
-            <t t-call="magnus_account.report_invoice_document_magnus_account" t-lang="o.partner_id.lang"/>
+    <template id="report_invoice_magnus_account">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.user_id.sudo().lang if o.type in ('in_invoice', 'in_refund') else o.partner_id.lang"/>
+                <t t-call="magnus_account.report_invoice_document_magnus_account" t-lang="lang"/>
+            </t>
         </t>
-    </t>
-</template>
+    </template>
 
 
 
