@@ -49,7 +49,7 @@ voor de interface naar slam.
                 'account_operating_unit',
                 'operating_unit_report_layout',
                 'magnus_timesheet',
-                'magnus_calender',
+#                'magnus_calender',
                 'connector_jira'
     ],
     'data' : [
