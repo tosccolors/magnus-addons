@@ -39,7 +39,7 @@
     "init_xml": [
     ],
     "update_xml": [
-        "view/account_invoice_report.xml",
+        # "view/account_invoice_report.xml",
         "view/account_invoice_view.xml",
     ],
     'demo_xml': [

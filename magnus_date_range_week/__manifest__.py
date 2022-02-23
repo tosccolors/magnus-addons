@@ -11,7 +11,7 @@
     'author': 'Magnus, Odoo Community Association (OCA)',
     'website': 'https://www.magnus.nl',
     'depends': [
-        'date_range',
+        'date_range','account_fiscal_year'
     ],
     'data': [
         'data/date_range_type.xml',
