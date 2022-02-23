@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <menuitem id="menu_nmbrs" name="NMBRs" groups="nmbrs_interface_config"/>
+        <menuitem id="menu_nmbrs" name="NMBRs" groups="nmbrs_interface_config" web_icon="magnus_nmbrs_base,static/description/icon.png"/>
         <menuitem id="menu_nmbrs_header" name="NMBRs Configuration" parent="menu_nmbrs" groups="nmbrs_interface_config"/>
         <menuitem id="menu_nmbrs_mappings" name="NMBRs Mappings" parent="menu_nmbrs"/>
 
