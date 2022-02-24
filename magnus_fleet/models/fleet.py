@@ -54,6 +54,7 @@ class FleetVehicle(models.Model):
 
 
 
+
     @api.depends('log_contracts')
     def _compute_contract_reminder(self):
         for record in self:
