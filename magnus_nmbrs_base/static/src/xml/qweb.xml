@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+  <t t-extend="ListView.buttons">
+        <t t-jquery="div" t-operation="append">
+          <t t-if="widget.modelName=='mapping.nmbrs.analytic.account'">
+            <button class="btn btn-sm btn-primary add_fetch_nmbrs_analytic_accounts" type="button">Fetch Analytic Accounts NMBRs</button>
+          </t>
+        </t>
+    </t>
+</templates>

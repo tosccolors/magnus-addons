@@ -13,8 +13,7 @@ def post_init_hook(cr, pool):
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
     for month in env['date.range'].search([('type_id.fiscal_month', '=', True)]):
-        month.calender_name = time.strftime('%B', time.strptime(month.date_start, '%Y-%m-%d'))
+        month.calender_name = time.strftime('%B', time.strptime(str(month.date_start), '%Y-%m-%d'))
 
-    # commented by deekshith
-    # for month in env['date.range'].search([('type_id.fiscal_year', '=', True)]):
-    #     month.calender_name = time.strftime('%Y', time.strptime(month.date_start, '%Y-%m-%d'))
+    for month in env['date.range'].search([('type_id.fiscal_year', '=', True)]):
+        month.calender_name = time.strftime('%Y', time.strptime(str(month.date_start), '%Y-%m-%d'))

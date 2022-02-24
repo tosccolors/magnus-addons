@@ -11,7 +11,7 @@
                     <field name="project_id"/>
                     <field name="task_id" domain="[('project_id','=',project_id)]"/>
                     <field name="unit_amount" widget="float_time" string="Hours" sum="Hours"/>
-                    <field name="kilometers" style="border-color:#7F8C8D;"/>
+                    <field name="kilometers"/>
                     <field name="user_id" invisible="1"/>
                </tree>
             </field>

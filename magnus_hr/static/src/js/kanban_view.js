@@ -2,8 +2,6 @@ odoo.define('magnus_hr.KanbanView', function (require) {
 "use strict";
 
     var KanbanView = require('web_kanban.KanbanView');
-    // web_kanban.KanbanView
-    var Model = require('web.Model');
 
     var KanbanView = KanbanView.include({
         render_buttons: function($node) {

@@ -31,7 +31,7 @@ Steps to generate monthly expected revenue:
     # any module necessary for this one to work correctly
     # 'depends': ['base', 'crm', 'crm_sector', 'project', 'operating_unit', 'hr', 'web_readonly_bypass','utm', 'date_range','web_notify'],
     # commented by deekshith
-    'depends': ['base','uom', 'crm', 'crm_industry', 'project', 'operating_unit', 'hr','utm', 'date_range','web_notify'],
+    'depends': ['base','uom', 'crm', 'crm_industry', 'project', 'operating_unit', 'hr','utm', 'date_range','web_notify','sale'],
 
     # always loaded
     'data': [

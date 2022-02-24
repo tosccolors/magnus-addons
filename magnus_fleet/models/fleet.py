@@ -53,6 +53,7 @@ class FleetVehicle(models.Model):
     location = fields.Integer("Personal Contribution")
 
 
+
     @api.depends('log_contracts')
     def _compute_contract_reminder(self):
         for record in self:

@@ -25,8 +25,8 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/hr_views.xml',
-        # 'views/analytic_views.xml', commented it
-        'views/hr_timesheet_views.xml',
+        'views/analytic_views.xml',
+        # 'views/hr_timesheet_views.xml',
         'views/hr_timesheet_assets.xml',
     ],
     # only loaded in demonstration mode
