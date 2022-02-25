@@ -162,8 +162,8 @@ class AccountAnalyticLine(models.Model):
             account_id = project.analytic_account_id
             operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
-        if 'timesheet_date_from' in context:
-            date = context.get('timesheet_date_from')
+        if 'timesheet_date_start' in context:
+            date = context.get('timesheet_date_start')
             res.update({'date': date})
         return res
 
@@ -385,10 +385,10 @@ class AccountAnalyticLine(models.Model):
             return {
                 'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
             }
-        elif self.env.context.get('timesheet_date_from',False) and \
-            self.env.context.get('timesheet_date_to',False) and not \
-            self.env.context.get('timesheet_date_from') <= self.date <= self.env.context.get('timesheet_date_to'):
-            self.date = self.env.context.get('timesheet_date_from')
+        elif self.env.context.get('timesheet_date_start',False) and \
+            self.env.context.get('timesheet_date_end',False) and not \
+            self.env.context.get('timesheet_date_start') <= self.date <= self.env.context.get('timesheet_date_end'):
+            self.date = self.env.context.get('timesheet_date_start')
             return {
                 'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
             }
