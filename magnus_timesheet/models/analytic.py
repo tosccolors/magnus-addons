@@ -380,8 +380,8 @@ class AccountAnalyticLine(models.Model):
             self.company_id = self.env.user.company_id
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
-        elif self.sheet_id and not self.sheet_id.date_from <= self.date <= self.sheet_id.date_to:
-            self.date = self.sheet_id.date_from
+        elif self.sheet_id and not self.sheet_id.date_start <= self.date <= self.sheet_id.date_end:
+            self.date = self.sheet_id.date_start
             return {
                 'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
             }
