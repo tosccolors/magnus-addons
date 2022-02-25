@@ -89,7 +89,7 @@
                                        t-field="o.operating_unit_id.partner_id.vat"/><br/>
                                  <t t-if="analytic_invoice_id and not sale_inv">
                                      <span t-field="analytic_invoice_id[0].month_id.calender_name"/>
-                                    <span t-esc="time.strftime('%Y', time.strptime(analytic_invoice_id[0].month_id.date_start,'%Y-%m-%d'))"/>
+                                    <span t-esc="time.strftime('%Y', time.strptime(str(analytic_invoice_id[0].month_id.date_start),'%Y-%m-%d'))"/>
                                  </t>
                                  <br/>
                                  <br/>
@@ -244,7 +244,7 @@
                             <t t-foreach="monthLines_value" t-as="feeLines">
                                 <div width="85%">
                                     <t t-if="monthLines != 'null'">
-                                         Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(monthLines.date_start,'%Y-%m-%d'))"/></strong>
+                                         Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(str(monthLines.date_start),'%Y-%m-%d'))"/></strong>
                                     </t>
                                     <t t-if="feeLines != 'null'">
                                         Fee Rate: <strong><span t-esc="feeLines"/></strong>
@@ -332,7 +332,7 @@
                             <t t-foreach="monthLines_value" t-as="feeLines">
                                 <div width="85%">
                                     <t t-if="monthLines != 'null'">
-                                        Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(monthLines.date_start,'%Y-%m-%d'))"/></strong>
+                                        Month: <strong> <span t-esc="time.strftime('%Y %B', time.strptime(str(monthLines.date_start),'%Y-%m-%d'))"/></strong>
                                         <t t-if="feeLines != 'null'">
                                             Fee Rate: <strong><span t-esc="feeLines"/></strong>
                                         </t>
