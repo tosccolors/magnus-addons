@@ -388,7 +388,7 @@ class AccountAnalyticLine(models.Model):
         elif self.env.context.get('timesheet_date_start',False) and  self.env.context.get('timesheet_date_end',False):
             start_date = datetime.strptime(self.env.context.get('timesheet_date_start'), "%Y-%m-%d").date()
             end_date = datetime.strptime(self.env.context.get('timesheet_date_end'), "%Y-%m-%d").date()
-            if start_date <= self.date <= end_date:
+            if not start_date <= self.date <= end_date:
                 self.date = start_date
             # return {
             #     'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
