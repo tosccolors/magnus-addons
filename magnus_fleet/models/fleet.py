@@ -49,7 +49,7 @@ class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
     
     # fiscal_addition = fields.Float("Fiscal Addition")
-    hoem_work_distance = fields.Integer("Home/Work Distance")
+    home_work_distance = fields.Integer("Home/Work Distance")
     location = fields.Integer("Personal Contribution")
     fiscal_addition_id = fields.Many2one("fleet.fiscal.addition.mapping", string="Fiscal Addition")
 
