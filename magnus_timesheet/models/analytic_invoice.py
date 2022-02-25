@@ -467,7 +467,6 @@ class AnalyticInvoice(models.Model):
             'origin': line.task_id.project_id.po_number
                         if line.task_id and line.task_id.project_id and line.task_id.project_id.correction_charge
                         else '/',
-            'name':line.name,
         })
 
         return invoice_line_vals
