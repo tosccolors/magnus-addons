@@ -385,13 +385,14 @@ class AccountAnalyticLine(models.Model):
             return {
                 'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
             }
-        elif self.env.context.get('timesheet_date_start',False) and \
-            self.env.context.get('timesheet_date_end',False) and not \
-            self.env.context.get('timesheet_date_start') <= self.date <= self.env.context.get('timesheet_date_end'):
-            self.date = self.env.context.get('timesheet_date_start')
-            return {
-                'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
-            }
+        elif self.env.context.get('timesheet_date_start',False) and  self.env.context.get('timesheet_date_end',False):
+            start_date = datetime.strptime(self.env.context.get('timesheet_date_start'), "%Y-%m-%d").date()
+            end_date = datetime.strptime(self.env.context.get('timesheet_date_end'), "%Y-%m-%d").date()
+            if start_date <= self.date <= end_date:
+                self.date = start_date
+            # return {
+            #     'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
+            # }
 
 
     @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
