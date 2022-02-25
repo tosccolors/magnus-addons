@@ -162,8 +162,8 @@ class AccountAnalyticLine(models.Model):
             account_id = project.analytic_account_id
             operating_unit_id = account_id.operating_unit_ids and account_id.operating_unit_ids[0] or False
             res.update({'operating_unit_id':operating_unit_id, 'name':'/', 'task_id':task_id})
-        if 'timesheet_date_from' in context:
-            date = context.get('timesheet_date_from')
+        if 'timesheet_date_start' in context:
+            date = context.get('timesheet_date_start')
             res.update({'date': date})
         return res
 
@@ -380,18 +380,19 @@ class AccountAnalyticLine(models.Model):
             self.company_id = self.env.user.company_id
             date = self.find_daterange_week(self.date)
             self.week_id = date.id
-        elif self.sheet_id and not self.sheet_id.date_from <= self.date <= self.sheet_id.date_to:
-            self.date = self.sheet_id.date_from
+        elif self.sheet_id and not self.sheet_id.date_start <= self.date <= self.sheet_id.date_end:
+            self.date = self.sheet_id.date_start
             return {
                 'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
             }
-        elif self.env.context.get('timesheet_date_from',False) and \
-            self.env.context.get('timesheet_date_to',False) and not \
-            self.env.context.get('timesheet_date_from') <= self.date <= self.env.context.get('timesheet_date_to'):
-            self.date = self.env.context.get('timesheet_date_from')
-            return {
-                'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
-            }
+        elif self.env.context.get('timesheet_date_start',False) and  self.env.context.get('timesheet_date_end',False):
+            start_date = datetime.strptime(self.env.context.get('timesheet_date_start'), "%Y-%m-%d").date()
+            end_date = datetime.strptime(self.env.context.get('timesheet_date_end'), "%Y-%m-%d").date()
+            if not start_date <= self.date <= end_date:
+                self.date = start_date
+            # return {
+            #     'warning': {'title': _('Error'), 'message': _('Please fill in date within timesheet dates.'), },
+            # }
 
 
     @api.onchange('product_id', 'product_uom_id', 'unit_amount', 'currency_id')
