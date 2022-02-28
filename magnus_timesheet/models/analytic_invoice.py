@@ -602,7 +602,7 @@ class AnalyticInvoice(models.Model):
                 unit_amount = item.get('unit_amount')
                 fee_rate = item.get('line_fee_rate')
                 amount = item.get('amount')
-                month = self.env['date.range'].browse(item.get('month_id')[0]) if item.has_key('month_id') else 'null'
+                month = self.env['date.range'].browse(item.get('month_id')[0]) if item.get('month_id', False) else 'null'
                 gb_fee_rate = abs(fee_rate) if data[2] else 'null'
 
                 if month in result:
@@ -717,7 +717,7 @@ class AnalyticInvoice(models.Model):
                 task_obj = task.browse(item.get('task_id')[0])
                 unit_amount = item.get('unit_amount')
                 fee_rate = item.get('line_fee_rate')
-                month = self.env['date.range'].browse(item.get('month_id')[0]) if item.has_key('month_id') else 'null'
+                month = self.env['date.range'].browse(item.get('month_id')[0]) if item.get('month_id', False) else 'null'
 
                 gb_fee_rate = abs(fee_rate) if data[2] else 'null'
                 if month in result:
