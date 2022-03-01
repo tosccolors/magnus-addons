@@ -376,7 +376,7 @@ class AnalyticLineStatus(models.TransientModel):
                         cond = 'IN'
                         rec = tuple(analytic_line_obj.ids)
 
-                    first_of_next_month_date = (datetime.strptime(date_end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+                    first_of_next_month_date = (datetime.strptime(str(date_end), "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
                     wip_month_id = analytic_line_obj[0].find_daterange_month(first_of_next_month_date)
 
                     line_query = ("""
@@ -424,7 +424,7 @@ class AnalyticLineStatus(models.TransientModel):
                 tot_credit = sum(move.line_ids.mapped('credit'))
                 tot_debit = sum(move.line_ids.mapped('debit'))
                 reconcile = True if move.wip_percentage and (tot_credit or tot_debit) else False
-                date = datetime.strptime(move.date, "%Y-%m-%d") + timedelta(days=1)
+                date = datetime.strptime(str(move.date), "%Y-%m-%d") + timedelta(days=1)
                 reverse_move= move.create_reversals(
                     date=date, journal=move.journal_id,
                     move_prefix='WIP Reverse', line_prefix='WIP Reverse',

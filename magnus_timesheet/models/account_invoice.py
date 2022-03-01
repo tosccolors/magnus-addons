@@ -113,10 +113,10 @@ class AccountInvoice(models.Model):
             if not analytic_invoice_id:
                 return res
             # if invoicing period doesn't lie in same month
-            period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+            period_date = analytic_invoice_id.month_id.date_start.strftime('%Y-%m')
             cur_date = datetime.now().date().strftime("%Y-%m")
             invoice_date = self.date or self.date_invoice
-            inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
+            inv_date = invoice_date.strftime('%Y-%m') if invoice_date else cur_date
             if inv_date != period_date and self.move_id:
                 self.action_wip_move_create()
             #if analytic invoice move_line_id then update account_analytic_line_ids field for model account.analytic.line
@@ -157,7 +157,7 @@ class AccountInvoice(models.Model):
             # make the invoice point to that wip move
             inv.wip_move_id = wip_move.id
             #wip reverse posting
-            reverse_date = datetime.strptime(wip_move.date, "%Y-%m-%d") + timedelta(days=1)
+            reverse_date = datetime.strptime(str(wip_move.date), "%Y-%m-%d") + timedelta(days=1)
             line_amt = sum(ml.credit + ml.debit for ml in wip_move.line_ids)
             reconcile = False
             if line_amt > 0:

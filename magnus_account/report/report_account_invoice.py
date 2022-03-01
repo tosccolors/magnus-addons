@@ -35,12 +35,12 @@ class account_invoice(report_sxw.rml_parse):
     def get_date(self, invoice_date):
         if not invoice_date:
             return False
-        return datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%d-%m-%Y')
+        return datetime.strptime(str(invoice_date), "%Y-%m-%d").strftime('%d-%m-%Y')
 
     def new_date(self, period_id):
         if not period_id:
             return False
-        return datetime.strptime(period_id.date_start, "%Y-%m-%d").strftime('%B %Y')
+        return datetime.strptime(str(period_id.date_start), "%Y-%m-%d").strftime('%B %Y')
 
 report_sxw.report_sxw(
     'report.account.invoice.custom',

@@ -46,21 +46,21 @@ class AccountMove(models.Model):
     is_wip_move=fields.Boolean("Is WIP move")
     wip_percentage=fields.Integer("WIP percentage")
     @api.multi
-    def post(self):
+    def post(self, invoice=False):
         for move in self:
             if not move.company_id.ou_is_self_balanced or not move.name:
                 continue
             for line in move.line_ids:
                 if line.name == 'OU-Balancing':
                     line.with_context(wip=True).unlink()
-        res = super(AccountMove, self).post()
+        res = super(AccountMove, self).post(invoice=invoice)
         return res
 
     @api.multi
     def wip_move_create(self, wip_journal, name, ar_account_id, ref=None):
         self.ensure_one()
-        move_date = datetime.strptime(self.date, "%Y-%m-%d")
-        last_day_month_before = (move_date - timedelta(days=move_date.day)).strftime("%Y-%m-%d")
+        move_date = datetime.strptime(str(self.date), "%Y-%m-%d")
+        last_day_month_before = datetime.strptime(str(move_date - timedelta(days=move_date.day)), "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
         default = {
             'name': name,
             'ref':  ref if ref else 'WIP Invoicing Posting',
