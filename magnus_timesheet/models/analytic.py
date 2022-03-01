@@ -375,7 +375,7 @@ class AccountAnalyticLine(models.Model):
     @api.onchange('date')
     def _onchange_dates(self):
         if self.planned or self.env.context.get('default_planned',False) :
-            dt = datetime.strptime(self.date, "%Y-%m-%d") if self.date else datetime.now().date()
+            dt = datetime.strptime(str(self.date), "%Y-%m-%d") if self.date else datetime.now().date()
             self.date = dt-timedelta(days=dt.weekday())
             self.company_id = self.env.user.company_id
             date = self.find_daterange_week(self.date)
