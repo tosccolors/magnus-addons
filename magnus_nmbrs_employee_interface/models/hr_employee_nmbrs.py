@@ -45,7 +45,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
         #Create the emplyoee in NMBRs
         nmbrs_id = client.service.Employee_Insert(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
-            StartDate=datetime.strptime(self.start_date,'%Y-%m-%d'),
+            StartDate=datetime.strptime(str(self.start_date),'%Y-%m-%d'),
             FirstName=self.first_name,
             LastName=self.last_name,
             CompanyId=self.company_id,
@@ -70,7 +70,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
                 'BurgerlijkeStaat': self.marital_status,
                 'Naamstelling': None,
                 'TelephoneWork': self.mobile,
-                'Birthday': datetime.strptime(self.birthday,'%Y-%m-%d')
+                'Birthday': datetime.strptime(str(self.birthday),'%Y-%m-%d')
             }
         )
         #Update bank account
