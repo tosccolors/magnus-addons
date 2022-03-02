@@ -121,7 +121,8 @@ class AccountInvoice(models.Model):
                 self.action_wip_move_create()
             #if analytic invoice move_line_id then update account_analytic_line_ids field for model account.analytic.line
             if self.move_id:
-                val=[self.move_id.id,self.wip_move_id.id,self.wip_move_id.reversal_id.id]
+                val=[self.move_id.id,self.wip_move_id.id,self.wip_move_id.reverse_entry_id.id]
+                # val=[self.move_id.id,self.wip_move_id.id,self.wip_move_id.reversal_id.id]
                 for move_id in val:
                     move_line = self.env['account.move.line'].search([('move_id', '=', move_id)])
                     for inv_analytic_line in self.invoice_line_ids:
@@ -158,21 +159,24 @@ class AccountInvoice(models.Model):
             inv.wip_move_id = wip_move.id
             #wip reverse posting
             reverse_date = datetime.strptime(str(wip_move.date), "%Y-%m-%d") + timedelta(days=1)
-            line_amt = sum(ml.credit + ml.debit for ml in wip_move.line_ids)
-            reconcile = False
-            if line_amt > 0:
-                reconcile = True
-            reverse_wip_move = wip_move.create_reversals(
-                date=reverse_date,
-                journal=wip_journal,
-                move_prefix='WIP Invoicing Reverse',
-                line_prefix='WIP Invoicing Reverse',
-                reconcile=reconcile
-            )
-            if len(reverse_wip_move) == 1:
+            ##########updated reversal code####
+            # line_amt = sum(ml.credit + ml.debit for ml in wip_move.line_ids)
+            # reconcile = False
+            # if line_amt > 0:
+            #     reconcile = True
+            # reverse_wip_move = wip_move.create_reversals(
+            #     date=reverse_date,
+            #     journal=wip_journal,
+            #     move_prefix='WIP Invoicing Reverse',
+            #     line_prefix='WIP Invoicing Reverse',
+            #     reconcile=reconcile
+            # )
+            ########################################
+            reverse_wip_ids = wip_move.reverse_moves(date=reverse_date, journal_id=wip_journal, auto=False)
+            if len(reverse_wip_ids) == 1:
+                reverse_wip_move = wip_move.browse(reverse_wip_ids)
                 wip_nxt_seq = sequence.with_context(ir_sequence_date=reverse_wip_move.date).next_by_id()
                 reverse_wip_move.write({'name':wip_nxt_seq})
-
         return True
 
     @api.multi
