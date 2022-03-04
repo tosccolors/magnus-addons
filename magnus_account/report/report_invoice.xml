@@ -5,7 +5,8 @@
 
 <template id="report_invoice_document_magnus_account">
     <t t-call="magnus_account.external_layout_magnus">
-    <!-- <t t-call="web.external_layout"> -->
+     <!--<t t-call="web.external_layout">-->
+    <!--<t t-call="report_qweb_operating_unit.external_layout_ou">-->
 
         <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
         <t t-set="proforma_invoice" t-value="o.state=='proforma' or o.state=='proforma2'"/>
@@ -380,7 +381,7 @@
 
 
 
-    <template id="report_invoice_magnus_account">
+    <template id="magnus_account.report_invoice_magnus_account">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="o.user_id.sudo().lang if o.type in ('in_invoice', 'in_refund') else o.partner_id.lang"/>

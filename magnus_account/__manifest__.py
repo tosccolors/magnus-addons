@@ -60,7 +60,12 @@ voor de interface naar slam.
         "views/account_invoice_report.xml",
     ],
     'demo' : [],
-    'installable': True
+    'installable': True,
+    'external_dependencies': {
+        'python': [
+            'PyPDF2',
+        ],
+    },
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 
