@@ -146,7 +146,7 @@ class AccountInvoice(models.Model):
             timesheet_user = invoice.invoice_line_ids.mapped('user_id')
             all_lines = invoice.invoice_line_ids
             if not timesheet_user:
-                all_lines.write({'revenue_line':True})
+                all_lines.write({'revenue_line':True, 'trading_partner_code': invoice.partner_id.trading_partner_code})
                 continue
             intercompany_revenue_lines = invoice.invoice_line_ids.filtered(
                 lambda l: l.operating_unit_id != invoice.operating_unit_id and
@@ -154,7 +154,7 @@ class AccountInvoice(models.Model):
                                   self.env.ref('account.data_account_type_other_income'),
                                   self.env.ref('account.data_account_type_revenue')))
             regular_lines = all_lines - intercompany_revenue_lines if intercompany_revenue_lines else all_lines
-            regular_lines.write({'revenue_line': True})
+            regular_lines.write({'revenue_line': True, 'trading_partner_code': invoice.partner_id.trading_partner_code })
             if intercompany_revenue_lines:
                 invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
                 for line in intercompany_revenue_lines:
@@ -175,6 +175,7 @@ class AccountInvoice(models.Model):
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
                             'ic_line': True,
                             'revenue_line': True,
+                            'trading_partner_code': invoice.partner_id.trading_partner_code
                         })
                         revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
                                                  line.user_task_total_line_id.fee_rate
@@ -215,14 +216,17 @@ class AccountInvoice(models.Model):
     @api.multi
     def fill_trading_partner_code_supplier_invoice(self):
         for invoice in self:
-            intercompany_lines = invoice.invoice_line_ids.filtered(
-                lambda l: l.operating_unit_id != invoice.operating_unit_id)
-            if intercompany_lines:
-                invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
-                for line in intercompany_lines:
-                    line_tpc = line.operating_unit_id.partner_id.trading_partner_code
-                    trading_partners = invoice_tpc and line_tpc and invoice_tpc != line_tpc
-                    line.trading_partner_code = invoice_tpc if trading_partners else False
+            if not invoice.partner_id.trading_partner_code:
+                intercompany_lines = invoice.invoice_line_ids.filtered(
+                    lambda l: l.operating_unit_id != invoice.operating_unit_id)
+                if intercompany_lines:
+                    invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
+                    for line in intercompany_lines:
+                        line_tpc = line.operating_unit_id.partner_id.trading_partner_code
+                        trading_partners = invoice_tpc and line_tpc and invoice_tpc != line_tpc
+                        line.trading_partner_code = invoice_tpc if trading_partners else False
+            else:
+                invoice.invoice_line_ids.write({'trading_partner_code': invoice.partner_id.trading_partner_code })
 
     def set_move_to_draft(self):
         if self.move_id.state == 'posted':
