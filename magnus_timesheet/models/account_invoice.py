@@ -116,12 +116,11 @@ class AccountInvoice(models.Model):
     @api.multi
     def action_invoice_open(self):
         to_process_invoices = self.filtered(lambda inv: inv.type in ('out_invoice', 'out_refund'))
-        # timesheet_user = self.invoice_line_ids.mapped('user_id')
-        # if to_process_invoices and timesheet_user:
+        supplier_invoices = self - to_process_invoices
         if to_process_invoices:
             to_process_invoices.action_create_ic_lines()
-        # elif not timesheet_user:
-        #     self.invoice_line_ids.write({'revenue_line':True})
+        if supplier_invoices:
+            supplier_invoices.fill_trading_partner_code()
         res = super(AccountInvoice, self).action_invoice_open()
         for invoice in to_process_invoices:
             analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
@@ -141,11 +140,6 @@ class AccountInvoice(models.Model):
         mapping_notp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=False, maptype='inter_to_regular')
         mapping2_tp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=True, maptype='inter_to_cost')
         mapping2_notp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=False, maptype='inter_to_cost')
-        # mapping3_tp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=True, maptype='regular_to_inter')
-        # mapping3_notp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=False, maptype='regular_to_inter')
-        # mapping4_tp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=True, maptype='regular_to_cost')
-        # mapping4_notp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=False, maptype='regular_to_cost')
-
         for invoice in self:
             if invoice.ic_lines:
                 continue
@@ -184,7 +178,6 @@ class AccountInvoice(models.Model):
                         })
                         revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
                                                  line.user_task_total_line_id.fee_rate
-                        # revenue_line.invoice_line_tax_ids.compute_all(revenue_line.price_unit, currency=None, quantity=revenue_line.quantity, product=None, partner=None)
                         ## intercompany cost of sales line
                         cost_line = line.copy({
                             'account_id': mapping2[line.account_id.id],
@@ -218,6 +211,18 @@ class AccountInvoice(models.Model):
             # if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
                 invoice.compute_taxes()
             invoice.ic_lines = False
+
+    @api.multi
+    def fill_trading_partner_code_supplier_invoice(self):
+        for invoice in self:
+            intercompany_lines = invoice.invoice_line_ids.filtered(
+                lambda l: l.operating_unit_id != invoice.operating_unit_id)
+            if intercompany_lines:
+                invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
+                for line in intercompany_lines:
+                    line_tpc = line.operating_unit_id.partner_id.trading_partner_code
+                    trading_partners = invoice_tpc and line_tpc and invoice_tpc != line_tpc
+                    line.trading_partner_code = invoice_tpc if trading_partners else False
 
     def set_move_to_draft(self):
         if self.move_id.state == 'posted':
