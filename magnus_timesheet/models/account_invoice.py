@@ -146,7 +146,7 @@ class AccountInvoice(models.Model):
             all_lines = invoice.invoice_line_ids
             timesheet_user = all_lines.mapped('user_id')
             ou_trading_partner = invoice.operating_unit_id.partner_id.trading_partner_code
-            if not timesheet_user and trading_partners:
+            if not timesheet_user and ou_trading_partner:
                 all_lines.write({'revenue_line':True, 'trading_partner_code': invoice.partner_id.trading_partner_code})
             elif not timesheet_user:
                 all_lines.write({'revenue_line': True})
