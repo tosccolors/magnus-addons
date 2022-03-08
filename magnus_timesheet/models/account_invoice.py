@@ -108,7 +108,7 @@ class AccountInvoice(models.Model):
     @api.multi
     def action_invoice_open(self):
         res = super(AccountInvoice, self).action_invoice_open()
-        if self.type in ('out_invoice'):
+        if self.type and self.type in ('out_invoice'):
             analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
             if not analytic_invoice_id:
                 return res

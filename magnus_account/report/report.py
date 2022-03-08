@@ -3,6 +3,8 @@ from base64 import b64decode
 from logging import getLogger
 from PIL import Image
 from io import BytesIO
+from odoo.exceptions import UserError
+from odoo import api, fields, models, tools, _
 
 try:
     # we need this to be sure PIL has loaded PDF support
@@ -43,7 +45,9 @@ class Report(models.Model):
         docids = self.env.context.get('res_ids', False)
         watermark = None
         docs = self.env[self.model].browse(docids)
-        operating_unit = docs.operating_unit_id
+        operating_unit = docs.mapped('operating_unit_id')
+        if len(operating_unit) > 1:
+            raise UserError(_("Can't print!\nSelected records belongs to different Operating Unit!"))
         if docs:
             if not (operating_unit and operating_unit.report_background_image1):
                 return result

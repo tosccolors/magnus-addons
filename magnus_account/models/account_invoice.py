@@ -26,14 +26,14 @@ class AccountInvoice(models.Model):
 
     invoice_description = fields.Html('Description')
 
-    @api.multi
-    def invoice_print(self):
-        """ Print the invoice and mark it as sent, so that we can see more
-            easily the next step of the workflow
-        """
-        self.ensure_one()
-        self.sent = True
-        return self.env['report'].get_action(self, 'magnus_account.report_invoice_magnus_account')
+    # @api.multi
+    # def invoice_print(self):
+    #     """ Print the invoice and mark it as sent, so that we can see more
+    #         easily the next step of the workflow
+    #     """
+    #     self.ensure_one()
+    #     self.sent = True
+    #     return self.env['report'].get_action(self, 'magnus_account.report_invoice_magnus_account')
 
     @api.multi
     def group_by_analytic_acc(self, type, uom_hrs=False):
