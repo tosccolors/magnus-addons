@@ -143,10 +143,13 @@ class AccountInvoice(models.Model):
         for invoice in self:
             if invoice.ic_lines:
                 continue
-            timesheet_user = invoice.invoice_line_ids.mapped('user_id')
             all_lines = invoice.invoice_line_ids
-            if not timesheet_user:
+            timesheet_user = all_lines.mapped('user_id')
+            ou_trading_partner = invoice.operating_unit_id.partner_id.trading_partner_code
+            if not timesheet_user and trading_partners:
                 all_lines.write({'revenue_line':True, 'trading_partner_code': invoice.partner_id.trading_partner_code})
+            elif not timesheet_user:
+                all_lines.write({'revenue_line': True})
                 continue
             intercompany_revenue_lines = invoice.invoice_line_ids.filtered(
                 lambda l: l.operating_unit_id != invoice.operating_unit_id and
@@ -154,7 +157,9 @@ class AccountInvoice(models.Model):
                                   self.env.ref('account.data_account_type_other_income'),
                                   self.env.ref('account.data_account_type_revenue')))
             regular_lines = all_lines - intercompany_revenue_lines if intercompany_revenue_lines else all_lines
-            regular_lines.write({'revenue_line': True, 'trading_partner_code': invoice.partner_id.trading_partner_code })
+            regular_lines.write({'revenue_line': True,
+                                 'trading_partner_code': invoice.partner_id.trading_partner_code if ou_trading_partner
+                                                                                                    else False})
             if intercompany_revenue_lines:
                 invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
                 for line in intercompany_revenue_lines:
@@ -175,7 +180,8 @@ class AccountInvoice(models.Model):
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
                             'ic_line': True,
                             'revenue_line': True,
-                            'trading_partner_code': invoice.partner_id.trading_partner_code
+                            'trading_partner_code': invoice.partner_id.trading_partner_code if ou_trading_partner
+                                                                                                    else False
                         })
                         revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
                                                  line.user_task_total_line_id.fee_rate
@@ -225,7 +231,7 @@ class AccountInvoice(models.Model):
                         line_tpc = line.operating_unit_id.partner_id.trading_partner_code
                         trading_partners = invoice_tpc and line_tpc and invoice_tpc != line_tpc
                         line.trading_partner_code = invoice_tpc if trading_partners else False
-            else:
+            elif invoice.operating_unit_id.partner_id.trading_partner_code:
                 invoice.invoice_line_ids.write({'trading_partner_code': invoice.partner_id.trading_partner_code })
 
     def set_move_to_draft(self):
