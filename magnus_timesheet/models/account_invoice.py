@@ -82,6 +82,10 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).line_get_convert(line, part)
         res['user_id'] = line.get('user_id', False)
         res['trading_partner_code'] = line.get('trading_partner_code', False)
+        if self.partner_id.trading_partner_code \
+                and self.operating_unit_id.partner_id.trading_partner_code \
+                and line.get('type', False) == 'dest':
+            res['trading_partner_code'] = self.partner_id.trading_partner_code
         return res
 
     def inv_line_characteristic_hashcode(self, invoice_line):
