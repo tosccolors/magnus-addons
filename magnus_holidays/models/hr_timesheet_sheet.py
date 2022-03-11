@@ -106,7 +106,7 @@ class HrTimesheetSheet(models.Model):
     @api.one
     def action_timesheet_draft(self):
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
-        leave_request = self.env['hr.leave'].search([('name', '=', 'Time report'), ('employee_id', '=', self.employee_id.id), ('date_from', '>=', self.week_id.date_start), ('date_from', '<=', self.week_id.date_end), ('type', '=', 'remove'), ('state', '=', 'written')])
+        leave_request = self.env['hr.leave'].search([('name', '=', 'Time report'), ('employee_id', '=', self.employee_id.id), ('date_from', '>=', self.week_id.date_start), ('date_from', '<=', self.week_id.date_end), ('state', '=', 'written')])
         if leave_request:
             leave_request.write({'state': 'draft'})
             leave_request.unlink()
