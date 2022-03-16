@@ -68,8 +68,8 @@ class AccountAnalyticLine(models.Model):
                  'date',
                  'task_id',
                  'user_id',
-                 'user_total_id.fee_rate,'
-                 'user_total_id.ic_fee-rate'
+                 'user_total_id.fee_rate',
+                 'user_total_id.ic_fee_rate'
                  )
     def _compute_analytic_line(self):
         uom_hrs = self.env.ref("product.product_uom_hour").id
