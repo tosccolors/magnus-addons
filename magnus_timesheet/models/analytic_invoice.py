@@ -803,17 +803,12 @@ class AnalyticUserTotal(models.Model):
         if task_user:
             task_user = task_user.search([('id', 'in', task_user.ids)], limit=1, order='from_date Desc')
             self.fee_rate = fr = task_user.fee_rate
-            self.amount = - self.unit_amount * fr
             self.ic_fee_rate = ic_fr = task_user.ic_fee_rate
-            self.ic_amount = - self.unit_amount * ic_fr
         else:
-            self.fee_rate = fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)
-            self.amount = - self.unit_amount * fr
-
-        ## make sure that aal.fee_rate and amount is corresponding to user_total_line
-        for aaline in self.detail_ids:
-            aaline.line_fee_rate = fr
-            aaline.amount = aaline.unit_amount * - fr
+            self.fee_rate = fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)[0]
+            self.ic_fee_rate = ic_fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)[1]
+        self.amount = - self.unit_amount * fr
+        self.ic_amount = - self.unit_amount * ic_fr
 
     @api.one
     def _compute_analytic_line(self):
