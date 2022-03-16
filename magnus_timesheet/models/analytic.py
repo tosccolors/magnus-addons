@@ -346,6 +346,7 @@ class AccountAnalyticLine(models.Model):
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
         fr = 0.0
+        ic_fr = 0.0
         # fr = None
         if uid and tid and date:
             task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
