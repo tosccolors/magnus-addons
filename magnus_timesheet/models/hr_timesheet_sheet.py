@@ -389,6 +389,8 @@ class HrTimesheetSheet(models.Model):
 				'vehicle_id': vehicle.id
 			})
 		date_from = datetime.strptime(str(self.date_start), "%Y-%m-%d").date()
+		tot_ot_hrs = 0
+		GTM = self.employee_id.user_id.has_group("magnus_timesheet.group_timesheet_manager")
 		for i in range(7):
 			date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
 			hour = sum(self.env['account.analytic.line'].search([('date', '=', date), ('sheet_id', '=', self.id), ('task_id.standby', '=', False)]).mapped('unit_amount'))
@@ -397,6 +399,15 @@ class HrTimesheetSheet(models.Model):
 			if not self.employee_id.timesheet_no_8_hours_day:
 				if i < 5 and float_compare(hour, 8, precision_digits=3, precision_rounding=None) < 0:
 					raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
+			ot_aal = self.env['account.analytic.line'].search(
+				[('date', '=', date), ('sheet_id', '=', self.id), ('project_id.overtime', '=', True)])
+			if not GTM and ot_aal:
+				ot_hrs = ot_aal.unit_amount
+				if float_compare(ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
+					raise UserError(_('Each day maximum 4 hours overtime taken allowed from Monday to Friday.'))
+				tot_ot_hrs += ot_hrs
+		if not GTM and float_compare(tot_ot_hrs, 8, precision_digits=3, precision_rounding=None) > 0:
+			raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
 		return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
 	@api.one
