@@ -57,6 +57,7 @@ thereof""",
                 'web_domain_field',
                 'invoice_line_revenue_distribution_operating_unit',
                 'queue_job',
+                'consolidation_external_system',
                 ],
 
     # always loaded

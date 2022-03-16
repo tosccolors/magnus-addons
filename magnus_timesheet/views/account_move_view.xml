@@ -7,9 +7,8 @@
         <field name="inherit_id" ref="account.view_move_line_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='account_id']" position="after">
-                <field name="user_id"
-                       options="{'no_create': True}"
-                       />
+                <field name="user_id" options="{'no_create': True}"/>
+                <field name="trading_partner_code" />
             </xpath>
         </field>
     </record>
@@ -21,8 +20,11 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='account_id']" position="after">
                 <field name="user_id" />
+                <field name="trading_partner_code"/>
                 <filter string="Timesheet User"  icon="terp-folder-green"
                         context="{'group_by':'user_id'}"/>
+                <filter string="Trading Partner"  icon="terp-folder-green"
+                        context="{'group_by':'trading_partner_code'}"/>
             </xpath>
         </field>
     </record>
@@ -38,9 +40,8 @@
             </field>
             <xpath expr="//field[@name='line_ids']/tree//field[@name='account_id']"
                    position="after">
-                <field name="user_id"
-                       options="{'no_create': True}"
-                       />
+                <field name="user_id" options="{'no_create': True}"/>
+                <field name="trading_partner_code"/>
             </xpath>
         </field>
     </record>

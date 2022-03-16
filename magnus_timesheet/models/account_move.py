@@ -15,6 +15,10 @@ class AccountMoveLine(models.Model):
         'res.users',
         string='Timesheet User'
     )
+    trading_partner_code = fields.Char(
+        'Trading Partner Code',
+        help="Specify code of Trading Partner"
+    )
 
     @api.multi
     @api.constrains('operating_unit_id', 'analytic_account_id','user_id')
@@ -104,7 +108,7 @@ class InteroOUAccountMapping(models.Model):
     _rec_name = 'account_id'
 
     @api.model
-    def _get_revenuw_account_domain(self):
+    def _get_revenue_account_domain(self):
         ids = [self.env.ref('account.data_account_type_other_income').id,
                self.env.ref('account.data_account_type_revenue').id]
         return [('deprecated', '=', False), ('user_type_id', 'in', ids)]
@@ -115,39 +119,58 @@ class InteroOUAccountMapping(models.Model):
         return [('deprecated', '=', False), ('user_type_id', 'in', ids)]
 
     company_id = fields.Many2one(
-        'res.company', string='Company', required=True,
+        'res.company',
+        string='Company',
+        required=True,
         default=lambda self: self.env['res.company']._company_default_get(
-            'inter.ou.account.mapping'))
+            'inter.ou.account.mapping')
+    )
     account_id = fields.Many2one(
-        'account.account', string='Regular Revenue Account',
-        domain=_get_revenuw_account_domain,
-        required=True)
+        'account.account',
+        string='Product Revenue Account',
+        domain=_get_revenue_account_domain,
+        required=True
+    )
     inter_ou_account_id = fields.Many2one(
-        'account.account', string='Inter OU Account',
-        domain=_get_revenuw_account_domain,
-        required=True)
+        'account.account',
+        string='Inter OU Account',
+        domain=_get_revenue_account_domain,
+        required=True
+    )
+    revenue_account_id = fields.Many2one(
+        'account.account',
+        string='Revenue Account',
+        domain=_get_revenue_account_domain,
+        required=True
+    )
     cost_account_id = fields.Many2one(
-        'account.account', string='Intercompany Cost of Sales Account',
+        'account.account',
+        string='Inter OU Cost of Sales Account',
         domain=_get_cost_of_sales_account_domain,
-        required=True)
+        required=True
+    )
+    trading_partners = fields.Boolean(
+        string='both operating_units are trading partners',
+        default=False
+    )
 
     @api.model
-    def _get_mapping_dict(self, company_id, maptype):
+    def _get_mapping_dict(self, company_id, trading_partners, maptype):
         """return a dict with:
         key = ID of account,
         value = ID of mapped_account"""
         mappings = self.search([
-            ('company_id', '=', company_id.id)])
+            ('company_id', '=', company_id.id),('trading_partners','=', trading_partners)])
         mapping = {}
-        if maptype == 'regular_to_inter':
+        if maptype == 'product_to_inter':
             for item in mappings:
                 mapping[item.account_id.id] = item.inter_ou_account_id.id
         if maptype == 'inter_to_regular':
             for item in mappings:
-                mapping[item.inter_ou_account_id.id] = item.account_id.id
+                mapping[item.inter_ou_account_id.id] = item.revenue_account_id.id
         if maptype == 'regular_to_cost':
             for item in mappings:
-                mapping[item.account_id.id] = item.cost_account_id.id
+                mapping[item.revenue_account_id.id] = item.cost_account_id.id
         if maptype == 'inter_to_cost':
             for item in mappings:
                 mapping[item.inter_ou_account_id.id] = item.cost_account_id.id

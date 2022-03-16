@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from . import res_partner
 from . import account_invoice
 from . import analytic_invoice
 from . import account_move
@@ -12,3 +11,4 @@ from . import res_users
 from . import analytic
 from . import hr_employee
 from . import magnus_planning
+# from . import res_partner
