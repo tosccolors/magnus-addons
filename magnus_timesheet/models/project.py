@@ -112,6 +112,10 @@ class TaskUser(models.Model):
         return [('categ_id', '=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
+
+    project_id = fields.Many2one(related='task_id.project_id', comodel_name='project.project',
+                                 string="Project", store=True)
+
     task_id = fields.Many2one(
         'project.task',
         string='Task'
