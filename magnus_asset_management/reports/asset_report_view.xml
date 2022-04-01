@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="view_mr_asset_report_pivot" model="ir.ui.view">
+        <field name="name">mr.asset.report.pivot</field>
+        <field name="model">mr.asset.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Asset Report" disable_linking="True">
+                <field name="name" type="row"/>
+                <field name="dep_year" type="col"/>
+                <field name="start_value" type="measure"/>
+                <field name="new_purchase" type="measure"/>
+                <field name="dep_value" type="measure"/>
+                <field name="end_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_mr_asset_report_graph" model="ir.ui.view">
+        <field name="name">mr.asset.report.graph</field>
+        <field name="model">mr.asset.report</field>
+        <field name="arch" type="xml">
+            <graph string="Asset Report">
+                <field name="name" type="row"/>
+                <field name="dep_year" type="col"/>
+                <field name="start_value" type="measure"/>
+                <field name="new_purchase" type="measure"/>
+                <field name="dep_value" type="measure"/>
+                <field name="end_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_mr_asset_report_tree" model="ir.ui.view">
+        <field name="name">mr.asset.report.tree</field>
+        <field name="model">mr.asset.report</field>
+        <field name="arch" type="xml">
+            <tree string="Asset Report">
+                <field name="name"/>
+                <field name="profile_id"/>
+                <field name="operating_unit_id"/>
+                <field name="code"/>
+                <field name="purchase_value"/>
+                <field name="date_start"/>
+                <field name="dep_year"/>
+                <field name="start_value"/>
+                <field name="dep_value"/>
+                <field name="end_value"/>
+                <field name="state"/>
+                <field name="company_id"  groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_mr_asset_report_search" model="ir.ui.view">
+        <field name="name">mr.asset.report.search</field>
+        <field name="model">mr.asset.report</field>
+        <field name="arch" type="xml">
+            <search string="Asset Report">
+                <field name="dep_year"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="start_value"/>
+                <field name="dep_value"/>
+                <field name="end_value"/>
+                <field name="state"/>
+                <field name="company_id" widget="selection" groups="base.group_multi_company"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]" help="Draft Assets"/>
+                <filter string="Running" domain="[('state', '=', 'open')]" help="Assets in Running State"/>
+                <filter string="Closed" domain="[('state', '=', 'close')]" help="Assets in Close State"/>
+                <filter string="Removed" domain="[('state', '=', 'removed')]" help="Assets which have been removed"/>
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter string="Depreciation Year" name="dep_year" context="{'group_by':'dep_year'}"/>
+                    <filter string="Profile" name="profile_id" context="{'group_by':'profile_id'}"/>
+                    <filter string="Operating Unit" name="operating_unit_id" context="{'group_by':'operating_unit_id'}"/>
+                    <filter string="Status" name="state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_mr_asset_report_all" model="ir.actions.act_window">
+        <field name="name">Asset Report</field>
+        <field name="res_model">mr.asset.report</field>
+        <field name="view_mode">pivot,graph,tree</field>
+        <field name="search_view_id" ref="view_mr_asset_report_search"/>
+    </record>
+
+    <menuitem id="menu_mr_asset_report_pivot"
+              name="Asset Report"
+              parent="account_asset_management.menu_finance_assets"
+              sequence="11"
+              action="action_mr_asset_report_all"
+    />
+
+</odoo>
