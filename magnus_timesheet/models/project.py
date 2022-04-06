@@ -112,6 +112,10 @@ class TaskUser(models.Model):
         return [('categ_id', '=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
+
+    project_id = fields.Many2one(related='task_id.project_id', comodel_name='project.project',
+                                 string="Project", store=True)
+
     task_id = fields.Many2one(
         'project.task',
         string='Task'
@@ -193,12 +197,13 @@ class TaskUser(models.Model):
                        {0}
                     WHERE {1}
                 )
-                UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2})
+                UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2}), product_id = {3}
                 FROM aal WHERE {0}.id = aal.id
                         """.format(
             aal_tables,
             aal_where_clause,
-            self.fee_rate
+            self.fee_rate,
+            self.product_id.id
         ))
         self.env.cr.execute(list_query, aal_where_clause_params)
         return True

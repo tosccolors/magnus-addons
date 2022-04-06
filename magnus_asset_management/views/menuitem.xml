@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<odoo>
+
+    <menuitem id="menu_asset_report"
+            name="Asset Reports"
+            parent="account_asset_management.menu_finance_assets"
+            sequence="9"/>
+
+</odoo>
