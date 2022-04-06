@@ -86,6 +86,20 @@ class Project(models.Model):
         if len(overtime_project) > 1:
             raise ValidationError(_("You can have only one project with 'Overtime Hours' per company!"))
 
+    @api.multi
+    def action_view_invoice(self):
+        invoice_lines = self.env['account.invoice.line']
+        invoices = invoice_lines.search([('account_analytic_id', '=', self.analytic_account_id.id)]).mapped('invoice_id')
+        action = self.env.ref('account.action_invoice_tree1').read()[0]
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            action['res_id'] = invoices.ids[0]
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
+
 
 class TaskUser(models.Model):
     _name = 'task.user'
