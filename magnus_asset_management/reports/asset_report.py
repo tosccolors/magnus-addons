@@ -74,8 +74,8 @@ class MRAssetReport(models.Model):
                 select extract(year from line_date) as dl_year
                     , amount as init_val
                     , asset_id
-                from account_asset_line
-                where init_entry is true
+                from account_asset_line l
+                where l.type = 'create'
             )s on s.dl_year = e.dl_year and s.asset_id = e.asset_id
         )d
         join account_asset a on a.id = d.asset_id
