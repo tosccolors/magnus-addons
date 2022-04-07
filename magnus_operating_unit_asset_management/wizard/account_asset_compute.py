@@ -25,6 +25,5 @@ from openerp.osv import fields, orm
 from openerp.tools.translate import _
 
 
-class asset_depreciation_confirmation_wizard(orm.TransientModel):
-    _inherit = 'asset.depreciation.confirmation.wizard'
+class AccountAssetCompute(models.TransientModel):
     operating_unit_id = fields.Many2one('operating.unit'),
