@@ -9,3 +9,14 @@
         </field>
     </record>
 </odoo>
+<odoo>
+    <record id="view_asset_depreciation_confirmation_wizard_magnus" model="ir.ui.view">
+        <field name="model">asset.depreciation.confirmation.wizard</field>
+        <field name="inherit_id" ref="account_asset_management.view_asset_depreciation_confirmation_wizard"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='period_id']" position="after">
+                <field name="operating_unit_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
