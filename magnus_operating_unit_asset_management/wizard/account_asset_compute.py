@@ -26,4 +26,6 @@ from openerp.tools.translate import _
 
 
 class AccountAssetCompute(models.TransientModel):
+    _inherit = 'account.asset.compute'
     operating_unit_id = fields.Many2one('operating.unit'),
+
