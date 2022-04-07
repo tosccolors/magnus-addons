@@ -120,7 +120,7 @@
     <record id="action_task_user_tree" model="ir.actions.act_window.view">
         <field name="sequence" eval="1"/>
         <field name="view_mode">tree</field>
-        <field name="view_id" ref="action_task_user"/>
+        <field name="view_id" ref="view_task_user_tree1"/>
         <field name="act_window_id" ref="action_task_user"/>
     </record>
 
