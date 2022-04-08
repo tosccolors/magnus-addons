@@ -21,16 +21,12 @@
 #
 ##############################################################################
 
-from openerp.osv import fields, orm
-from openerp.tools.translate import _
-
+from odoo import api, fields, models
 
 class AccountAssetCompute(models.TransientModel):
     _inherit = 'account.asset.compute'
     operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', required=False)
 
-    
-    
     # Overridden:
     def asset_compute(self):
         domain = [("state", "=", "open")]
