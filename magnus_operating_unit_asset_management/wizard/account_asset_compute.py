@@ -21,7 +21,7 @@
 #
 ##############################################################################
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 class AccountAssetCompute(models.TransientModel):
     _inherit = 'account.asset.compute'
