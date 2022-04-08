@@ -29,3 +29,42 @@ class AccountAssetCompute(models.TransientModel):
     _inherit = 'account.asset.compute'
     operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', required=False)
 
+    
+    
+    # Overridden:
+    def asset_compute(self):
+        domain = [("state", "=", "open")]
+        if self.operating_unit_id:
+            domain += [('operating_unit_id', '=', self.operating_unit_id.id)]
+
+        assets = self.env["account.asset"].search(domain)
+        created_move_ids, error_log = assets._compute_entries(
+            self.date_end, check_triggers=True
+        )
+
+        if error_log:
+            module = __name__.split("addons.")[1].split(".")[0]
+            result_view = self.env.ref(
+                "{}.{}_view_form_result".format(module, self._table)
+            )
+            self.note = _("Compute Assets errors") + ":\n" + error_log
+            return {
+                "name": _("Compute Assets result"),
+                "res_id": self.id,
+                "view_mode": "form",
+                "res_model": "account.asset.compute",
+                "view_id": result_view.id,
+                "target": "new",
+                "type": "ir.actions.act_window",
+                "context": {"asset_move_ids": created_move_ids},
+            }
+
+        return {
+            "name": _("Created Asset Moves"),
+            "view_mode": "tree,form",
+            "res_model": "account.move",
+            "view_id": False,
+            "domain": [("id", "in", created_move_ids)],
+            "type": "ir.actions.act_window",
+        }
+
