@@ -24,6 +24,7 @@
     # always loaded
     'data': [
         'views/account_asset_views.xml',
+        'wizard/account_asset_compute.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
