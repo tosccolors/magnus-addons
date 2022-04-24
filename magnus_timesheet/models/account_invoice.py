@@ -151,7 +151,9 @@ class AccountInvoice(models.Model):
             timesheet_user = all_lines.mapped('user_id')
             ou_trading_partner = invoice.operating_unit_id.partner_id.trading_partner_code
             if not timesheet_user and ou_trading_partner:
-                all_lines.write({'revenue_line':True, 'trading_partner_code': invoice.partner_id.trading_partner_code})
+                all_lines.write({'revenue_line':True,
+                                 'trading_partner_code': invoice.partner_id.trading_partner_code or
+                                                         invoice.partner_id.parent_id.trading_partner_code})
             elif not timesheet_user:
                 all_lines.write({'revenue_line': True})
                 continue
@@ -162,8 +164,9 @@ class AccountInvoice(models.Model):
                                   self.env.ref('account.data_account_type_revenue')))
             regular_lines = all_lines - intercompany_revenue_lines if intercompany_revenue_lines else all_lines
             regular_lines.write({'revenue_line': True,
-                                 'trading_partner_code': invoice.partner_id.trading_partner_code if ou_trading_partner
-                                                                                                    else False})
+                                 'trading_partner_code': invoice.partner_id.trading_partner_code or
+                                                         invoice.partner_id.parent_id.trading_partner_code
+                                                            if ou_trading_partner else False})
             if intercompany_revenue_lines:
                 invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
                 for line in intercompany_revenue_lines:
@@ -184,9 +187,9 @@ class AccountInvoice(models.Model):
                             'name': line.user_id.firstname + " " + line.user_id.lastname + " " + line.name,
                             'ic_line': True,
                             'revenue_line': True,
-                            'trading_partner_code': invoice.partner_id.trading_partner_code if ou_trading_partner
-                                                                                                    else False
-                        })
+                            'trading_partner_code': invoice.partner_id.trading_partner_code or
+                                                    invoice.partner_id.parent_id.trading_partner_code
+                                                        if ou_trading_partner else False})
                         revenue_line.price_unit = line.price_unit if not line.user_task_total_line_id else \
                                                  line.user_task_total_line_id.fee_rate
                         ## intercompany cost of sales line
@@ -226,7 +229,7 @@ class AccountInvoice(models.Model):
     @api.multi
     def fill_trading_partner_code_supplier_invoice(self):
         for invoice in self:
-            if not invoice.partner_id.trading_partner_code:
+            if not (invoice.partner_id.trading_partner_code or invoice.partner_id.parent_id.trading_partner_code):
                 intercompany_lines = invoice.invoice_line_ids.filtered(
                     lambda l: l.operating_unit_id != invoice.operating_unit_id)
                 if intercompany_lines:
@@ -236,7 +239,10 @@ class AccountInvoice(models.Model):
                         trading_partners = invoice_tpc and line_tpc and invoice_tpc != line_tpc
                         line.trading_partner_code = invoice_tpc if trading_partners else False
             elif invoice.operating_unit_id.partner_id.trading_partner_code:
-                invoice.invoice_line_ids.write({'trading_partner_code': invoice.partner_id.trading_partner_code })
+                invoice.invoice_line_ids.write(
+                                {'trading_partner_code': invoice.partner_id.trading_partner_code or
+                                                         invoice.partner_id.parent_id.trading_partner_code}
+                )
 
     def set_move_to_draft(self):
         if self.move_id.state == 'posted':
