@@ -39,7 +39,7 @@ class AccountAssetCompute(models.TransientModel):
         )
 
         if error_log:
-            module = __name__.split("addons.")[1].split(".")[0]
+            module = 'account_asset_management'
             result_view = self.env.ref(
                 "{}.{}_view_form_result".format(module, self._table)
             )
