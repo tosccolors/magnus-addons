@@ -139,12 +139,12 @@
             groups="base.group_user"
             sequence="2"/>
 
-    <menuitem id="landing_page_root" name="Magnus Landing Page" sequence="1"/>
-    <menuitem id="landing_page_main_menu" web_icon="mail,static/description/icon.png" name="Magnus Landing Page" parent="landing_page_root" sequence="1"/>
+    <menuitem id="landing_page_root" web_icon="magnus_landing_page,static/description/icon.png" name="Magnus Landing Page" sequence="1"/>
+    <menuitem id="landing_page_main_menu" name="Magnus Landing Page" parent="landing_page_root" sequence="1"/>
 
 
     <menuitem name="Landing Page" id="magnus_landing_page.menu_1_list" parent="landing_page_main_menu"
-              action="hr_employee_landing_page_action" groups="magnus_landing_page.group_magnus_landing_page" sequence="1"/>
+              action="hr_employee_landing_page_action" groups="magnus_landing_page.group_magnus_landing_page" sequence="1" />
 
   </data>
 </odoo>

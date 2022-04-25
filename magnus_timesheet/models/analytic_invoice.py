@@ -883,7 +883,7 @@ class AnalyticUserTotal(models.Model):
         domain=[('allow_timesheets', '=', True)]
     )
     product_uom_id = fields.Many2one(
-        'product.uom',
+        'uom.uom',
         string='Unit of Measure'
     )
     unit_amount = fields.Float(
