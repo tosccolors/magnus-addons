@@ -220,11 +220,18 @@ class HrExpenseSheet(models.Model):
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'tree,kanban,form,pivot,graph',
-            'domain': "['&','&',('employee_id.department_id.id', 'in', %s),('state','=','approve'),('is_from_crdit_card', '=', True)]" % child_departs,
+            'domain': [('employee_id.department_id.id', 'in', child_departs), ('state','=','approve'),('is_from_crdit_card', '=', True), ('company_id', '=', self.env.user.company_id.id)],
             'res_model': 'hr.expense.sheet',
-            'context': "{'from_credi_card_expense':True}",
+            'context': {'search_default_group_operating_unit': 1},
             'target': 'current'
         }
+
+    # inherit partner approval from magnus_expense to add domian for from_credi_card_expense
+    @api.multi
+    def partner_approval_menu_action(self):
+        res = super(HrExpenseSheet, self).partner_approval_menu_action()
+        res['domain'] += [('is_from_crdit_card', '=', False)]
+        return res
 
 
 
