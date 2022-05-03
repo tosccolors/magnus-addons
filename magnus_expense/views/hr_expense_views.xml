@@ -130,6 +130,9 @@
                 <xpath expr="//search/filter[@name='to_post']" position="after">
                     <filter domain="[('state', '=', 'approve')]" string="To Partner Approval" name="to_partner_approval" help="Manager Approved Expenses"/>
                 </xpath>
+                <xpath expr="//search/group" position="inside">
+                    <filter string="Operating Unit" domain="[]" name="group_operating_unit" context="{'group_by': 'operating_unit_id'}" help="Group By Operating Unit"/>
+                </xpath>
             </field>
         </record>
 

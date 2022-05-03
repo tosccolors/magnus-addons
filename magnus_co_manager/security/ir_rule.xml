@@ -4,7 +4,7 @@
         <record model="ir.rule" id="co_manager_visibility_rule_expense">
             <field name="name">Co-manager: see expenses of managees</field>
             <field name="model_id" ref="hr_expense.model_hr_expense"/>
-            <field name="groups" eval="[(4, ref('group_hr_expense_user'))]"/>
+            <field name="groups" eval="[(4, ref('hr_expense.group_hr_expense_user'))]"/>
             <field name="domain_force">
                 ['|','|',
                 ('employee_id.department_id.manager_2_ids','=',user.employee_ids.ids[0]),
@@ -16,7 +16,7 @@
         <record model="ir.rule" id="co_manager_visibility_rule_expense_report">
             <field name="name">Co-manager: see expenses of managees</field>
             <field name="model_id" ref="hr_expense.model_hr_expense_sheet"/>
-            <field name="groups" eval="[(4, ref('group_hr_expense_user'))]"/>
+            <field name="groups" eval="[(4, ref('hr_expense.group_hr_expense_user'))]"/>
             <field name="domain_force">
                 ['|','|',
                 ('employee_id.department_id.manager_2_ids','=',user.employee_ids.ids[0]),
