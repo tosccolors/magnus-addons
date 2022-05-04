@@ -162,22 +162,22 @@ class HrExpenseSheet(models.Model):
         return res
 
     # adding server action function for the menuitem partner approval
-    @api.multi
-    def partner_approval_menu_action(self):
+    # @api.multi
+    # def partner_approval_menu_action(self):
         # get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
         # child_departs = self.env['hr.department'].sudo().search(
         #     [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
-        return {
-            'name': 'Partner Approval',
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'tree,kanban,form,pivot,graph',
-            'domain': [('state','=','approve'), ('company_id', '=', self.env.user.company_id.id)],
-            'res_model': 'hr.expense.sheet',
-            'context': {'search_default_group_operating_unit': 1},
-            'target': 'current',
-            }
-    
+        # return {
+        #     'name': 'Partner Approval',
+        #     'type': 'ir.actions.act_window',
+        #     'view_type': 'form',
+        #     'view_mode': 'tree,kanban,form,pivot,graph',
+        #     'domain': [('state','=','approve'), ('company_id', '=', self.env.user.company_id.id)],
+        #     'res_model': 'hr.expense.sheet',
+        #     'context': {'search_default_group_operating_unit': 1},
+        #     'target': 'current',
+        #     }
+        #
     @api.one
     @api.constrains('expense_line_ids', 'employee_id')
     def _check_employee(self):
