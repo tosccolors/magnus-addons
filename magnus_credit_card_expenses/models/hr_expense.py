@@ -210,28 +210,23 @@ class HrExpenseSheet(models.Model):
 #             raise ValidationError(_('You cannot have a positive and negative amounts on the same expense report.'))
 
     # adding server action function for the menuitem partner approval
-    @api.multi
-    def partner_credit_card_approval_menu_action(self):
-        # get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
-        # child_departs = self.env['hr.department'].sudo().search(
-        #     [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
-        return {
-            'name': 'Credit Card Partner Approval',
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'tree,kanban,form,pivot,graph',
-            'domain': [('state','=','approve'),('is_from_crdit_card', '=', True), ('company_id', '=', self.env.user.company_id.id)],
-            'res_model': 'hr.expense.sheet',
-            'context': {'search_default_group_operating_unit': 1},
-            'target': 'current'
-        }
+    # @api.multi
+    # def partner_credit_card_approval_menu_action(self):
+    #     # get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
+    #     # child_departs = self.env['hr.department'].sudo().search(
+    #     #     [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
+    #     return {
+    #         'name': 'Credit Card Partner Approval',
+    #         'type': 'ir.actions.act_window',
+    #         'view_type': 'form',
+    #         'view_mode': 'tree,kanban,form,pivot,graph',
+    #         'domain': [('state','=','approve'),('is_from_crdit_card', '=', True), ('company_id', '=', self.env.user.company_id.id)],
+    #         'res_model': 'hr.expense.sheet',
+    #         'context': {'search_default_group_operating_unit': 1},
+    #         'target': 'current'
+    #     }
 
-    # inherit partner approval from magnus_expense to add domian for from_credi_card_expense
-    @api.multi
-    def partner_approval_menu_action(self):
-        res = super(HrExpenseSheet, self).partner_approval_menu_action()
-        res['domain'] += [('is_from_crdit_card', '=', False)]
-        return res
+
 
 
 
