@@ -82,145 +82,259 @@ class HREmployeeWizard(models.TransientModel):
            'operating_unit_ids':operating_unit_ids.ids
         })
         return res
-    
+
     @api.multi
-    def create_employee(self):
-        emp_dict = {}
-        user_dict = {}
-        partner_dict = {}
-        holiday_dict = {}
-        """ Employee and user creation data"""
-        hr_employee = self.env['hr.employee']
-        hr_users = self.env['res.users']
-        hr_holiday = self.env['hr.leave']
-        hr_leave_type = self.env['hr.leave.status'].search([('is_leave_type_of_wizard','=',True)],limit=1)
-        res_partner = self.env['res.partner']
-        res_partner_bank = self.env['res.partner.bank']
-        account_payment_term = self.env['account.payment.term']
-        account_payment_mode = self.env['account.payment.mode']
-        
+    def create_partner(self):
+        """ partner creation"""
         firstname = self.firstname
         lastname = self.lastname
-        email = self.email
-        gender = self.gender
-        mobile = self.mobile
-        birthday = self.birthday
-        place_of_birth = self.place_of_birth
-        bank_id = self.bank_name_id and self.bank_name_id.id
-        department_id = self.department_id and self.department_id.id
-#         allocated_leaves = self.allocated_leaves
-        account_id = self.account_id and self.account_id.id
-        initial_employment_date = self.initial_employment_date
-        official_date_of_employment = self.official_date_of_employment
-        temporary_contract = self.temporary_contract
-        category_ids = self.category_ids.ids
-        acc_number = self.acc_number
-        external = self.external
-        login = self.login
-        street = self.street
-        zip = self.zip
-        city =  self.city
-        country_id = self.country_id and self.country_id.id
-        ref = self.ref
-        product_id = self.product_id and self.product_id.id
-        default_operating_unit_id = self.default_operating_unit_id and self.default_operating_unit_id.id
-        operating_unit_ids = self.operating_unit_ids and self.operating_unit_ids.ids
-        parent_id = self.parent_id and self.parent_id.id
-        full_name=''
-        if firstname and lastname:
-            full_name = firstname +' '+ lastname
-            
-            
-        """ partner creation"""
-        account_payment_term_id = account_payment_term.search([('name','=','Immediate Payment')],limit=1)
-        account_payment_mode_id = account_payment_mode.search([('name','=','SEPA Credit Transfer (Outbound)')],limit=1)
-        partner_dict.update({'name':full_name,
-                             'lastname':lastname,
-                             'firstname':firstname,
-                             'street':street,
-                             'zip':zip,
-                             'city':city,
-                             'country_id':country_id,
-                             'email':email,
-                             'mobile':mobile,
-                             'ref':ref,
-                             'supplier':True,
-                             'customer':False,
-                             'notify_email':'none',
-                             'property_supplier_payment_term_id': account_payment_term_id and account_payment_term_id.id ,
-                             'supplier_payment_mode_id':account_payment_mode_id and account_payment_mode_id.id,
-                             'lang':'nl_NL'})
+        account_payment_term_id = self.env['account.payment.term'].search([('name','=','Immediate Payment')],limit=1)
+        account_payment_mode_id = self.env['account.payment.mode'].search([('name','=','SEPA Credit Transfer (Outbound)')],limit=1)
+        partner = {
+            'name': firstname +' '+ lastname if firstname and lastname else '',
+                     'lastname':lastname,
+                     'firstname':firstname,
+                     'street': self.street,
+                     'zip': self.zip,
+                     'city': self.city,
+                     'country_id': self.country_id and self.country_id.id,
+                     'email': self.email,
+                     'mobile': self.mobile,
+                     'ref': self.ref,
+                     'supplier': True,
+                     'customer': False,
+                     'notify_email':'none',
+                     'property_supplier_payment_term_id': account_payment_term_id and account_payment_term_id.id ,
+                     'supplier_payment_mode_id':account_payment_mode_id and account_payment_mode_id.id,
+                     'lang':'nl_NL'}
+        partner_id = self.env['res.partner'].create(partner)
+        return partner_id
 
-        res_partner_id = res_partner.create(partner_dict)
-            
-        res_partner_bank_id = res_partner_bank.search([('acc_number','=',acc_number)],limit=1)
+    @api.multi
+    def create_user(self, partner_id):
+        list_role = [(5, False, False)]
+        for role_line in self.role_line_ids:
+            data = {'role_id': role_line.role_id.id,
+                    'date_from': role_line.from_date or False,
+                    'date_to': role_line.to_date or False
+                    }
+            list_role.append((0, 0, data))
+        user = {'lastname': self.lastname,
+                'firstname': self.firstname,
+                'login': self.login,
+                'partner_id': partner_id and partner_id.id,
+                'default_operating_unit_id': self.default_operating_unit_id and self.default_operating_unit_id.id,
+                'operating_unit_ids': [(6, 0, self.operating_unit_ids and self.operating_unit_ids.ids)],
+                'role_line_ids': list_role
+                }
+        user_id = self.env['res.users'].create(user)
+        return user_id
+
+    @api.multi
+    def create_res_partner_bank(self, partner_id):
+        res_partner_bank_id = self.env['res.partner.bank'].search([('acc_number','=',self.acc_number)],limit=1)
         if res_partner_bank_id:
-            res_partner_bank_id = res_partner_bank_id 
+            res_partner_bank_id = res_partner_bank_id
         else:
-            if acc_number:
-                res_partner_bank_id = res_partner_bank.create({'acc_number':acc_number,
-                                         'bank_id':bank_id,
-                                         'partner_id':res_partner_id and res_partner_id.id
-                                         })
-        
-        emp_dict.update({'name':full_name,
-                         'firstname':firstname,
-                         'lastname':lastname,
-                         'work_email':email,
-                         'gender':gender,
-                         'mobile_phone':mobile,
-                         'birthday':birthday,
-                         'place_of_birth':place_of_birth,
-                         'bank_account_id':res_partner_bank_id and res_partner_bank_id.id,
-                         'department_id':department_id,
-                         'account_id':account_id,
-                         'initial_employment_date':initial_employment_date,
-                         'official_date_of_employment':official_date_of_employment,
-                         'temporary_contract':temporary_contract,
-                         'category_ids':[(6, 0, category_ids)],
-                         'external':external,
-                          'product_id':product_id,
-                          'parent_id':parent_id,
-                         })
-        employee_id = hr_employee.create(emp_dict)
+            if self.acc_number:
+                res_partner_bank_id = self.env['res.partner.bank'].create({
+                    'acc_number':self.acc_number,
+                    'bank_id':self.bank_name_id and self.bank_name_id.id,
+                    'partner_id':partner_id and partner_id.id
+                    })
+        return res_partner_bank_id
+    
+#     @api.multi
+#     def create_employee(self):
+#         emp_dict = {}
+#         user_dict = {}
+#         partner_dict = {}
+#         holiday_dict = {}
+#         """ Employee and user creation data"""
+#         hr_employee = self.env['hr.employee']
+#         hr_users = self.env['res.users']
+#         hr_holiday = self.env['hr.leave']
+#         hr_leave_type = self.env['hr.leave.status'].search([('is_leave_type_of_wizard','=',True)],limit=1)
+#         res_partner = self.env['res.partner']
+#         res_partner_bank = self.env['res.partner.bank']
+#         account_payment_term = self.env['account.payment.term']
+#         account_payment_mode = self.env['account.payment.mode']
+#
+#         firstname = self.firstname
+#         lastname = self.lastname
+#         email = self.email
+#         gender = self.gender
+#         mobile = self.mobile
+#         birthday = self.birthday
+#         place_of_birth = self.place_of_birth
+#         bank_id = self.bank_name_id and self.bank_name_id.id
+#         department_id = self.department_id and self.department_id.id
+# #         allocated_leaves = self.allocated_leaves
+#         account_id = self.account_id and self.account_id.id
+#         initial_employment_date = self.initial_employment_date
+#         official_date_of_employment = self.official_date_of_employment
+#         temporary_contract = self.temporary_contract
+#         category_ids = self.category_ids.ids
+#         acc_number = self.acc_number
+#         external = self.external
+#         login = self.login
+#         street = self.street
+#         zip = self.zip
+#         city =  self.city
+#         country_id = self.country_id and self.country_id.id
+#         ref = self.ref
+#         product_id = self.product_id and self.product_id.id
+#         default_operating_unit_id = self.default_operating_unit_id and self.default_operating_unit_id.id
+#         operating_unit_ids = self.operating_unit_ids and self.operating_unit_ids.ids
+#         parent_id = self.parent_id and self.parent_id.id
+#         full_name=''
+#         if firstname and lastname:
+#             full_name = firstname +' '+ lastname
+#
+#
+#         """ partner creation"""
+#         account_payment_term_id = account_payment_term.search([('name','=','Immediate Payment')],limit=1)
+#         account_payment_mode_id = account_payment_mode.search([('name','=','SEPA Credit Transfer (Outbound)')],limit=1)
+#         partner_dict.update({'name':full_name,
+#                              'lastname':lastname,
+#                              'firstname':firstname,
+#                              'street':street,
+#                              'zip':zip,
+#                              'city':city,
+#                              'country_id':country_id,
+#                              'email':email,
+#                              'mobile':mobile,
+#                              'ref':ref,
+#                              'supplier':True,
+#                              'customer':False,
+#                              'notify_email':'none',
+#                              'property_supplier_payment_term_id': account_payment_term_id and account_payment_term_id.id ,
+#                              'supplier_payment_mode_id':account_payment_mode_id and account_payment_mode_id.id,
+#                              'lang':'nl_NL'})
+#
+#         res_partner_id = res_partner.create(partner_dict)
+#
+#         res_partner_bank_id = res_partner_bank.search([('acc_number','=',acc_number)],limit=1)
+#         if res_partner_bank_id:
+#             res_partner_bank_id = res_partner_bank_id
+#         else:
+#             if acc_number:
+#                 res_partner_bank_id = res_partner_bank.create({'acc_number':acc_number,
+#                                          'bank_id':bank_id,
+#                                          'partner_id':res_partner_id and res_partner_id.id
+#                                          })
+#
+#         emp_dict.update({'name':full_name,
+#                          'firstname':firstname,
+#                          'lastname':lastname,
+#                          'work_email':email,
+#                          'gender':gender,
+#                          'mobile_phone':mobile,
+#                          'birthday':birthday,
+#                          'place_of_birth':place_of_birth,
+#                          'bank_account_id':res_partner_bank_id and res_partner_bank_id.id,
+#                          'department_id':department_id,
+#                          'account_id':account_id,
+#                          'initial_employment_date':initial_employment_date,
+#                          'official_date_of_employment':official_date_of_employment,
+#                          'temporary_contract':temporary_contract,
+#                          'category_ids':[(6, 0, category_ids)],
+#                          'external':external,
+#                           'product_id':product_id,
+#                           'parent_id':parent_id,
+#                          })
+#         employee_id = hr_employee.create(emp_dict)
+#
+#         holiday_dict.update({'holiday_status_id':hr_leave_type.id,
+#                                 'holiday_type':'employee',
+#                                 'employee_id':employee_id.id,
+#                                 'number_of_hours_temp':self.leave_hours,
+#                                 'type':'add',
+#                                 'state':'confirm'})
+#         holiday_id = hr_holiday.create(holiday_dict)
+#         holiday_id.action_approve()
+#
+#         user_dict.update({'firstname':firstname,
+#                           'lastname':lastname,
+#                           'login':login,
+#                           'partner_id':res_partner_id and res_partner_id.id,
+#                           'default_operating_unit_id':default_operating_unit_id,
+#                           'operating_unit_ids':[(6,0,operating_unit_ids)],
+#                           })
+#         hr_user_id = hr_users.create(user_dict)
+#         employee_id.write({'bank_account_id':res_partner_bank_id and res_partner_bank_id.id,
+#                            'address_home_id':res_partner_id and res_partner_id.id,
+#                            'user_id':hr_user_id and hr_user_id.id})
+#
+#         list_role = []
+#         data = {}
+#         flag=False
+#         list_role.append((6, 0, data))
+#         hr_user_id.write({'role_line_ids':list_role})
+#         list_role = []
+#         for role in self.role_line_ids:
+#             data = {'role_id':role.role_id.id,
+#                               'date_from':role.from_date,
+#                               'date_to':role.to_date,
+#                               'user_id':hr_user_id and hr_user_id.id}
+#             list_role.append((0, 0, data))
+#         hr_user_id.write({'role_line_ids':list_role})
+#
+#         return True
 
-        holiday_dict.update({'holiday_status_id':hr_leave_type.id,
+
+    @api.multi
+    def create_employee(self, user_id, res_partner_bank_id):
+        firstname = self.firstname
+        lastname = self.lastname
+        employee = {
+                     'name': firstname +' '+ lastname if firstname and lastname else '',
+                     'firstname': firstname,
+                     'lastname': lastname,
+                     'work_email': self.email,
+                     'gender': self.gender,
+                     'mobile_phone': self.mobile,
+                     'birthday': self.birthday,
+                     'place_of_birth': self.place_of_birth,
+                     'address_home_id': user_id.partner_id and user_id.partner_id.id,
+                     'user_id': user_id and user_id.id,
+                     'bank_account_id': res_partner_bank_id and res_partner_bank_id.id,
+                     'department_id': self.department_id and self.department_id.id,
+                     'account_id': self.account_id and self.account_id.id,
+                     'initial_employment_date': self.initial_employment_date,
+                     'official_date_of_employment': self.official_date_of_employment,
+                     'temporary_contract': self.temporary_contract,
+                     'category_ids': [(6, 0, self.category_ids.ids)],
+                     'external': self.external,
+                     'product_id': self.product_id and self.product_id.id,
+                     'parent_id': self.parent_id and self.parent_id.id,
+                     }
+        return self.env['hr.employee'].create(employee)
+
+    @api.multi
+    def create_holiday(self, employee_id):
+        hr_leave_type = self.env['hr.holidays.status'].search([('is_leave_type_of_wizard', '=', True)], limit=1)
+        holiday = {'holiday_status_id':hr_leave_type.id,
                                 'holiday_type':'employee',
                                 'employee_id':employee_id.id,
-                                'number_of_hours_temp':self.leave_hours,
+                                'number_of_hours_temp': self.leave_hours,
                                 'type':'add',
-                                'state':'confirm'})
-        holiday_id = hr_holiday.create(holiday_dict)
+                                'state':'confirm'}
+        holiday_id = self.env['hr.holidays'].create(holiday)
         holiday_id.action_approve()
-        
-        user_dict.update({'firstname':firstname,
-                          'lastname':lastname,
-                          'login':login,
-                          'partner_id':res_partner_id and res_partner_id.id,
-                          'default_operating_unit_id':default_operating_unit_id,
-                          'operating_unit_ids':[(6,0,operating_unit_ids)],
-                          })
-        hr_user_id = hr_users.create(user_dict)
-        employee_id.write({'bank_account_id':res_partner_bank_id and res_partner_bank_id.id,
-                           'address_home_id':res_partner_id and res_partner_id.id,
-                           'user_id':hr_user_id and hr_user_id.id})
-        
-        list_role = []
-        data = {}
-        flag=False
-        list_role.append((6, 0, data))
-        hr_user_id.write({'role_line_ids':list_role})
-        list_role = []
-        for role in self.role_line_ids:
-            data = {'role_id':role.role_id.id,
-                              'date_from':role.from_date,
-                              'date_to':role.to_date,
-                              'user_id':hr_user_id and hr_user_id.id}
-            list_role.append((0, 0, data))
-        hr_user_id.write({'role_line_ids':list_role})
-            
         return True
-    
+
+    @api.multi
+    def create_all(self):
+        """ Partner, user, bank, holiday and Employee creation """
+        partner_id = self.create_partner()
+        user_id = self.create_user(partner_id)
+        res_partner_bank_id = self.create_res_partner_bank(partner_id)
+        employee_id = self.create_employee(user_id, res_partner_bank_id)
+        self.create_holiday(employee_id)
+        return employee_id
+
+
 class UsersRoleWizard(models.TransientModel):
     _name= "users.role.wizard"
     _description = "Employee role"

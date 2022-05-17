@@ -8,7 +8,7 @@
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
             <field eval="False" name="doall"/>
-            <field eval="'hr.expense'" name="model"/>
+            <field name="model_id" ref="model_hr_expense"/>
             <field eval="'update_expense'" name="function"/>
             <field eval="'()'" name="args"/>
             <field eval="False" name="active"/>

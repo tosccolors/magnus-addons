@@ -374,6 +374,8 @@ class HrTimesheetSheet(models.Model):
 		if self.odo_log_id:
 			self.env['fleet.vehicle.odometer'].sudo().search([('id', '=', self.odo_log_id.id)]).unlink()
 			self.odo_log_id = False
+		if self.overtime_analytic_line_id:
+			self.overtime_analytic_line_id.unlink()
 		return res
 
 
@@ -460,13 +462,50 @@ class HrTimesheetSheet(models.Model):
 		self.generate_km_lines()
 		return res
 
+	# @job(default_channel='root.timesheet')
+	def _recompute_timesheet(self, fields):
+		"""Recompute this sheet and its lines.
+		This function is called asynchronically after create/write"""
+		for this in self:
+			this.modified(fields)
+			if 'timesheet_ids' not in fields:
+				continue
+			this.mapped('timesheet_ids').modified(
+                self.env['account.analytic.line']._fields.keys()
+            )
+		self.recompute()
+
+	def _queue_recompute_timesheet(self, fields):
+		"""Queue a recomputation if appropriate"""
+		if not fields or not self:
+			return
+		return self.with_delay(
+            description=' '.join([self.employee_id.name, self.display_name, self.date_from[:4]]),
+            identity_key=self._name + ',' + ','.join(map(str, self.ids)) +
+            ',' + ','.join(fields)
+        )._recompute_timesheet(fields)
+
+	@api.model
+	def create(self, vals):
+		result = super(
+            HrTimesheetSheet, self.with_context(_timesheet_write=True)
+        ).create(vals)
+		result._queue_recompute_timesheet(['timesheet_ids'])
+		return result
+
 	@api.one
 	def write(self, vals):
-		result = super(HrTimesheetSheet, self).write(vals)
-		lines = self.env['account.analytic.line'].search([('sheet_id', '=', self.id)]).filtered(
-			lambda line: line.unit_amount > 24 or line.unit_amount < 0)
-		for l in lines:
-			l.write({'unit_amount': 0})
+		result = super(
+			HrTimesheetSheet, self.with_context(_timesheet_write=True)
+		).write(vals)
+		self.env['account.analytic.line'].search([
+            ('sheet_id', '=', self.id),
+            '|',
+            ('unit_amount', '>', 24),
+            ('unit_amount', '<', 0),
+        ]).write({'unit_amount': 0})
+		if 'timesheet_ids' in vals:
+			self._queue_recompute_timesheet(['timesheet_ids'])
 		return result
 
 	@api.multi
@@ -594,6 +633,7 @@ class HrTimesheetSheet(models.Model):
 				 FROM account_analytic_line
 				 WHERE sheet_id = %(sheet_aal)s
 				 )
+			  AND pp.allow_timesheets = TRUE
 			 ;"""
 
 		self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),

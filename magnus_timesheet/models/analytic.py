@@ -12,33 +12,33 @@ class AccountAnalyticLine(models.Model):
     _description = 'Analytic Line'
     _order = 'date desc'
     # field account_analytic_line_ids for display the account moves
-    account_analy_line_ids=fields.Many2many('account.move.line',string="Analytic Account Line",readonly=True)
-    wip_percentage=fields.Float("WIP percentage")
-    @api.depends(
-                 'sheet_id_computed.date_to',
-                 'sheet_id_computed.date_from',
-                 'sheet_id_computed.employee_id',
-                 )
-    def _compute_sheet(self):
-        """Links the timesheet line to the corresponding sheet
-        overridden from method in hr_timesheet_sheet without super()
-        """
-        # we first get value of sheet_id in cache, because it is empty for all to be computed fields
-        # because sheet_id does not get a value when sheets is empty, we need the original value.
-        # we have to filter self for records existing in db
-        self.filtered(lambda i: isinstance(i.id, (int))).read(['sheet_id'])
-        uom_hrs = self.env.ref("uom.product_uom_hour").id
-        for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
-            sheets = self.env['hr_timesheet.sheet'].search(
-                [('date_end', '>=', ts_line.date),
-                 ('date_start', '<=', ts_line.date),
-                 ('employee_id.user_id.id', '=', ts_line.user_id.id),
-                 ('state', 'in', ['draft', 'new'])])
-            if sheets:
-                # [0] because only one sheet possible for an employee between
-                # 2 dates
-                ts_line.sheet_id_computed = sheets[0]
-                ts_line.sheet_id = sheets[0]
+    # account_analy_line_ids=fields.Many2many('account.move.line',string="Analytic Account Line",readonly=True)
+    # wip_percentage=fields.Float("WIP percentage")
+    # @api.depends(
+    #              'sheet_id_computed.date_to',
+    #              'sheet_id_computed.date_from',
+    #              'sheet_id_computed.employee_id',
+    #              )
+    # def _compute_sheet(self):
+    #     """Links the timesheet line to the corresponding sheet
+    #     overridden from method in hr_timesheet_sheet without super()
+    #     """
+    #     # we first get value of sheet_id in cache, because it is empty for all to be computed fields
+    #     # because sheet_id does not get a value when sheets is empty, we need the original value.
+    #     # we have to filter self for records existing in db
+    #     self.filtered(lambda i: isinstance(i.id, (int))).read(['sheet_id'])
+    #     uom_hrs = self.env.ref("uom.product_uom_hour").id
+    #     for ts_line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
+    #         sheets = self.env['hr_timesheet.sheet'].search(
+    #             [('date_end', '>=', ts_line.date),
+    #              ('date_start', '<=', ts_line.date),
+    #              ('employee_id.user_id.id', '=', ts_line.user_id.id),
+    #              ('state', 'in', ['draft', 'new'])])
+    #         if sheets:
+    #             # [0] because only one sheet possible for an employee between
+    #             # 2 dates
+    #             ts_line.sheet_id_computed = sheets[0]
+    #             ts_line.sheet_id = sheets[0]
 
     @api.depends('project_id.chargeable',
                  'project_id.correction_charge',
@@ -49,7 +49,9 @@ class AccountAnalyticLine(models.Model):
                  'planned',
                  'date',
                  'task_id',
-                 'user_id'
+                 'user_id',
+                 'user_total_id.fee_rate',
+                 'user_total_id.ic_fee_rate'
                  )
     def _compute_analytic_line(self):
         uom_hrs = self.env.ref("uom.product_uom_hour").id
@@ -101,8 +103,8 @@ class AccountAnalyticLine(models.Model):
                         line.wip_month_id = var_month_id
                     if line.product_uom_id.id == uom_hrs:
                         line.ts_line = True
-                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)
-                        line.project_rate = line.get_fee_rate(task.id, user.id, date, True)
+                        line.line_fee_rate = line.get_fee_rate(task.id, user.id)[0]
+                        # line.project_rate = line.get_fee_rate(task.id, user.id, date, True)
                         line.project_amount = (line.project_rate * line.unit_amount)
                     # line.actual_qty = line.unit_amount
                     # line.planned_qty = 0.0
@@ -231,7 +233,8 @@ class AccountAnalyticLine(models.Model):
     )
     day_name = fields.Char(
         string="Day",
-        compute=_compute_analytic_line
+        compute=_compute_analytic_line,
+        store=True,
     )
     ts_line = fields.Boolean(
         compute=_compute_analytic_line,
@@ -251,6 +254,7 @@ class AccountAnalyticLine(models.Model):
     expenses = fields.Boolean(
         compute=_compute_analytic_line,
         string='Expenses',
+        store=True,
     )
     project_mgr = fields.Many2one(
         comodel_name='res.users',
@@ -342,32 +346,37 @@ class AccountAnalyticLine(models.Model):
         uid = user_id or self.user_id.id or False
         tid = task_id or self.task_id.id or False
         date = date or self.date or False
-        fr = None
+        fr = 0.0
+        ic_fr = 0.0
+        # fr = None
         if uid and tid and date:
-            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)
-            if task_user:
+            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
+            if task_user and task_user.fee_rate:
                 fr = task_user.fee_rate
+                ic_fr = task_user.ic_fee_rate
             if project_rate:
                 return fr or 0.0
             # check standard task for fee earners
-            if fr == None:
+            else:
                 project_id = self.env['project.task'].browse(tid).project_id
                 standard_task = project_id.task_ids.filtered('standard')
                 if standard_task:
                     # task-358
                     task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
                     if task_user:
-                        fr = task_user.fee_rate
-        if fr == None:
-            employee = self.env['hr.employee'].search([('user_id', '=', uid)])
-            fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
-            if self.product_id and self.product_id != employee.product_id:
-                fr = self.product_id.lst_price
-        return fr
+                        fr = task_user[:1].fee_rate
+                        ic_fr = task_user[:1].ic_fee_rate
+        return [fr, ic_fr]
+        # if fr == None:
+        #     employee = self.env['hr.employee'].search([('user_id', '=', uid)])
+        #     fr = employee.fee_rate or employee.product_id and employee.product_id.lst_price or 0.0
+        #     if self.product_id and self.product_id != employee.product_id:
+        #         fr = self.product_id.lst_price
+        # return fr
 
     @api.model
     def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=False):
-        fr = self.get_fee_rate(task_id=task_id, user_id=user_id)
+        fr = self.get_fee_rate(task_id=task_id, user_id=user_id)[0]
         unit_amount = unit_amount if unit_amount else self.unit_amount
         amount = - unit_amount * fr
         return amount
@@ -403,6 +412,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.multi
     def write(self, vals):
+        uom_hour = self.env.ref("uom.product_uom_hour")
         # don't call super if only state has to be updated
         if self and 'state' in vals and len(vals) == 1:
             state = vals['state']
@@ -429,7 +439,7 @@ class AccountAnalyticLine(models.Model):
                         'Please fill in Fee Rate Product in employee %s.\n '
                     ) % user.name)
                 vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', self.ts_line)
+            ts_line = vals.get('ts_line', self.product_uom_id == uom_hour and task_id and not planned)
             if ts_line:
                 unit_amount = vals.get('unit_amount', self.unit_amount)
                 vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
@@ -443,7 +453,7 @@ class AccountAnalyticLine(models.Model):
                 'task_id' in vals or
                 'user_id' in vals or
                 'name' in vals or
-                'ref' in vals):
+                'ref' in vals) and any(this.product_uom_id == uom_hour for this in self):
             # always copy context to keep other context reference
             context = self.env.context.copy()
             context.update({'analytic_check_state': True})
@@ -507,15 +517,30 @@ class AccountAnalyticLine(models.Model):
 
  # To display the Account move and reverse move in many2many list view for status = delayed record
 
+    # @api.multi
+    # def add_move_line(self,analytic_lines_ids,vals):
+    #     if False not in vals:
+    #         for mov_id in vals:
+    #             acc_mov_line=self.env['account.move.line'].search([('move_id', '=', mov_id)])
+    #             for id in analytic_lines_ids:
+    #                 analytic_line = self.env['account.analytic.line'].search([('id', '=', id)])
+    #                 for mov_line_ids in acc_mov_line:
+    #                     analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
+    #     return True
+
     @api.multi
-    def add_move_line(self,analytic_lines_ids,vals):
-        if False not in vals:
-            for mov_id in vals:
-                acc_mov_line=self.env['account.move.line'].search([('move_id', '=', mov_id)])
-                for id in analytic_lines_ids:
-                    analytic_line = self.env['account.analytic.line'].search([('id', '=', id)])
-                    for mov_line_ids in acc_mov_line:
-                        analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
-        return True
+    def modified(self, fnames):
+        if not self.env.context.get('_timesheet_write'):
+            # disable modification triggers when writing timesheets
+            return super(AccountAnalyticLine, self).modified(fnames)
+
+    # #not found in V12
+    # @api.multi
+    # def _get_sale_order_line(self, vals=None):
+    #     if not self.env.context.get('_timesheet_write'):
+    #         # disable linking sale order lines to analytic lines on timesheets
+    #         return super(AccountAnalyticLine, self)._get_sale_order_line(vals=vals)
+    #     return dict(vals or {})
+
 
 

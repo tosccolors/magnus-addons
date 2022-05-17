@@ -24,7 +24,7 @@ class Employee(models.Model):
     personnel_number = fields.Char('Personnel Number')
     employee_numbersid = fields.Char('Employee NMBRs ID')
     date_last_promotion = fields.Date('Date of last Promotion')
-
+    klippa_user = fields.Boolean(string="Employee uses Klippa")
     has_private_car = fields.Boolean(string="Employee has a private car")
     leave_hours = fields.Float(string="Leave Hours")
 

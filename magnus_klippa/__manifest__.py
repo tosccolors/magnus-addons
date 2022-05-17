@@ -26,7 +26,7 @@
 
     # always loaded
     'data': [
-        # 'data/cron_data.xml', commented coz of error on model id
+        'data/cron_data.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

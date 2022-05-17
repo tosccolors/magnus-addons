@@ -516,6 +516,15 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                <field name="operating_unit_id"/>
+                <field name="department_id"/>
+                <field name="tag_ids" string="Proposition" widget="many2many_tags"/>
+                <field name="date_deadline" string="Expected Closing Date"/>
+            </xpath>
+            <label for="planned_revenue" position="replace">
+                <label string="Expected Revenue + Probability" for="planned_revenue"  />
+            </label>
+            <xpath expr="//field[@name='planned_revenue']" position="after">
+               <field name="probability"/>
             </xpath>
         </field>
       </record>
