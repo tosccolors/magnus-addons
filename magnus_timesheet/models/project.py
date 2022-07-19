@@ -117,6 +117,17 @@ class TaskUser(models.Model):
         return [('categ_id', '=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
+    @api.one
+    @api.depends('task_id', 'user_id', 'from_date')
+    def _get_last_valid_fee_rate(self):
+        task_id = self.task_id.id
+        user_id = self.user_id.id
+        task_user = self.search([('task_id', '=', task_id), ('user_id', '=', user_id)], order='from_date desc', limit=1)
+        if task_user == self:
+            self.last_valid_fee_rate = True
+        else:
+            self.last_valid_fee_rate = False
+
     project_id = fields.Many2one(related='task_id.project_id',
         comodel_name='project.project', string="Project", store=True)
 
@@ -154,6 +165,12 @@ class TaskUser(models.Model):
     #     'res.users',
     #     string='Consultants',
     # )
+
+    last_valid_fee_rate = fields.Boolean(
+        compute='_get_last_valid_fee_rate',
+        string='Last Valid Fee Rate',
+        store=True
+    )
 
     @api.onchange('user_id')
     def onchange_user_id(self):
