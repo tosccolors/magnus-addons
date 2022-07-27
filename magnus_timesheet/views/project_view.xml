@@ -76,6 +76,8 @@
                     <field name="task_id"/>
                     <field name="user_id"/>
                     <field name="product_id"/>
+                    <field name="last_valid_fee_rate"/>
+                    <filter string="last valid fee rate" name="last_valid_fee_rate" domain="[('last_valid_fee_rate','=', True)]"/>
                     <filter string="Project" name="groupby_project" domain="[]" context="{'group_by':'project_id'}"/>
                     <filter string="Task" name="groupby_task" domain="[]" context="{'group_by':'task_id'}"/>
                     <filter string="User" name="groupby_user" domain="[]" context="{'group_by':'user_id'}"/>
@@ -100,6 +102,7 @@
                     <field name="ic_fee_rate"/>
                     <field name="margin"/>
                     <field name="task_id"/>
+                    <field name="last_valid_fee_rate" invisible="1"/>
                 </tree>
             </field>
         </record>
