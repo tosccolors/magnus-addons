@@ -56,7 +56,7 @@ class HrExpense(models.Model):
 
     @api.multi
     def action_view_sheet(self):
-        res = super(HrExpense, self).view_sheet()
+        res = super(HrExpense, self).action_view_sheet()
         res['flags'] = {'initial_mode': 'edit'}
         return res
 
