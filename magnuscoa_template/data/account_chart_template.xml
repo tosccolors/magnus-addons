@@ -15,6 +15,9 @@
             <field name="code_digits">4</field>
             <field name="currency_id" ref="base.EUR"/>
             <field name="transfer_account_id" ref="transfer_account_id"/>
+            <field name="cash_account_code_prefix">10</field>
+            <field name="bank_account_code_prefix">11</field>
+            <field name="transfer_account_code_prefix">12</field>
         </record>
 
         <record id="transfer_account_id" model="account.account.template">
