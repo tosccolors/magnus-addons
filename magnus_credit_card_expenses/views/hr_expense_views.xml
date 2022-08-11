@@ -231,9 +231,10 @@
         <field name="domain">[('is_from_crdit_card','=',False)]</field>
     </record>
 
-    <record id="magnus_expense.partner_approval_menu_action" model="ir.actions.act_window">
+    <!-- partner_approval_menu_action not found  in magnus_expense-->
+    <!--<record id="magnus_expense.partner_approval_menu_action" model="ir.actions.act_window">
         <field name="domain">[('state','=','approve'), ('is_from_crdit_card','=',False)]</field>
-    </record>
+    </record>-->
     <!--   Adding Server Action for dynamic call the Tree view for menu Partner Approval-->
     <!--<record id="credit_card_partner_approval_menu_server_action" model="ir.actions.server">
         <field name="name">Partner Approval</field>
