@@ -29,6 +29,9 @@
             <field name="personnel_number" />
             <field name="employee_numbersid" />
           </group>
+          <group string="Klippa" name="klippa">
+            <field name="klippa_user" />
+          </group>
         </xpath>
         <xpath expr="//field[@name='marital']" position="after">
           <field name="has_private_car"/>

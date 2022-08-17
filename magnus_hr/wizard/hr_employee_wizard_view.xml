@@ -70,7 +70,7 @@
       			</field>
       		</group>
       		<footer>
-                <button name="create_employee" string="Create Employee" type="object" class="btn-primary"/> 
+                <button name="create_all" string="Create Employee" type="object" class="btn-primary"/>
                 <button string="Cancel" class="btn-default" special="cancel"/>   
             </footer>
       	</sheet>

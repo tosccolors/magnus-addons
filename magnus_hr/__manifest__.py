@@ -33,7 +33,8 @@ In the object hr. employee on the tab 'HR Settings' under the heading 'Status' c
     'depends': ['base', 'hr', 
     # 'hr_employee_seniority', commented coz the source module not found
     'hr_employee_service',
-     'hr_contract'],
+    'hr_contract',
+    'account_payment_mode'],
 
     # always loaded
     'data': [
