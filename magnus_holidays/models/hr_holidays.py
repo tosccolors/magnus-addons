@@ -9,19 +9,21 @@ class Holidays(models.Model):
 
     state = fields.Selection(selection_add=[('written', 'Written')])
 
-    @api.model
-    def _check_leave_hours(self, leave_hours):
-        return True
+    # method not for v12
+    # @api.model
+    # def _check_leave_hours(self, leave_hours):
+    #     return True
 
-    @api.depends('number_of_days', 'state')
-    def _compute_number_of_hours(self):
-        for rec in self:
-            rec.number_of_hours = 0.0
-            if rec.state == 'validate' and rec.type == 'add':
-                rec.number_of_hours = rec.number_of_days
-                rec.virtual_hours = rec.number_of_days
-            if rec.state == 'written' and rec.type == 'remove':
-                rec.number_of_hours = -rec.number_of_days
-                rec.virtual_hours = -rec.number_of_days
+    #this approach not required due to allocation and leave object is differnt in V12
+    # @api.depends('number_of_days', 'state')
+    # def _compute_number_of_hours(self):
+    #     for rec in self:
+    #         rec.number_of_hours = 0.0
+    #         if rec.state == 'validate':
+    #             rec.number_of_hours = rec.number_of_days
+    #             rec.virtual_hours = rec.number_of_days
+    #         if rec.state == 'written':
+    #             rec.number_of_hours = -rec.number_of_days
+    #             rec.virtual_hours = -rec.number_of_days
 
 
