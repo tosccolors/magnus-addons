@@ -16,7 +16,7 @@ class MaintenanceEquipment(models.Model):
     # imei_number=fields.Char("IMEI Number")
 
     # General fields
-    purchase_date = fields.Date(string="Date of acquisition", default=datetime.today())
+    purchase_date = fields.Date(string="Date of acquisition", default=fields.Date.context_today)
     maintenance_status = fields.Many2one(
         'maintenance.equipment.maintenance.status',
         string="Equipment Status"
