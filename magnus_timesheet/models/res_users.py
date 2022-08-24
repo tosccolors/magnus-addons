@@ -16,7 +16,7 @@ class ResUsers(models.Model):
 		ctx = dict(self.env.context)
 		if 'thread_model' in ctx:
 			ctx['thread_model'] = 'hr.employee'
-		return self.env['hr.employee'].with_context(ctx).search([('user_id', '=', self.id)])
+		return self.env['hr.employee'].with_context(ctx).search([('user_id', '=', self.id)], limit=1)
 
 
 	@api.multi
