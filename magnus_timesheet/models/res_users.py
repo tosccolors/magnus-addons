@@ -18,7 +18,7 @@ class ResUsers(models.Model):
 		ctx = dict(self.env.context)
 		if 'thread_model' in ctx:
 			ctx['thread_model'] = 'hr.employee'
-		return self.env['hr.employee'].with_context(ctx).search([('user_id', '=', self.id)], limit=1)
+		return self.env['hr.employee'].with_context(ctx).search([('user_id', '=', self.id)])
 
 
 	@api.multi
@@ -27,6 +27,7 @@ class ResUsers(models.Model):
 		top Department."""
 		employee_id = self._get_related_employees()
 		assert not employee_id or len(employee_id) == 1, 'Only one employee can have this user_id'
+		_logger.info("employee ------------------%s", employee_id)
 		if employee_id.department_id:
 			if employee_id.department_id.parent_id.id == False:
 				dep = employee_id.department_id
@@ -35,7 +36,6 @@ class ResUsers(models.Model):
 			else:
 				dep = employee_id.department_id.parent_id.parent_id
 		else:
-			_logger.info("employee ------------------%s",employee_id)
 			raise ValidationError(_('The Employee in the Analytic line has '
 									'no department defined. Please complete'))
 		return dep.operating_unit_id
