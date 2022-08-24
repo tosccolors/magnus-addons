@@ -18,7 +18,7 @@
             </field>
         </record>
 
-        <record id="action_view_change_charge_code" model="ir.actions.act_window">
+        <!--<record id="action_view_change_charge_code" model="ir.actions.act_window">
             <field name="name">Change Chargecode</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">change.chargecode</field>
@@ -27,17 +27,18 @@
             <field name="view_id" ref="view_change_charge_code"/>
             <field name="target">new</field>
             <field name="groups_id" eval="[(4,ref('group_chargecode_time_admin'))]"/>
-        </record>
+        </record>-->
 
 
-        <!-- <record model="ir.values" id="change_charge_code">
-            <field name="model_id" ref="analytic.model_account_analytic_line" />
+        <record model="ir.actions.act_window" id="change_charge_code">
             <field name="name">Change Chargecode</field>
-            <field name="key2">client_action_multi</field>
-            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_view_change_charge_code'))" />
-            <field name="key">action</field>
-            <field name="model">account.analytic.line</field>
-        </record> -->
+            <field name="res_model">change.chargecode</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="groups_id" eval="[(4,ref('group_chargecode_time_admin'))]"/>
+            <field name="binding_model_id" ref="magnus_timesheet.model_account_analytic_line" />
+        </record>
 
     </data>
 </odoo>

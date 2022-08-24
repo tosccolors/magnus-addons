@@ -48,92 +48,106 @@ class HrExpense(models.Model):
 			'target': 'current',
 			'res_id': expense_sheet.id
 		}
-		
+
+	@api.multi
+	def _get_account_move_by_sheet(self):
+		""" Return a mapping between the expense sheet of current expense and its account move
+            :returns dict where key is a sheet id, and value is an account move record
+        """
+		move_grouped_by_sheet = {}
+		for expense in self:
+			# create the move that will contain the accounting entries
+			if expense.sheet_id.id not in move_grouped_by_sheet:
+				if expense.is_from_crdit_card:
+					journal = expense.sheet_id.company_id.creditcard_decl_journal_id
+				else:
+					journal = expense.sheet_id.company_id.decl_journal_id
+				acc_date = expense.sheet_id.accounting_date or expense.date
+				move = self.env['account.move'].create({
+					'journal_id': journal.id,
+					'company_id': self.env.user.company_id.id,
+					'date': acc_date,
+					'ref': expense.sheet_id.name,
+					# force the name to the default value, to avoid an eventual 'default_name' in the context
+					# to set it to '' which cause no number to be given to the account.move when posted.
+					'name': '/',
+				})
+				# move = self.env['account.move'].create(expense._prepare_move_values())
+				move_grouped_by_sheet[expense.sheet_id.id] = move
+			else:
+				move = move_grouped_by_sheet[expense.sheet_id.id]
+		return move_grouped_by_sheet
+
 	@api.multi
 	def action_move_create(self):
 		'''
-		main function that is called when trying to create the accounting entries related to an expense
-		'''
+        main function that is called when trying to create the accounting entries related to an expense
+        '''
+		move_group_by_sheet = self._get_account_move_by_sheet()
+
+		move_line_values_by_expense = self._get_account_move_line_values()
+
 		for expense in self:
-			if expense.is_from_crdit_card:
-				journal = expense.sheet_id.company_id.creditcard_decl_journal_id
-			else:
-				journal = expense.sheet_id.company_id.decl_journal_id
-#             journal = expense.sheet_id.bank_journal_id if expense.payment_mode == 'company_account' else expense.sheet_id.journal_id
-			#create the move that will contain the accounting entries
-			acc_date = expense.sheet_id.accounting_date or expense.date
-			move = self.env['account.move'].create({
-				'journal_id': journal.id,
-				'company_id': self.env.user.company_id.id,
-				'date': acc_date,
-				'ref': expense.sheet_id.name,
-				# force the name to the default value, to avoid an eventual 'default_name' in the context
-				# to set it to '' which cause no number to be given to the account.move when posted.
-				'name': '/',
-			})
 			company_currency = expense.company_id.currency_id
-			diff_currency_p = expense.currency_id != company_currency
-			#one account.move.line per expense (+taxes..)
-			move_lines = expense._move_line_get()
-			
-			#create one more move line, a counterline for the total on payable account
-			payment_id = False
-			total, total_currency, move_lines = expense._compute_expense_totals(company_currency, move_lines, acc_date)
+			different_currency = expense.currency_id != company_currency
+
+			# get the account move of the related sheet
+			move = move_group_by_sheet[expense.sheet_id.id]
+
+			# get move line values
+			move_line_values = move_line_values_by_expense.get(expense.id)
+			move_line_dst = move_line_values[-1]
+			total_amount = move_line_dst['debit'] or -move_line_dst['credit']
+			total_amount_currency = move_line_dst['amount_currency']
+
+			# create one more move line, a counterline for the total on payable account
+			# if expense.payment_mode == 'company_account':
 			if expense.is_from_crdit_card:
 				if not expense.sheet_id.company_id.creditcard_decl_journal_id:
 					raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
-#                 emp_account = expense.sheet_id.bank_journal_id.default_credit_account_id.id
-				emp_account = expense.sheet_id.company_id.creditcard_decl_journal_id.default_credit_account_id.id
-				
+				# if not expense.sheet_id.bank_journal_id.default_credit_account_id:
+				# 	raise UserError(_("No credit account found for the %s journal, please configure one.") % (
+				# 	expense.sheet_id.bank_journal_id.name))
+				# journal = expense.sheet_id.bank_journal_id
 				journal = expense.sheet_id.company_id.creditcard_decl_journal_id
-				#create payment
-				payment_methods = (total < 0) and journal.outbound_payment_method_ids or journal.inbound_payment_method_ids
+				# create payment
+				payment_methods = journal.outbound_payment_method_ids if total_amount < 0 else journal.inbound_payment_method_ids
 				journal_currency = journal.currency_id or journal.company_id.currency_id
 				payment = self.env['account.payment'].create({
 					'payment_method_id': payment_methods and payment_methods[0].id or False,
-					'payment_type': total < 0 and 'outbound' or 'inbound',
+					'payment_type': 'outbound' if total_amount < 0 else 'inbound',
 					'partner_id': expense.employee_id.address_home_id.commercial_partner_id.id,
 					'partner_type': 'supplier',
 					'journal_id': journal.id,
 					'payment_date': expense.date,
 					'state': 'reconciled',
-					'currency_id': diff_currency_p and expense.currency_id.id or journal_currency.id,
-					'amount': diff_currency_p and abs(total_currency) or abs(total),
+					'currency_id': expense.currency_id.id if different_currency else journal_currency.id,
+					'amount': abs(total_amount_currency) if different_currency else abs(total_amount),
 					'name': expense.name,
 				})
-				payment_id = payment.id
-			else:
-#                 if not expense.sheet_id.company_id.decl_journal_id.default_credit_account_id:
-#                     raise UserError(_("No credit account found for the %s journal, please configure one. ") % (expense.sheet_id.company_id.decl_journal_id.name))
-				if not expense.employee_id.address_home_id:
-					 raise UserError(_("No Home Address found for the employee %s, please configure one.") % (expense.employee_id.name))
-				emp_account = expense.employee_id.address_home_id.property_account_payable_id.id
+				move_line_dst['payment_id'] = payment.id
 
-#                 emp_account = expense.sheet_id.company_id.decl_journal_id.default_credit_account_id.id
-			aml_name = expense.employee_id.name + ': ' + expense.name.split('\n')[0][:64]
-			move_lines.append({
-					'type': 'dest',
-					'name': aml_name,
-					'price': total,
-					'account_id': emp_account,
-					'date_maturity': acc_date,
-					'amount_currency': diff_currency_p and total_currency or False,
-					'currency_id': diff_currency_p and expense.currency_id.id or False,
-					'payment_id': payment_id,
-					})
-			#convert eml into an osv-valid format
-			lines = map(lambda x: (0, 0, expense._prepare_move_line(x)), move_lines)
-			move.with_context(dont_create_taxes=True).write({'line_ids': lines})
+			# link move lines to move, and move to expense sheet
+			move.with_context(dont_create_taxes=True).write({
+				'line_ids': [(0, 0, line) for line in move_line_values]
+			})
 			expense.sheet_id.write({'account_move_id': move.id})
-			#updating the line_ids 1st line_id OU with creditcard_decl_journal_id OU
+
+			# updating the line_ids 1st line_id OU with creditcard_decl_journal_id OU
 			if expense.is_from_crdit_card:
 				ou = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id
 				if ou and expense.sheet_id.account_move_id:
 					expense.sheet_id.account_move_id.line_ids[0].operating_unit_id = ou.id
-			move.post()
+
 			if expense.payment_mode == 'company_account':
 				expense.sheet_id.paid_expense_sheets()
-		return True
+
+		# post the moves
+		for move in move_group_by_sheet.values():
+			move.post()
+
+		return move_group_by_sheet
+
 		
 class HrExpenseSheet(models.Model):
 
@@ -210,21 +224,21 @@ class HrExpenseSheet(models.Model):
 #             raise ValidationError(_('You cannot have a positive and negative amounts on the same expense report.'))
 
 	# adding server action function for the menuitem partner approval
-	@api.multi
-	def partner_credit_card_approval_menu_action(self):
-		get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
-		child_departs = self.env['hr.department'].sudo().search(
-			[('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
-		return {
-			'name': 'Credit Card Partner Approval',
-			'type': 'ir.actions.act_window',
-			'view_type': 'form',
-			'view_mode': 'tree,kanban,form,pivot,graph',
-			'domain': "['&','&',('employee_id.department_id.id', 'in', %s),('state','=','approve'),('is_from_crdit_card', '=', True)]" % child_departs,
-			'res_model': 'hr.expense.sheet',
-			'context': "{'from_credi_card_expense':True}",
-			'target': 'current'
-		}
+	# @api.multi
+	# def partner_credit_card_approval_menu_action(self):
+	# 	get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
+	# 	child_departs = self.env['hr.department'].sudo().search(
+	# 		[('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
+	# 	return {
+	# 		'name': 'Credit Card Partner Approval',
+	# 		'type': 'ir.actions.act_window',
+	# 		'view_type': 'form',
+	# 		'view_mode': 'tree,kanban,form,pivot,graph',
+	# 		'domain': "['&','&',('employee_id.department_id.id', 'in', %s),('state','=','approve'),('is_from_crdit_card', '=', True)]" % child_departs,
+	# 		'res_model': 'hr.expense.sheet',
+	# 		'context': "{'from_credi_card_expense':True}",
+	# 		'target': 'current'
+	# 	}
 
 
 

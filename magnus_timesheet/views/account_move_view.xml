@@ -37,6 +37,7 @@
                 <field name="user_id"
                        options="{'no_create': True}"
                        />
+                <field name="trading_partner_code" />
             </xpath>
         </field>
     </record>
@@ -48,9 +49,11 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='account_id']" position="after">
                 <field name="user_id" />
-                <filter string="Timesheet User" icon="terp-folder-green" name="user_id" context="{'group_by':'user_id'}"/>
-                <!-- <filter string="Timesheet User" icon="terp-folder-green"
-                        context="{'group_by':'user_id'}"/> -->
+                <field name="trading_partner_code"/>
+                <!--<filter string="Timesheet User"  icon="terp-folder-green"-->
+                        <!--context="{'group_by':'user_id'}"/>-->
+                <!--<filter string="Trading Partner"  icon="terp-folder-green"-->
+                        <!--context="{'group_by':'trading_partner_code'}"/>-->
             </xpath>
         </field>
     </record>
@@ -63,14 +66,15 @@
         <field name="arch" type="xml">
             <field name="journal_id" position="after">
                 <!--<field name="operating_unit_id"/>-->
-                <field name="is_wip_move" invisible="True"/>
-                <field name="wip_percentage" attrs="{'invisible': [('is_wip_move','=',False)]}" readonly="1" />
+                <!--<field name="is_wip_move" invisible="True"/>-->
+                <!--<field name="wip_percentage" attrs="{'invisible': [('is_wip_move','=',False)]}" readonly="1" />-->
             </field>
             <xpath expr="//field[@name='line_ids']/tree//field[@name='account_id']"
                    position="after">
                 <field name="user_id"
                        options="{'no_create': True}"
                        />
+                <field name="trading_partner_code"/>
             </xpath>
         </field>
     </record>

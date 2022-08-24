@@ -56,7 +56,7 @@ class HrExpense(models.Model):
 
     @api.multi
     def action_view_sheet(self):
-        res = super(HrExpense, self).view_sheet()
+        res = super(HrExpense, self).action_view_sheet()
         res['flags'] = {'initial_mode': 'edit'}
         return res
 
@@ -163,21 +163,21 @@ class HrExpenseSheet(models.Model):
             self.write({'state': 'done'})
         return res
 
-    # adding server action function for the menuitem partner approval
-    @api.multi
-    def partner_approval_menu_action(self):
-        get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
-        child_departs = self.env['hr.department'].sudo().search(
-            [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
-        return {
-            'name': 'Partner Approval',
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'tree,kanban,form,pivot,graph',
-            'domain': "['&',('employee_id.department_id.id', 'in', %s),('state','=','approve')]" % child_departs,
-            'res_model': 'hr.expense.sheet',
-            'target': 'current'
-            }
+    # # adding server action function for the menuitem partner approval
+    # @api.multi
+    # def partner_approval_menu_action(self):
+    #     get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
+    #     child_departs = self.env['hr.department'].sudo().search(
+    #         [('id', 'child_of', get_logged_user_emp_id.department_id.ids)]).mapped('id')
+    #     return {
+    #         'name': 'Partner Approval',
+    #         'type': 'ir.actions.act_window',
+    #         'view_type': 'form',
+    #         'view_mode': 'tree,kanban,form,pivot,graph',
+    #         'domain': "['&',('employee_id.department_id.id', 'in', %s),('state','=','approve')]" % child_departs,
+    #         'res_model': 'hr.expense.sheet',
+    #         'target': 'current'
+    #         }
     
     @api.one
     @api.constrains('expense_line_ids', 'employee_id')

@@ -36,7 +36,7 @@
             	<field name="payment_mode" position="attributes">
             		<attribute name="invisible">True</attribute>
             	</field>
-            	<label for="payment_mode" position="attributes">a
+            	<label for="payment_mode" position="attributes">
             		<attribute name="invisible">True</attribute>
             	</label>
             	<field name="currency_id" position="attributes">
@@ -230,14 +230,27 @@
     <record id="hr_expense.action_hr_expense_sheet_all_all" model="ir.actions.act_window">
         <field name="domain">[('is_from_crdit_card','=',False)]</field>
     </record>
+
+    <!-- partner_approval_menu_action not found  in magnus_expense-->
+    <!--<record id="magnus_expense.partner_approval_menu_action" model="ir.actions.act_window">
+        <field name="domain">[('state','=','approve'), ('is_from_crdit_card','=',False)]</field>
+    </record>-->
     <!--   Adding Server Action for dynamic call the Tree view for menu Partner Approval-->
-    <record id="credit_card_partner_approval_menu_server_action" model="ir.actions.server">
+    <!--<record id="credit_card_partner_approval_menu_server_action" model="ir.actions.server">
         <field name="name">Partner Approval</field>
         <field name="model_id" ref="hr_expense.model_hr_expense_sheet"/>
         <field name="state">code</field>
         <field name="code">
             action = model.partner_credit_card_approval_menu_action()
         </field>
+    </record>
+    -->
+    <record model="ir.actions.act_window" id="credit_card_partner_approval_menu_server_action">
+        <field name="name">Partner Approval</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="domain">[('state','=','approve'), ('is_from_crdit_card','=',True)]</field>
+        <field name="context">{'search_default_group_operating_unit': 1}</field>
     </record>
 
 

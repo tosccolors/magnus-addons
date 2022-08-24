@@ -37,7 +37,9 @@
                                     <field name="from_date" />
                                     <field name="product_id"/>
                                     <field name="fee_rate"/>
-                                </tree>
+                                    <field name="ic_fee_rate"/>
+                                    <field name="margin"/>
+                            </tree>
                                 <form string="Fee Earners">
                                     <group>
                                         <field name="user_id" invisible="0"/>
@@ -45,6 +47,8 @@
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
+                                        <field name="ic_fee_rate"/>
+                                        <field name="margin"/>
                                     </group>
                                 </form>
                             </field>
@@ -58,16 +62,95 @@
         <record id="view_task_user_tree" model="ir.ui.view">
             <field name="name">task.user.tree</field>
             <field name="model">task.user</field>
+            <field name="priority">20</field>
             <field name="arch" type="xml">
                 <tree>
                     <field name="user_id"/>
                     <field name="product_id"/>
                     <field name="from_date"/>
                     <field name="fee_rate"/>
+                    <field name="ic_fee_rate"/>
+                    <field name="margin"/>
                     <field name="task_id"/>
                 </tree>
             </field>
         </record>
+
+
+
+        <record id="view_task_user_search" model="ir.ui.view">
+            <field name="name">task.user.search</field>
+            <field name="model">task.user</field>
+            <field name="arch" type="xml">
+                <search string="Fee Earners">
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="last_valid_fee_rate"/>
+                    <filter string="last valid fee rate" name="last_valid_fee_rate" domain="[('last_valid_fee_rate','=', True)]"/>
+                    <filter string="Project" name="groupby_project" domain="[]" context="{'group_by':'project_id'}"/>
+                    <filter string="Task" name="groupby_task" domain="[]" context="{'group_by':'task_id'}"/>
+                    <filter string="User" name="groupby_user" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Product" name="groupby_product" domain="[]" context="{'group_by':'product_id'}"/>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="view_task_user_tree1" model="ir.ui.view">
+            <field name="name">task.user.tree</field>
+            <field name="model">task.user</field>
+            <field name="priority">5</field>
+            <field name="arch" type="xml">
+                <tree string="Fee Earners" editable="top">
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="from_date"/>
+                    <field name="fee_rate"/>
+                    <field name="ic_fee_rate"/>
+                    <field name="margin"/>
+                    <field name="task_id"/>
+                    <field name="last_valid_fee_rate" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+
+    <record id="action_task_user" model="ir.actions.act_window">
+        <field name="name">Fee Earners</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">task.user</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="view_task_user_search"/>
+    </record>
+
+
+    <!-- addition of tree view -->
+    <record id="action_task_user_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_task_user_tree1"/>
+        <field name="act_window_id" ref="action_task_user"/>
+    </record>
+
+
+  <!-- Menu item -->
+  <menuitem id="menu_fee_earner"
+            name="Fee Earner"
+            sequence="20"
+            parent="project.menu_main_pm"/>
+
+
+  <menuitem id="menu_action_task_user_tree"
+            name="Fee Earner"
+            action="action_task_user"
+            parent="menu_fee_earner"  />
+
 
     <!-- ProjectInvoicingProperties -->
         <record model="ir.ui.view" id="project_invoicing_period_form_inherited">
@@ -81,6 +164,23 @@
                     <field name="group_by_fee_rate"/>
                     <field name="group_by_month"/>
                 </field>
+            </field>
+        </record>
+
+
+        <record id="edit_project_magnus_timesheet" model="ir.ui.view">
+            <field name="name">project.project.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[last()]" position="after">
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-pencil-square-o" string="Invoices"/>
+                    </div>
+                </xpath>
             </field>
         </record>
 

@@ -30,15 +30,18 @@ class Task(models.Model):
         track_visibility='always'
     )
 
-    # @api.model
-    # def name_search(self, name, args=None, operator='ilike', limit=100):
-    #     args = args or []
-    #     recs = self.browse()
-    #     if name:
-    #         recs = self.search([('name', '=', name)] + args, limit=limit)
-    #     if not recs:
-    #         recs = self.search(['|',('name', operator, name), ('jira_compound_key', operator, name)] + args, limit=limit)
-    #     return recs.name_get()
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        args = args or []
+        recs = self.browse()
+        if name:
+            recs = self.search([('name', '=', name)] + args, limit=limit)
+        if not recs:
+            domain = [('name', operator, name)]
+            if 'jira_compound_key' in self._fields:
+                domain = ['|'] + domain + [('jira_compound_key', operator, name)]
+            recs = self.search(domain + args, limit=limit)
+        return recs.name_get()
 
 
 class Project(models.Model):
@@ -75,6 +78,19 @@ class Project(models.Model):
         if len(overtime_project) > 1:
             raise ValidationError(_("You can have only one project with 'Overtime Hours' per company!"))
 
+    @api.multi
+    def action_view_invoice(self):
+        invoice_lines = self.env['account.invoice.line']
+        invoices = invoice_lines.search([('account_analytic_id', '=', self.analytic_account_id.id)]).mapped('invoice_id')
+        action = self.env.ref('account.action_invoice_tree1').read()[0]
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            action['res_id'] = invoices.ids[0]
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
 
 class TaskUser(models.Model):
     _name = 'task.user'
@@ -85,6 +101,12 @@ class TaskUser(models.Model):
         if self.product_id:
             self.fee_rate = self.product_id.list_price
 
+    @api.one
+    @api.depends('fee_rate','ic_fee_rate')
+    def _compute_margin(self):
+        if self.fee_rate and self.ic_fee_rate:
+            self.margin = self.fee_rate - self.ic_fee_rate
+
     @api.model
     def _default_product(self):
         if self.user_id.employee_ids.product_id:
@@ -94,6 +116,20 @@ class TaskUser(models.Model):
     def _get_category_domain(self):
         return [('categ_id', '=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
+
+    @api.one
+    @api.depends('task_id', 'user_id', 'from_date')
+    def _get_last_valid_fee_rate(self):
+        task_id = self.task_id.id
+        user_id = self.user_id.id
+        task_user = self.search([('task_id', '=', task_id), ('user_id', '=', user_id)], order='from_date desc', limit=1)
+        if task_user == self:
+            self.last_valid_fee_rate = True
+        else:
+            self.last_valid_fee_rate = False
+
+    project_id = fields.Many2one(related='task_id.project_id',
+        comodel_name='project.project', string="Project", store=True)
 
     task_id = fields.Many2one(
         'project.task',
@@ -113,14 +149,27 @@ class TaskUser(models.Model):
         default=_default_fee_rate,
         string='Fee Rate',
     )
-
+    ic_fee_rate = fields.Float(
+        default=_default_fee_rate,
+        string='Intercompany Fee Rate',
+    )
+    margin = fields.Float(
+        compute=_compute_margin,
+        string='Margin',
+    )
     from_date = fields.Date(
         string='From Date'
         # default=datetime.today()
     )
-    user_ids = fields.Many2many(
-        'res.users',
-        string='Consultants',
+    # user_ids = fields.Many2many(
+    #     'res.users',
+    #     string='Consultants',
+    # )
+
+    last_valid_fee_rate = fields.Boolean(
+        compute='_get_last_valid_fee_rate',
+        string='Last Valid Fee Rate',
+        store=True
     )
 
     @api.onchange('user_id')
@@ -173,12 +222,13 @@ class TaskUser(models.Model):
                        {0}
                     WHERE {1}
                 )
-                UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2})
+                UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2}), product_id = {3}
                 FROM aal WHERE {0}.id = aal.id
                         """.format(
             aal_tables,
             aal_where_clause,
-            self.fee_rate
+            self.fee_rate,
+            self.product_id.id
         ))
         self.env.cr.execute(list_query, aal_where_clause_params)
         return True

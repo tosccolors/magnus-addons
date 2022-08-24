@@ -108,7 +108,7 @@
                         <field name="project_id" />
                         <field name="task_id" />
                         <field name="date_of_last_wip"/>
-                        <field name="wip_percentage"/>
+                        <!--<field name="wip_percentage"/>-->
                     </xpath>
                     <xpath expr="//field[@name='unit_amount']" position="after">
                         <field name="product_uom_id" />
@@ -276,7 +276,7 @@
             </field>
         </record>
 <!--        Adding Account analytic line's account moves when state in delay in list view-->
-        <record id="view_account_analytic_line_move_tree_form_magnus" model="ir.ui.view">
+        <!--<record id="view_account_analytic_line_move_tree_form_magnus" model="ir.ui.view">
             <field name="name">account.analytic.line.move.tree.form.magnus</field>
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="analytic.view_account_analytic_line_form"/>
@@ -300,7 +300,7 @@
                     </notebook>
                 </xpath>
             </field>
-        </record>
+        </record>-->
 
         <menuitem id="menu_hr_working_planned_vs_actual" parent="hr_timesheet.menu_timesheets_reports" action="act_hr_timesheet_line_planned_vs_actual"
             name="Planned vs. Actual Activity Analysis" sequence="9" groups="group_planning_forecasting"/>

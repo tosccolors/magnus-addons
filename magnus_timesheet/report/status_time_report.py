@@ -7,6 +7,22 @@ class StatusTimeReport(models.Model):
     _auto = False
     _description = 'Status Time Report'
 
+    @api.one
+    @api.depends('department_id')
+    def _get_atmost_parent_ou(self):
+        # calling atmost parent's operating unit
+        self.env.cr.execute("""
+                SELECT * FROM (WITH RECURSIVE    
+                ancestors (id,parent_id) AS(
+                SELECT id,parent_id,operating_unit_id FROM hr_department where id = %s                 
+                UNION
+                SELECT hr_department.id,hr_department.parent_id,hr_department.operating_unit_id 
+                FROM ancestors, hr_department WHERE hr_department.id = ancestors.parent_id
+                )TABLE ancestors )parents
+                WHERE parent_id IS NULL""" % (self.department_id.id))
+        dept_parent_ids = [x[2] for x in self.env.cr.fetchall() if x[2]]
+        self.operating_unit_id = dept_parent_ids[0]
+
     employee_id = fields.Many2one(
         'hr.employee',
         string='Employee',
@@ -25,6 +41,12 @@ class StatusTimeReport(models.Model):
     department_id = fields.Many2one(
         'hr.department',
         string='Department',
+        readonly=True
+    )
+    operating_unit_id = fields.Many2one(
+        'operating.unit',
+        compute='_get_atmost_parent_ou',
+        string='Operating Unit',
         readonly=True
     )
     state = fields.Char(

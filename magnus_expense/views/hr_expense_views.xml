@@ -214,14 +214,23 @@
         <field name='name'>Manager Approval</field>
     </record>
 <!--   Adding Server Action for dynamic call the Tree view for menu Partner Approval-->
-    <record id="partner_approval_menu_server_action" model="ir.actions.server">
+    <!--<record id="partner_approval_menu_server_action" model="ir.actions.server">
         <field name="name">Partner Approval</field>
         <field name="model_id" ref="hr_expense.model_hr_expense_sheet"/>
         <field name="state">code</field>
         <field name="code">
             action = model.partner_approval_menu_action()
         </field>
+    </record>-->
+
+    <record model="ir.actions.act_window" id="partner_approval_menu_action">
+        <field name="name">Partner Approval</field>
+        <field name="res_model">hr.expense.sheet</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="domain">[('state','=','approve')]</field>
+        <field name="context">{'search_default_group_operating_unit': 1}</field>
     </record>
+
 
     <!-- added missing code from standard -->
 
@@ -230,7 +239,7 @@
 
     <menuitem id="menu_hr_expense_sheet_all_to_approve_partner" name="Partner Approval" sequence="1"
               parent="menu_hr_expense_to_approve"
-              action="partner_approval_menu_server_action" groups="magnus_expense.group_hr_expense_partner"/>
+              action="partner_approval_menu_action" groups="magnus_expense.group_hr_expense_partner"/>
               <!-- parent id not found so commented parent="hr_expense.menu_hr_expense_to_approve"-->
 
     

@@ -5,6 +5,7 @@
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from odoo.exceptions import ValidationError, Warning
+from odoo.addons.resource.models.resource import float_to_time, HOURS_PER_DAY
 
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet.sheet"
@@ -14,13 +15,14 @@ class HrTimesheetSheet(models.Model):
         domain = [
             ('date_to', '=', previous_date),
             ('employee_id', '=', self.employee_id.id),
-            ('type', '=', 'remove'),
+            # ('type', '=', 'remove'),
             ('state', '=', 'written'),
         ]
         previous_leave_request = self.env['hr.leave'].search(domain)
         if previous_leave_request:
             # Merge LR by updating date_to and number_of_hours_temp
-            previous_leave_request.write({'date_to': date, 'number_of_hours_temp': data['number_of_hours_temp'] + previous_leave_request.number_of_hours_temp})
+            num_of_days = (data['number_of_hours_display'] + previous_leave_request.number_of_hours_display) / HOURS_PER_DAY
+            previous_leave_request.write({'date_to': date, 'number_of_days': num_of_days})
         else:
             # Create new LR from timesheet
             self.env['hr.leave'].create(data)
@@ -29,20 +31,21 @@ class HrTimesheetSheet(models.Model):
         # Data to create leave requests from timesheet
         data = {
             'name': 'Time report',
-            'number_of_hours_temp': hour,
+            'number_of_hours_display': hour,
+            'number_of_days': hour/HOURS_PER_DAY,
             'holiday_status_id': leave_type,
             'state': 'written',
             'date_from': date,
             'date_to': date,
             'employee_id': self.employee_id.id,
-            'type': 'remove'
+            # 'type': 'remove'
         }
         # Domain to get LR available in the same date period
         domain = [
             ('date_from', '<=', date),
             ('date_to', '>=', date),
             ('employee_id', '=', self.employee_id.id),
-            ('type', '=', 'remove'),
+            # ('type', '=', 'remove'),
             ('state', 'not in', ['cancel', 'refuse']),
         ]
         leave_request = self.env['hr.leave'].search(domain)
@@ -77,12 +80,12 @@ class HrTimesheetSheet(models.Model):
             self.env['hr.leave'].create(data)
 
     def get_leave_type(self, hour):
-        leave_types = self.env['hr.leave.status'].filtered('date_start').search([], order='date_start')
+        leave_types = self.env['hr.leave.type'].filtered('validity_start').search([('valid', '=', True)], order='validity_start')
         if not leave_types:
             raise ValidationError(_('Please create some leave types to apply for leave.\nNote: For one of the selected project the Holiday Consumption is true.'))
         leave_type = False
         for lt in leave_types:
-            if not leave_type and lt.remaining_hours > hour:
+            if not leave_type and lt.virtual_remaining_leaves > hour:
                 leave_type = lt.id
                 break
         if not leave_type:

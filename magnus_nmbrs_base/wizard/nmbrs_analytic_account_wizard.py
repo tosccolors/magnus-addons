@@ -22,6 +22,8 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
         token = config.api_key
         authentication_v3 = {'Username': user, 'Token': token, 'Domain': 'magnus'}
         client = Client(config.endpoint_company_service)
+        if not self.operating_unit.nmbrs_id:
+            raise Warning(_("You need to set the Nmbrs ID for the operating unit in Odoo"))
         nmbrs_analytic_accounts = client.service.CostCenter_GetList(
             _soapheaders={'AuthHeaderWithDomain': authentication_v3},
             CompanyId=self.operating_unit.nmbrs_id,
