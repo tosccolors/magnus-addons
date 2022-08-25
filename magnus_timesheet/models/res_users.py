@@ -27,7 +27,7 @@ class ResUsers(models.Model):
 		top Department."""
 		employee_id = self._get_related_employees()
 		if not employee_id or len(employee_id)>1:
-		    _logger.info("---------employee--%s--user--%s----------",employee_id)
+		    _logger.info("---------employee--%s--user--%s----------"%(employee_id,self))
 		    employee_id = employee_id[0] if len(employee_id) else employee_id
 		assert not employee_id or len(employee_id) == 1, 'Only one employee can have this user_id'
 		if employee_id.department_id:
@@ -39,7 +39,7 @@ class ResUsers(models.Model):
 				dep = employee_id.department_id.parent_id.parent_id
 		else:
 			_logger.info("missing_dept for employee--%s-----",employee_id)
-			pass
+			return self.env['operating.unit']
 			raise ValidationError(_('The Employee in the Analytic line has '
 									'no department defined. Please complete'))
 		return dep.operating_unit_id
