@@ -481,7 +481,7 @@ class HrTimesheetSheet(models.Model):
 		if not fields or not self:
 			return
 		return self.with_delay(
-            description=' '.join([self.employee_id.name, self.display_name, self.date_from[:4]]),
+            description=' '.join([self.employee_id.name, self.display_name, self.date_start[:4]]),
             identity_key=self._name + ',' + ','.join(map(str, self.ids)) +
             ',' + ','.join(fields)
         )._recompute_timesheet(fields)
