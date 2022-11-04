@@ -244,7 +244,10 @@ class AnalyticLineStatus(models.TransientModel):
         if line.unit_amount == 0:
             return res
 
-        analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.account_id.tag_ids]
+        default_analytic_account = self.env['account.analytic.default'].search([('analytic_id', '=', line.account_id.id)], limit=1)
+        analytic_tag_ids = []
+        if default_analytic_account:
+            analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in default_analytic_account.analytic_tag_ids]
         amount = abs(self._calculate_fee_rate(line))
 
         move_line_debit = {
@@ -393,16 +396,16 @@ class AnalyticLineStatus(models.TransientModel):
                     self.env.cr.execute(line_query)
                     done_analytic_line |= analytic_line_obj
 
-        except Exception (e):
+        except Exception as e:
             # update the analytic line record into there previous state when job get failed in delay
-            for id, state in notupdatestate.iteritems():
+            for id, state in notupdatestate.items():
                 self.env.cr.execute("""
                                 UPDATE account_analytic_line SET state = '%s' WHERE id=%s
                                 """ % (state,id))
                 self.env.cr.commit()
                 self.env.cache.invalidate()
             raise FailedJobError(
-                _("The details of the error:'%s'") % (unicode(e)))
+                _("The details of the error:'%s'") %e)
         vals = [account_move.id]
         # if self.wip_percentage > 0.0 or True:
             # Skip wip reversal creation when percantage is 0
@@ -411,7 +414,7 @@ class AnalyticLineStatus(models.TransientModel):
         if reverse_move:
             vals.append(reverse_move.id)
         # Adding moves to each record
-        self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
+        # self.env['account.analytic.line'].add_move_line(analytic_lines_ids, vals)
 
         return "WIP moves and Reversals successfully created. \n "
 
@@ -423,13 +426,16 @@ class AnalyticLineStatus(models.TransientModel):
             try:
                 tot_credit = sum(move.line_ids.mapped('credit'))
                 tot_debit = sum(move.line_ids.mapped('debit'))
-                reconcile = True if move.wip_percentage and (tot_credit or tot_debit) else False
+                # reconcile = True if move.wip_percentage and (tot_credit or tot_debit) else False
                 date = datetime.strptime(str(move.date), "%Y-%m-%d") + timedelta(days=1)
-                reverse_move= move.create_reversals(
-                    date=date, journal=move.journal_id,
-                    move_prefix='WIP Reverse', line_prefix='WIP Reverse',
-                    reconcile=reconcile)
-            except Exception (e):
+                # reverse_move= move.create_reversals(
+                #     date=date, journal=move.journal_id,
+                #     move_prefix='WIP Reverse', line_prefix='WIP Reverse',
+                #     reconcile=reconcile)
+                reverse_wip_ids = move.reverse_moves(date=date, journal_id=move.journal_id, auto=False)
+                if len(reverse_wip_ids) == 1:
+                    reverse_move = move.browse(reverse_wip_ids)
+            except Exception as e:
                 raise FailedJobError(
-                    _("The details of the error:'%s'") % (unicode(e)))
+                    _("The details of the error:'%s'") %e)
         return reverse_move
