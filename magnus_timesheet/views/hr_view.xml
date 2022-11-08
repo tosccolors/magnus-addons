@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
                 <field name="parent_id" position="after">
                      <field name="operating_unit_id"/>
+                     <field name="no_ott_check"/>
                 </field>
             </field>
         </record>
@@ -47,6 +48,7 @@
                 <xpath expr="//group[@name='timesheet']" position="after">
                     <field name="timesheet_optional" />
                     <field name="timesheet_no_8_hours_day" />
+                    <field name="no_ott_check"/>
                     <field name="overtime_hours" widget="float_time" invisible="1"/>
                 </xpath>
             </field>
