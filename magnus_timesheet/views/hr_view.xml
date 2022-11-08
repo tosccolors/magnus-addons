@@ -35,6 +35,7 @@
                 <xpath expr="//field[@name='account_id']" position="after">
                     <field name="timesheet_optional" />
                     <field name="timesheet_no_8_hours_day" />
+                    <field name="no_ott_check" />
                     <field name="overtime_hours" widget="float_time" invisible="1"/>
                 </xpath>
             </field>
@@ -51,6 +52,7 @@
                     <field name="operating_unit_id"
                            attrs="{'required':[('parent_id', '=', False)],
                                     'invisible': [('parent_id', '!=', False)]}"/>
+                    <field name="no_ott_check" />
                 </field>
             </field>
         </record>
