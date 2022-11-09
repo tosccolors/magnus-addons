@@ -51,7 +51,7 @@ class Employee(models.Model):
     )
     no_ott_check = fields.Boolean(
         'No OTT Check',
-        help="No Overtime Check"
+        help="8 Hours OTT possible"
     )
 
 
@@ -67,5 +67,5 @@ class Department(models.Model):
 
     no_ott_check = fields.Boolean(
         'No OTT Check',
-        help="No Overtime Check"
+        help="8 Hours OTT possible"
     )
