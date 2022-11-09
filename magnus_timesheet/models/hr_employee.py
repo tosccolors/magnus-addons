@@ -50,7 +50,7 @@ class Employee(models.Model):
         readonly=True
     )
     no_ott_check = fields.Boolean(
-        'No OTT Check',
+        '8 Hours OTT possible',
         help="No Overtime Check"
     )
 
@@ -65,6 +65,6 @@ class Department(models.Model):
         track_visibility='onchange'
     )
     no_ott_check = fields.Boolean(
-        'No OTT Check',
+        '8 Hours OTT possible',
         help="No Overtime Check"
     )
