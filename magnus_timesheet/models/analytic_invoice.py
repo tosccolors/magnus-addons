@@ -168,6 +168,7 @@ class AnalyticInvoice(models.Model):
 
     def _determine_analytic_account_ids(self):
         partner_id = self.partner_id or False
+        analytic_accounts = self.env['account.analytic.account']
         if self.project_id and self.link_project:
             partner_id = self.project_id.partner_id
         if partner_id and len(self.account_analytic_ids) == 0:

@@ -49,6 +49,10 @@ class Employee(models.Model):
         string='Fee Rate',
         readonly=True
     )
+    no_ott_check = fields.Boolean(
+        '8 Hours OTT possible',
+        help="No Overtime Check"
+    )
 
 
 class Department(models.Model):
@@ -59,4 +63,8 @@ class Department(models.Model):
         comodel_name='operating.unit',
         string='Operating Unit',
         track_visibility='onchange'
+    )
+    no_ott_check = fields.Boolean(
+        '8 Hours OTT possible',
+        help="No Overtime Check"
     )
