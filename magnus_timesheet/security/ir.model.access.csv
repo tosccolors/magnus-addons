@@ -25,3 +25,4 @@ access_magnus_timesheet_analytic_line_officer,magnus_timesheet_analytic_line_off
 access_magnus_timesheet_analytic_line_officer,magnus_timesheet_analytic_line_officer,model_timesheet_analytic_line,magnus_timesheet.group_magnus_planning_officer,1,1,1,1
 
 access_task_user,task_user,model_task_user,,1,1,1,0
+access_inter_ou_acc_mapping,magnus_timesheet_inter_ou_acc_mapping,model_inter_ou_account_mapping,,1,1,1,0
