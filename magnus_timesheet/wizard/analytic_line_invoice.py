@@ -356,7 +356,7 @@ class AnalyticLineStatus(models.TransientModel):
                         'journal_id': wip_journal.id,
                         'date': date_end,
                         'narration': 'WIP move',
-                        'to_be_reversed': True,
+                        # 'to_be_reversed': True,
                     }
 
                     ctx = dict(self._context, lang=partner.lang)

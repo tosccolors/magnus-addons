@@ -130,10 +130,10 @@ class AccountInvoice(models.Model):
             analytic_invoice_id = invoice.invoice_line_ids.mapped('analytic_invoice_id')
             if analytic_invoice_id and invoice.type != 'out_refund':
                 # if invoicing period doesn't lie in same month
-                period_date = datetime.strptime(analytic_invoice_id.month_id.date_start, "%Y-%m-%d").strftime('%Y-%m')
+                period_date = datetime.strptime(str(analytic_invoice_id.month_id.date_start), "%Y-%m-%d").strftime('%Y-%m')
                 cur_date = datetime.now().date().strftime("%Y-%m")
                 invoice_date = invoice.date or invoice.date_invoice
-                inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
+                inv_date = datetime.strptime(str(invoice_date), "%Y-%m-%d").strftime('%Y-%m') if invoice_date else cur_date
                 if inv_date != period_date and invoice.move_id:
                     invoice.action_wip_move_create()
         return res
