@@ -335,12 +335,12 @@ class HrTimesheetSheet(models.Model):
                     raise UserError(_('Each day from Monday to Friday needs to have at least 8 logged hours.'))
             ot_aal = self.env['account.analytic.line'].search(
                 [('date', '=', date), ('sheet_id', '=', self.id), ('project_id.overtime', '=', True)])
-            if not (no_ott_check or GTM) and ot_aal:
+            if not GTM and ot_aal:
                 ot_hrs = ot_aal.unit_amount
-                if float_compare(ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
+                if not no_ott_check and float_compare(ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
                     raise UserError(_('Each day maximum 4 hours overtime taken allowed from Monday to Friday.'))
                 tot_ot_hrs += ot_hrs
-        if not (no_ott_check or GTM) and float_compare(tot_ot_hrs, 8, precision_digits=3, precision_rounding=None) > 0:
+        if not GTM and float_compare(tot_ot_hrs, 8, precision_digits=3, precision_rounding=None) > 0:
             raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 

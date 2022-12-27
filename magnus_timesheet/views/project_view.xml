@@ -38,6 +38,7 @@
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
                                         <field name="ic_fee_rate"/>
+                                        <field name="cost_rate"/>
                                         <field name="margin"/>
                                     </tree>
                             </field>
@@ -100,6 +101,7 @@
                     <field name="from_date"/>
                     <field name="fee_rate"/>
                     <field name="ic_fee_rate"/>
+                    <field name="cost_rate"/>
                     <field name="margin"/>
                     <field name="task_id"/>
                     <field name="last_valid_fee_rate" invisible="1"/>
