@@ -254,7 +254,7 @@ class TaskUser(models.Model):
     @api.multi
     def write(self, vals):
         result = super(TaskUser, self).write(vals)
-        for res in result:
+        for res in self:
             res.update_analytic_lines()
         return result
 
