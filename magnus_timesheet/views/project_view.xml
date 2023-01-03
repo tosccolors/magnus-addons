@@ -40,17 +40,18 @@
                                     <field name="ic_fee_rate"/>
                                     <field name="margin"/>
                             </tree>
-                                <form string="Fee Earners">
+                                <!--<form string="Fee Earners">
                                     <group>
                                         <field name="user_id" invisible="0"/>
-                                        <!--<field name="user_ids" widget="many2many_tags"/>-->
+                                        &lt;!&ndash;<field name="user_ids" widget="many2many_tags"/>&ndash;&gt;
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
                                         <field name="ic_fee_rate"/>
+                                        <field name="cost_rate"/>
                                         <field name="margin"/>
                                     </group>
-                                </form>
+                                </form>-->
                             </field>
                         </group>
                     </page>
@@ -73,6 +74,28 @@
                     <field name="margin"/>
                     <field name="task_id"/>
                 </tree>
+            </field>
+        </record>
+
+        <record id="view_task_user_form" model="ir.ui.view">
+            <field name="name">task.user.form</field>
+            <field name="model">task.user</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <form string="Can register time">
+                    <group col="4">
+                        <field name="user_id"/>
+                        <field name="project_id"/>
+                        <field name="task_id"/>
+                        <field name="product_id"/>
+                        <field name="from_date"/>
+                        <field name="fee_rate"/>
+                        <field name="ic_fee_rate"/>
+                        <field name="cost_rate"/>
+                        <field name="margin"/>
+                        <field name="last_valid_fee_rate"/>
+                    </group>
+                </form>
             </field>
         </record>
 

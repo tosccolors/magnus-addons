@@ -171,6 +171,9 @@ class TaskUser(models.Model):
         string='Last Valid Fee Rate',
         store=True
     )
+    cost_rate = fields.Float(
+        string='Cost Rate',
+    )
 
     @api.onchange('user_id')
     def onchange_user_id(self):
