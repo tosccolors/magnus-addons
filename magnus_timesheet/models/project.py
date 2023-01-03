@@ -180,9 +180,9 @@ class TaskUser(models.Model):
         string='Cost Rate',
     )
 
-    @api.onchange('fee_rate')
-    def onchange_fee_rate(self):
-        self.cost_rate = self.fee_rate
+    # @api.onchange('fee_rate')
+    # def onchange_fee_rate(self):
+    #     self.cost_rate = self.fee_rate
 
     @api.onchange('user_id')
     def onchange_user_id(self):
