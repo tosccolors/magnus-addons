@@ -12,7 +12,6 @@ import json
 class Lead(models.Model):
     _inherit = "crm.lead"
 
-    @api.one
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
         start_date = self.start_date
@@ -21,7 +20,6 @@ class Lead(models.Model):
             raise ValidationError(_("End date should be greater than start date."))
 
     @api.depends('operating_unit_id')
-    @api.one
     def _compute_dept_ou_domain(self):
         """
         Compute the domain for the department domain.
@@ -145,13 +143,13 @@ class Lead(models.Model):
 
     @api.onchange('monthly_revenue_ids')
     def onchange_monthly_revenue_ids(self):
-        if round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2) != round(self.planned_revenue, 2):
+        if round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2) != round(self.prorated_revenue, 2):
             self.show_button = True
         else:
             self.show_button = False
 
-    @api.one
     def update_monthly_revenue(self):
+        self.ensure_one()
         manual_lines = []
         sd = self.start_date
         ed = self.end_date
@@ -179,8 +177,8 @@ class Lead(models.Model):
                 month = date_range.search(common_domain+[('type_id.fiscal_month', '=', True)])
                 year = date_range.search(common_domain + [('type_id.fiscal_year', '=', True)])
                 days_per_month = (month_end_date-sd).days + 1
-                expected_revenue_per_month = self.planned_revenue*days_per_month/total_days
-                weighted_revenue_per_month = (((float(days_per_month)/float(total_days))*self.planned_revenue)*(self.probability/100))
+                expected_revenue_per_month = self.prorated_revenue*days_per_month/total_days
+                weighted_revenue_per_month = (((float(days_per_month)/float(total_days))*self.prorated_revenue)*(self.probability/100))
                 days = " days (" if days_per_month > 1 else " day ("
                 duration = str(days_per_month) + days + str(sd.day)+"-"+str(month_end_date.day)+" "+str(sd.strftime('%B'))+")"
                 monthly_revenues.append((0, 0,
@@ -234,13 +232,13 @@ class Lead(models.Model):
             self.monthly_revenue_ids = monthly_revenues + manual_lines
             self.revenue_split_ids = monthly_revenues_split
 
-    @api.one
     def recalculate_total(self):
-        if round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2) != round(self.planned_revenue, 2):
-            self.planned_revenue = round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2)
+        self.ensure_one()
+        if round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2) != round(self.prorated_revenue, 2):
+            self.prorated_revenue = round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2)
             self.show_button = False
 
-    @api.onchange('start_date', 'end_date', 'planned_revenue', 'probability')
+    @api.onchange('start_date', 'end_date', 'prorated_revenue', 'probability')
     def onchange_date(self):
         if self.start_date and not self._origin.end_date and self.start_date > self.end_date:
             self.end_date = self.start_date
@@ -402,7 +400,6 @@ class CRMRevenueSplit(models.Model):
     magnus_black_bv_amount = fields.Float(oldname='mangnus_black_bv_amount', string='Magnus Black B.V.')
     magnus_black_bv_per = fields.Float(oldname='mangnus_black_bv_per', string='Magnus Black B.V. %')
     
-    @api.one
     @api.constrains('magnus_blue_bv_per', 'magnus_red_bv_per','magnus_green_bv_per','magnus_black_bv_per')
     def _check_dates(self):
         total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per

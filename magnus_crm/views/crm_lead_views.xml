@@ -5,12 +5,12 @@
     <record id="crm_case_form_view_oppor_inherited" model="ir.ui.view">
       <field name="name">crm.lead.form.opportunity</field>
       <field name="model">crm.lead</field>
-      <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+      <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
           <data>
             <xpath expr="//group[1]" position="before">
                 <button name="recalculate_total" string="Re-calculate total" type="object" attrs="{'invisible': [('show_button', '=', False)]}"/>
-              <group string="Monthly Expected Revenue" attrs="{'invisible': [('planned_revenue', '=', 0)]}">
+              <group string="Monthly Expected Revenue" attrs="{'invisible': [('expected_revenue', '=', 0)]}">
                 <group>
                   <field name="start_date" />
                 </group>
@@ -20,7 +20,7 @@
                   <field name="show_button" invisible="1"/>
                 </group>
               </group>
-              <div attrs="{'invisible': [('planned_revenue', '=', 0)]}">
+              <div attrs="{'invisible': [('expected_revenue', '=', 0)]}">
                 <field name='id' invisible='True'/>
                 <field name="monthly_revenue_ids" context="{'default_lead_id':active_id, 'default_percentage': probability}" attrs="{'readonly': [('id','=', False )]}">
                   <tree editable="bottom" create="true" default_order="date" colors="grey:computed_line==True;">
@@ -70,7 +70,7 @@
             <xpath expr="//field[@name='team_id']" position="attributes">
               <attribute name="invisible">1</attribute>
             </xpath>
-            <xpath expr="//h2[@class='o_row row no-gutters d-flex']/div[2]" position="after">
+            <xpath expr="//h2/div[2]" position="after">
               <div>
                 <label for="expected_duration" class="oe_edit_only" invisible="1"/>
                 <div class="o_row">
@@ -81,7 +81,7 @@
             <!-- added row no-gutters d-flex to above xpath -->
             <xpath expr="//sheet/group/group/field[@name='partner_id']" position="after" >
               <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}"
-                   domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
+                   domain="[('is_company', '=', False),('parent_id', '=', partner_id),('type', '=', 'contact')]"/>
             </xpath>
             <xpath expr="//notebook" position="inside">
             	<page string="Revenue Split">
@@ -103,16 +103,20 @@
             	</page>
             </xpath>
           </data>
+            <xpath expr="//sheet/group/group/field[@name='user_id']" position="before">
+            <field name="industry_id" placeholder="Sector" options="{&quot;no_open&quot;: True}" attrs="{'invisible': [('type', '=', 'opportunity')]}"/>
+            <field name="secondary_industry_ids" widget="many2many_tags" attrs="{'invisible': [('type', '=', 'opportunity')]}"/>
+            </xpath>
       </field>
     </record>
 
     <!-- Inherited crm.lead (as Lead) views -->
-    <record id="crm_case_form_view_leads_inherited_magnus" model="ir.ui.view">
+    <!-- <record id="crm_case_form_view_leads_inherited_magnus" model="ir.ui.view">
         <field name="name">crm.lead.form.lead</field>
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_case_form_view_leads"/>
         <field name="arch" type="xml">
-            <!-- <xpath expr="//field[@name='function']" position="after">
+            &lt;!&ndash; <xpath expr="//field[@name='function']" position="after">
                 <label for="next_activity_id"/>
                 <div>
                     <div class="o_row mr16">
@@ -124,8 +128,8 @@
                         <field name="title_action" placeholder="e.g. Discuss proposal" attrs="{'invisible': [('next_activity_id', '=', False)]}"/>
                     </div>
                 </div>
-            </xpath> -->
-            <!-- commented next_activity id not found -->
+            </xpath> &ndash;&gt;
+            &lt;!&ndash; commented next_activity id not found &ndash;&gt;
             <xpath expr="//sheet/group/group/field[@name='partner_id']" position="replace">
             </xpath>
             <xpath expr="//sheet/group/group/field[@name='industry_id']" position="replace">
@@ -133,21 +137,21 @@
             <xpath expr="//sheet/group/group/field[@name='secondary_industry_ids']" position="replace">
             </xpath>
             <xpath expr="//sheet/group/group/field[@name='user_id']" position="before">
-                <!-- <field name="partner_id" string="Customer" options="{&quot;create_name_field&quot;: &quot;name&quot;}" context="{'default_name': contact_name, 'default_street': street, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_function': function, 'default_phone': phone, 'default_mobile': mobile, 'default_fax': fax, 'default_email': email_from, 'default_user_id': user_id, 'default_team_id': team_id}" groups="base.group_no_one"/> -->
-                <!-- commented -->
-                <!-- <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}" domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/> -->
+                &lt;!&ndash; <field name="partner_id" string="Customer" options="{&quot;create_name_field&quot;: &quot;name&quot;}" context="{'default_name': contact_name, 'default_street': street, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_function': function, 'default_phone': phone, 'default_mobile': mobile, 'default_fax': fax, 'default_email': email_from, 'default_user_id': user_id, 'default_team_id': team_id}" groups="base.group_no_one"/> &ndash;&gt;
+                &lt;!&ndash; commented &ndash;&gt;
+                &lt;!&ndash; <field name="partner_contact_id" string="Contact Person" context="{'default_parent_id': partner_id}" domain="[('is_company', '=', False), ('customer', '=', True),('parent_id', '=', partner_id),('type', '=', 'contact')]"/> &ndash;&gt;
                 <field name="industry_id" placeholder="Sector" options="{&quot;no_open&quot;: True}"/>
                 <field name="secondary_industry_ids" widget="many2many_tags"/>
             </xpath>
             <xpath expr="//sheet/group/group/field[@name='team_id']" position="after">
                 <field name="operating_unit_id"/>
             </xpath>
-            <!-- <xpath expr="//sheet/group/group/field[@name='fax']" position="attributes">
+            &lt;!&ndash; <xpath expr="//sheet/group/group/field[@name='fax']" position="attributes">
                 <attribute name="invisible">1</attribute>
-            </xpath> -->
-            <!-- commented source not found -->
+            </xpath> &ndash;&gt;
+            &lt;!&ndash; commented source not found &ndash;&gt;
         </field>
-    </record>
+    </record>-->
       
       <!-- Inherited crm.lead list view (as Lead) -->
     <record id="crm_case_tree_view_leads_inherited_magnus" model="ir.ui.view">
@@ -210,9 +214,9 @@
             <field name="team_id" position="replace">
             <field name="team_id" invisible="1"/>
             </field>
-            <field name="planned_revenue" position="replace">
-            <field name="planned_revenue" invisible="1"/>
-            </field>
+            <!--<field name="prorated_revenue" position="replace">
+            <field name="prorated_revenue" invisible="1"/>
+            </field>-->
             <!-- <field name="title_action" position="replace">
             <field name="title_action" invisible="1"/>
             </field> -->
@@ -226,7 +230,7 @@
             </field>
             <field name="partner_name" position="after">
             	<field name="date_deadline"/>
-                <field name="planned_revenue"/>
+                <field name="prorated_revenue"/>
             	 <field name="priority"/>
                  <field name="probability"/>
                  <field name="user_id" string="Owner"/>
@@ -397,7 +401,7 @@
     <record id="crm_monthly_revenue_report_action" model="ir.actions.act_window">
         <field name="name">Monthly Revenue Analysis</field>
         <field name="res_model">crm.monthly.revenue</field>
-        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
         <field name="view_mode">pivot,graph,tree,form</field>
     </record>
     
@@ -489,14 +493,14 @@
     <record id="crm_monthly_revenue_split_report_action" model="ir.actions.act_window">
         <field name="name">Monthly Revenue Split Analysis</field>
         <field name="res_model">crm.revenue.split</field>
-        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
         <field name="view_mode">pivot,graph,tree,form</field>
     </record>
 
       <record model="ir.ui.view" id="crm_case_form_view_leads_magnus">
         <field name="name">Update sector field</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm_industry.crm_case_form_view_leads"/>
+        <field name="inherit_id" ref="crm_industry.crm_lead_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='industry_id']" position="attributes">
                 <attribute name="readonly">1</attribute>
@@ -512,7 +516,7 @@
 	<record model="ir.ui.view" id="view_create_opportunity_simplified_inherit">
         <field name="name">crm.lead.quick.view</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.view_create_opportunity_simplified"/>
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_id']" position="after">
                <field name="operating_unit_id"/>
@@ -520,16 +524,16 @@
                 <field name="tag_ids" string="Proposition" widget="many2many_tags"/>
                 <field name="date_deadline" string="Expected Closing Date"/>
             </xpath>
-            <label for="planned_revenue" position="replace">
-                <label string="Expected Revenue + Probability" for="planned_revenue"  />
+            <label for="expected_revenue" position="replace">
+                <label string="Expected Revenue + Probability" for="expected_revenue"  />
             </label>
-            <xpath expr="//field[@name='planned_revenue']" position="after">
+            <xpath expr="//field[@name='expected_revenue']" position="after">
                <field name="probability"/>
             </xpath>
         </field>
       </record>
       
-      <record model="ir.ui.view" id="crm_case_form_view_oppor_magnus">
+      <!--<record model="ir.ui.view" id="crm_case_form_view_oppor_magnus">
         <field name="name">Update sector field</field>
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm_industry.crm_case_form_view_oppor"/>
@@ -541,13 +545,13 @@
                 <attribute name="readonly">1</attribute>
             </xpath>
         </field>
-      </record>
+      </record>-->
 
       <record id="crm.crm_lead_all_leads" model="ir.actions.act_window">
         <field name="context">{'default_type':'lead', 'search_default_type': 'lead', 'needaction_menu_ref': 'crm.menu_crm_opportunities', 'search_default_to_process':1}</field>
       </record>
 
-      <record id="crm.crm_lead_opportunities_tree_view" model="ir.actions.act_window">
+      <record id="crm.crm_lead_opportunities" model="ir.actions.act_window">
         <field name="context">{'default_type': 'opportunity', 'default_user_id': uid, 'search_default_assigned_to_me': 1}</field>
       </record>
 <!-- 
@@ -585,6 +589,6 @@
         </field>
         </field>
       </record>
-        
+
   </data>
 </odoo>

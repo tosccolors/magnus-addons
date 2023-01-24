@@ -7,7 +7,7 @@
 	    	 -->
 	    <!--Monthly Revenue Split menu-->
         <menuitem id="crm_monthly_revenue_split_report_menu" name="Monthly Revenue Split"
-            parent="sales_team.menu_sale_report" action="crm_monthly_revenue_split_report_action" sequence="10"/>
+            parent="sale.menu_sale_report" action="crm_monthly_revenue_split_report_action" sequence="10"/>
             
     	<!-- Link Tracker Menu -->
      	<record id="utm.menu_link_tracker_root" model="ir.ui.menu">
@@ -62,12 +62,12 @@
             <!--sequence="5"/>-->
 
         <menuitem name="Sales"
-                id="sales_team.menu_base_partner"
-                groups="sales_team.group_sale_salesman,sales_team.group_sale_manager,magnus_crm.group_sale_regular_user" sequence="6"/>
+                id="sale.sale_menu_root"
+                groups="magnus_crm.group_sale_regular_user" sequence="6"/>
 
         <menuitem action="sale.action_orders"
             id="sale.menu_sale_order" parent="sales_team.menu_sales"
-            sequence="12" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager,magnus_crm.group_sale_regular_user"/>
+            sequence="12" groups="magnus_crm.group_sale_regular_user"/>
 
         <menuitem id="sales_team.menu_sale_report" name="Reports" parent="sales_team.menu_base_partner" sequence="99" groups="sales_team.group_sale_manager,magnus_crm.group_sale_regular_user"/>
 

@@ -4,14 +4,6 @@
 
 from odoo import models, fields, api
 
-
-# class Project(models.Model):
-#     _inherit = "project.project"
-#
-#     custom_layout = fields.Boolean('Add Project Header/Footer')
-#     project_header = fields.Text('Project Header')
-#     project_footer = fields.Text('Project Footer')
-
 class ProjectInvoicingProperties(models.Model):
     _inherit = "project.invoicing.properties"
 

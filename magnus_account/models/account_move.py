@@ -21,8 +21,8 @@
 from odoo import fields, models, api
 
 
-class AccountInvoice(models.Model):
-    _inherit = 'account.invoice'
+class AccountMove(models.Model):
+    _inherit = 'account.move'
 
     invoice_description = fields.Html('Description')
 
@@ -35,7 +35,6 @@ class AccountInvoice(models.Model):
     #     self.sent = True
     #     return self.env['report'].get_action(self, 'magnus_account.report_invoice_magnus_account')
 
-    @api.multi
     def group_by_analytic_acc(self, type, uom_hrs=False):
         self.ensure_one()
         result = {}
@@ -67,7 +66,6 @@ class AccountInvoice(models.Model):
                         result[line.account_analytic_id] = [line]
         return result
 
-    @api.multi
     def parse_invoice_description(self):
         res = False
         desc = self.invoice_description
@@ -75,7 +73,6 @@ class AccountInvoice(models.Model):
             res = True
         return res
 
-    @api.multi
     def value_conversion(self, value, monetary=False, digits=2, currency_obj=False):
         lang_objs = self.env['res.lang'].search([('code', '=', self.partner_id.lang)])
         if not lang_objs:
@@ -90,7 +87,6 @@ class AccountInvoice(models.Model):
                 res = u'%s\N{NO-BREAK SPACE}%s' % (currency_obj.symbol, res)
         return res
 
-    @api.multi
     def get_invoice_project(self):
         project = self.env['project.project']
         analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
@@ -103,7 +99,6 @@ class AccountInvoice(models.Model):
                 project = account_analytic_id.project_ids
         return project
 
-    @api.multi
     def get_bank_details(self):
         self.ensure_one()
         bank_ids = self.operating_unit_id.partner_id.bank_ids.mapped('bank_id')
