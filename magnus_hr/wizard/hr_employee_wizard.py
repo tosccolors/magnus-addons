@@ -54,7 +54,7 @@ class HREmployeeWizard(models.TransientModel):
     leave_hours = fields.Float(string="Leave Hours")
 
     
-    @api.multi
+    # @api.multi
     @api.onchange('default_operating_unit_id')
     def onchange_operating_unit(self):
         res ={}
@@ -83,7 +83,7 @@ class HREmployeeWizard(models.TransientModel):
         })
         return res
 
-    @api.multi
+    # @api.multi
     def create_partner(self):
         """ partner creation"""
         firstname = self.firstname
@@ -110,7 +110,7 @@ class HREmployeeWizard(models.TransientModel):
         partner_id = self.env['res.partner'].create(partner)
         return partner_id
 
-    @api.multi
+    # @api.multi
     def create_user(self, partner_id):
         list_role = [(5, False, False)]
         for role_line in self.role_line_ids:
@@ -130,7 +130,7 @@ class HREmployeeWizard(models.TransientModel):
         user_id = self.env['res.users'].create(user)
         return user_id
 
-    @api.multi
+    # @api.multi
     def create_res_partner_bank(self, partner_id):
         res_partner_bank_id = self.env['res.partner.bank'].search([('acc_number','=',self.acc_number)],limit=1)
         if res_partner_bank_id:
@@ -144,7 +144,7 @@ class HREmployeeWizard(models.TransientModel):
                     })
         return res_partner_bank_id
 
-    @api.multi
+    # @api.multi
     def create_employee(self, user_id, res_partner_bank_id):
         firstname = self.firstname
         lastname = self.lastname
@@ -172,7 +172,7 @@ class HREmployeeWizard(models.TransientModel):
                      }
         return self.env['hr.employee'].create(employee)
 
-    @api.multi
+    # @api.multi
     def create_holiday(self, employee_id):
         hr_leave_type = self.env['hr.leave.type'].search([('is_leave_type_of_wizard', '=', True)], limit=1)
         holiday = {'holiday_status_id':hr_leave_type.id,
@@ -186,7 +186,7 @@ class HREmployeeWizard(models.TransientModel):
         return True
 
 
-    @api.multi
+    # @api.multi
     def create_all(self):
         """ Partner, user, bank, holiday and Employee creation """
         partner_id = self.create_partner()

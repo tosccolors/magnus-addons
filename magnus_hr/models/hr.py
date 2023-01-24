@@ -38,7 +38,7 @@ class Employee(models.Model):
     def onchange_dates(self):
         self.validate_dates()
 
-    @api.one
+    # @api.one
     @api.constrains('official_date_of_employment', 'end_date_of_employment')
     def _check_closing_date(self):
         self.validate_dates()

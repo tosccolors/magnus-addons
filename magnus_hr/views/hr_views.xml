@@ -60,8 +60,7 @@
       <field name="model">hr.employee</field>
       <field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
       <field name="arch" type="xml">
-        <!-- <xpath expr="//field[@name='vehicle_distance']" position="after"> -->
-        <xpath expr="//field[@name='vehicle']" position="after">
+        <xpath expr="//field[@name='resource_calendar_id']" position="after">
           <field name="parttime" />
           <field name="allocated_leaves" />
         </xpath>
