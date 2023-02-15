@@ -13,7 +13,6 @@ class DateRangeType(models.Model):
     calender_week = fields.Boolean(string="Is calender week?", readonly=True)
     fiscal_year = fields.Boolean(string="Is Fiscal Year?", readonly=True)
 
-    @api.multi
     def unlink(self):
         date_range_type_cw = self.env.ref(
             'magnus_date_range_week.date_range_calender_week')

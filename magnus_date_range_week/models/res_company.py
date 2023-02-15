@@ -9,7 +9,6 @@ class ResCompany(models.Model):
 
     _inherit = 'res.company'
 
-    @api.multi
     def find_daterange_cw(self, date_str):
         self.ensure_one()
         cw_id = self.env.ref('magnus_date_range_week.date_range_calender_week')
