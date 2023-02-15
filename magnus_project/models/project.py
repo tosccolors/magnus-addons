@@ -24,7 +24,6 @@ class Project(models.Model):
     linked_operating_unit = fields.Boolean(string="Linked Operating Unit",related="analytic_account_id.linked_operating_unit")
     operating_unit_ids = fields.Many2many('operating.unit',string="Operating Units",related="analytic_account_id.operating_unit_ids")
 
-    @api.multi
     def name_get(self):
         return [(value.id, "%s%s" % (value.code + '-' if value.code else '', value.name)) for value in self]
 
@@ -33,7 +32,6 @@ class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
     _description = 'Analytic Account'
 
-    @api.multi
     @api.constrains('project_ids')
     def _check_length_projects(self):
         for aa in self:
@@ -47,7 +45,6 @@ class AccountAnalyticAccount(models.Model):
 class Task(models.Model):
     _inherit = "project.task"
 
-    @api.multi
     @api.depends('description')
     def parse_description(self):
         import re

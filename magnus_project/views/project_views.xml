@@ -144,7 +144,7 @@
         <record id="project_invoicing_properties_action" model="ir.actions.act_window">
             <field name="name">Invoicing Properties</field>
             <field name="res_model">project.invoicing.properties</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to add a new project invoicing properties.

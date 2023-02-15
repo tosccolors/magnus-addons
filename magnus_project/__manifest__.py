@@ -24,7 +24,8 @@
     'depends': ['project',
                 'operating_unit',
                 'analytic',
-                'hr_timesheet_sheet'],
+                'hr_timesheet_sheet',
+                'invoice_line_revenue_distribution_operating_unit'],
 
     # always loaded
     'data': [
