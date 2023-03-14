@@ -12,6 +12,12 @@ class AccountJournal(models.Model):
 
     type = fields.Selection(selection_add=[('wip', 'WIP')])
 
+    @api.one
+    @api.constrains('company_id', 'type')
+    def _check_type(self):
+        if len(self.search([('type', '=', 'wip'), ('company_id', '=', self.company_id.id)])) > 1 and self.type == 'wip':
+            raise ValidationError(_(
+                            'You cannot have 2 wip type journal for same compnay.'))
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
