@@ -275,7 +275,7 @@ class AccountInvoice(models.Model):
                 raise UserError(_('Please define WIP journal on company.'))
             if not inv.company_id.wip_journal_id.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
-            wip_journal = company.wip_journal_id
+            wip_journal = inv.company_id.wip_journal_id
             sequence = wip_journal.sequence_id
             if inv.type in ['out_refund', 'in_invoice','in_refund'] or inv.wip_move_id:
                 continue
