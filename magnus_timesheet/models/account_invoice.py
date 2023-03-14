@@ -12,6 +12,12 @@ class AccountJournal(models.Model):
 
     type = fields.Selection(selection_add=[('wip', 'WIP')])
 
+    @api.one
+    @api.constrains('company_id', 'type')
+    def _check_type(self):
+        if len(self.search([('type', '=', 'wip'), ('company_id', '=', self.company_id.id)])) > 1 and self.type == 'wip':
+            raise ValidationError(_(
+                            'You cannot have 2 wip type journal for same compnay.'))
 
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
@@ -262,9 +268,14 @@ class AccountInvoice(models.Model):
     def action_wip_move_create(self):
         """ Creates invoice related analytics and financial move lines """
         for inv in self:
-            wip_journal = self.env.ref('magnus_timesheet.wip_journal')
-            if not wip_journal.sequence_id:
+            # wip_journal = self.env.ref('magnus_timesheet.wip_journal')
+            # if not wip_journal.sequence_id:
+            #     raise UserError(_('Please define sequence on the type WIP journal.'))
+            if not inv.company_id.wip_journal_id:
+                raise UserError(_('Please define WIP journal on company.'))
+            if not inv.company_id.wip_journal_id.sequence_id:
                 raise UserError(_('Please define sequence on the type WIP journal.'))
+            wip_journal = company.wip_journal_id
             sequence = wip_journal.sequence_id
             if inv.type in ['out_refund', 'in_invoice','in_refund'] or inv.wip_move_id:
                 continue

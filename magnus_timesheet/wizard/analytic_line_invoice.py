@@ -304,14 +304,21 @@ class AnalyticLineStatus(models.TransientModel):
         narration = self.description if self.wip else ''
         try:
             if len(result) > 0:
-                wip_journal = self.env.ref('magnus_timesheet.wip_journal')
-                if not wip_journal.sequence_id:
-                    raise UserError(_('Please define sequence on the type WIP journal.'))
+                # wip_journal = self.env.ref('magnus_timesheet.wip_journal')
+                # if not wip_journal.sequence_id:
+                #     raise UserError(_('Please define sequence on the type WIP journal.'))
                 for item in result:
                     partner_id = item['partner_id'][0]
                     operating_unit_id = item['operating_unit_id'][0]
                     month_id = item['wip_month_id'][0]
                     company_id = item['company_id'][0]
+
+                    company = self.env['res.company'].browse(company_id)
+                    if not company.wip_journal_id:
+                        raise UserError(_('Please define WIP journal on company.'))
+                    if not company.wip_journal_id.sequence_id:
+                        raise UserError(_('Please define sequence on the type WIP journal.'))
+                    wip_journal = company.wip_journal_id
 
                     date_end = self.env['date.range'].browse(month_id).date_end
 
