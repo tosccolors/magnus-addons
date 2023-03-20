@@ -104,6 +104,7 @@ class PayrollEntry(models.Model):
                     ('analytic_account_code_nmbrs', '=', line[1].text)
                 ]
             ).analytic_account_odoo
+            line_operating_unit = self.env['operating.unit']
             if analytic_account:
                 if not analytic_account.operating_unit_ids:
                     raise UserError(_('Analytic account %s has no operating unit!') % analytic_account.name)
