@@ -22,7 +22,7 @@
                     </div>
                     <group colspan="4" col="4">
                             <field name="partner_id" string="Client" attrs="{'readonly': [('state','in',('invoiced'))]}" context="{'active_invoice_id': active_id}"/>
-                            <field name="date_invoice" attrs="{'readonly': [('state','=','invoiced')]}"/>
+                            <field name="invoice_date" attrs="{'readonly': [('state','=','invoiced')]}"/>
                             <field name="account_analytic_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
                             <field name="project_operating_unit_id" options="{'no_create_edit': True}" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
                             <field name="month_id" string="Invoicing Period" attrs="{'readonly': [('state','in',('open','invoiced'))]}"/>
@@ -40,16 +40,18 @@
                            context="{'tree_view_ref' : 'magnus_timesheet.view_task_user_tree'}"
                            />
                     <field name="company_id" invisible="1"/>
-                    <field name="type" invisible="1"/>
+                    <field name="move_type" invisible="1"/>
+                    <field name="invoice_filter_type_domain" invisible="1"/>
 
                     <separator string="Invoice Lines"/>
+                    <field name="suitable_journal_ids" invisible="1"/>
                     <field name="journal_id" invisible="1"/>
                     <field name="invoice_line_ids"
                            attrs="{'readonly': [('state','=','invoiced')]}"
                            nolabel="1"
                            widget="one2many_list"
                            mode="tree,kanban"
-                           context="{'type': 'out_invoice', 'journal_id': journal_id,
+                           context="{'move_type': 'out_invoice', 'journal_id': journal_id,
                                     'default_invoice_id': invoice_id}">
                         <tree string="Invoice Lines"
                               editable="bottom"
@@ -57,8 +59,8 @@
                             <field name="sequence"
                                    widget="handle"/>
                             <field name="product_id"/>
-                            <field name="origin"
-                                   invisible="1"/>
+                            <!--<field name="move_origin"
+                                   invisible="1"/>-->
                             <field name="name"/>
                             <field name="company_id"
                                    invisible="1"/>
@@ -67,7 +69,7 @@
                                    domain="[
                                    ('company_id', '=', parent.company_id),
                                    ('internal_type', '=', 'other')]"/>
-                            <field name="account_analytic_id"
+                            <field name="analytic_account_id"
                                    groups="analytic.group_analytic_accounting"
                                    domain="[
                                    ('company_id', '=', parent.company_id)]"/>
@@ -77,18 +79,18 @@
                             <field name="user_id"
                                    groups="base.group_no_one"/>
                             <field name="quantity"/>
-                            <field name="uom_id"
-                                   groups="product.group_uom"/>
+                            <!--<field name="product_uom_id"
+                                   groups="product.group_uom"/>-->
+                            <field name="product_uom_category_id" invisible="1"/>
+                            <field name="product_uom_id" string="UoM" groups="uom.group_uom" optional="show"/>
                             <field name="price_unit"/>
                             <field name="discount"
                                    groups="base.group_no_one"/>
-                            <field name="invoice_line_tax_ids"
-                                   widget="many2many_tags"
-                                   context="{'type':parent.type}"
-                                   domain="[
-                                   ('type_tax_use','=','sale'),
-                                   ('company_id', '=', parent.company_id)]"
-                                   options="{'no_create': True}"/>
+                            <field name="tax_ids" widget="many2many_tags"
+                                               domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', '=', parent.company_id)]"
+                                               context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}"
+                                               options="{'no_create': True}"
+                                               optional="show"/>
                             <field name="price_subtotal"/>
                             <field name="currency_id"
                                    invisible="1"/>
@@ -211,7 +213,7 @@
             <field name="name">Make Invoices</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">analytic.invoice</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_analytic_invoice_tree"/>
         </record>

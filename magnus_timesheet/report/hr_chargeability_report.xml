@@ -44,7 +44,7 @@
         <record id="action_hr_chargeability_report" model="ir.actions.act_window">
             <field name="name">Chargeability Analysis</field>
             <field name="res_model">hr.chargeability.report</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">pivot</field>
             <field name="domain">[('ts_optional','=',False),('ts_no_8_hours_day','=',False)]</field>
             <field name="help">Chargeabiltiy analysis allows you to check chargeabiltiy grouping by employee.</field>

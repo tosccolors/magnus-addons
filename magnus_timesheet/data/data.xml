@@ -24,18 +24,21 @@
             <field name="state">code</field>
             <field name="type">ir.actions.server</field>
             <field name="model_id" ref="model_hr_timesheet_current_open"/>
+            <field name="binding_model_id" ref="model_hr_timesheet_current_open" />
             <field name="code">action = model.open_timesheet()</field>
-            <field name="condition">True</field>
+            <!--<field name="condition">True</field>-->
             <field name="name">My Timesheet</field>
         </record>
-        
+
+
         <record id="ir_actions_server_timesheet_planning_employee" model="ir.actions.server">
             <field name="sequence" eval="5"/>
             <field name="state">code</field>
             <field name="type">ir.actions.server</field>
             <field name="model_id" ref="model_hr_timesheet_current_open"/>
+            <field name="binding_model_id" ref="model_hr_timesheet_current_open" />
             <field name="code">action = model.open_employees_planning()</field>
-            <field name="condition">True</field>
+            <!--<field name="condition">True</field>-->
             <field name="name">My Employee's Planning sheet</field>
         </record>
 
@@ -44,8 +47,9 @@
             <field name="state">code</field>
             <field name="type">ir.actions.server</field>
             <field name="model_id" ref="model_hr_timesheet_current_open"/>
+            <field name="binding_model_id" ref="model_hr_timesheet_current_open"/>
             <field name="code">action = model.open_self_planning()</field>
-            <field name="condition">True</field>
+            <!--<field name="condition">True</field>-->
             <field name="name">My Planning</field>
         </record>
 </odoo>

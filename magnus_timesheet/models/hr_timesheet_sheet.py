@@ -7,14 +7,14 @@ from datetime import datetime, time, timedelta
 from odoo.exceptions import UserError, ValidationError
 from dateutil.rrule import MONTHLY, WEEKLY
 from dateutil.relativedelta import relativedelta, SU
-from openerp.tools.float_utils import float_compare
+from odoo.tools import float_compare
 import babel.dates
 
 import babel.dates
 import logging
 import re
 from collections import namedtuple
-from odoo.addons.queue_job.job import job, related_action
+# from odoo.addons.queue_job.job import job, related_action
 
 
 _logger = logging.getLogger(__name__)
@@ -124,27 +124,23 @@ class HrTimesheetSheet(models.Model):
 			latest_mileage = self.sudo().starting_mileage_editable
 		return latest_mileage
 
-	@api.multi
 	@api.depends('employee_id','week_id')
 	def _get_starting_mileage(self):
 		for sheet in self:
 			sheet.vehicle = True if sheet._get_vehicle() else False
 			sheet.starting_mileage = sheet._get_latest_mileage()
 
-	@api.multi
 	@api.depends('timesheet_ids.kilometers')
 	def _get_business_mileage(self):
 		for sheet in self:
 			sheet.business_mileage = sum(sheet.sudo().timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
 
-	@api.multi
 	@api.depends('end_mileage','business_mileage','starting_mileage')
 	def _get_private_mileage(self):
 		for sheet in self:
 			m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
 			sheet.private_mileage = m if m > 0 else 0
 
-	@api.one
 	@api.depends('timesheet_ids')
 	def _get_overtime_hours(self):
 		aal_incl_ott = self.timesheet_ids.filtered(lambda a: not a.task_id.standby)
@@ -211,16 +207,6 @@ class HrTimesheetSheet(models.Model):
 		'account.analytic.line',
 		string="Overtime Entry"
 	)
-	# date_from = fields.Date(
-	# 	related='week_id.date_start',
-	# 	string='Date From',
-	# 	store=True,
-	# )
-	# date_to = fields.Date(
-	# 	related='week_id.date_end',
-	# 	string='Date To',
-	# 	store=True,
-	# )
 	date_start = fields.Date(
 		string='Date From',
 		related='week_id.date_start',
@@ -247,20 +233,19 @@ class HrTimesheetSheet(models.Model):
 		help=' * The \'Open\' status is used when a user is encoding a new and unconfirmed timesheet. '
 			 '\n* The \'Waiting Approval\' status is used to confirm the timesheet by user. '
 			 '\n* The \'Approved\' status is used when the users timesheet is accepted by his/her senior.')
-	
-	## with override of date fields as related of week_id not necessary anymore
-	# @api.onchange('week_id', 'date_from', 'date_to')
-	# def onchange_week(self):
-	#     self.date_from = self.week_id.date_start
-	#     self.date_to = self.week_id.date_end
 
-	#  @api.onchange('starting_mileage', 'business_mileage')
-	#  def onchange_private_mileage(self):
-	#      if self.private_mileage == 0:
-	#          self.end_mileage = self.starting_mileage + self.business_mileage
-
-
-	@api.multi
+# 	## with override of date fields as related of week_id not necessary anymore
+# 	# @api.onchange('week_id', 'date_from', 'date_to')
+# 	# def onchange_week(self):
+# 	#     self.date_from = self.week_id.date_start
+# 	#     self.date_to = self.week_id.date_end
+#
+# 	#  @api.onchange('starting_mileage', 'business_mileage')
+# 	#  def onchange_private_mileage(self):
+# 	#      if self.private_mileage == 0:
+# 	#          self.end_mileage = self.starting_mileage + self.business_mileage
+#
+#
 	@api.depends('date_start', 'date_end')
 	def _compute_name(self):
 		locale = self.env.context.get('lang') or self.env.user.lang or 'en_US'
@@ -307,13 +292,12 @@ class HrTimesheetSheet(models.Model):
 					raise ValidationError(_(
 						'You cannot have 2 timesheets with the same week_id!\nPlease use the menu \'My Current Timesheet\' to avoid this problem.'))
 
-	# @api.onchange('employee_id')
-	# def onchange_employee_id(self):
-	#     super(HrTimesheetSheet, self).onchange_employee_id()
-	#     return {'domain': {'week_id': self._get_week_domain()}}
-
-	@api.multi
-	# need to work on this function deekshith
+# 	# @api.onchange('employee_id')
+# 	# def onchange_employee_id(self):
+# 	#     super(HrTimesheetSheet, self).onchange_employee_id()
+# 	#     return {'domain': {'week_id': self._get_week_domain()}}
+#
+# 	# need to work on this function deekshith
 	def duplicate_last_week(self):
 		if self.week_id and self.employee_id:
 			ds = self.week_id.date_start
@@ -351,7 +335,6 @@ class HrTimesheetSheet(models.Model):
 		if self.end_mileage < total:
 			raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
 
-	@api.one
 	def action_timesheet_draft(self):
 		"""
 		On timesheet reset draft check analytic shouldn't be in invoiced
@@ -380,8 +363,6 @@ class HrTimesheetSheet(models.Model):
 		return res
 
 
-
-	@api.one
 	def action_timesheet_confirm(self):
 		self._check_end_mileage()
 		vehicle = self._get_vehicle()
@@ -414,7 +395,7 @@ class HrTimesheetSheet(models.Model):
 			raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
 		return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
-	@api.one
+
 	def create_overtime_entries(self):
 		analytic_line = self.env['account.analytic.line']
 		if self.overtime_hours > 0 and not self.overtime_analytic_line_id:
@@ -444,7 +425,7 @@ class HrTimesheetSheet(models.Model):
 				self.overtime_analytic_line_id.unlink()
 		return self.overtime_analytic_line_id
 
-	@api.one
+
 	def action_timesheet_done(self):
 		"""
 		On timesheet confirmed update analytic state to confirmed
@@ -464,7 +445,7 @@ class HrTimesheetSheet(models.Model):
 		self.generate_km_lines()
 		return res
 
-	@job(default_channel='root.timesheet')
+	# @job(default_channel='root.timesheet')
 	def _recompute_timesheet(self, fields):
 		"""Recompute this sheet and its lines.
 		This function is called asynchronically after create/write"""
@@ -495,7 +476,6 @@ class HrTimesheetSheet(models.Model):
 		result._queue_recompute_timesheet(['timesheet_ids'])
 		return result
 
-	@api.one
 	def write(self, vals):
 		result = super(
 			HrTimesheetSheet, self.with_context(_timesheet_write=True)
@@ -510,7 +490,6 @@ class HrTimesheetSheet(models.Model):
 			self._queue_recompute_timesheet(['timesheet_ids'])
 		return result
 
-	@api.multi
 	def action_view_overtime_entry(self):
 		self.ensure_one()
 		action = self.env.ref('analytic.account_analytic_line_action_entries')
@@ -556,7 +535,7 @@ class HrTimesheetSheet(models.Model):
 				ts_line,
 				month_id,
 				week_id,
-				account_department_id,               
+				account_department_id,
 				chargeable,
 				operating_unit_id,
 				project_operating_unit_id,
@@ -613,7 +592,7 @@ class HrTimesheetSheet(models.Model):
 				END AS non_invoiceable_mileage,
 				aal.product_uom_id as product_uom_id
 		FROM account_analytic_line aal
-			 LEFT JOIN project_project pp 
+			 LEFT JOIN project_project pp
 			 ON pp.id = aal.project_id
 			 LEFT JOIN account_analytic_account aaa
 			 ON aaa.id = aal.account_id
@@ -621,15 +600,15 @@ class HrTimesheetSheet(models.Model):
 			 ON ip.id = pp.invoice_properties
 			 RIGHT JOIN hr_timesheet_sheet hss
 			 ON hss.id = aal.sheet_id
-			 LEFT JOIN date_range dr 
+			 LEFT JOIN date_range dr
 			 ON (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
-			 LEFT JOIN hr_employee he 
+			 LEFT JOIN hr_employee he
 			 ON (hss.employee_id = he.id)
-			 LEFT JOIN task_user tu 
+			 LEFT JOIN task_user tu
 			 ON (tu.task_id = aal.task_id and tu.user_id = aal.user_id and aal.date >= tu.from_date)
 		WHERE hss.id = %(sheet_select)s
-			 AND aal.ref_id IS NULL             
-			 AND aal.task_id NOT IN 
+			 AND aal.ref_id IS NULL
+			 AND aal.task_id NOT IN
 				 (
 				 SELECT DISTINCT task_id
 				 FROM account_analytic_line
@@ -677,7 +656,7 @@ class HrTimesheetSheet(models.Model):
 				ts_line,
 				month_id,
 				week_id,
-				account_department_id,               
+				account_department_id,
 				chargeable,
 				operating_unit_id,
 				project_operating_unit_id,
@@ -733,7 +712,7 @@ class HrTimesheetSheet(models.Model):
 				END AS non_invoiceable_mileage,
 				%(uom)s as product_uom_id
 		FROM account_analytic_line aal
-			 LEFT JOIN project_project pp 
+			 LEFT JOIN project_project pp
 			 ON pp.id = aal.project_id
 			 LEFT JOIN account_analytic_account aaa
 			 ON aaa.id = aal.account_id
@@ -741,14 +720,14 @@ class HrTimesheetSheet(models.Model):
 			 ON ip.id = pp.invoice_properties
 			 RIGHT JOIN hr_timesheet_sheet hss
 			 ON hss.id = aal.sheet_id
-			 LEFT JOIN date_range dr 
+			 LEFT JOIN date_range dr
 			 ON (dr.type_id = 2 and dr.date_start <= aal.date +7 and dr.date_end >= aal.date + 7)
-			 LEFT JOIN hr_employee he 
+			 LEFT JOIN hr_employee he
 			 ON (hss.employee_id = he.id)
-			 LEFT JOIN task_user tu 
+			 LEFT JOIN task_user tu
 			 ON (tu.task_id = aal.task_id and tu.user_id = aal.user_id and aal.date >= tu.from_date)
 		WHERE hss.id = %(sheet_select)s
-			 AND aal.ref_id IS NULL             
+			 AND aal.ref_id IS NULL
 			 AND aal.kilometers > 0 ;
 		"""
 		self.env.cr.execute(query, {'create': str(fields.Datetime.to_string(fields.datetime.now())),
@@ -761,36 +740,36 @@ class HrTimesheetSheet(models.Model):
 		return True
 
 
-# class DateRangeGenerator(models.TransientModel):
-# 	_inherit = 'date.range.generator'
+# # class DateRangeGenerator(models.TransientModel):
+# # 	_inherit = 'date.range.generator'
+# #
+# #
+# # 	def _compute_date_ranges(self):
+# # 		self.ensure_one()
+# # 		vals = rrule(freq=self.unit_of_time,
+# # 					 interval=self.duration_count,
+# # 					 dtstart=fields.Date.from_string(self.date_start),
+# # 					 count=self.count+1)
+# # 		vals = list(vals)
+# # 		date_ranges = []
+# # 		# count_digits = len(unicode(self.count))
+# # 		count_digits = len(str(self.count))
+# # 		for idx, dt_start in enumerate(vals[:-1]):
+# # 			date_start = fields.Date.to_string(dt_start.date())
+# # 			# always remove 1 day for the date_end since range limits are
+# # 			# inclusive
+# # 			dt_end = vals[idx+1].date() - relativedelta(days=1)
+# # 			date_end = fields.Date.to_string(dt_end)
+# # 			# year and week number are updated for name according to ISO 8601 Calendar
+# # 			date_ranges.append({
+# # 				'name': '%s%d' % (
+# # 					str(dt_start.isocalendar()[0])+" "+self.name_prefix, int(dt_start.isocalendar()[1])),
+# # 				'date_start': date_start,
+# # 				'date_end': date_end,
+# # 				'type_id': self.type_id.id,
+# # 				'company_id': self.company_id.id})
+# # 		return date_ranges
 #
-# 	@api.multi
-# 	def _compute_date_ranges(self):
-# 		self.ensure_one()
-# 		vals = rrule(freq=self.unit_of_time,
-# 					 interval=self.duration_count,
-# 					 dtstart=fields.Date.from_string(self.date_start),
-# 					 count=self.count+1)
-# 		vals = list(vals)
-# 		date_ranges = []
-# 		# count_digits = len(unicode(self.count))
-# 		count_digits = len(str(self.count))
-# 		for idx, dt_start in enumerate(vals[:-1]):
-# 			date_start = fields.Date.to_string(dt_start.date())
-# 			# always remove 1 day for the date_end since range limits are
-# 			# inclusive
-# 			dt_end = vals[idx+1].date() - relativedelta(days=1)
-# 			date_end = fields.Date.to_string(dt_end)
-# 			# year and week number are updated for name according to ISO 8601 Calendar
-# 			date_ranges.append({
-# 				'name': '%s%d' % (
-# 					str(dt_start.isocalendar()[0])+" "+self.name_prefix, int(dt_start.isocalendar()[1])),
-# 				'date_start': date_start,
-# 				'date_end': date_end,
-# 				'type_id': self.type_id.id,
-# 				'company_id': self.company_id.id})
-# 		return date_ranges
-
 class SheetLine(models.TransientModel):
 	_inherit = 'hr_timesheet.sheet.line'
 
@@ -805,4 +784,4 @@ class SheetLine(models.TransientModel):
 				'message': _("Logged hours should be 0 to 24."),
 			}}
 		return res
-		
+

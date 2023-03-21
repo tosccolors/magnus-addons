@@ -49,7 +49,6 @@ class TimesheetAnalyticLine(models.Model):
     project_id = fields.Many2one('project.project',string="Project")
     account_id = fields.Many2one('account.analytic.account', 'Analytic Account')
 
-    @api.multi
     def merge_timesheets(self):
         unit_amount = sum(
             [t.unit_amount for t in self])
@@ -65,7 +64,6 @@ class TimesheetAnalyticLine(models.Model):
     def _planning_create(self, values):
         return self.with_context(planning_create=True).create(values)
 
-    @api.multi
     @api.constrains('company_id', 'account_id')
     def _check_company_id(self):
         for line in self:

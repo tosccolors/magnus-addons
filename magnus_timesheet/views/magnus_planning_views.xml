@@ -145,7 +145,7 @@
         <record id="act_view_magnus_planning" model="ir.actions.act_window">
             <field name="name">My Planning</field>
             <field name="res_model">magnus.planning</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
@@ -237,7 +237,7 @@
         <record id="act_magnus_planning_my_planning" model="ir.actions.act_window">
             <field name="name">My Planning Sheets</field>
             <field name="res_model">magnus.planning</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">tree,kanban,form</field>
             <field name="domain">[('employee_id.user_id', '=', uid)]</field>
             <field name="context">{'self_planning': 1}</field>
@@ -272,7 +272,7 @@
         <record id="act_magnus_planning_all_plannings" model="ir.actions.act_window">
             <field name="name">My Employee's Planning Sheets</field>
             <field name="res_model">magnus.planning</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">tree,kanban,form</field>
             <!--<field name="search_view_id" ref="view_magnus_planning_filter"/>-->
             <!-- <field name="domain">['|',('employee_id.user_id', '=', uid),('employee_id.parent_id.user_id', '=', uid)]</field> -->
@@ -310,7 +310,7 @@
             <field name="name">Planning Sheets to Review</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">magnus.planning</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">tree,kanban,form</field>
             <field name="view_id" eval="False"/>
             <field name="context">{'search_default_to_review':1}</field>
@@ -400,7 +400,7 @@
         <record id="action_standby_planning" model="ir.actions.act_window">
             <field name="name">Stand-By Planning</field>
             <field name="res_model">magnus.standby.planning</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">calendar,tree</field>
             <field name="view_id" ref="standby_planning_calendar_view"/>
             <field name="help" type="html">

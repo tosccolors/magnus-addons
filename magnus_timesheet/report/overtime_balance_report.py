@@ -29,7 +29,7 @@ class OvertimeBalanceReport(models.Model):
         readonly=True
     )
 
-    @api.model_cr
+    # @api.model_cr
     def init(self):
         tools.drop_view_if_exists(self.env.cr, 'overtime_balance_report')
 

@@ -124,7 +124,7 @@ class CrmPipelineActualsReport(models.Model):
         readonly=True
     )
 
-    @api.model_cr
+    # @api.model_cr
     def init(self):
         """ """
         tools.drop_view_if_exists(self.env.cr, 'crm_pipeline_actuals_report')

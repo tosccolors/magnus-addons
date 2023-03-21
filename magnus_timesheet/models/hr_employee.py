@@ -9,19 +9,15 @@ from odoo.tools.translate import _
 class Employee(models.Model):
     _inherit = "hr.employee"
 
-
-    @api.one
     @api.depends('product_id')
     def _compute_fee_rate(self):
-        if self.product_id:
-            self.fee_rate = self.product_id.list_price
+        self.fee_rate = self.product_id and self.product_id.list_price or 0.0
 
     @api.model
     def _get_category_domain(self):
         return [('categ_id','=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
-    @api.one
     def _get_overtime_hours(self):
         self.overtime_hours = sum(
             self.env['hr_timesheet.sheet'].search([('employee_id', '=', self.id)]).mapped('overtime_hours'))

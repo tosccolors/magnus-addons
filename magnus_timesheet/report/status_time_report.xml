@@ -59,7 +59,7 @@
         <record id="action_status_time_report" model="ir.actions.act_window">
             <field name="name">Status Time Reports</field>
             <field name="res_model">status.time.report</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">tree</field>
             <field name="help">Status Time Report allows you to check status
                                             time reports per employee.</field>

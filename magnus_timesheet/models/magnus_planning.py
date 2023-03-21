@@ -185,7 +185,6 @@ class MagnusPlanning(models.Model):
 			print("-fetch from employee query",line_query)
 			self.env.cr.execute(line_query)
 
-	@api.one
 	def _compute_planning_lines(self):
 		self_planning = self.env.context.get('self_planning', False)
 		self.planning_ids_compute = False
@@ -200,7 +199,6 @@ class MagnusPlanning(models.Model):
 			print("--------planning from manager 2")
 			self.get_planning_from_managers()
 
-	@api.one
 	def compute_planning_lines(self):
 		self._compute_planning_lines()
 
@@ -342,7 +340,6 @@ class MagnusPlanning(models.Model):
 	is_planning_officer = fields.Boolean('Is Planning Officer')
 	self_planning = fields.Boolean('Self Planning')
 
-	@api.multi
 	@api.depends('week_from', 'week_to')
 	def _compute_name(self):
 		locale = self.env.context.get('lang') or self.env.user.lang or 'en_US'
@@ -379,7 +376,6 @@ class MagnusPlanning(models.Model):
 		for sheet in self:
 			sheet.total_time = sum(sheet.mapped('planning_analytic_ids.unit_amount'))
 
-	@api.multi
 	def _get_overlapping_sheet_domain(self):
 		""" Hook for extensions """
 		self.ensure_one()
@@ -410,7 +406,6 @@ class MagnusPlanning(models.Model):
 					)
 				))
 
-	@api.multi
 	@api.constrains('company_id', 'employee_id')
 	def _check_company_id_employee_id(self):
 		for rec in self.sudo():
@@ -420,7 +415,6 @@ class MagnusPlanning(models.Model):
 					_('The Company in the Planning Sheet and in '
 					  'the Employee must be the same.'))
 
-	@api.multi
 	@api.constrains('company_id', 'department_id')
 	def _check_company_id_department_id(self):
 		for rec in self.sudo():
@@ -430,7 +424,6 @@ class MagnusPlanning(models.Model):
 					_('The Company in the Planning Sheet and in '
 					  'the Department must be the same.'))
 
-	@api.multi
 	@api.constrains('company_id', 'add_line_project_id')
 	def _check_company_id_add_line_project_id(self):
 		for rec in self.sudo():
@@ -440,7 +433,6 @@ class MagnusPlanning(models.Model):
 					_('The Company in the Planning Sheet and in '
 					  'the Project must be the same.'))
 
-	@api.multi
 	@api.constrains('company_id', 'add_line_emp_id')
 	def _check_company_id_add_line_emp_id(self):
 		for rec in self.sudo():
@@ -450,7 +442,6 @@ class MagnusPlanning(models.Model):
 					_('The Company in the Planning Sheet and in '
 					  'the Task must be the same.'))
 
-	@api.multi
 	def _get_timesheet_sheet_company(self):
 		self.ensure_one()
 		employee = self.employee_id
@@ -487,7 +478,6 @@ class MagnusPlanning(models.Model):
 		data = {'planning_quarter': [('id', 'in', period.ids)]}
 		return {'value': vals, 'domain': data}
 
-	@api.multi
 	def _get_timesheet_sheet_lines_domain(self):
 		self.ensure_one()
 		return [
@@ -498,7 +488,6 @@ class MagnusPlanning(models.Model):
 			('project_id', '!=', False),
 		]
 
-	@api.multi
 	# @api.depends('date_start', 'date_end')
 	@api.depends('week_from', 'week_to')
 	def _compute_line_ids(self):
@@ -556,7 +545,6 @@ class MagnusPlanning(models.Model):
 			res.append(value)
 		return res
 
-	@api.multi
 	def _get_data_matrix(self):
 		self.ensure_one()
 		MatrixKey = self._matrix_key()
@@ -616,7 +604,7 @@ class MagnusPlanning(models.Model):
 			return employee.user_id.id
 		return False
 
-	# @api.multi
+	# 
 	# def copy(self, default=None):
 	# 	if not self.env.context.get('allow_copy_timesheet'):
 	# 		raise UserError(_('You cannot duplicate a sheet.'))
@@ -625,14 +613,13 @@ class MagnusPlanning(models.Model):
 	@api.model
 	def create(self, vals):
 		self._check_employee_user_link(vals)
-		res = super().create(vals)
+		res = super(MagnusPlanning).create(vals)
 		# res.write({'state': 'draft'})
 		return res
 
 	def _sheet_write(self, field, recs):
 		self.with_context(sheet_write=True).write({field: [(6, 0, recs.ids)]})
 
-	@api.multi
 	def write(self, vals):
 		self._check_employee_user_link(vals)
 		res = super().write(vals)
@@ -646,7 +633,7 @@ class MagnusPlanning(models.Model):
 					rec.delete_empty_lines(True)
 		return res
 
-	# @api.multi
+	# 
 	# def unlink(self):
 	#     for sheet in self:
 	#         if sheet.state in ('confirm', 'done'):
@@ -662,7 +649,7 @@ class MagnusPlanning(models.Model):
 		self.ensure_one()
 		return self.employee_id.parent_id.user_id.partner_id
 
-	# @api.multi
+	# 
 	# def action_timesheet_draft(self):
 	#     if self.filtered(lambda sheet: sheet.state != 'done'):
 	#         raise UserError(_('Cannot revert to draft a non-approved sheet.'))
@@ -672,12 +659,12 @@ class MagnusPlanning(models.Model):
 	#         # 'reviewer_id': False,
 	#     })
 
-	# @api.multi
+	# 
 	# def action_timesheet_confirm(self):
 	#     self.reset_add_line()
 	#     self.write({'state': 'confirm'})
 
-	# @api.multi
+	# 
 	# def action_timesheet_done(self):
 	#     if self.filtered(lambda sheet: sheet.state != 'confirm'):
 	#         raise UserError(_('Cannot approve a non-submitted sheet.'))
@@ -685,7 +672,7 @@ class MagnusPlanning(models.Model):
 	#         'state': 'done',
 	#     })
 	#
-	# @api.multi
+	# 
 	# def action_timesheet_refuse(self):
 	#     if self.filtered(lambda sheet: sheet.state != 'confirm'):
 	#         raise UserError(_('Cannot reject a non-submitted sheet.'))
@@ -706,7 +693,6 @@ class MagnusPlanning(models.Model):
 			))
 		return reviewer
 
-	@api.multi
 	def button_add_line(self):
 		for rec in self:
 			# if rec.state in ['new', 'draft']:
@@ -743,7 +729,6 @@ class MagnusPlanning(models.Model):
 			dates.append(start)
 		return dates
 
-	@api.multi
 	def _get_line_name(self, project_id, employee_id=None, **kwargs):
 		self.ensure_one()
 		if employee_id:
@@ -753,7 +738,6 @@ class MagnusPlanning(models.Model):
 			)
 		return project_id.name_get()[0][1]
 
-	@api.multi
 	def _get_new_line_unique_id(self):
 		""" Hook for extensions """
 		self.ensure_one()
@@ -762,7 +746,6 @@ class MagnusPlanning(models.Model):
 			'employee_id': self.add_line_emp_id,
 		}
 
-	@api.multi
 	def _get_default_sheet_line(self, matrix, key):
 		self.ensure_one()
 		week_date = self._get_date_name(key.week_id)
@@ -834,7 +817,6 @@ class MagnusPlanning(models.Model):
 			return repeated.merge_timesheets()
 		return timesheets
 
-	@api.multi
 	def _is_add_line(self, row):
 		""" Hook for extensions """
 		self.ensure_one()
@@ -874,7 +856,6 @@ class MagnusPlanning(models.Model):
 				self._sheet_write(
 					'planning_analytic_ids', self.planning_analytic_ids.exists())
 
-	@api.multi
 	def _update_analytic_lines_from_new_lines(self, vals):
 		self.ensure_one()
 		new_line_ids_list = []
@@ -913,7 +894,6 @@ class MagnusPlanning(models.Model):
 			'employee_id': line.employee_id.id,
 		}
 
-	@api.multi
 	def _is_compatible_new_line(self, line_a, line_b):
 		""" Hook for extensions """
 		self.ensure_one()
@@ -922,7 +902,6 @@ class MagnusPlanning(models.Model):
 			and line_a.date == line_b.date
 			# and line_a.task_id.id == line_b.task_id.id \
 
-	@api.multi
 	def add_new_line(self, line):
 		self.ensure_one()
 		new_line_model = self.env['magnus.planning.new.analytic.line']
@@ -970,7 +949,7 @@ class MagnusPlanning(models.Model):
 	# OpenChatter methods and notifications
 	# ------------------------------------------------
 
-	# @api.multi
+	# 
 	# def _track_subtype(self, init_values):
 	#     self.ensure_one()
 	#     if 'state' in init_values and self.state == 'confirm':
@@ -1010,7 +989,6 @@ class MagnusAbstractSheetLine(models.AbstractModel):
 		string='Employee',
 	)
 
-	@api.multi
 	def get_unique_id(self):
 		""" Hook for extensions """
 		self.ensure_one()
@@ -1156,7 +1134,6 @@ class MagnusStandbyPlanning(models.Model):
 class HrEmployee(models.Model):
 	_inherit = 'hr.employee'
 
-	@api.multi
 	def name_get(self):
 		res = []
 		if self.env.context.get('magnus_planning', False):

@@ -3,7 +3,7 @@
 from odoo import api, fields, models, _
 from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError
-from odoo.addons.queue_job.job import job, related_action
+# from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.queue_job.exception import FailedJobError
 import logging
 _logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ class AnalyticLineStatus(models.TransientModel):
                 _("Entries must belong to same month!"))
         return True
 
-    @api.one
+    
     def analytic_invoice_lines(self):
         context = self.env.context.copy()
         analytic_ids = context.get('active_ids',[])
@@ -139,7 +139,7 @@ class AnalyticLineStatus(models.TransientModel):
                         'operating_unit_id': project_operating_unit_id,
                         'link_project': False,
                         'payment_term_id': partner.property_payment_term_id.id or False,
-                        'journal_id': self.env['account.invoice'].default_get(['journal_id'])['journal_id'],
+                        'journal_id': self.env['account.move'].default_get(['journal_id'])['journal_id'],
                         'fiscal_position_id': partner.property_account_position_id.id or False,
                         'user_id': self.env.user.id,
                         'company_id': self.env.user.company_id.id,
@@ -280,8 +280,7 @@ class AnalyticLineStatus(models.TransientModel):
         res.append(move_line_credit)
         return res
 
-    @job
-    @api.multi
+    # @job
     def prepare_account_move(self, analytic_lines_ids,notupdatestate):
         """ Creates analytics related financial move lines """
         acc_analytic_line = self.env['account.analytic.line']
@@ -418,8 +417,7 @@ class AnalyticLineStatus(models.TransientModel):
 
         return "WIP moves and Reversals successfully created. \n "
 
-    @job
-    @api.multi
+    # @job
     def wip_reversal(self, moves):
         reverse_move = None
         for move in moves:

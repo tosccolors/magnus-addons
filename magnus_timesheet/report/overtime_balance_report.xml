@@ -38,7 +38,7 @@
         <record id="action_overtime_balance_report" model="ir.actions.act_window">
             <field name="name">Overtime Balance Report Analysis</field>
             <field name="res_model">overtime.balance.report</field>
-            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
             <field name="view_mode">pivot</field>
             <field name="help">Calculate overtime balance grouping by employee.</field>
             <field name="search_view_id" ref="view_overtime_balance_report_search"/>

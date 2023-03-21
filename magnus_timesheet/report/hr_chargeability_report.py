@@ -57,7 +57,7 @@ class HrChargeabilityReport(models.Model):
 	)
 
 
-	@api.model_cr
+	# @api.model_cr
 	def init(self):
 		""" """
 		uom = self.env.ref('uom.product_uom_hour').id

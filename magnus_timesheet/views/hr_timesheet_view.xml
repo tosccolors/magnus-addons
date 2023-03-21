@@ -2,7 +2,7 @@
 <odoo>
   <data>
 
-    <record id="hr_timesheet_sheet_form_inherited" model="ir.ui.view">
+   <record id="hr_timesheet_sheet_form_inherited" model="ir.ui.view">
       <field name="name">hr.timesheet.sheet.form</field>
       <field name="model">hr_timesheet.sheet</field>
       <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
@@ -125,7 +125,7 @@
       <field name="name">Timesheets to Approve</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">hr_timesheet.sheet</field>
-      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
       <field name="view_id" eval="False"/>
       <field name="context">{'search_default_to_approve':1}</field>
       <field name="search_view_id" ref="view_hr_timesheet_sheet_filter"/>
@@ -144,7 +144,7 @@
     </record>
     
 
-    <record model="ir.ui.view" id="view_hr_timesheet_sheet_pivot">
+<!--    <record model="ir.ui.view" id="view_hr_timesheet_sheet_pivot">
         <field name="name">view.hr.timesheet.sheet.pivot</field>
         <field name="model">hr_timesheet.sheet</field>
         <field name="arch" type="xml">
@@ -157,7 +157,7 @@
                 <field name="overtime_hours_delta" widget="float_time" type="measure"/>
             </pivot>
         </field>
-    </record>
+    </record>-->
 
 
     <!--My Timesheets action inherited-->

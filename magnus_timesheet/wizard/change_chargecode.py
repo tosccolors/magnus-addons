@@ -22,7 +22,7 @@ class ChangeChargecode(models.TransientModel):
 
     # TODO: aal with km's?
     # TODO: Reverse of correction?
-    @api.multi
+    
     def post(self):
         context = self.env.context.copy()
         analytic_ids = context.get('active_ids', [])
