@@ -72,7 +72,7 @@
                         </td>
                         <td style="text-right">
                             <div style="margin-left:10px">
-                                <span t-field="o.date_invoice"/><br/>
+                                <span t-field="o.invoice_date"/><br/>
                                  <span t-field="o.number"/><br/>
                                  <span t-if="sale_inv" t-field="o.invoice_line_ids[0].account_analytic_id.project_ids[0].po_number"/>
                                  <t t-if="not sale_inv">
