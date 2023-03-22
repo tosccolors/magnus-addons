@@ -27,6 +27,7 @@
         'security/security.xml',
         'views/hr_expense_views.xml',
         'views/res_company_view.xml',
+        'views/analytic_views.xml',
         # 'views/account_views.xml',
     ],
     # only loaded in demonstration mode
