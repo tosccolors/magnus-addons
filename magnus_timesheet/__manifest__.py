@@ -90,6 +90,7 @@ thereof""",
         'views/invoice_view.xml',
         'views/inter_ou_account_mapping_view.xml',
         'views/menuitem.xml',
+        'views/res_company_view.xml',
     ],
     'installable': True,
     # only loaded in demonstration mode
