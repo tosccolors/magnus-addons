@@ -11,11 +11,11 @@ def email_escape_char(email_address):
     return email_address.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
 
 
-class AccountInvoice(models.Model):
-    _inherit = "account.invoice"
+class AccountMove(models.Model):
+    _inherit = "account.move"
 
     source_email = fields.Char(string='Source Email', track_visibility='onchange')
-    vendor_bill_id = fields.Many2one('account.invoice', string='Vendor Bill',
+    vendor_bill_id = fields.Many2one('account.move', string='Vendor Bill',
         help="Auto-complete from a past bill.")
 
     @api.model
@@ -75,7 +75,7 @@ class AccountInvoice(models.Model):
             if 'operating_unit_id' in self._fields:
                 values['operating_unit_id'] = journal.operating_unit_id.id
         # Passing `type` in context so that _default_journal(...) can correctly set journal for new vendor bill
-        invoice = super(AccountInvoice, self.with_context(type=values.get('type') or 'in_invoice')).message_new(msg_dict, values)
+        invoice = super(AccountMove, self.with_context(type=values.get('type') or 'in_invoice')).message_new(msg_dict, values)
 
         # Subscribe internal users on the newly created bill
         partners = self.env['res.partner'].browse(seen_partner_ids)
