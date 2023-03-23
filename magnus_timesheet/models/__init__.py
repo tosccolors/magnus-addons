@@ -11,4 +11,5 @@ from . import res_users
 from . import hr_employee
 from . import timesheet_analytic_line
 from . import magnus_planning
+from . import res_company
 

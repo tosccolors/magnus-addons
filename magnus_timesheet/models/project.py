@@ -166,6 +166,10 @@ class TaskUser(models.Model):
         store=True
     )
 
+    cost_rate = fields.Float(
+        string='Cost Rate',
+    )
+
     @api.onchange('user_id')
     def onchange_user_id(self):
         self.product_id = False

@@ -59,7 +59,8 @@ thereof""",
                 'hr_timesheet_sheet_validators',
                 # 'connector_jira',
                 # 'web_domain_field', its full of JS files, so as of now the module is not installed and is commented
-                'invoice_line_revenue_distribution_operating_unit'
+                'invoice_line_revenue_distribution_operating_unit',
+                'queue_job'
                 ],
 
     # always loaded
@@ -90,6 +91,7 @@ thereof""",
         'views/invoice_view.xml',
         'views/inter_ou_account_mapping_view.xml',
         'views/menuitem.xml',
+        'views/res_company_view.xml',
     ],
     'installable': True,
     # only loaded in demonstration mode
