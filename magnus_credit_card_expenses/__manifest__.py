@@ -39,8 +39,8 @@ defined. This is used for reconciliation of the expenses and the final expense i
 
 
     """,
-    'author'  : 'Magnus - SB',
-    'website' : 'http://www.magnus.nl',
+    'author'  : 'TOSC - SB',
+    'website' : 'http://www.tosc.nl',
     'depends' : ['magnus_expense'],
     'data'    : [
         'security/hr_expense_security.xml',

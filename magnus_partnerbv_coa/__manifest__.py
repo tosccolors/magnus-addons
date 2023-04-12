@@ -7,8 +7,8 @@
     'name': 'Netherlands - Magnus Partner B.V. Chart of Accounts',
     'version': '3.0',
     'category': 'Localization',
-    'author': 'Magnus',
-    'website': 'http://www.magnus.nl',
+    'author': 'TOSC',
+    'website': 'http://www.tosc.nl',
     'depends': [
         'account',
         'base_vat',

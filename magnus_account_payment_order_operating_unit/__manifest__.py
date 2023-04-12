@@ -17,7 +17,7 @@
               "Tecnativa, "
               "Akretion, "
               "Odoo Community Association (OCA)"
-              "Magnus",
+              "TOSC",
     'category': 'Banking addons',
     'depends': [
         'account_payment_order',

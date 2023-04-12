@@ -115,8 +115,8 @@ cijfers. Dit is het minimale aantal welk u moet invullen, u mag het aantal verho
 De extra cijfers worden dan achter het rekeningnummer aangevult met 'nullen'.
 
     """,
-    'author'  : 'Magnus - Willem Hulshof',
-    'website' : 'http://www.magnus.nl',
+    'author'  : 'TOSC - Willem Hulshof',
+    'website' : 'http://www.tosc.nl',
     'depends' : ['account',
                  'base_vat',
                  'base_iban',

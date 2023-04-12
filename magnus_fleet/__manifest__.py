@@ -8,8 +8,8 @@
         Changes in contract notifications and new fields""",
     'version': '10.0.1.0.0',
     'license': 'AGPL-3',
-    'author': 'Magnus, Odoo Community Association (OCA)',
-    'website': 'https://www.magnus.nl',
+    'author': 'TOSC, Odoo Community Association (OCA)',
+    'website': 'https://www.tosc.nl',
     'depends': [
         'fleet',
         'magnus_timesheet'
