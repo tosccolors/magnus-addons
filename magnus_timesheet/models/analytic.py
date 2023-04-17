@@ -68,8 +68,9 @@ class AccountAnalyticLine(models.Model):
                  'date',
                  'task_id',
                  'user_id',
-                 'user_total_id.fee_rate',
-                 'user_total_id.ic_fee_rate'
+                 'task_id.task_user_ids'
+                #  'user_total_id.fee_rate',
+                #  'user_total_id.ic_fee_rate'
                  )
     def _compute_analytic_line(self):
         uom_hrs = self.env.ref("product.product_uom_hour").id
@@ -112,7 +113,18 @@ class AccountAnalyticLine(models.Model):
                             line.wip_month_id = var_month_id
                         if line.product_uom_id.id == uom_hrs:
                             line.ts_line = True
-                            line.line_fee_rate = line.get_fee_rate(task.id, user.id)[0]
+                            # line.line_fee_rate = line.get_fee_rate(task.id, user.id)[0]
+                            if date = line.date:
+                                task_user = self.env['task.user'].get_task_user_obj(task, user, date)[:1]
+                                if task_user:
+                                    line.task_user_id = task_user
+                                #check standard task for fee earners
+                                else:
+                                    project_id = self.env['project.task'].browse(task).project_id
+                                    standard_task = project_id.task_ids.filtered('standard')
+                                    if standard_task:
+                                        # task-358
+                                        task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user, date) or False
                         line.actual_qty = line.unit_amount
                         line.planned_qty = 0.0
 
@@ -224,6 +236,11 @@ class AccountAnalyticLine(models.Model):
     task_id = fields.Many2one(
         'project.task', 'Task',
         ondelete='restrict'
+    )
+    task_user_id = fields.Many2one(
+        string='Task User Fee Rate',
+        compute=_compute_analytic_line,
+        store=True
     )
     planned = fields.Boolean(
         string='Planned'
