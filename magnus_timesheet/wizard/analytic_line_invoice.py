@@ -76,6 +76,12 @@ class AnalyticLineStatus(models.TransientModel):
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
                 )%project_names)
+        no_task_user_id_entries = entries.filtered(lambda al: not al.task_user_id)
+        if no_task_user_id_entries and status == 'invoiceable':
+            task_user_names = ','.join([al.task_id.name + ' ' + al.user_id.name for al in no_task_user_id_entries])
+            raise UserError(_(
+                'Project(s) %s doesn\'t have invoicing properties.'
+                )%task_user_names)
         if entries:
             cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
             self.env.cr.execute("""
@@ -226,6 +232,7 @@ class AnalyticLineStatus(models.TransientModel):
         else:
             self.wip = False
 
+## todo:
     @api.model
     def _calculate_fee_rate(self, line):
         amount = line.get_fee_rate_amount(False, False)
@@ -240,7 +247,7 @@ class AnalyticLineStatus(models.TransientModel):
             return res
 
         analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.account_id.tag_ids]
-        amount = abs(self._calculate_fee_rate(line))
+        amount = line.amount
 
         move_line_debit = {
             'date_maturity': line.date,

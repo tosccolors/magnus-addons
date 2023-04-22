@@ -68,13 +68,15 @@ class AccountAnalyticLine(models.Model):
                  'date',
                  'task_id',
                  'user_id',
-                 'task_id.task_user_ids'
-                #  'user_total_id.fee_rate',
-                #  'user_total_id.ic_fee_rate'
+                 'task_id.task_user_ids',
+                 'task_user_id.date_from',
+                 'task_user_id.product_id',
+                 'task_user_id.fee_rate',
                  )
     def _compute_analytic_line(self):
+        self.filtered(lambda i: isinstance(i.id, (int, long))).read(['task_user_id','line_fee_rate','product_id','amount'])
         uom_hrs = self.env.ref("product.product_uom_hour").id
-        for line in self:
+        for line in self.filtered(lambda line: line.task_id and line.product_uom_id.id == uom_hrs):
             # all analytic lines need a project_operating_unit_id and
             # for all analytic lines day_name, week_id and month_id are computed
             date = line.date
@@ -98,6 +100,7 @@ class AccountAnalyticLine(models.Model):
                 line.project_mgr = line.account_id.project_ids.user_id or False
             task = line.task_id
             user = line.user_id
+            date = line.date
             # only if task_id the remaining fields are computed
             if task and user:
                 uou = user._get_operating_unit_id()
@@ -113,8 +116,13 @@ class AccountAnalyticLine(models.Model):
                             line.wip_month_id = var_month_id
                         if line.product_uom_id.id == uom_hrs:
                             line.ts_line = True
-                            # line.line_fee_rate = line.get_fee_rate(task.id, user.id)[0]
-                            if date = line.date:
+                            if date and line.state in ['new',
+                                                       'draft',
+                                                       'open',
+                                                       'delayed',
+                                                       'invoiceable',
+                                                       'progress',
+                                                       're_confirmed',]:
                                 task_user = self.env['task.user'].get_task_user_obj(task, user, date)[:1]
                                 if task_user:
                                     line.task_user_id = task_user
@@ -123,10 +131,25 @@ class AccountAnalyticLine(models.Model):
                                     project_id = self.env['project.task'].browse(task).project_id
                                     standard_task = project_id.task_ids.filtered('standard')
                                     if standard_task:
-                                        # task-358
-                                        task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user, date) or False
+                                        line.task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user, date) or False
+                                line.line_fee_rate = line.get_fee_rate()[0]
+                                line.amount = line.get_fee_rate_amount()
+                                line.product_id = line.get_task_user_product()
                         line.actual_qty = line.unit_amount
                         line.planned_qty = 0.0
+
+    # @api.depends('unit_amount',
+    #              'task_user_id',
+    #              'task_user_id.product_id',
+    #              'task_user_id.fee_rate',
+    #              )
+    # def _compute_product_amount(self):
+    #     for line in self:
+    #         line.line_fee_rate = line.get_fee_rate()[0]
+    #         line.amount = line.get_fee_rate_amount()
+    #         line.product_id = line.get_task_user_product()
+
+    def _inverse_product_amount(self):
 
     def find_daterange_week(self, date):
         """
@@ -297,6 +320,19 @@ class AccountAnalyticLine(models.Model):
         string='Fee Rate',
         store=True,
     )
+    amount = fields.Monetary(
+        compute=_compute_product_amount,
+        inverse=_inverse_product_amount,
+        string='Amount',
+        # required=True,
+        default=0.0,
+        store=True
+    )
+    product_id = fields.Many2one(
+        compute=_compute_product_amount,
+        inverse=_inverse_product_amount,
+        store=True
+    )
     state = fields.Selection([
         ('draft', 'Draft'),
         ('open', 'Confirmed'),
@@ -330,62 +366,30 @@ class AccountAnalyticLine(models.Model):
     )
 
     @api.model
-    def get_task_user_product(self, task_id, user_id):
-        taskUserObj = self.env['task.user']
+    def get_task_user_product(self):
         product_id = False
-        if task_id and user_id:
-            date_now = fields.Date.today()
-            #task-358
-            taskUser = taskUserObj.search(
-                                [('task_id', '=', task_id),
-                                 ('from_date', '<=', date_now),
-                                 ('user_id', '=', user_id)],
-                                            limit=1, order='from_date Desc')
-            if taskUser and taskUser.product_id:
-                product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
-            else:
-                #check standard task for fee earners
-                project_id = self.env['project.task'].browse(task_id).project_id
-                standard_task = project_id.task_ids.filtered('standard')
-                if standard_task:
-                    taskUser = taskUserObj.search([('task_id', '=', standard_task.id), ('user_id', '=', user_id)],
-                                                  limit=1)
-                    product_id = taskUser.product_id.id if taskUser and taskUser.product_id else False
-        if user_id and not product_id:
-            user = self.env['res.users'].browse(user_id)
+        if self.task_user_id:
+            product_id = self.task_user_id.product_id
+        if self.user_id and not product_id:
+            user = self.env['res.users'].browse(self.user_id)
             employee = user._get_related_employees()
-            product_id = employee.product_id and employee.product_id.id or False
+            product_id = employee.product_id or False
         return product_id
 
     @api.model
-    def get_fee_rate(self, task_id=None, user_id=None, date=None):
-        uid = user_id or self.user_id.id or False
-        tid = task_id or self.task_id.id or False
-        date = date or self.date or False
+    def get_fee_rate(self):
+        tui = self.task_user_id
         fr = 0.0
         ic_fr = 0.0
-        # fr = None
-        if uid and tid and date:
-            task_user = self.env['task.user'].get_task_user_obj(tid, uid, date)[:1]
-            if task_user and task_user.fee_rate:
-                fr = task_user.fee_rate
-                ic_fr = task_user.ic_fee_rate
-            #check standard task for fee earners
-            else:
-                project_id = self.env['project.task'].browse(tid).project_id
-                standard_task = project_id.task_ids.filtered('standard')
-                if standard_task:
-                    # task-358
-                    task_user = self.env['task.user'].get_task_user_obj(standard_task.id, uid, date)
-                    if task_user:
-                        fr = task_user[:1].fee_rate
-                        ic_fr = task_user[:1].ic_fee_rate
+        if tui:
+            fr = tui.fee_rate or 0.0
+            ic_fr = tui.ic_fee_rate or 0.0
         return [fr, ic_fr]
 
     @api.model
-    def get_fee_rate_amount(self, task_id=None, user_id=None, unit_amount=False):
-        fr = self.get_fee_rate(task_id=task_id, user_id=user_id)[0]
-        unit_amount = unit_amount if unit_amount else self.unit_amount
+    def get_fee_rate_amount(self):
+        fr = self.get_fee_rate()[0]
+        unit_amount = self.unit_amount
         amount = - unit_amount * fr
         return amount
 
@@ -431,25 +435,6 @@ class AccountAnalyticLine(models.Model):
             self.env.invalidate_all()
             vals.pop('state')
             return True
-
-        if len(self) == 1:
-            task_id = vals.get('task_id', self.task_id and self.task_id.id)
-            user_id = vals.get('user_id', self.user_id and self.user_id.id)
-            # for planning skip fee rate check
-            planned = vals.get('planned', self.planned)
-            # some cases product id is missing
-            if not vals.get('product_id', self.product_id) and user_id:
-                product_id = self.get_task_user_product(task_id, user_id) or False
-                if not product_id and not planned:
-                    user = self.env.user.browse(user_id)
-                    raise ValidationError(_(
-                        'Please fill in Fee Rate Product in employee %s.\n '
-                    ) % user.name)
-                vals['product_id'] = product_id
-            ts_line = vals.get('ts_line', self.product_uom_id == uom_hour and task_id and not planned)
-            if ts_line:
-                unit_amount = vals.get('unit_amount', self.unit_amount)
-                vals['amount'] = self.get_fee_rate_amount(task_id, user_id, unit_amount)
 
         if not (
                 'unit_amount' in vals or

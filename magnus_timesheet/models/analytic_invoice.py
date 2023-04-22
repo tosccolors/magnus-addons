@@ -205,20 +205,20 @@ class AnalyticInvoice(models.Model):
     def _calculate_grouping(self):
         fields_grouped = [
             'id',
-            'user_id',
-            'task_id',
+            # 'user_id',
+            'task_user_id',
             'account_id',
-            'product_id',
+            # 'product_id',
             'unit_amount',
-            'line_fee_rate',
+            # 'line_fee_rate',
             'operating_unit_id',
             'project_operating_unit_id']
         grouped_by = [
-            'user_id',
-            'task_id',
+            # 'user_id',
+            'task_user_id',
             'account_id',
-            'product_id',
-            'line_fee_rate',
+            # 'product_id',
+            # 'line_fee_rate',
             'operating_unit_id',
             'project_operating_unit_id']
         reg_fields_grouped = fields_grouped + ['month_id', 'week_id']
