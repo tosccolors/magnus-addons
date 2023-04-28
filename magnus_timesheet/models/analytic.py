@@ -123,7 +123,7 @@ class AccountAnalyticLine(models.Model):
                                                        'invoiceable',
                                                        'progress',
                                                        're_confirmed',]:
-                                task_user = self.env['task.user'].get_task_user_obj(task, user, date)
+                                task_user = self.env['task.user'].get_task_user_obj(task.id, user.id, date)[:1]
                                 if task_user:
                                     line.task_user_id = task_user
                                 #check standard task for fee earners
