@@ -128,15 +128,16 @@ class AccountAnalyticLine(models.Model):
                                     line.task_user_id = task_user
                                 #check standard task for fee earners
                                 else:
-                                    project_id = self.env['project.task'].browse(task).project_id
+                                    project_id = self.env['project.task'].browse(task.id).project_id
                                     standard_task = project_id.task_ids.filtered('standard')
                                     if standard_task:
-                                        line.task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user, date) or False
+                                        line.task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user.id, date) or False
                                 line.line_fee_rate = line.get_fee_rate()[0]
                                 line.amount = line.get_fee_rate_amount()
                                 line.product_id = line.get_task_user_product()
                         line.actual_qty = line.unit_amount
                         line.planned_qty = 0.0
+
 
     def _inverse_product_amount(self):
         return
