@@ -84,17 +84,9 @@ class AnalyticLineStatus(models.TransientModel):
                 )%task_user_names)
         if entries:
             entries.write({'state': status})
-            # cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
-            # self.env.cr.execute("""
-            #     UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
-            #     """ % (status, cond, rec))
-            # self.env.invalidate_all()
             if status == 'delayed' and self.wip:
-                # self.validate_entries_month(analytic_ids)
-                # self.update_line_fee_rates(analytic_ids)
                 self.with_delay(eta=datetime.now(), description="WIP Posting").prepare_account_move(analytic_ids)
             if status == 'invoiceable':
-                # self.update_line_fee_rates(analytic_ids)
                 self.with_context(active_ids=entries.ids).prepare_analytic_invoice()
         return True
 
@@ -129,8 +121,6 @@ class AnalyticLineStatus(models.TransientModel):
                     ctx = self.env.context.copy()
                     ctx.update({'active_invoice_id': analytic_invobj.id})
                     analytic_invobj.with_context(ctx).partner_id = partner_id
-                    # analytic_invobj.with_context(ctx).month_id = month_id
-                    # analytic_invobj.with_context(ctx).project_operating_unit_id = project_operating_unit_id
                 else:
                     data = {
                         'partner_id': partner_id,
@@ -311,9 +301,6 @@ class AnalyticLineStatus(models.TransientModel):
         narration = self.description if self.wip else ''
         try:
             if len(result) > 0:
-                # wip_journal = self.env.ref('magnus_timesheet.wip_journal')
-                # if not wip_journal.sequence_id:
-                #     raise UserError(_('Please define sequence on the type WIP journal.'))
                 for item in result:
                     partner_id = item['partner_id'][0]
                     operating_unit_id = item['operating_unit_id'][0]

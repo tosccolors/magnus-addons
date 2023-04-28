@@ -138,17 +138,6 @@ class AccountAnalyticLine(models.Model):
                         line.actual_qty = line.unit_amount
                         line.planned_qty = 0.0
 
-    # @api.depends('unit_amount',
-    #              'task_user_id',
-    #              'task_user_id.product_id',
-    #              'task_user_id.fee_rate',
-    #              )
-    # def _compute_product_amount(self):
-    #     for line in self:
-    #         line.line_fee_rate = line.get_fee_rate()[0]
-    #         line.amount = line.get_fee_rate_amount()
-    #         line.product_id = line.get_task_user_product()
-
     def _inverse_product_amount(self):
         return
 
@@ -331,6 +320,7 @@ class AccountAnalyticLine(models.Model):
         store=True
     )
     product_id = fields.Many2one(
+        'product.product',
         compute=_compute_analytic_line,
         inverse=_inverse_product_amount,
         store=True

@@ -115,13 +115,9 @@ class AnalyticInvoice(models.Model):
         user_total_data = []
         for item in result:
             vals = self._prepare_user_total(item, reconfirmed_entries)
-            ## todo
+
             aal_domain = time_domain + [
-                # ('user_id', '=', vals['user_id']),
                 ('task_user_id', '=', vals['task_user_id']),
-                # ('account_id', '=', vals['account_id']),
-                # ('product_id', '=', vals['product_id']),
-                # ('line_fee_rate', '=', vals['line_fee_rate'])
             ]
             if reconfirmed_entries:
                 aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
@@ -198,16 +194,9 @@ class AnalyticInvoice(models.Model):
         fields_grouped = [
             'id',
             'task_user_id',
-            # 'account_id',
-            # 'unit_amount',
-            # 'operating_unit_id',
-            # 'project_operating_unit_id'
             ]
         grouped_by = [
             'task_user_id',
-            # 'account_id',
-            # 'operating_unit_id',
-            # 'project_operating_unit_id'
             ]
         reg_fields_grouped = fields_grouped + ['month_id', 'week_id']
         reg_grouped_by = grouped_by + ['month_id']
@@ -218,22 +207,8 @@ class AnalyticInvoice(models.Model):
         return reg_fields_grouped, reg_grouped_by, reconfirmed_fields_grouped, reconfirmed_grouped_by
 
     def _prepare_user_total(self, item, reconfirmed_entries=False):
-        # task_id = item.get('task_id')[0] if item.get('task_id', False) else False
-        # project_id = False
-        # if task_id:
-        #     project_id = self.env['project.task'].browse(task_id).project_id.id or False
         vals = {
             'name': '/',
-            # 'task_user_id': item.get('task_user_id')[0] if item.get('task_user_id', False) else False,
-            # 'task_id': item.get('task_id')[0] if item.get('task_id', False) else False,
-            # 'project_id': project_id,
-            # 'account_id': item.get('account_id')[0] if item.get('account_id', False) else False,
-            # 'unit_amount': item.get('unit_amount'),
-            # 'product_id': item.get('product_id')[0] if item.get('product_id', False) else False,
-            # 'operating_unit_id': item.get('operating_unit_id')[0] if item.get('operating_unit_id', False) else False,
-            # 'project_operating_unit_id': item.get('project_operating_unit_id')[0] if item.get(
-            #                                                         'project_operating_unit_id', False) else False,
-            # 'line_fee_rate': item.get('line_fee_rate')
         }
         if reconfirmed_entries:
             vals.update({'gb_month_id': item.get('month_of_last_wip')[0] if item.get(
@@ -778,10 +753,6 @@ class AnalyticUserTotal(models.Model):
     @api.one
     @api.depends('detail_ids',
                  'detail_ids.task_user_id',
-                 # 'detail_ids.task_user_id.from_date',
-                 # 'detail_ids.task_user_id.product_id',
-                 # 'detail_ids.task_user_id.fee_rate',
-                 # 'detail_ids.task_user_id.ic_fee_rate',
                  )
     def _compute_user_total_line(self):
         """
@@ -806,14 +777,6 @@ class AnalyticUserTotal(models.Model):
             self.product_uom_id = self.env.ref("product.product_uom_hour")
             self.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
 
-    # @api.one
-    # def _compute_analytic_line(self):
-    #     for aut in self:
-    #         aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
-
-    # @api.model
-    # def _default_user(self):
-    #     return self.env.context.get('user_id', self.env.user.id)
 
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
