@@ -69,7 +69,7 @@ class AccountAnalyticLine(models.Model):
                  'task_id',
                  'user_id',
                  'task_id.task_user_ids',
-                 'task_user_id.date_from',
+                 'task_user_id.from_date',
                  'task_user_id.product_id',
                  'task_user_id.fee_rate',
                  )
