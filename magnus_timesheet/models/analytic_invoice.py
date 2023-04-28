@@ -778,7 +778,7 @@ class AnalyticUserTotal(models.Model):
     @api.one
     @api.depends('detail_ids',
                  'detail_ids.task_user_id',
-                 'detail_ids.task_user_id.date_from',
+                 'detail_ids.task_user_id.from_date',
                  'detail_ids.task_user_id.product_id',
                  'detail_ids.task_user_id.fee_rate',
                  'detail_ids.task_user_id.ic_fee_rate',
