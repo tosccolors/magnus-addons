@@ -262,6 +262,7 @@ class AccountAnalyticLine(models.Model):
         ondelete='restrict'
     )
     task_user_id = fields.Many2one(
+        'task.user',
         string='Task User Fee Rate',
         compute=_compute_analytic_line,
         store=True
