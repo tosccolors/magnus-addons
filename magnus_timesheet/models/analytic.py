@@ -364,8 +364,9 @@ class AccountAnalyticLine(models.Model):
         if self.task_user_id:
             product_id = self.task_user_id.product_id
         if self.user_id and not product_id:
-            user = self.env['res.users'].browse(self.user_id)
-            employee = user._get_related_employees()
+            # user = self.env['res.users'].browse(self.user_id.id)
+            employee = self.user_id._get_related_employees()
+            
             product_id = employee.product_id or False
         return product_id
 
