@@ -80,14 +80,15 @@ class AnalyticLineStatus(models.TransientModel):
         if no_task_user_id_entries and status == 'invoiceable':
             task_user_names = ','.join([al.task_id.name + ' ' + al.user_id.name for al in no_task_user_id_entries])
             raise UserError(_(
-                'Project(s) %s doesn\'t have invoicing properties.'
+                'Time lines don\'t have task_user_id\'s'
                 )%task_user_names)
         if entries:
-            cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
-            self.env.cr.execute("""
-                UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
-                """ % (status, cond, rec))
-            self.env.invalidate_all()
+            entries.write({'state': status})
+            # cond, rec = ("IN", tuple(entries.ids)) if len(entries) > 1 else ("=", entries.id)
+            # self.env.cr.execute("""
+            #     UPDATE account_analytic_line SET state = '%s' WHERE id %s %s
+            #     """ % (status, cond, rec))
+            # self.env.invalidate_all()
             if status == 'delayed' and self.wip:
                 # self.validate_entries_month(analytic_ids)
                 # self.update_line_fee_rates(analytic_ids)
@@ -232,10 +233,9 @@ class AnalyticLineStatus(models.TransientModel):
         else:
             self.wip = False
 
-## todo:
     @api.model
     def _calculate_fee_rate(self, line):
-        amount = line.get_fee_rate_amount(False, False)
+        amount = line.amount
         if self.wip and self.wip_percentage > 0:
             amount = amount * (self.wip_percentage / 100)
         return amount
@@ -247,7 +247,7 @@ class AnalyticLineStatus(models.TransientModel):
             return res
 
         analytic_tag_ids = [(4, analytic_tag.id, None) for analytic_tag in line.account_id.tag_ids]
-        amount = line.amount
+        amount = abs(self._calculate_fee_rate(line))
 
         move_line_debit = {
             'date_maturity': line.date,

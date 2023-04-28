@@ -205,58 +205,58 @@ class TaskUser(models.Model):
         order='from_date Desc', limit=1)
         return taskUserObj
 
-    @api.multi
-    def update_analytic_lines(self):
-        next_fee_rate_date = self.search(
-            [('from_date', '>', self.from_date),
-             ('task_id', '=', self.task_id.id),
-             ('user_id', '=', self.user_id.id)],
-            order='from_date', limit=1)
+    # @api.multi
+    # def update_analytic_lines(self):
+    #     next_fee_rate_date = self.search(
+    #         [('from_date', '>', self.from_date),
+    #          ('task_id', '=', self.task_id.id),
+    #          ('user_id', '=', self.user_id.id)],
+    #         order='from_date', limit=1)
+    #
+    #     aal_obj = self.env['account.analytic.line']
+    #     aal_domain = [
+    #         ('task_id', '=', self.task_id.id),
+    #         ('user_id', '=', self.user_id.id),
+    #         ('state', 'not in', ['invoiced','invoiced-by-fixed','write_off','expense-invoiced']),
+    #         ('date', '>=', self.from_date)
+    #     ]
+    #
+    #     if next_fee_rate_date:
+    #         aal_domain += [('date', '<', next_fee_rate_date.from_date)]
+    #     aal_query_line = aal_obj._where_calc(aal_domain)
+    #     aal_tables, aal_where_clause, aal_where_clause_params = aal_query_line.get_sql()
+    #
+    #     list_query = ("""
+    #             WITH aal AS (
+    #                 SELECT
+    #                    id, unit_amount
+    #                 FROM
+    #                    {0}
+    #                 WHERE {1}
+    #             )
+    #             UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2}), product_id = {3}
+    #             FROM aal WHERE {0}.id = aal.id
+    #                     """.format(
+    #         aal_tables,
+    #         aal_where_clause,
+    #         self.fee_rate,
+    #         self.product_id.id
+    #     ))
+    #     self.env.cr.execute(list_query, aal_where_clause_params)
+    #     return True
 
-        aal_obj = self.env['account.analytic.line']
-        aal_domain = [
-            ('task_id', '=', self.task_id.id),
-            ('user_id', '=', self.user_id.id),
-            ('state', 'not in', ['invoiced','invoiced-by-fixed','write_off','expense-invoiced']),
-            ('date', '>=', self.from_date)
-        ]
+    # @api.model
+    # def create(self, vals):
+    #     res = super(TaskUser, self).create(vals)
+    #     res.update_analytic_lines()
+    #     return res
 
-        if next_fee_rate_date:
-            aal_domain += [('date', '<', next_fee_rate_date.from_date)]
-        aal_query_line = aal_obj._where_calc(aal_domain)
-        aal_tables, aal_where_clause, aal_where_clause_params = aal_query_line.get_sql()
-
-        list_query = ("""
-                WITH aal AS (
-                    SELECT
-                       id, unit_amount
-                    FROM
-                       {0}
-                    WHERE {1}
-                )
-                UPDATE {0} SET line_fee_rate = {2}, amount = (- aal.unit_amount * {2}), product_id = {3}
-                FROM aal WHERE {0}.id = aal.id
-                        """.format(
-            aal_tables,
-            aal_where_clause,
-            self.fee_rate,
-            self.product_id.id
-        ))
-        self.env.cr.execute(list_query, aal_where_clause_params)
-        return True
-
-    @api.model
-    def create(self, vals):
-        res = super(TaskUser, self).create(vals)
-        res.update_analytic_lines()
-        return res
-
-    @api.multi
-    def write(self, vals):
-        result = super(TaskUser, self).write(vals)
-        for res in self:
-            res.update_analytic_lines()
-        return result
+    # @api.multi
+    # def write(self, vals):
+    #     result = super(TaskUser, self).write(vals)
+    #     for res in self:
+    #         res.update_analytic_lines()
+    #     return result
 
 class InvoiceScheduleLine(models.Model):
     _name = 'invoice.schedule.lines'

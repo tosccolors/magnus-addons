@@ -150,6 +150,7 @@ class AccountAnalyticLine(models.Model):
     #         line.product_id = line.get_task_user_product()
 
     def _inverse_product_amount(self):
+        return
 
     def find_daterange_week(self, date):
         """
@@ -321,7 +322,7 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
     amount = fields.Monetary(
-        compute=_compute_product_amount,
+        compute=_compute_analytic_line,
         inverse=_inverse_product_amount,
         string='Amount',
         # required=True,
@@ -329,7 +330,7 @@ class AccountAnalyticLine(models.Model):
         store=True
     )
     product_id = fields.Many2one(
-        compute=_compute_product_amount,
+        compute=_compute_analytic_line,
         inverse=_inverse_product_amount,
         store=True
     )
@@ -378,12 +379,12 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def get_fee_rate(self):
-        tui = self.task_user_id
+        task_user = self.task_user_id
         fr = 0.0
         ic_fr = 0.0
-        if tui:
-            fr = tui.fee_rate or 0.0
-            ic_fr = tui.ic_fee_rate or 0.0
+        if task_user:
+            fr = task_user.fee_rate or 0.0
+            ic_fr = task_user.ic_fee_rate or 0.0
         return [fr, ic_fr]
 
     @api.model
@@ -435,7 +436,7 @@ class AccountAnalyticLine(models.Model):
             self.env.invalidate_all()
             vals.pop('state')
             return True
-
+        ## todo
         if not (
                 'unit_amount' in vals or
                 'product_uom_id' in vals or

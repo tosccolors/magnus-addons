@@ -113,15 +113,16 @@ class AnalyticInvoice(models.Model):
         '''
         task_user_ids = []
         user_total_data = []
-        task_user_obj = self.env['task.user']
         for item in result:
             vals = self._prepare_user_total(item, reconfirmed_entries)
+            ## todo
             aal_domain = time_domain + [
-                ('user_id', '=', vals['user_id']),
-                ('task_id', '=', vals['task_id']),
-                ('account_id', '=', vals['account_id']),
-                ('product_id', '=', vals['product_id']),
-                ('line_fee_rate', '=', vals['line_fee_rate'])]
+                # ('user_id', '=', vals['user_id']),
+                ('task_user_id', '=', vals['task_user_id']),
+                # ('account_id', '=', vals['account_id']),
+                # ('product_id', '=', vals['product_id']),
+                # ('line_fee_rate', '=', vals['line_fee_rate'])
+            ]
             if reconfirmed_entries:
                 aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
             else:
@@ -131,16 +132,7 @@ class AnalyticInvoice(models.Model):
 
             user_total_analytic_lines = []
             for aal in self.env['account.analytic.line'].search(aal_domain):
-                task_user_lines = task_user_obj.get_task_user_obj(
-                    aal.task_id.id,
-                    aal.user_id.id,
-                    aal.date) \
-                                  or task_user_obj.get_task_user_obj(
-                    aal.task_id.project_id.task_ids.filtered('standard').id,
-                    aal.user_id.id,
-                    aal.date)
-                if task_user_lines:
-                    task_user_ids += task_user_lines.ids
+                task_user_ids += aal.task_user_id
                 user_total_analytic_lines.append((4, aal.id))
             vals['detail_ids'] = user_total_analytic_lines
             user_total_data.append((0, 0, vals))
@@ -205,22 +197,18 @@ class AnalyticInvoice(models.Model):
     def _calculate_grouping(self):
         fields_grouped = [
             'id',
-            # 'user_id',
             'task_user_id',
-            'account_id',
-            # 'product_id',
-            'unit_amount',
-            # 'line_fee_rate',
-            'operating_unit_id',
-            'project_operating_unit_id']
+            # 'account_id',
+            # 'unit_amount',
+            # 'operating_unit_id',
+            # 'project_operating_unit_id'
+            ]
         grouped_by = [
-            # 'user_id',
             'task_user_id',
-            'account_id',
-            # 'product_id',
-            # 'line_fee_rate',
-            'operating_unit_id',
-            'project_operating_unit_id']
+            # 'account_id',
+            # 'operating_unit_id',
+            # 'project_operating_unit_id'
+            ]
         reg_fields_grouped = fields_grouped + ['month_id', 'week_id']
         reg_grouped_by = grouped_by + ['month_id']
         if self.gb_week:
@@ -230,22 +218,22 @@ class AnalyticInvoice(models.Model):
         return reg_fields_grouped, reg_grouped_by, reconfirmed_fields_grouped, reconfirmed_grouped_by
 
     def _prepare_user_total(self, item, reconfirmed_entries=False):
-        task_id = item.get('task_id')[0] if item.get('task_id', False) else False
-        project_id = False
-        if task_id:
-            project_id = self.env['project.task'].browse(task_id).project_id.id or False
+        # task_id = item.get('task_id')[0] if item.get('task_id', False) else False
+        # project_id = False
+        # if task_id:
+        #     project_id = self.env['project.task'].browse(task_id).project_id.id or False
         vals = {
             'name': '/',
-            'user_id': item.get('user_id')[0] if item.get('user_id', False) else False,
-            'task_id': item.get('task_id')[0] if item.get('task_id', False) else False,
-            'project_id': project_id,
-            'account_id': item.get('account_id')[0] if item.get('account_id', False) else False,
-            'unit_amount': item.get('unit_amount'),
-            'product_id': item.get('product_id')[0] if item.get('product_id', False) else False,
-            'operating_unit_id': item.get('operating_unit_id')[0] if item.get('operating_unit_id', False) else False,
-            'project_operating_unit_id': item.get('project_operating_unit_id')[0] if item.get(
-                                                                    'project_operating_unit_id', False) else False,
-            'line_fee_rate': item.get('line_fee_rate')
+            # 'task_user_id': item.get('task_user_id')[0] if item.get('task_user_id', False) else False,
+            # 'task_id': item.get('task_id')[0] if item.get('task_id', False) else False,
+            # 'project_id': project_id,
+            # 'account_id': item.get('account_id')[0] if item.get('account_id', False) else False,
+            # 'unit_amount': item.get('unit_amount'),
+            # 'product_id': item.get('product_id')[0] if item.get('product_id', False) else False,
+            # 'operating_unit_id': item.get('operating_unit_id')[0] if item.get('operating_unit_id', False) else False,
+            # 'project_operating_unit_id': item.get('project_operating_unit_id')[0] if item.get(
+            #                                                         'project_operating_unit_id', False) else False,
+            # 'line_fee_rate': item.get('line_fee_rate')
         }
         if reconfirmed_entries:
             vals.update({'gb_month_id': item.get('month_of_last_wip')[0] if item.get(
@@ -312,9 +300,10 @@ class AnalyticInvoice(models.Model):
     @api.depends('user_total_ids')
     def _compute_task_user_ids_domain(self):
         for rec in self:
+            task_user_ids = rec.user_total_ids.mapped('task_user_id')
             rec.task_user_ids_domain = json.dumps([
-                ('user_id', 'in', rec.user_total_ids.mapped('user_id').ids),
-                ('task_id', 'in', rec.user_total_ids.mapped('task_id').ids)
+                ('user_id', 'in', [tui.user_id for tui in task_user_ids]),
+                ('task_id', 'in', [tui.task_id for tui in task_user_ids])
             ])
 
     @api.onchange('account_analytic_ids')
@@ -495,14 +484,16 @@ class AnalyticInvoice(models.Model):
         # Get other invoice line values from product onchange
         invoice_line._onchange_product_id()
         invoice_line_vals = invoice_line._convert_to_write(invoice_line._cache)
-
+        project = line.project_id
+        analytic_account = line.account_id
         invoice_line_vals.update({
-            'account_analytic_id': line.account_id and line.account_id.id or False,
-            'price_unit': line.fee_rate if line.operating_unit_id == line.project_operating_unit_id else
-                            line.ic_fee_rate,
+            'account_analytic_id': analytic_account and analytic_account.id or False,
+            'price_unit': line.fee_rate if line.operating_unit_id ==
+                                                        line.project_operating_unit_id
+                                                     else line.ic_fee_rate,
             'analytic_invoice_id': line.analytic_invoice_id.id,
-            'origin': line.task_id.project_id.po_number
-                        if line.task_id and line.task_id.project_id and line.task_id.project_id.correction_charge
+            'origin': project.po_number
+                        if project and project.correction_charge
                         else '/',
         })
 
@@ -678,12 +669,13 @@ class AnalyticInvoice(models.Model):
         self.ensure_one()
         result = {}
         for user_tot in self.user_total_ids:
-            inv_property = user_tot.project_id.invoice_properties
+            project = line.task_user_id.task_id.project_id
+            inv_property = project.invoice_properties
             if inv_property.specs_invoice_report and inv_property.specs_type != 'per_month':
-                if user_tot.project_id in result:
-                    result[user_tot.project_id] |= user_tot.detail_ids
+                if project in result:
+                    result[project] |= user_tot.detail_ids
                 else:
-                    result[user_tot.project_id] = user_tot.detail_ids
+                    result[project] = user_tot.detail_ids
         return result
 
     @api.multi
@@ -784,59 +776,134 @@ class AnalyticUserTotal(models.Model):
     _description = "Analytic User Total"
 
     @api.one
-    @api.depends('unit_amount', 'user_id', 'task_id', 'analytic_invoice_id.task_user_ids')
-    def _compute_fee_rate(self):
+    @api.depends('detail_ids',
+                 'detail_ids.task_user_id',
+                 'detail_ids.task_user_id.date_from',
+                 'detail_ids.task_user_id.product_id',
+                 'detail_ids.task_user_id.fee_rate',
+                 'detail_ids.task_user_id.ic_fee_rate',
+                 )
+    def _compute_user_total_line(self):
         """
-            First, look get fee rate from task_user_ids from analytic invoice.
-            Else, get fee rate from method get_fee_rate()
+            compute all attributes from detail_ids
         :return:
         """
-        task_user = self.env['task.user']
-        ## get task-user out of first aaline
-        aaline = self.detail_ids and self.detail_ids[0]
-        task_user |= task_user.search([
-            ('id', 'in', self.analytic_invoice_id.task_user_ids.ids),
-            ('task_id', '=', self.task_id.id),
-            ('from_date', '<=', aaline.date),
-            ('user_id', '=', self.user_id.id)
-        ])
-        if task_user:
-            task_user = task_user.search([('id', 'in', task_user.ids)], limit=1, order='from_date Desc')
+        task_user = self.detail_ids.mapped('task_user_id')
+        if task_user and len(task_user) == 1:
+            self.task_user_id = task_user
+            self.task_id = task_user.task_id
+            self.user_id = task_user.user_id
+            self.product_id = task_user.product_id
             self.fee_rate = fr = task_user.fee_rate
             self.ic_fee_rate = ic_fr = task_user.ic_fee_rate
-        else:
-            self.fee_rate = fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)[0]
-            self.ic_fee_rate = ic_fr = aaline.get_fee_rate(self.task_id.id, self.user_id.id, aaline.date)[1]
-        self.amount = - self.unit_amount * fr
-        self.ic_amount = - self.unit_amount * ic_fr
+            self.account_id = analytic_account = task_user.task_id.project_id.analytic_account_id
+            self.operating_unit_id = task_user.user_id._get_operating_unit_id()
+            self.project_operating_unit_id = analytic_account.operating_unit_ids \
+                                             and analytic_account.operating_unit_ids[0] or False
+            self.unit_amount = ua = sum(self.details_ids.mapped('unit_amount'))
+            self.amount = fr * - ua
+            self.ic_amount = ic_fr * - ua
+            self.product_uom_id = self.env.ref("product.product_uom_hour")
+            self.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
 
-    @api.one
-    def _compute_analytic_line(self):
-        for aut in self:
-            aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
+    # @api.one
+    # def _compute_analytic_line(self):
+    #     for aut in self:
+    #         aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
 
-    @api.model
-    def _default_user(self):
-        return self.env.context.get('user_id', self.env.user.id)
+    # @api.model
+    # def _default_user(self):
+    #     return self.env.context.get('user_id', self.env.user.id)
 
     analytic_invoice_id = fields.Many2one(
         'analytic.invoice'
     )
+    task_user_id = fields.Many2one(
+        'task.user',
+        'Task User',
+        compute=_compute_user_total_line,
+        store=True
+    )
     fee_rate = fields.Float(
-        compute=_compute_fee_rate,
-        string='Fee Rate'
+        compute=_compute_user_total_line,
+        string='Fee Rate',
+        store=True
     )
     ic_fee_rate = fields.Float(
-        compute=_compute_fee_rate,
-        string='Intercompany Fee Rate'
+        compute=_compute_user_total_line,
+        string='Intercompany Fee Rate',
+        store=True
     )
     amount = fields.Float(
-        compute=_compute_fee_rate,
-        string='Amount'
+        compute=_compute_user_total_line,
+        string='Amount',
+        store=True
     )
     ic_amount = fields.Float(
-        compute=_compute_fee_rate,
-        string='Intercompany Amount'
+        compute=_compute_user_total_line,
+        string='Intercompany Amount',
+        store=True
+    )
+    account_id = fields.Many2one(
+        'account.analytic.account',
+        'Analytic Account',
+        compute=_compute_user_total_line,
+        required=True,
+        store=True
+    )
+    user_id = fields.Many2one(
+        'res.users',
+        compute=_compute_user_total_line,
+        string='User',
+        store=True
+        # default=_default_user
+    )
+    product_id = fields.Many2one(
+        'product.product',
+        string='Product',
+        compute=_compute_user_total_line,
+        store=True
+    )
+    task_id = fields.Many2one(
+        'project.task',
+        'Task',
+        compute=_compute_user_total_line,
+        store=True
+    )
+    project_id = fields.Many2one(
+        'project.project',
+        'Project',
+        compute=_compute_user_total_line,
+        store=True
+        # domain=[('allow_timesheets', '=', True)]
+    )
+    product_uom_id = fields.Many2one(
+        'product.uom',
+        string='Unit of Measure',
+        compute=_compute_user_total_line,
+        store=True
+    )
+    unit_amount = fields.Float(
+        'Quantity',
+        compute=_compute_user_total_line,
+        store=True
+        # default=0.0
+    )
+    operating_unit_id = fields.Many2one(
+        'operating.unit',
+        string='Operating Unit',
+        compute=_compute_user_total_line,
+        store=True
+    )
+    project_operating_unit_id = fields.Many2one(
+        'operating.unit',
+        string='Project Operating Unit',
+        compute=_compute_user_total_line,
+        store=True
+    )
+    count_analytic_line = fields.Char(
+        compute=_compute_user_total_line,
+        string='# Detail Time Lines'
     )
     detail_ids = fields.One2many(
         'account.analytic.line',
@@ -844,10 +911,6 @@ class AnalyticUserTotal(models.Model):
         string='Detail Time Lines',
         readonly=True,
         copy=False
-    )
-    count_analytic_line = fields.Char(
-        compute=_compute_analytic_line,
-        string='Detail Time Lines'
     )
     gb_week_id = fields.Many2one(
         'date.range',
@@ -883,23 +946,12 @@ class AnalyticUserTotal(models.Model):
         track_visibility='onchange',
         default='draft'
     )
-    account_id = fields.Many2one(
-        'account.analytic.account',
-        'Analytic Account',
-        required=True,
-        ondelete='restrict',
-    )
     partner_id = fields.Many2one(
         'res.partner',
-#        related='account_id.partner_id',
+        related='account_id.partner_id',
         string='Partner',
-#        store=True,
-#        readonly=True
-    )
-    user_id = fields.Many2one(
-        'res.users',
-        string='User',
-        default=_default_user
+        store=True,
+        readonly=True
     )
     company_id = fields.Many2one(
         related='account_id.company_id',
@@ -913,37 +965,6 @@ class AnalyticUserTotal(models.Model):
         related='user_id.employee_ids.department_id',
         store=True,
         readonly=True
-    )
-    product_id = fields.Many2one(
-        'product.product',
-        string='Product'
-    )
-    task_id = fields.Many2one(
-        'project.task',
-        'Task'
-    )
-    project_id = fields.Many2one(
-        'project.project',
-        'Project',
-        domain=[('allow_timesheets', '=', True)]
-    )
-    product_uom_id = fields.Many2one(
-        'product.uom',
-        string='Unit of Measure'
-    )
-    unit_amount = fields.Float(
-        'Quantity',
-        default=0.0
-    )
-    operating_unit_id = fields.Many2one(
-        'operating.unit',
-        string='Operating Unit',
-        store=True
-    )
-    project_operating_unit_id = fields.Many2one(
-        'operating.unit',
-        string='Project Operating Unit',
-        store=True
     )
     date = fields.Date(
         'Date',
