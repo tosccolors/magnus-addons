@@ -130,7 +130,7 @@ class AccountAnalyticLine(models.Model):
                                 else:
                                     project_id = self.env['project.task'].browse(task.id).project_id
                                     standard_task = project_id.task_ids.filtered('standard')
-                                    if standard_task:
+                                    if len(standard_task) == 1 :
                                         line.task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user.id, date) or False
                                 line.line_fee_rate = line.get_fee_rate()[0]
                                 line.amount = line.get_fee_rate_amount()
@@ -366,7 +366,7 @@ class AccountAnalyticLine(models.Model):
         if self.user_id and not product_id:
             # user = self.env['res.users'].browse(self.user_id.id)
             employee = self.user_id._get_related_employees()
-            
+
             product_id = employee.product_id or False
         return product_id
 
