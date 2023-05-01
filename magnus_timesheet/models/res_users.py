@@ -15,7 +15,7 @@ class ResUsers(models.Model):
     def _get_operating_unit_id(self):
         """ Compute Operating Unit of Employee based on the OU in the
         top Department."""
-        employee_id = self._get_related_employees()
+        employee_id = self._get_related_employees().filtered('resource_id.active')
         assert len(employee_id) == 1, 'Only one employee can have this user_id'
         if employee_id.department_id:
             if employee_id.department_id.parent_id.id == False:
