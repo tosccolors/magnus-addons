@@ -759,7 +759,8 @@ class AnalyticUserTotal(models.Model):
         """
         task_user = self.detail_ids.mapped('task_user_id')
         if task_user and len(task_user) == 1:
-            self.task_user_id = task_user_obj = self.env['task.user'].browse(task_user)
+            task_user_obj = self.env['task.user'].browse(task_user)
+            self.task_user_id = task_user_obj
             self.task_id = task_user_obj.task_id
             self.user_id = task_user_obj.user_id
             self.product_id = task_user_obj.product_id
