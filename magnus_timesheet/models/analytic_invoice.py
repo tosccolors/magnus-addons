@@ -116,9 +116,7 @@ class AnalyticInvoice(models.Model):
         for item in result:
             vals = self._prepare_user_total(item, reconfirmed_entries)
 
-            aal_domain = time_domain + [
-                ('task_user_id', '=', vals['task_user_id']),
-            ]
+            aal_domain = time_domain 
             if reconfirmed_entries:
                 aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
             else:
