@@ -116,7 +116,7 @@ class AnalyticInvoice(models.Model):
         for item in result:
             vals = self._prepare_user_total(item, reconfirmed_entries)
 
-            aal_domain = time_domain 
+            aal_domain = time_domain
             if reconfirmed_entries:
                 aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
             else:
@@ -759,14 +759,14 @@ class AnalyticUserTotal(models.Model):
         """
         task_user = self.detail_ids.mapped('task_user_id')
         if task_user and len(task_user) == 1:
-            self.task_user_id = task_user
-            self.task_id = task_user.task_id
-            self.user_id = task_user.user_id
-            self.product_id = task_user.product_id
-            self.fee_rate = fr = task_user.fee_rate
-            self.ic_fee_rate = ic_fr = task_user.ic_fee_rate
-            self.account_id = analytic_account = task_user.task_id.project_id.analytic_account_id
-            self.operating_unit_id = task_user.user_id._get_operating_unit_id()
+            self.task_user_id = task_user_obj = self.env['task.user'].browse(task_user)
+            self.task_id = task_user_obj.task_id
+            self.user_id = task_user_obj.user_id
+            self.product_id = task_user_obj.product_id
+            self.fee_rate = fr = task_user_obj.fee_rate
+            self.ic_fee_rate = ic_fr = task_user_obj.ic_fee_rate
+            self.account_id = analytic_account = task_user_obj.task_id.project_id.analytic_account_id
+            self.operating_unit_id = task_user_obj.user_id._get_operating_unit_id()
             self.project_operating_unit_id = analytic_account.operating_unit_ids \
                                              and analytic_account.operating_unit_ids[0] or False
             self.unit_amount = ua = sum(self.details_ids.mapped('unit_amount'))
