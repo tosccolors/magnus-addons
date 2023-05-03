@@ -273,7 +273,8 @@ class AnalyticInvoice(models.Model):
     @api.depends('user_total_ids')
     def _compute_task_user_ids_domain(self):
         for rec in self:
-            task_user_ids = rec.user_total_ids.mapped('task_user_id')
+            task_user_ids_list = rec.user_total_ids.mapped('task_user_id')
+            task_user_ids = self.env['task.user'].search(['id','=', task_user_ids_list])
             rec.task_user_ids_domain = json.dumps([
                 ('user_id', 'in', [tui.user_id for tui in task_user_ids]),
                 ('task_id', 'in', [tui.task_id for tui in task_user_ids])
