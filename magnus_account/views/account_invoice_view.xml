@@ -8,7 +8,7 @@
             <field name="inherit_id" ref="account.view_in_invoice_tree"/>
             <field name="arch" type="xml">
                 <data>
-                    <field name="reference" position="after">
+                    <field name="ref" position="after">
                         <field name="supplier_invoice_number"/>
                     </field>
                 </data>
@@ -23,7 +23,7 @@
             <field name="arch" type="xml">
                 <data>
                     <xpath expr="//field[@name='supplier_invoice_number']" position="attributes">
-                        <attribute name="required">1</attribute>
+                        <attribute name="attrs">{'required':[('move_type', 'in', ('in_invoice', 'in_refund'))]</attribute>
                     </xpath>
                 </data>
             </field>
@@ -48,11 +48,11 @@
                                placeholder="Add description" />
                     </page>
                 </xpath>
-                <xpath expr="//notebook/page[@name='other_info']/group/group[2]/field[@name='origin']" position="after">
+                <xpath expr="//field[@name='invoice_origin']" position="after">
                     <field name="date"/>
                 </xpath>
                 <xpath expr="//button[@name='action_invoice_sent']" position="after">
-                    <button name="action_invoice_sent" type="object" string="Send by Email" attrs="{'invisible':[('sent','=',True), ('state', 'not in', ('proforma', 'proforma2'))]}" groups="base.group_user"/>
+                    <button name="action_invoice_sent" type="object" string="Send by Email" attrs="{'invisible':[('state', 'not in', ('proforma', 'proforma2'))]}" groups="base.group_user"/>
                 </xpath>
             </field>
         </record>

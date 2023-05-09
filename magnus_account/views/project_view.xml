@@ -21,7 +21,7 @@
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_task_form2_magnus_account">
+        <!--<record model="ir.ui.view" id="view_task_form2_magnus_account">
             <field name="name">project Task Magnus</field>
             <field name="model">project.task</field>
             <field name="inherit_id" ref="connector_jira.view_task_form2"/>
@@ -30,7 +30,7 @@
                     <attribute name="string">Ticket Number</attribute>
                 </xpath>
             </field>
-        </record>
+        </record>-->
 
     </data>
 </odoo>

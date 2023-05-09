@@ -37,8 +37,8 @@ class Task(models.Model):
             recs = self.search([('name', '=', name)] + args, limit=limit)
         if not recs:
             domain = [('name', operator, name)]
-            if 'jira_compound_key' in self._fields:
-                domain = ['|'] + domain + [('jira_compound_key', operator, name)]
+            # if 'jira_compound_key' in self._fields:
+            #     domain = ['|'] + domain + [('jira_compound_key', operator, name)]
             recs = self.search(domain + args, limit=limit)
         return recs.name_get()
 

@@ -367,7 +367,7 @@ class AccountMove(models.Model):
 
 
 
-class AccountInvoiceLine(models.Model):
+class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     analytic_invoice_id = fields.Many2one(
@@ -429,9 +429,9 @@ class AccountInvoiceLine(models.Model):
             self.operating_unit_id = \
                 self.user_id._get_operating_unit_id()
 
-    @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
+    @api.depends('account_analytic_id', 'user_id', 'move_id.operating_unit_id')
     def _compute_operating_unit(self):
-        super(AccountInvoiceLine, self)._compute_operating_unit()
+        super(AccountMoveLine, self)._compute_operating_unit()
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
 
@@ -443,7 +443,7 @@ class AccountInvoiceLine(models.Model):
 
     @api.model
     def default_get(self, fields):
-        res = super(AccountInvoiceLine, self).default_get(fields)
+        res = super(AccountMoveLine, self).default_get(fields)
         ctx = self.env.context.copy()
         if 'default_invoice_id' in ctx:
             invoice_obj = self.env['account.move'].browse(ctx['default_invoice_id'])
@@ -459,16 +459,16 @@ class AccountInvoiceLine(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
-        res = super(AccountInvoiceLine, self)._onchange_product_id()
-        if self.invoice_id.type in 'out_invoice' \
-                and self.operating_unit_id != self.invoice_id.operating_unit_id \
+        res = super(AccountMoveLine, self)._onchange_product_id()
+        if self.move_id.move_type == 'out_invoice' \
+                and self.operating_unit_id != self.move_id.operating_unit_id \
                 and self.account_id.user_type_id in (
                                             self.env.ref('account.data_account_type_other_income'),
                                             self.env.ref('account.data_account_type_revenue')
                                             ):
            account = self.account_id
            trading_partners = self.operating_unit_id.partner_id.trading_partner_code \
-                              and self.invoice_id.operating_unit_id.partner_id.trading_partner_code
+                              and self.move_id.operating_unit_id.partner_id.trading_partner_code
            self.account_id = self.env['inter.ou.account.mapping']._get_mapping_dict(
                                                                 self.company_id, trading_partners,'product_to_inter'
                                                                 )[account.id]

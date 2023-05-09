@@ -390,7 +390,7 @@
                                             <thead>
                                                 <th style="font-weight:normal;" width="20%">Project</th>
                                                 <th style="font-weight:normal;" class="text-right" width="30%">Task type</th>
-                                                <th style="font-weight:normal;" class="text-right" width="30%">Jira Key</th>
+                                                <!--<th style="font-weight:normal;" class="text-right" width="30%">Jira Key</th>-->
                                                 <th style="font-weight:normal;" class="text-right" width="20%">Quantity</th>
                                             </thead>
                                             <t t-foreach="proLines_value" t-as="line">
@@ -398,12 +398,12 @@
                                                     <td style='border-top:none;' width="20%">
                                                         <span t-field="proLines.analytic_account_related.name"/>
                                                     </td>
-                                                    <td style='border-top:none;' class="text-right" width="30%">
+                                                    <!--<td style='border-top:none;' class="text-right" width="30%">
                                                         <span t-field="line.jira_issue_type"></span>
                                                     </td>
                                                     <td style='border-top:none;' class="text-right" width="30%">
                                                         <span t-field="line.jira_compound_key"/>-<span t-field="line.name"/>
-                                                    </td>
+                                                    </td>-->
                                                     <td style='border-top:none;' class="text-right" width="29%">
                                                         <span t-esc="line_value['unit_amount']"/>
                                                     </td>
