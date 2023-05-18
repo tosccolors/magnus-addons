@@ -94,6 +94,7 @@ class AnalyticInvoice(models.Model):
                                                                                  time_domain_reconfirm, True)
                 task_user_ids += task_user_reconfirm
                 user_total_data += user_total_reconfirm
+            # import pdb; pdb.set_trace()
             if task_user_ids:
                 self.task_user_ids = [(6, 0, task_user_ids)]
             else:
@@ -102,6 +103,9 @@ class AnalyticInvoice(models.Model):
             for total_line in user_total_invoiced_lines:
                 user_total_data.append((4, total_line.id))
             self.user_total_ids = user_total_data
+            self.rc_toggle = 'poppelepee'
+
+
 
     def _calculate_data(self, result, time_domain, reconfirmed_entries=False):
         '''
@@ -115,8 +119,9 @@ class AnalyticInvoice(models.Model):
         user_total_data = []
         for item in result:
             vals = self._prepare_user_total(item, reconfirmed_entries)
-
-            aal_domain = time_domain 
+            aal_domain = time_domain + [
+                ('task_user_id', '=', item.get('task_user_id', False)[0])
+            ]
             if reconfirmed_entries:
                 aal_domain += [('month_of_last_wip', '=', vals['gb_month_id'])]
             else:
@@ -126,7 +131,7 @@ class AnalyticInvoice(models.Model):
 
             user_total_analytic_lines = []
             for aal in self.env['account.analytic.line'].search(aal_domain):
-                task_user_ids += aal.task_user_id
+                task_user_ids.append(aal.task_user_id.id)
                 user_total_analytic_lines.append((4, aal.id))
             vals['detail_ids'] = user_total_analytic_lines
             user_total_data.append((0, 0, vals))
@@ -275,8 +280,8 @@ class AnalyticInvoice(models.Model):
         for rec in self:
             task_user_ids = rec.user_total_ids.mapped('task_user_id')
             rec.task_user_ids_domain = json.dumps([
-                ('user_id', 'in', [tui.user_id for tui in task_user_ids]),
-                ('task_id', 'in', [tui.task_id for tui in task_user_ids])
+                ('user_id', 'in', [tui.user_id.id for tui in task_user_ids]),
+                ('task_id', 'in', [tui.task_id.id for tui in task_user_ids])
             ])
 
     @api.onchange('account_analytic_ids')
@@ -291,6 +296,16 @@ class AnalyticInvoice(models.Model):
                                 ]}
         return res
 
+
+    def _inverse_task_user(self):
+        self.ensure_one()
+        not_existing_task_user = self.task_user_ids - self.task_user_ids.exists()
+        for task_user in not_existing_task_user:
+            task_user.create()
+        print(self.rc_toggle)
+
+
+
     @api.one
     @api.depends('account_analytic_ids', 'project_id')
     def _compute_invoice_properties(self):
@@ -300,30 +315,10 @@ class AnalyticInvoice(models.Model):
     name = fields.Char(
         string='Name'
     )
-    account_analytic_ids = fields.Many2many(
-        'account.analytic.account',
-        compute='_compute_objects',
-        string='Analytic Account',
-        store=True
-    )
     task_user_ids_domain = fields.Char(
         compute="_compute_task_user_ids_domain",
         readonly=True,
         store=False,
-    )
-    task_user_ids = fields.Many2many(
-        'task.user',
-        compute='_compute_objects',
-        string='Task Fee Rate',
-        store=True
-    )
-    invoice_id = fields.Many2one(
-        'account.invoice',
-        string='Customer Invoice',
-        required=True,
-        readonly=True,
-        ondelete='restrict',
-        index=True
     )
     time_line_ids = fields.Many2many(
         'account.analytic.line',
@@ -340,12 +335,36 @@ class AnalyticInvoice(models.Model):
         compute='_compute_analytic_lines',
         string='Revenue Line',
     )
+    task_user_ids = fields.Many2many(
+        'task.user',
+        compute='_compute_objects',
+        inverse='_inverse_task_user',
+        string='Task Fee Rate',
+        store=True
+    )
+    account_analytic_ids = fields.Many2many(
+        'account.analytic.account',
+        compute='_compute_objects',
+        string='Analytic Account',
+        store=True
+    )
     user_total_ids = fields.One2many(
         'analytic.user.total',
         'analytic_invoice_id',
         compute='_compute_objects',
         string='User Total Line',
         store=True
+    )
+    rc_toggle = fields.Char(
+        compute='_compute_objects',
+    )
+    invoice_id = fields.Many2one(
+        'account.invoice',
+        string='Customer Invoice',
+        required=True,
+        readonly=True,
+        ondelete='restrict',
+        index=True
     )
     month_id = fields.Many2one(
         'date.range',
@@ -751,12 +770,16 @@ class AnalyticUserTotal(models.Model):
     @api.one
     @api.depends('detail_ids',
                  'detail_ids.task_user_id',
+                 'detail_ids.task_user_id.fee_rate',
+                 'detail_ids.task_user_id.ic_fee_rate',
                  )
     def _compute_user_total_line(self):
         """
             compute all attributes from detail_ids
         :return:
         """
+        # import pdb;
+        # pdb.set_trace()
         task_user = self.detail_ids.mapped('task_user_id')
         if task_user and len(task_user) == 1:
             self.task_user_id = task_user
@@ -769,11 +792,11 @@ class AnalyticUserTotal(models.Model):
             self.operating_unit_id = task_user.user_id._get_operating_unit_id()
             self.project_operating_unit_id = analytic_account.operating_unit_ids \
                                              and analytic_account.operating_unit_ids[0] or False
-            self.unit_amount = ua = sum(self.details_ids.mapped('unit_amount'))
+            self.unit_amount = ua = sum(self.detail_ids.mapped('unit_amount'))
             self.amount = fr * - ua
             self.ic_amount = ic_fr * - ua
             self.product_uom_id = self.env.ref("product.product_uom_hour")
-            self.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'
+            self.count_analytic_line = str(len(self.detail_ids)) + ' (records)'
 
 
     analytic_invoice_id = fields.Many2one(
@@ -809,7 +832,6 @@ class AnalyticUserTotal(models.Model):
         'account.analytic.account',
         'Analytic Account',
         compute=_compute_user_total_line,
-        required=True,
         store=True
     )
     user_id = fields.Many2one(

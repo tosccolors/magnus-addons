@@ -76,12 +76,12 @@ class AnalyticLineStatus(models.TransientModel):
             raise UserError(_(
                 'Project(s) %s doesn\'t have invoicing properties.'
                 )%project_names)
-        no_task_user_id_entries = entries.filtered(lambda al: not al.task_user_id)
-        if no_task_user_id_entries and status == 'invoiceable':
-            task_user_names = ','.join([al.task_id.name + ' ' + al.user_id.name for al in no_task_user_id_entries])
-            raise UserError(_(
-                'Time lines %s don\'t have task_user_id\'s'
-                )%task_user_names)
+        # no_task_user_id_entries = entries.filtered(lambda al: not al.task_user_id)
+        # if no_task_user_id_entries and status == 'invoiceable':
+        #     task_user_names = ','.join([al.task_id.name + ' ' + al.user_id.name for al in no_task_user_id_entries])
+        #     raise UserError(_(
+        #         'Time lines %s don\'t have task_user_id\'s'
+        #         )%task_user_names)
         if entries:
             entries.write({'state': status})
             if status == 'delayed' and self.wip:

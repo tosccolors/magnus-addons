@@ -55,6 +55,12 @@ class Task(models.Model):
 class Project(models.Model):
     _inherit = "project.project"
 
+    @api.one
+    @api.depends('task_ids.standard')
+    def _compute_standard(self):
+        if self.task_ids:
+            self.standard_task_id = self.env['project.task'].search([('standard','=', True),('id','in', self.task_ids.ids)])
+
     overtime = fields.Boolean(
         string='Overtime Taken'
     )
@@ -71,6 +77,11 @@ class Project(models.Model):
         'invoice.schedule.lines',
         'project_id',
         string='Invoice Schedule'
+    )
+    standard_task_id = fields.Many2one(
+        'project.task',
+        compute=_compute_standard,
+        string='Standard Task'
     )
 
     @api.one

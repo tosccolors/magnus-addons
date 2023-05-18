@@ -62,6 +62,7 @@ class AccountAnalyticLine(models.Model):
                  'project_id.correction_charge',
                  'project_id.user_id',
                  'project_id.invoice_properties.expenses',
+                 'project_id.standard_task_id.task_user_ids',
                  'account_id',
                  'unit_amount',
                  'planned',
@@ -128,8 +129,9 @@ class AccountAnalyticLine(models.Model):
                                     line.task_user_id = task_user
                                 #check standard task for fee earners
                                 else:
-                                    project_id = self.env['project.task'].browse(task.id).project_id
-                                    standard_task = project_id.task_ids.filtered('standard')
+                                    # project_id = self.env['project.task'].browse(task.id).project_id
+                                    if line.project_id:
+                                        standard_task = line.project_id.standard_task_id
                                     if len(standard_task) == 1 :
                                         line.task_user_id = self.env['task.user'].get_task_user_obj(standard_task.id, user.id, date) or False
                                 line.line_fee_rate = line.get_fee_rate()[0]

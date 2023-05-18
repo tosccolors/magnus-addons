@@ -28,3 +28,8 @@ class ResUsers(models.Model):
             raise ValidationError(_('The Employee in the Analytic line has '
                                     'no department defined. Please complete'))
         return dep.operating_unit_id
+
+    task_user_ids = fields.One2many(
+        'task.user',
+        'user_id',
+    )
