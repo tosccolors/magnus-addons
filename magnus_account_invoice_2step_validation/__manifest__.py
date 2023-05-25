@@ -24,7 +24,7 @@ Enchanced to add
     'depends' : ['account_invoice_2step_validation',
     ],
     'data' : [
-        "views/account_invoice_view.xml",
+        "views/account_move_view.xml",
     ],
     'demo' : [],
     'installable': True

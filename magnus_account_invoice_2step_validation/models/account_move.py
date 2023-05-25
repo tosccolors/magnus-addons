@@ -22,8 +22,8 @@
 
 from odoo import models, fields, api, _
 
-class AccountInvoice(models.Model):
-    _inherit = 'account.invoice'
+class AccountMove(models.Model):
+    _inherit = 'account.move'
 
     def _get_current_user(self):
         grp_ver = self.env.user.has_group('account_invoice_2step_validation.verification')
