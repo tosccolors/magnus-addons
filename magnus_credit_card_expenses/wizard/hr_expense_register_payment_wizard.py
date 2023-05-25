@@ -10,7 +10,7 @@ class HrExpenseRegisterPaymentWizard(models.TransientModel):
     _description = "Hr Expense Register Payment wizard"
 
     
-    @api.one
+    # @api.one
     @api.constrains('amount')
     def _check_amount(self):
         if not self.amount > 0.0:
@@ -24,7 +24,7 @@ class account_abstract_payment(models.AbstractModel):
     _description = "Contains the logic shared between models which allows to register payments"
 
 
-    @api.one
+    # @api.one
     @api.constrains('amount')
     def _check_amount(self):
         if not self.amount > 0.0:
