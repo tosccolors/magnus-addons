@@ -116,7 +116,7 @@ De extra cijfers worden dan achter het rekeningnummer aangevult met 'nullen'.
 
     """,
     'author'  : 'Magnus - Willem Hulshof',
-    'website' : 'http://www.magnus.nl',
+    'website' : 'http://www.tosc.nl',
     'depends' : ['account',
                  'base_vat',
                  'base_iban',

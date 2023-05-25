@@ -19,8 +19,8 @@ Enchanced to add
 * Verification status on the Invoice
 
     """,
-    'author'  : 'Magnus - Willem Hulshof',
-    'website' : 'http://www.magnus.nl',
+    'author'  : 'TOSC - Willem Hulshof',
+    'website' : 'http://www.tosc.nl',
     'depends' : ['account_invoice_2step_validation',
     ],
     'data' : [

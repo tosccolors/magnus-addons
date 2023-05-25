@@ -9,7 +9,7 @@
       <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
       <field name="arch" type="xml">
         <!-- <xpath expr="//group[@name='selection']" position="inside"> -->
-        <xpath expr="//group[@name='validation']" position="inside">
+        <xpath expr="//group[@name='validity']" position="inside">
           <field name="is_leave_type_of_wizard" />
         </xpath>
       </field>

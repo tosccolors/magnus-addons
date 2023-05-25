@@ -6,7 +6,7 @@
     "name": "Magnus customization to the asset equipment link",
     "summary": "Create equipment when validating an invoice with assets",
     "version": "10.0.1.0.0",
-    "website": "http://www.magnus.nl",
+    "website": "http://www.tosc.nl",
     "author": "Hayo Bos",
     "license": "AGPL-3",
     "installable": True,

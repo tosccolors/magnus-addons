@@ -40,8 +40,8 @@ voor de interface naar slam.
 
 
     """,
-    'author'  : 'Magnus - Willem Hulshof',
-    'website' : 'http://www.magnus.nl',
+    'author'  : 'TOSC - Willem Hulshof',
+    'website' : 'http://www.tosc.nl',
     'depends' : [
                 'account',
                 'account_invoice_supplier_ref_unique',

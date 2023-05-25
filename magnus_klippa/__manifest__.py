@@ -12,8 +12,8 @@
         2. And fills in the operating unit, based on the linked operating unit in the analytic account.\n
     """,
 
-    'author': "Magnus",
-    'website': "http://www.magnus.nl",
+    'author': "TOSC",
+    'website': "http://www.tosc.nl",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml

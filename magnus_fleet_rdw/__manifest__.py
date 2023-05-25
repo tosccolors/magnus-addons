@@ -5,8 +5,8 @@
     'summary': """
         Provides a simple interface to fetch RDW data using the RDW API """,
 
-    'author': "Magnus - Hayo Bos",
-    'website': "http://www.magnus.nl",
+    'author': "TOSC - Hayo Bos",
+    'website': "http://www.tosc.nl",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml

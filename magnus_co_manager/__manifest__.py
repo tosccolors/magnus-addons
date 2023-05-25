@@ -3,8 +3,8 @@
 {
     'name': 'Magnus - Co Manager for Departments',
     'version': '1.0',
-    'author'  : 'Magnus - Hayo Bos',
-    'website' : 'http://www.magnus.nl',
+    'author'  : 'TOSC - Hayo Bos',
+    'website' : 'http://www.tosc.nl',
     'category': 'Human Resources',
     'description': """Adds a co-manager field to a department""",
     'depends': ['magnus_expense', 'magnus_timesheet'],

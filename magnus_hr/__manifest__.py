@@ -20,8 +20,8 @@ In the object hr.employee creates a new tab called 'Description' and on this tab
 In the object hr. employee on the tab 'HR Settings' under the heading 'Status' creates a new character field called 'Pass Number Alarm'.
 """,
 
-    'author': "Magnus",
-    'website': "http://www.magnus.nl",
+    'author': "TOSC",
+    'website': "http://www.tosc.nl",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml

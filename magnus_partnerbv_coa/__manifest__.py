@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-# Copyright (C) 2018 Magnus Red B.V. (<http://www.magnus.nl>).
+# Copyright (C) 2018 Magnus Red B.V. (<http://www.tosc.nl>).
 
 {
     'name': 'Netherlands - Magnus Partner B.V. Chart of Accounts',
     'version': '3.0',
     'category': 'Localization',
-    'author': 'Magnus',
-    'website': 'http://www.magnus.nl',
+    'author': 'TOSC',
+    'website': 'http://www.tosc.nl',
     'depends': [
         'account',
         'base_vat',

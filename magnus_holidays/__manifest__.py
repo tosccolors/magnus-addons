@@ -12,8 +12,8 @@
         This module adds a boolean field in the object project.project, named 'Holiday Consumption'. \nWhen this boolean is TRUE for a certain project.project and a user write time in the hr_timesheet.sheet and this time record has the status "Approved" on the project.project it should not only make a line in the object account.analytic.line but also a  new record in the object hr.leave.
     """,
 
-    'author': "Magnus",
-    'website': "http://www.magnus.nl",
+    'author': "TOSC",
+    'website': "http://www.tosc.nl",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
@@ -22,7 +22,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr_timesheet', 'hr_timesheet_sheet', 'hr_holidays', 'hr_holidays_hour', 'hr_holidays_validity_date', 'magnus_timesheet'],
+    'depends': ['base', 'project', 'hr_timesheet', 'hr_timesheet_sheet', 'hr_holidays', 'magnus_timesheet'],
 
     # always loaded
     'data': [

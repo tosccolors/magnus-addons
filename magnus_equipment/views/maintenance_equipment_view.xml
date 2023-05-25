@@ -135,7 +135,7 @@
             <form string="Warranty Categories">
                 <sheet>
                 <div class="oe_title">
-                    <label for="name" class="oe_edit_only" string="Warranty Category Name"/>
+                    <label for="warranty_category_name" class="oe_edit_only" string="Warranty Category Name"/>
                     <h1>
                         <field name="warranty_category_name"/>
                     </h1>

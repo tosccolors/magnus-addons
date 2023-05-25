@@ -23,7 +23,7 @@
             <field name="arch" type="xml">
                 <data>
                     <xpath expr="//field[@name='supplier_invoice_number']" position="attributes">
-                        <attribute name="attrs">{'required':[('move_type', 'in', ('in_invoice', 'in_refund'))]</attribute>
+                        <attribute name="attrs">{'required':[('move_type', 'in', ('in_invoice', 'in_refund'))]}</attribute>
                     </xpath>
                 </data>
             </field>

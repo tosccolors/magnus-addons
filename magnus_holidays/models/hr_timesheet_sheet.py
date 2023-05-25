@@ -92,7 +92,7 @@ class HrTimesheetSheet(models.Model):
             leave_type = leave_types[-1].id
         return leave_type
 
-    @api.one
+    # @api.one
     def action_timesheet_done(self):
         res = super(HrTimesheetSheet, self).action_timesheet_done()
         if self.timesheet_ids:
@@ -106,7 +106,7 @@ class HrTimesheetSheet(models.Model):
                     self.create_leave_request(leave_type, hour, date)
         return res
 
-    @api.one
+    # @api.one
     def action_timesheet_draft(self):
         res = super(HrTimesheetSheet, self).action_timesheet_draft()
         leave_request = self.env['hr.leave'].search([('name', '=', 'Time report'), ('employee_id', '=', self.employee_id.id), ('date_from', '>=', self.week_id.date_start), ('date_from', '<=', self.week_id.date_end), ('state', '=', 'written')])

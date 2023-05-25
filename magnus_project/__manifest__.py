@@ -11,8 +11,8 @@
         The operating unit defined in the project.project is copied to each timesheet_ids(account.analytic.line) created for this project.
     """,
 
-    'author': "Magnus",
-    'website': "http://www.magnus.nl",
+    'author': "TOSC",
+    'website': "http://www.tosc.nl",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml

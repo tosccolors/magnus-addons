@@ -10,8 +10,8 @@
         Set account_asset.account_analytic = account_asset.analytic_account_2 when this module was installed on Odoo 10. 
     """,
 
-    'author': "Magnus - Hayo Bos",
-    'website': "http://www.magnus.nl",
+    'author': "TOSC - Hayo Bos",
+    'website': "http://www.tosc.nl",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
