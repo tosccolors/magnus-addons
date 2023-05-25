@@ -26,7 +26,7 @@ class HrExpense(models.Model):
         self.name = name
         return res
 
-    @api.multi
+    
     def action_move_create(self):
         '''
         inherited function that is called when trying to create the accounting entries related to an expense
@@ -39,7 +39,7 @@ class HrExpense(models.Model):
                     expense.sheet_id.account_move_id.operating_unit_id = ou.id
         return res
 
-    @api.multi
+    
     def action_submit_expenses(self):
         if any(expense.state != 'draft' for expense in self):
             raise UserError(_("You cannot report twice the same line!"))
@@ -54,7 +54,7 @@ class HrExpense(models.Model):
             'res_id': expense_sheet.id
         }
 
-    @api.multi
+    
     def action_view_sheet(self):
         res = super(HrExpense, self).action_view_sheet()
         res['flags'] = {'initial_mode': 'edit'}
@@ -74,7 +74,7 @@ class HrExpense(models.Model):
     #         move_line.update({'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)]})
     #     return move_line
 
-    @api.multi
+    
     def write(self, vals):
         if vals.get('operating_unit_id', False):
             sheet_id = vals['sheet_id'] if vals.get('sheet_id', False) else self.sheet_id.id
@@ -110,13 +110,13 @@ class HrExpenseSheet(models.Model):
         res['journal_id'] = self.env.user.company_id.decl_journal_id.id
         return res
 
-    @api.multi
+    
     def revise_expense(self):
         expenses = self.expense_line_ids.filtered(lambda x: x.state == 'reported')
         self.write({'state': 'revise'})
         expenses.write({'state':'revise'})
 
-    @api.multi
+    
     def expense_revised(self):
         expenses = self.expense_line_ids.filtered(lambda x: x.state == 'revise')
         expenses.write({'state': 'reported'})
@@ -132,7 +132,7 @@ class HrExpenseSheet(models.Model):
 
    # updated by expense sheets are approved by partner group will goto status Approved By Partner
 
-    @api.multi
+    
     def approve_partner_expense_sheets(self):
         if not self.env.user.has_group('magnus_expense.group_hr_expense_partner'):
             raise UserError(_("Only Partner can approve expenses"))
@@ -141,7 +141,7 @@ class HrExpenseSheet(models.Model):
 
     # updated by expense sheets move create which are in  status Approved By Partner
 
-    @api.multi
+    
     def action_partner_sheet_move_create(self):
         if any(sheet.state != 'approve_partner' for sheet in self):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
@@ -164,7 +164,7 @@ class HrExpenseSheet(models.Model):
         return res
 
     # # adding server action function for the menuitem partner approval
-    # @api.multi
+    # 
     # def partner_approval_menu_action(self):
     #     get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
     #     child_departs = self.env['hr.department'].sudo().search(
@@ -179,7 +179,7 @@ class HrExpenseSheet(models.Model):
     #         'target': 'current'
     #         }
     
-    @api.one
+
     @api.constrains('expense_line_ids', 'employee_id')
     def _check_employee(self):
         employee_ids = self.expense_line_ids.mapped('employee_id')

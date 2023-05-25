@@ -69,7 +69,7 @@
             <field name="name">Refused Expenses</field>
             <field name="res_model">hr.expense</field>
             <field name="view_mode">tree,kanban,form,graph,pivot</field>
-            <field name="search_view_id" ref="hr_expense.view_hr_expense_filter"/>
+            <field name="search_view_id" ref="hr_expense.hr_expense_view_search"/>
             <field name="domain">[('employee_id.user_id', '=', uid)]</field>
             <field name="context">{'search_default_refused': 1}</field>
             <field name="help" type="html">
@@ -117,7 +117,7 @@
                         class="oe_highlight o_expense_sheet_post"/>
             </xpath>
             <!-- code updated -->
-            <xpath expr="//button[@name='%(hr_expense.hr_expense_sheet_register_payment_wizard_action)d']" position="attributes">
+            <xpath expr="//button[@name='action_register_payment']" position="attributes">
                 <attribute name="invisible">True</attribute>
             </xpath>
             <!-- code updated -->
@@ -148,7 +148,7 @@
         <record id="magnus_expense_hr_expense_sheet_filter" model="ir.ui.view">
             <field name="name">hr.expense.filter.magnus.expense2</field>
             <field name="model">hr.expense.sheet</field>
-            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+            <field name="inherit_id" ref="hr_expense.hr_expense_sheet_view_search"/>
             <field name="arch" type="xml">
                     <xpath expr="//search/filter[@name='to_post']" position="replace">
                     <filter domain="[('state', '=', 'approve_partner')]" string="To Post" name="to_post" help="Approved Expenses"/>
