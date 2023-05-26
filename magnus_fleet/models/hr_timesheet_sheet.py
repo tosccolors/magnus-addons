@@ -12,7 +12,7 @@ class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet.sheet"
     _order = "week_id desc"
 
-    @api.multi
+    # @api.multi
     @api.depends('end_mileage','business_mileage','starting_mileage')
     def _get_private_mileage_new(self):
         for sheet in self:

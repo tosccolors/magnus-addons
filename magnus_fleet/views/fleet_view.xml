@@ -58,7 +58,7 @@
       <record id="action_open_view_fiscal_addition_mapping" model="ir.actions.act_window">
         <field name="name">Mapping Fiscal Addition</field>
         <field name="res_model">fleet.fiscal.addition.mapping</field>
-        <field name="view_type">form</field>
+        <!--<field name="view_type">form</field>-->
         <field name="view_mode">tree</field>
     </record>
 
