@@ -93,47 +93,47 @@
   </record> 
 
   <!-- Search filter -->
-  <record model="ir.ui.view" id="open_invoice_status_filter_view">
-            <field name="name">open.invoice.status.filter.view</field>
-            <field name="model">open.invoice.status</field>
-            <field name="priority" eval="25"/>
-            <field name="arch" type="xml">
-                <search string="Search Open Invoice Status Lines">
-                    <field name="invoice_id"/>
-                    <field name="partner_id" operator="child_of"/>
-                    <field name="account_manager"/>
+    <record id="open_invoice_status_filter_view" model="ir.ui.view">
+        <field name="name">open.invoice.status.filter.view.search</field>
+        <field name="model">open.invoice.status</field>
+        <field name="arch" type="xml">
+            <search string="Search Open Invoice Status Lines">
+                <field name="invoice_id"/>
+                <field name="partner_id" operator="child_of"/>
+                <field name="account_manager"/>
 
-                    <filter string="Level 1" domain="[('cc_level','=', 1)]" />
-                    <filter string="Level 2" domain="[('cc_level','=', 2)]" />
-                    <filter string="Level 3" domain="[('cc_level','=', 3)]" />
-                    <filter string="Level 4" domain="[('cc_level','=', 4)]" />
-                    <filter string="Level 5" domain="[('cc_level','=', 5)]" />
-                    <filter string="Level 6" domain="[('cc_level','=', 6)]" />
-                    <separator/> 
+                <filter name='level_1' string="Level 1" domain="[('cc_level','=', 1)]"/>
+                <filter name='level_2' string="Level 2" domain="[('cc_level','=', 2)]" />
+                <filter name='level_3' string="Level 3" domain="[('cc_level','=', 3)]" />
+                <filter name='level_4' string="Level 4" domain="[('cc_level','=', 4)]" />
+                <filter name='level_5' string="Level 5" domain="[('cc_level','=', 5)]" />
+                <filter name='level_6' string="Level 6" domain="[('cc_level','=', 6)]" />
+                <separator/>
 
-                    <filter string="Processed" domain="[('processed','=', True)]" />
-                    <filter string="Not processed" domain="[('processed','=', False)]" />
-                    <separator/> 
-                    
-                    <group expand="0" string="Group By">
-                        <filter string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
-                        <filter string="Account manager" domain="[]" context="{'group_by':'account_manager'}"/>
-                        <filter string="Policy level" domain="[]" context="{'group_by':'cc_policy_level'}"/>
-                    </group>
-                </search>      
-            </field>                               
-        </record>
+                <filter name='processed' string="Processed" domain="[('processed','=', True)]" />
+                <filter name='not_processed' string="Not processed" domain="[('processed','=', False)]" />
+                <separator/>
+
+                <group expand="0" string="Group By">
+                    <filter name="grp_customer" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter name="grp_acc_mgr" string="Account manager" domain="[]" context="{'group_by':'account_manager'}"/>
+                    <filter name="policy_level" string="Policy level" domain="[]" context="{'group_by':'cc_policy_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
  
 
   <!-- Action via model method -->
-  <record id="open_invoice_status_action" model="ir.actions.server"> 
-    <field name="name">Open invoices status</field> 
-    <field name="model_id" ref="model_open_invoice_status"/> 
-    <field name="context">view_tree_open_invoice_status</field>
+  <record id="open_invoice_status_action" model="ir.actions.server">
+    <field name="name">Open invoices status</field>
+    <field name="model_id" ref="model_open_invoice_status"/>
+    <!--<field name="context">view_tree_open_invoice_status</field>-->
     <field name="code">
       action = model.default_view()
     </field>
-  </record> 
+  </record>
+
 
   <!-- Action  --> 
   <!--act_window id="open_invoice_status_action2" 

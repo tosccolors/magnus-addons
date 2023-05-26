@@ -31,7 +31,7 @@ class CreditControlStatus(models.TransientModel):
     invoice_state = fields.Char(string='Invoice state')
     processed = fields.Boolean(string='Done') 
 
-    @api.multi
+    # @api.multi
     def accept(self):
         for line in self:
             line.processed = True
@@ -40,7 +40,7 @@ class CreditControlStatus(models.TransientModel):
         return
 
     #show records selected by sql query
-    @api.multi
+    # @api.multi
     def default_view(self):
         #clear table, then fill with current status
         self.env['open.invoice.status'].search([]).unlink()
