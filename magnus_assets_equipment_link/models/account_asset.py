@@ -23,7 +23,7 @@ class AccountAsset(models.Model):
 		for asset in self:
 			asset.equipment_count = len(asset.equipment_ids)
 
-	@api.multi
+	# @api.multi
 	def button_open_equipment(self):
 		self.ensure_one()
 		res = self.env.ref('maintenance.hr_equipment_action').read()[0]

@@ -6,15 +6,15 @@ from odoo import api, fields, models
 import math
 
 
-class AccountInvoice(models.Model):
-	_inherit = 'account.invoice'
+class AccountMove(models.Model):
+	_inherit = 'account.move'
 
 	equipment_ids = fields.Many2many(
 		comodel_name="maintenance.equipment", compute="_compute_equipment_ids",
 		string="Equipments"
 	)
 
-	@api.multi
+	# @api.multi
 	@api.depends('invoice_line_ids', 'invoice_line_ids.equipment_ids')
 	def _compute_equipment_ids(self):
 		for invoice in self:
@@ -22,15 +22,15 @@ class AccountInvoice(models.Model):
 				(6, 0, invoice.mapped('invoice_line_ids.equipment_ids').ids),
 			]
 
-	@api.multi
+	# @api.multi
 	def action_invoice_cancel(self):
 		res = super(AccountInvoice, self).action_invoice_cancel()
 		self.mapped('equipment_ids').unlink()
 		return res
 
 
-class AccountInvoiceLine(models.Model):
-	_inherit = 'account.invoice.line'
+class AccountMoveLine(models.Model):
+	_inherit = 'account.move.line'
 
 	equipment_ids = fields.One2many(
 		comodel_name="maintenance.equipment", inverse_name="invoice_line_id",
