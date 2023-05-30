@@ -20,10 +20,14 @@
         </field>
     </record>
 
-        <act_window id="action_fleet_changes_from_odoo_to_nmbrs_send_changes_to_nmbrs"
-        key2="client_action_multi" name="Send to NMBRs"
-        res_model="fleet.changes.from.odoo.to.nmbrs" src_model="nmbrs.fleet"
-        view_mode="form" target="new" view_type="form"/>
+        <record id="action_fleet_changes_from_odoo_to_nmbrs_send_changes_to_nmbrs" model="ir.actions.act_window">
+            <field name="name">Send to NMBRs</field>
+            <field name="res_model">fleet.changes.from.odoo.to.nmbrs</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_nmbrs_fleet"/>
+            <field name="binding_view_types">form</field>
+        </record>
 
         <record id="fleet_changes_from_odoo_to_nmbrs_view" model="ir.ui.view">
             <field name="name">fleet.changes.from.odoo.to.nmbrs.form</field>
