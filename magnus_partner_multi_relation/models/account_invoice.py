@@ -14,7 +14,7 @@ class AccountMove(models.Model):
             line.member_invoice_count = res.get(line.id, 0)
 
     parent_id = fields.Many2one(
-        comodel_name='account.invoice',
+        comodel_name='account.move',
         string="Parent Invoice",
         index=True
     )
@@ -32,8 +32,8 @@ class AccountMove(models.Model):
 
     @api.model
     def _prepare_member_invoice_line(self, line, invoice, share_key):
-        invoice_line = self.env['account.invoice.line'].new({
-            'invoice_id': invoice.id,
+        invoice_line = self.env['account.move.line'].new({
+            'move_id': invoice.id,
             'product_id': line.product_id.id,
             'quantity': line.quantity,
             'uom_id': line.uom_id.id,
@@ -55,7 +55,7 @@ class AccountMove(models.Model):
             inv_date = datetime.strptime(invoice_date, "%Y-%m-%d").strftime('%Y-%m')
             if inv_date != period_date:
                 fpos = invoice.fiscal_position_id
-                account = self.env['analytic.invoice'].get_product_wip_account(line.product_id, fpos)
+                account = self.env['analytic.move'].get_product_wip_account(line.product_id, fpos)
                 invoice_line_vals.update({
                     'account_id': account.id
                 })
@@ -84,7 +84,7 @@ class AccountMove(models.Model):
             partner.property_product_pricelist.currency_id or
             company_id.currency_id
         )
-        invoice = self.env['account.invoice'].new({
+        invoice = self.env['account.move'].new({
             'reference': self.number,
             'type': 'out_invoice',
             'partner_id': partner.address_get(
@@ -105,10 +105,10 @@ class AccountMove(models.Model):
     def _create_member_invoice(self, partner, share_key):
         self.ensure_one()
         invoice_vals = self._prepare_member_invoice(partner)
-        invoice = self.env['account.invoice'].create(invoice_vals)
+        invoice = self.env['account.move'].create(invoice_vals)
         for line in self.invoice_line_ids:
             invoice_line_vals = self._prepare_member_invoice_line(line, invoice, share_key)
-            self.env['account.invoice.line'].create(invoice_line_vals)
+            self.env['account.move.line'].create(invoice_line_vals)
         invoice.compute_taxes()
         return invoice
 
@@ -147,7 +147,7 @@ class AccountMove(models.Model):
         if len(invoice) > 1:
             action['domain'] = [('id', 'in', invoice.ids)]
         elif invoice:
-            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
             action['res_id'] = invoice.id
         else:
             action['domain'] = [('id', 'in', invoice.ids)]
