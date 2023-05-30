@@ -110,7 +110,7 @@ class AccountMove(models.Model):
         if not self.vendor_bill_id:
             return {}
         self.currency_id = self.vendor_bill_id.currency_id
-        new_lines = self.env['account.invoice.line']
+        new_lines = self.env['account.move.line']
         for line in self.vendor_bill_id.invoice_line_ids:
             new_lines += new_lines.new(line.read(None, load='_classic_write')[0])
         self.invoice_line_ids += new_lines

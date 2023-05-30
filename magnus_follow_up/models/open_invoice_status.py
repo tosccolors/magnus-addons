@@ -9,7 +9,7 @@ class CreditControlStatus(models.TransientModel):
     company_id = fields.Many2one('res.company', string='Company')
     operating_unit_id = fields.Many2one('operating.unit', string='Operating unit')
     
-    invoice_id = fields.Many2one('account.invoice', string='Invoice id')
+    invoice_id = fields.Many2one('account.move', string='Invoice id')
     partner_id = fields.Many2one('res.partner', string='Partner')
     phone = fields.Char(related='partner_id.phone', string='Phone')
     account_manager = fields.Many2one('res.users', string='Account manager')
@@ -44,7 +44,7 @@ class CreditControlStatus(models.TransientModel):
     def default_view(self):
         #clear table, then fill with current status
         self.env['open.invoice.status'].search([]).unlink()
-        open_invoices = self.env['account.invoice'].search([('state','=','open'),('type','like','%out%')])
+        open_invoices = self.env['account.move'].search([('state','=','open'),('type','like','%out%')])
         for invoice in open_invoices :
             last_cc_action =self.env['credit.control.line'].search([('invoice_id','=',invoice.id)], order='date desc', limit=1)
             cc_actions = self.env['credit.control.line'].search([('invoice_id','=',invoice.id)])
