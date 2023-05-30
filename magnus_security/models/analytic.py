@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api
 from lxml import etree
-from odoo.osv.orm import setup_modifiers
+# from odoo.osv.orm import setup_modifiers
 from odoo import SUPERUSER_ID
 
 class AccountAnalyticLine(models.Model):
@@ -17,15 +17,17 @@ class AccountAnalyticLine(models.Model):
             doc = etree.XML(result['arch'])
             pro_nodes = doc.xpath("//field[@name='project_id']")
             if pro_nodes:
-                pro_nodes[0].set('widget', 'many2one_clickable')
-                setup_modifiers(
-                    pro_nodes[0], result['fields']['project_id'])
+                # pro_nodes[0].set('widget', 'many2one_clickable')
+                # setup_modifiers(
+                #     pro_nodes[0], result['fields']['project_id'])
+                pro_nodes[0].attrib["widget"] = "many2one_clickable"
             tsk_nodes = doc.xpath("//field[@name='task_id']")
             if tsk_nodes:
-                tsk_nodes[0].set('widget', 'many2one_clickable')
-                setup_modifiers(
-                    tsk_nodes[0], result['fields']['task_id'])
-                result['arch'] = etree.tostring(doc)
+                # tsk_nodes[0].set('widget', 'many2one_clickable')
+                # setup_modifiers(
+                #     tsk_nodes[0], result['fields']['task_id'])
+                tsk_nodes[0].attrib["widget"] = "many2one_clickable"
+            result['arch'] = etree.tostring(doc)
         return result
 
 
