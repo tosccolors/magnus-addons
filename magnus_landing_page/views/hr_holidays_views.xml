@@ -10,7 +10,7 @@
                     <field name="department_id" invisible="1"/>
                     <field name="holiday_type"/>
                     <field name="name"/>
-                    <field name="number_of_hours" string="Approved Hours" sum="Remaining Hours"/>
+                    <!--<field name="number_of_hours" string="Approved Hours" sum="Remaining Hours"/>-->
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="holiday_status_id"/>

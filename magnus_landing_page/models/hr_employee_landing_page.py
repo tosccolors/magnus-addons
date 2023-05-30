@@ -163,12 +163,12 @@ class hr_employee_landing_page(models.TransientModel):
 			return hr_timesheet.browse(result['res_id']).week_id
 		return hr_timesheet.get_week_to_submit()
 
-	@api.multi
+	# @api.multi
 	def action_view_timesheet(self):
 		self.ensure_one()
 		return self.env['hr.timesheet.current.open'].open_timesheet()
 
-	@api.multi
+	# @api.multi
 	def action_view_leaves_dashboard(self):
 		self.ensure_one()
 		ir_model_data = self.env['ir.model.data']
@@ -195,7 +195,7 @@ class hr_employee_landing_page(models.TransientModel):
 			'context': {'search_default_year': 1, 'search_default_group_employee': 1},
 		}
 
-	@api.multi
+	# @api.multi
 	def action_view_timesheet_tree(self):
 		self.ensure_one()
 		ir_model_data = self.env['ir.model.data']
@@ -213,7 +213,7 @@ class hr_employee_landing_page(models.TransientModel):
 			'domain': [('employee_id.user_id', '=', self.env.uid)],
 		}
 
-	@api.multi
+	# @api.multi
 	def action_view_analytic_tree(self):
 		self.ensure_one()
 		ir_model_data = self.env['ir.model.data']
@@ -253,6 +253,6 @@ class hr_employee_landing_page(models.TransientModel):
 			'domain': [('id', 'in', entries)],
 		}
 
-	@api.multi
+	# @api.multi
 	def no_popup_window(self):
 		return {'type': 'ir.actions.act_window_close'}
