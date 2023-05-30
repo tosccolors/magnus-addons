@@ -4,8 +4,8 @@ from odoo import fields, models, api, _
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
 
-class AccountInvoice(models.Model):
-    _inherit = 'account.invoice'
+class AccountMove(models.Model):
+    _inherit = 'account.move'
 
     def _compute_member_invoice(self):
         member_invoice = self.read_group([('parent_id', 'in', self.ids)], ['parent_id'], ['parent_id'])
@@ -67,7 +67,7 @@ class AccountInvoice(models.Model):
         })
         return invoice_line_vals
 
-    @api.multi
+    # @api.multi
     def _prepare_member_invoice(self, partner):
         self.ensure_one()
         company_id = partner.company_id if partner.company_id else self.company_id
@@ -101,7 +101,7 @@ class AccountInvoice(models.Model):
         invoice._onchange_partner_id()
         return invoice._convert_to_write(invoice._cache)
 
-    @api.multi
+    # @api.multi
     def _create_member_invoice(self, partner, share_key):
         self.ensure_one()
         invoice_vals = self._prepare_member_invoice(partner)
@@ -112,7 +112,7 @@ class AccountInvoice(models.Model):
         invoice.compute_taxes()
         return invoice
 
-    @api.multi
+    # @api.multi
     def action_invoice_open(self):
         '''
             If partner has members split invoice by distribution keys,
@@ -124,7 +124,7 @@ class AccountInvoice(models.Model):
         relation_type = self.env.ref('magnus_partner_multi_relation.rel_type_consortium').id
         members_data = self.get_members_sharing_key(self.partner_id, relation_type)
         if not members_data:
-            return super(AccountInvoice, self).action_invoice_open()
+            return super(AccountMove, self).action_invoice_open()
 
         # lots of duplicate calls to action_invoice_open, so we remove those already open
         to_open_invoices = self.filtered(lambda inv: inv.state != 'open')
@@ -139,7 +139,7 @@ class AccountInvoice(models.Model):
 
         return res
 
-    @api.multi
+    # @api.multi
     def action_view_member_invoice(self):
         self.ensure_one()
         action = self.env.ref('account.action_invoice_tree').read()[0]

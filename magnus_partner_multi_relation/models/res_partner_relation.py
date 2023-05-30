@@ -28,7 +28,7 @@ class ResPartnerRelation(models.Model):
         string='Invoicing Property'
     )
 
-    @api.one
+    # @api.one
     @api.constrains('distribution_key')
     def _check_distribution_key(self):
         """Check distribution_key for valid values
@@ -42,7 +42,7 @@ class ResPartnerRelation(models.Model):
                   'or smaller than 0.')
             )
 
-    @api.multi
+    # @api.multi
     def name_get(self):
         return [
             (this.id, '%s %s %s' % (
