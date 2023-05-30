@@ -35,7 +35,7 @@ class PayrollEntry(models.Model):
         copy=False
     )
 
-    @api.multi
+    # @api.multi
     @api.onchange('operating_unit')
     def onchange_operating_unit(self):
         """
@@ -50,7 +50,7 @@ class PayrollEntry(models.Model):
                          }
         return res
 
-    @api.multi
+    # @api.multi
     def fetch_journal_entry(self):
         """
         This method creates the move using the method fetch_payroll_entry (the move lines) and create_move using the
@@ -61,7 +61,7 @@ class PayrollEntry(models.Model):
         self.created_move = move
         self.move_id = move
 
-    @api.multi
+    # @api.multi
     def create_move(self, lines):
         move_data = {
             'name': self.name,
@@ -75,7 +75,7 @@ class PayrollEntry(models.Model):
         self.env['payroll.runs.nmbrs'].browse(self.payroll_run.id).update({'imported': True})
         return move
 
-    @api.multi
+    # @api.multi
     def fetch_payroll_entry(self):
         """
         This method uses the NMBRs API to fetch the payroll entry lines.

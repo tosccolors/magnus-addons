@@ -18,14 +18,7 @@
     <record id="open_view_payroll_runs" model="ir.actions.act_window">
             <field name="name">Payroll Runs</field>
             <field name="res_model">payroll.runs.nmbrs</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-    </record>
-
-    <record id="open_view_nmbrs_journal_entries" model="ir.actions.act_window">
-            <field name="name">Payroll Journal Entries</field>
-            <field name="res_model">payroll.entry</field>
-            <field name="view_type">form</field>
+            <field name="view_id" ref="view_payroll_runs"/>
             <field name="view_mode">tree,form</field>
     </record>
 
@@ -64,6 +57,13 @@
               </sheet>
           </form>
         </field>
+    </record>
+
+    <record id="open_view_nmbrs_journal_entries" model="ir.actions.act_window">
+        <field name="name">Payroll Journal Entries</field>
+        <field name="res_model">payroll.entry</field>
+        <field name="view_id" ref="view_nmbrs_journal_entries"/>
+        <field name="view_mode">tree,form</field>
     </record>
 
     <menuitem

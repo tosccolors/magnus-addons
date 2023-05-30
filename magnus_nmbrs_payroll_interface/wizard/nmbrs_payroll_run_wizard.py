@@ -13,7 +13,7 @@ class NMBRsPayrollRunWizard(models.TransientModel):
     operating_unit = fields.Many2one("operating.unit", string="Operating Unit")
     year = fields.Char(string="Year")
 
-    @api.multi
+    # @api.multi
     def fetch_payroll_runs_nmbrs(self):
         """
         This method is used to retrieve the payroll run info from numbers. Note: the payroll entry is loaded elsewhere.
