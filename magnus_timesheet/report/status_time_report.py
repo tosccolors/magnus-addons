@@ -19,7 +19,7 @@ class StatusTimeReport(models.Model):
                 SELECT hr_department.id,hr_department.parent_id,hr_department.operating_unit_id 
                 FROM ancestors, hr_department WHERE hr_department.id = ancestors.parent_id
                 )TABLE ancestors )parents
-                WHERE parent_id IS NULL""" % (self.department_id.id))
+                WHERE parent_id IS NULL""" % (self.department_id.id or 0))
         dept_parent_ids = [x[2] for x in self.env.cr.fetchall() if x[2]]
         self.operating_unit_id = dept_parent_ids[0]
 
