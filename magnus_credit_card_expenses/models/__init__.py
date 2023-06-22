@@ -20,7 +20,7 @@
 #
 ##############################################################################
 
-from . import company
+from . import operating_unit
 from . import hr_expense
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
