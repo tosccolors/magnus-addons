@@ -39,8 +39,14 @@ class HrExpense(models.Model):
 			raise UserError(_("You cannot report twice the same line!"))
 		if len(self.mapped('employee_id')) != 1:
 			raise UserError(_("You cannot report expenses for different employees in the same report!"))
-		expense_sheet = self.env['hr.expense.sheet'].create({'expense_line_ids':[(6, 0, [line.id for line in self])], 'employee_id':self[0].employee_id.id, 'name': self[0].name if len(self.ids) == 1 else '','operating_unit_id':self[0].operating_unit_id.id,
-															 'is_from_crdit_card':self[0].is_from_crdit_card})
+		journal = self[0].operating_unit_id.creditcard_decl_journal_id and self[0].operating_unit_id.creditcard_decl_journal_id.id or False
+		dic = {'expense_line_ids': [(6, 0, [line.id for line in self])], 'employee_id': self[0].employee_id.id,
+			   'name': self[0].name if len(self.ids) == 1 else '', 'operating_unit_id': self[0].operating_unit_id.id,
+			   'is_from_crdit_card': self[0].is_from_crdit_card}
+		if journal:
+			dic.update({'bank_journal_id': journal})
+
+		expense_sheet = self.env['hr.expense.sheet'].create(dic)
 		return {
 			'type': 'ir.actions.act_window',
 			'view_mode': 'form',
