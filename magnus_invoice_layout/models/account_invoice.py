@@ -26,7 +26,7 @@ class AccountInvoice(models.Model):
 
     invoice_description = fields.Text('Description')
 
-    @api.multi
+    
     def invoice_print(self):
         """ Print the invoice and mark it as sent, so that we can see more
             easily the next step of the workflow

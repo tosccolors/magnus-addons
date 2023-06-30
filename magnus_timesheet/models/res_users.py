@@ -12,7 +12,7 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
 	_inherit = "res.users"
 
-	@api.multi
+	
 	def _get_related_employees(self):
 		self.ensure_one()
 		ctx = dict(self.env.context)
@@ -21,7 +21,7 @@ class ResUsers(models.Model):
 		return self.env['hr.employee'].with_context(ctx).search([('user_id', '=', self.id)])
 
 
-	@api.multi
+	
 	def _get_operating_unit_id(self):
 		""" Compute Operating Unit of Employee based on the OU in the
 		top Department."""

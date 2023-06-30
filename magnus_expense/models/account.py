@@ -9,7 +9,7 @@ class AccountMoveLine(models.Model):
 
     customer_charge_expense = fields.Boolean('Charge Expense To Customer', index=True)
 
-    @api.multi
+
     def _prepare_analytic_line(self):
         analytic_line = super(AccountMoveLine, self)._prepare_analytic_line()
         if self.partner_id:

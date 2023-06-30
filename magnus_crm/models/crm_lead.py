@@ -12,7 +12,7 @@ import json
 class Lead(models.Model):
     _inherit = "crm.lead"
 
-    @api.one
+    
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
         start_date = self.start_date
@@ -21,7 +21,7 @@ class Lead(models.Model):
             raise ValidationError(_("End date should be greater than start date."))
 
     @api.depends('operating_unit_id')
-    @api.one
+    
     def _compute_dept_ou_domain(self):
         """
         Compute the domain for the department domain.
@@ -150,7 +150,7 @@ class Lead(models.Model):
         else:
             self.show_button = False
 
-    @api.one
+    
     def update_monthly_revenue(self):
         manual_lines = []
         sd = self.start_date
@@ -234,7 +234,7 @@ class Lead(models.Model):
             self.monthly_revenue_ids = monthly_revenues + manual_lines
             self.revenue_split_ids = monthly_revenues_split
 
-    @api.one
+    
     def recalculate_total(self):
         if round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2) != round(self.planned_revenue, 2):
             self.planned_revenue = round(sum(self.monthly_revenue_ids.mapped('expected_revenue')), 2)
@@ -402,7 +402,7 @@ class CRMRevenueSplit(models.Model):
     magnus_black_bv_amount = fields.Float(oldname='mangnus_black_bv_amount', string='Magnus Black B.V.')
     magnus_black_bv_per = fields.Float(oldname='mangnus_black_bv_per', string='Magnus Black B.V. %')
     
-    @api.one
+    
     @api.constrains('magnus_blue_bv_per', 'magnus_red_bv_per','magnus_green_bv_per','magnus_black_bv_per')
     def _check_dates(self):
         total_per = self.magnus_blue_bv_per + self.magnus_red_bv_per + self.magnus_green_bv_per + self.magnus_black_bv_per

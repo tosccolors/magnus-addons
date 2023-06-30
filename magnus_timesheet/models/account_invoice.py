@@ -16,7 +16,7 @@ class AccountJournal(models.Model):
 class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
-    @api.one
+    
     @api.depends('invoice_line_ids')
     def _compute_month_id(self):
         analytic_invoice_id = self.invoice_line_ids.mapped('analytic_invoice_id')
@@ -98,7 +98,7 @@ class AccountInvoice(models.Model):
             invoice_line['user_id']
         )
 
-    @api.multi
+    
     def _get_timesheet_by_group(self):
         self.ensure_one()
         aal_ids = []
@@ -117,7 +117,7 @@ class AccountInvoice(models.Model):
         return userProject
 
 
-    @api.multi
+    
     def action_invoice_open(self):
         to_process_invoices = self.filtered(lambda inv: inv.type in ('out_invoice', 'out_refund'))
         supplier_invoices = self - to_process_invoices
@@ -138,7 +138,7 @@ class AccountInvoice(models.Model):
                     invoice.action_wip_move_create()
         return res
 
-    @api.multi
+    
     def action_create_ic_lines(self):
         mapping_tp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=True, maptype='inter_to_regular')
         mapping_notp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=False, maptype='inter_to_regular')
@@ -214,7 +214,7 @@ class AccountInvoice(models.Model):
             if any(line.invoice_line_tax_ids for line in invoice.invoice_line_ids):
                 invoice.compute_taxes()
 
-    @api.multi
+    
     def action_delete_ic_lines(self):
         for invoice in self.filtered('ic_lines'):
             invoice.invoice_line_ids.filtered('ic_line').unlink()
@@ -226,7 +226,7 @@ class AccountInvoice(models.Model):
                 invoice.compute_taxes()
             invoice.ic_lines = False
 
-    @api.multi
+    
     def fill_trading_partner_code_supplier_invoice(self):
         for invoice in self:
             if not (invoice.partner_id.trading_partner_code or invoice.partner_id.parent_id.trading_partner_code):
@@ -256,7 +256,7 @@ class AccountInvoice(models.Model):
             return self.journal_id.default_credit_account_id.id
         return self.journal_id.default_debit_account_id.id
 
-    @api.multi
+    
     def action_wip_move_create(self):
         """ Creates invoice related analytics and financial move lines """
         for inv in self:
@@ -300,7 +300,7 @@ class AccountInvoice(models.Model):
                 reverse_wip_move.write({'name':wip_nxt_seq})
         return True
 
-    @api.multi
+    
     def action_cancel(self):
         res = super(AccountInvoice, self).action_cancel()
         wip_moves = self.env['account.move']
@@ -355,13 +355,13 @@ class AccountInvoiceLine(models.Model):
     )
 
     @api.depends('account_analytic_id', 'user_id', 'invoice_id.operating_unit_id')
-    @api.multi
+    
     def _compute_operating_unit(self):
         super(AccountInvoiceLine, self)._compute_operating_unit()
         for line in self.filtered('user_id'):
             line.operating_unit_id = line.user_id._get_operating_unit_id()
 
-    # @api.multi
+    
     # def write(self, vals):
     #     res = super(AccountInvoiceLine, self).write(vals)
     #     self.filtered('analytic_invoice_id').mapped('invoice_id').compute_taxes() #Issue: Vat creation double after invoice date change

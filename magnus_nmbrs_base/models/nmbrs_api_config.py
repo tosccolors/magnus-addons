@@ -20,7 +20,7 @@ class NmbrsInterfaceConfig(models.Model):
     endpoint_company_service = fields.Char(strin="Endpoint Company Service")
 
     # show only first record to configure, no options to create an additional one
-    @api.multi
+
     def default_view(self):
         """Function that creates the form content. By default the sandbox endpoints are used."""
         configurations = self.search([])
@@ -47,7 +47,7 @@ class NmbrsInterfaceConfig(models.Model):
         }
         return action
 
-    @api.multi
+
     def save_config(self):
         self.write({})
         return True

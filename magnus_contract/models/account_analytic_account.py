@@ -16,7 +16,7 @@ from odoo.tools.translate import _
 class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
 
-    @api.multi
+    
     def _prepare_invoice(self):
         res = super(AccountAnalyticAccount, self)._prepare_invoice()
         res['operating_unit_id'] = self.operating_unit_ids.id

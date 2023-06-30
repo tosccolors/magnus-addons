@@ -11,7 +11,7 @@ class NMBRsAnalyticAccountWizard(models.TransientModel):
 
     operating_unit = fields.Many2one("operating.unit", string="Operating Unit")
 
-    @api.multi
+    
     def fetch_analytic_accounts_nmbrs(self):
         """
         This function loads the analytic accounts from NMBRs for the selected Operating unit. There is a check

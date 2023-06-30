@@ -15,7 +15,7 @@ class HrHolidaysStatus(models.Model):
 			 'than the available ones for this type and will not take them into account for the '
 			 '"Remaining Legal Leaves" defined on the employee form.')
 
-	# @api.multi # this method is replced by (self, employee_id)
+	 # this method is replced by (self, employee_id)
 	# def get_hours(self, employee):
 	# 	self.ensure_one()
 	# 	result = {
@@ -42,7 +42,7 @@ class HrHolidaysStatus(models.Model):
     #
 	# 	return result
 
-	@api.multi
+
 	def get_days(self, employee_id):
 		# need to use `dict` constructor to create a dict per id
 		result = dict(

@@ -23,14 +23,14 @@ class AccountPaymentOrder(models.Model):
         track_visibility='onchange')
 
 
-    @api.multi
+    
     def _prepare_move_line_offsetting_account(self, amount_company_currency, amount_payment_currency, bank_lines):
         vals = super(AccountPaymentOrder, self)._prepare_move_line_offsetting_account(
                                     amount_company_currency, amount_payment_currency, bank_lines)
         vals['operating_unit_id'] = self.journal_id.operating_unit_id.id
         return vals
 
-    @api.multi
+    
     def _prepare_move_line_partner_account(self, bank_line):
         vals = super(AccountPaymentOrder, self)._prepare_move_line_partner_account(bank_line)
         if bank_line.payment_line_ids[0].move_line_id:

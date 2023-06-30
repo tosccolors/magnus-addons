@@ -31,7 +31,7 @@ class PlanningWizard(models.TransientModel):
     name = fields.Many2one('date.range', string='Select Quarter', required=True, index=True)
 
 
-    @api.multi
+    
     def load_period(self):
         view_type = 'form,tree'
         planning = self.env['magnus.planning'].search(

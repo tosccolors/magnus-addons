@@ -4,7 +4,7 @@ from odoo import api, fields, models
 class MagnusPlanning(models.Model):
     _inherit = "magnus.planning"
 
-    @api.one
+    
     def _compute_emp_domain(self):
         user = self.employee_id.user_id
         self_planning = self.env.context.get('self_planning', False)

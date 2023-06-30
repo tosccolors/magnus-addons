@@ -15,7 +15,7 @@ class AnalyticInvoice(models.Model):
     _rec_name = 'partner_id'
 
 
-    @api.one
+
     @api.depends('account_analytic_ids', 'month_id')
     def _compute_analytic_lines(self):
         if len(self.account_analytic_ids) > 0:
@@ -44,7 +44,7 @@ class AnalyticInvoice(models.Model):
             self.cost_line_ids = []
             self.revenue_line_ids = []
 
-    @api.one
+
     @api.depends('month_id', 'gb_week', 'project_operating_unit_id', 'project_id', 'link_project')
     def _compute_objects(self):
         '''
@@ -271,7 +271,7 @@ class AnalyticInvoice(models.Model):
                     """ % (self_obj._table, status, cond, rec))
 
 
-    @api.multi
+
     @api.depends('invoice_id.state')
     def _compute_state(self):
         for ai in self:
@@ -309,7 +309,7 @@ class AnalyticInvoice(models.Model):
         fm = self.env.ref('account_fiscal_month.date_range_fiscal_month').id
         return [('type_id', '=', fm)]
 
-    @api.multi
+
     @api.depends('user_total_ids')
     def _compute_task_user_ids_domain(self):
         for rec in self:
@@ -330,7 +330,7 @@ class AnalyticInvoice(models.Model):
                                 ]}
         return res
 
-    @api.one
+
     @api.depends('account_analytic_ids', 'project_id')
     def _compute_invoice_properties(self):
         if len(self.account_analytic_ids.ids) == 1 and self.project_id:
@@ -450,7 +450,7 @@ class AnalyticInvoice(models.Model):
             analytic_lines.write({'state': 'invoiceable'})
             user_total_ids.unlink()
 
-    @api.multi
+
     def write(self, vals):
         res = super(AnalyticInvoice, self).write(vals)
         self.unlink_rec()
@@ -467,7 +467,7 @@ class AnalyticInvoice(models.Model):
             analytic_lines.write({'state': 'progress'})
         return res
 
-    @api.multi
+
     def unlink(self):
         """
             reset analytic line state to invoiceable
@@ -510,7 +510,7 @@ class AnalyticInvoice(models.Model):
 
         return invoice_line_vals
 
-    @api.one
+
     def generate_invoice(self):
         if self.invoice_id.state == 'cancel':
             raise UserError(_("Can't generate invoice, kindly re-set invoice to draft'"))
@@ -540,7 +540,7 @@ class AnalyticInvoice(models.Model):
             self._sql_update(user_total, 'invoice_created')
         return True
 
-    @api.one
+
     def delete_invoice(self):
         if self.state == 'invoiced':
             self.invoice_id.action_cancel()
@@ -558,7 +558,7 @@ class AnalyticInvoice(models.Model):
                 self._sql_update(user_total, 'draft')
 
 
-    @api.multi
+
     def action_view_invoices(self):
         self.ensure_one()
         action = self.env.ref('account.action_invoice_tree1').read()[0]
@@ -571,7 +571,7 @@ class AnalyticInvoice(models.Model):
         return action
 
 
-    @api.multi
+
     def _get_user_per_month(self):
         self.ensure_one()
         result = {}
@@ -675,7 +675,7 @@ class AnalyticInvoice(models.Model):
                                                                          'amount': amount}
         return result
 
-    @api.multi
+
     def _get_user_per_day(self):
         self.ensure_one()
         result = {}
@@ -688,7 +688,7 @@ class AnalyticInvoice(models.Model):
                     result[user_tot.project_id] = user_tot.detail_ids
         return result
 
-    @api.multi
+
     def _get_specs_on_task(self):
         self.ensure_one()
         result = {}
@@ -785,7 +785,7 @@ class AnalyticUserTotal(models.Model):
     _name = "analytic.user.total"
     _description = "Analytic User Total"
 
-    @api.one
+
     @api.depends('unit_amount', 'user_id', 'task_id', 'analytic_invoice_id.task_user_ids')
     def _compute_fee_rate(self):
         """
@@ -809,7 +809,7 @@ class AnalyticUserTotal(models.Model):
         self.amount = - self.unit_amount * fr
         self.ic_amount = - self.unit_amount * ic_fr
 
-    @api.one
+
     def _compute_analytic_line(self):
         for aut in self:
             aut.count_analytic_line = str(len(aut.detail_ids)) + ' (records)'

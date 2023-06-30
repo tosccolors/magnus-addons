@@ -421,7 +421,7 @@ class AccountAnalyticLine(models.Model):
             return {}
         return super(AccountAnalyticLine, self).on_change_unit_amount()
 
-    @api.multi
+
     def write(self, vals):
         uom_hour = self.env.ref("uom.product_uom_hour")
         # don't call super if only state has to be updated
@@ -528,7 +528,7 @@ class AccountAnalyticLine(models.Model):
 
  # To display the Account move and reverse move in many2many list view for status = delayed record
 
-    # @api.multi
+
     # def add_move_line(self,analytic_lines_ids,vals):
     #     if False not in vals:
     #         for mov_id in vals:
@@ -539,14 +539,14 @@ class AccountAnalyticLine(models.Model):
     #                     analytic_line.account_analy_line_ids=[(4,mov_line_ids.id)]
     #     return True
 
-    @api.multi
+
     def modified(self, fnames):
         if not self.env.context.get('_timesheet_write'):
             # disable modification triggers when writing timesheets
             return super(AccountAnalyticLine, self).modified(fnames)
 
     # #not found in V12
-    # @api.multi
+
     # def _get_sale_order_line(self, vals=None):
     #     if not self.env.context.get('_timesheet_write'):
     #         # disable linking sale order lines to analytic lines on timesheets

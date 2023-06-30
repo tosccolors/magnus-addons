@@ -67,7 +67,7 @@ class AccountInvoice(models.Model):
         })
         return invoice_line_vals
 
-    @api.multi
+
     def _prepare_member_invoice(self, partner):
         self.ensure_one()
         company_id = partner.company_id if partner.company_id else self.company_id
@@ -101,7 +101,7 @@ class AccountInvoice(models.Model):
         invoice._onchange_partner_id()
         return invoice._convert_to_write(invoice._cache)
 
-    @api.multi
+
     def _create_member_invoice(self, partner, share_key):
         self.ensure_one()
         invoice_vals = self._prepare_member_invoice(partner)
@@ -112,7 +112,7 @@ class AccountInvoice(models.Model):
         invoice.compute_taxes()
         return invoice
 
-    @api.multi
+
     def action_invoice_open(self):
         '''
             If partner has members split invoice by distribution keys,
@@ -139,7 +139,7 @@ class AccountInvoice(models.Model):
 
         return res
 
-    @api.multi
+
     def action_view_member_invoice(self):
         self.ensure_one()
         action = self.env.ref('account.action_invoice_tree').read()[0]

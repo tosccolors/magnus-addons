@@ -11,7 +11,7 @@ class NMBRsFleetwizard(models.TransientModel):
     from_date = fields.Date(string="Start date")
     to_date = fields.Date(string="End date")
 
-    @api.multi
+    
     def fetch_recently_changed_leases(self):
         """"""
         line_query = ("""          DELETE FROM nmbrs_fleet;
@@ -46,7 +46,7 @@ class FleetChangesFromOdooToNMBRs(models.TransientModel):
     _name = "fleet.changes.from.odoo.to.nmbrs"
     _description = "Wizard to send fleet changes from odoo to nmbrs"
 
-    @api.multi
+    
     def send_changes_to_nmbrs(self):
         context = dict(self._context)
         vehicle_object = self.env['fleet.vehicle']

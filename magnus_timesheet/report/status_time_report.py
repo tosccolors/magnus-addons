@@ -7,7 +7,7 @@ class StatusTimeReport(models.Model):
     _auto = False
     _description = 'Status Time Report'
 
-    @api.one
+
     @api.depends('department_id')
     def _get_atmost_parent_ou(self):
         # calling atmost parent's operating unit

@@ -31,7 +31,7 @@ class HrEmployeeFromOdooToNmbrs(models.TransientModel):
     analytic_account = fields.Many2one('account.analytic.account', string="Analytic Account")
     unprotected_mode = fields.Boolean("Unprotected Mode")
 
-    @api.multi
+    
     def insert_employee(self):
         config = self.env['nmbrs.interface.config'].search([])[0]
         user = config.api_user

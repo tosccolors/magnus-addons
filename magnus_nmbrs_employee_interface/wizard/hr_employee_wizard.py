@@ -20,7 +20,7 @@ class HREmployeeWizard(models.TransientModel):
     nationality = fields.Many2one('hr.nmbrs.nationality', string="Nationality")
     analytic_account = fields.Many2one('account.analytic.account', string="Analytic Account")
 
-    @api.multi
+    
     def fetch_employee_data(self):
         """Collects the relevant data and returns a dict"""
         employee_data = {
@@ -47,7 +47,7 @@ class HREmployeeWizard(models.TransientModel):
         }
         return employee_data
 
-    @api.multi
+    
     def create_all(self):
         """If the box "send to NMBRs" is ticked, then call create a create.employee.from.odoo.to.nmbrs record, and
         use functions from this object to insert the employee in nmbrs"""
@@ -60,7 +60,7 @@ class HREmployeeWizard(models.TransientModel):
             self.env['hr.employee'].browse(employee_id.id).write({'employee_numbersid': nmbrs_id})
         return employee_id
 
-    @api.multi
+    
     @api.onchange('department_id')
     def onchange_department_id(self):
         """Function that sets a domain on the selectable analytic accounts based on the selected department"""

@@ -60,7 +60,7 @@ class AnalyticLineStatus(models.TransientModel):
                 _("Entries must belong to same month!"))
         return True
 
-    @api.one
+    
     def analytic_invoice_lines(self):
         context = self.env.context.copy()
         analytic_ids = context.get('active_ids',[])
@@ -281,7 +281,7 @@ class AnalyticLineStatus(models.TransientModel):
         return res
 
     @job
-    @api.multi
+    
     def prepare_account_move(self, analytic_lines_ids,notupdatestate):
         """ Creates analytics related financial move lines """
         acc_analytic_line = self.env['account.analytic.line']
@@ -419,7 +419,7 @@ class AnalyticLineStatus(models.TransientModel):
         return "WIP moves and Reversals successfully created. \n "
 
     @job
-    @api.multi
+    
     def wip_reversal(self, moves):
         reverse_move = None
         for move in moves:

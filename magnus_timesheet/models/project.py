@@ -10,7 +10,7 @@ from datetime import datetime
 class Task(models.Model):
     _inherit = "project.task"
 
-    @api.one
+    
     @api.constrains('project_id', 'standard')
     def _check_project_standard(self):
         task = self.env['project.task'].search([('project_id', '=', self.project_id.id), ('standard', '=', True)])
@@ -65,7 +65,7 @@ class Project(models.Model):
         string='Invoice Schedule'
     )
 
-    @api.one
+    
     @api.constrains('overtime', 'overtime_hrs')
     def _check_project_overtime(self):
         company_id = self.company_id.id if self.company_id else False
@@ -78,7 +78,7 @@ class Project(models.Model):
         if len(overtime_project) > 1:
             raise ValidationError(_("You can have only one project with 'Overtime Hours' per company!"))
 
-    @api.multi
+    
     def action_view_invoice(self):
         invoice_lines = self.env['account.invoice.line']
         invoices = invoice_lines.search([('account_analytic_id', '=', self.analytic_account_id.id)]).mapped('invoice_id')
@@ -95,13 +95,13 @@ class Project(models.Model):
 class TaskUser(models.Model):
     _name = 'task.user'
 
-    @api.one
+    
     @api.depends('product_id')
     def _default_fee_rate(self):
         if self.product_id:
             self.fee_rate = self.product_id.list_price
 
-    @api.one
+    
     @api.depends('fee_rate','ic_fee_rate')
     def _compute_margin(self):
         if self.fee_rate and self.ic_fee_rate:
@@ -117,7 +117,7 @@ class TaskUser(models.Model):
         return [('categ_id', '=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
-    @api.one
+    
     @api.depends('task_id', 'user_id', 'from_date')
     def _get_last_valid_fee_rate(self):
         task_id = self.task_id.id
@@ -186,7 +186,7 @@ class TaskUser(models.Model):
                 self.product_id = product.id
                 self.fee_rate = product.lst_price
 
-    @api.multi
+    
     def get_task_user_obj(self, task_id, user_id, date):
         taskUserObj = self.search([
             ('from_date', '<=', date),
@@ -196,7 +196,7 @@ class TaskUser(models.Model):
         order='from_date Desc', limit=1)
         return taskUserObj
 
-    @api.multi
+    
     def update_analytic_lines(self):
         next_fee_rate_date = self.search(
             [('from_date', '>', self.from_date),
@@ -242,7 +242,7 @@ class TaskUser(models.Model):
         res.update_analytic_lines()
         return res
 
-    @api.multi
+    
     def write(self, vals):
         result = super(TaskUser, self).write(vals)
         for res in self:

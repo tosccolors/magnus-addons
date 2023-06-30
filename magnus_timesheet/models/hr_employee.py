@@ -10,7 +10,7 @@ class Employee(models.Model):
     _inherit = "hr.employee"
 
 
-    @api.one
+    
     @api.depends('product_id')
     def _compute_fee_rate(self):
         if self.product_id:
@@ -21,7 +21,7 @@ class Employee(models.Model):
         return [('categ_id','=', self.env.ref(
             'magnus_timesheet.product_category_fee_rate').id)]
 
-    @api.one
+    
     def _get_overtime_hours(self):
         self.overtime_hours = sum(
             self.env['hr_timesheet.sheet'].search([('employee_id', '=', self.id)]).mapped('overtime_hours'))

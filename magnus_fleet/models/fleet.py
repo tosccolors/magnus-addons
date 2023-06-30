@@ -23,7 +23,7 @@ class FleetVehicleContract(models.Model):
             vals.update({'expiration_date':end_date})
         return super(FleetVehicleContract,self).create(vals)
     
-    @api.multi
+    
     def write(self, vals):
         if vals.get('lease_period') and int(vals.get('lease_period')) > 0:
             start_date = datetime.strptime(self.start_date, '%Y-%m-%d')

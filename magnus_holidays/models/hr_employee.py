@@ -10,7 +10,7 @@ class HrEmployee(models.Model):
 
     current_leave_state = fields.Selection(selection_add=[('written', 'Written')])
 
-    @api.multi
+    
     def _compute_leaves_count(self):
         all_leaves = self.env['hr.leave.report'].read_group([
             ('employee_id', 'in', self.ids),

@@ -14,7 +14,7 @@ class AccountInvoice(models.Model):
 		string="Equipments"
 	)
 
-	@api.multi
+	
 	@api.depends('invoice_line_ids', 'invoice_line_ids.equipment_ids')
 	def _compute_equipment_ids(self):
 		for invoice in self:
@@ -22,7 +22,7 @@ class AccountInvoice(models.Model):
 				(6, 0, invoice.mapped('invoice_line_ids.equipment_ids').ids),
 			]
 
-	@api.multi
+	
 	def action_invoice_cancel(self):
 		res = super(AccountInvoice, self).action_invoice_cancel()
 		self.mapped('equipment_ids').unlink()
@@ -52,7 +52,7 @@ class AccountInvoiceLine(models.Model):
 	#         })
 	#     return vals_list
 	#
-	# @api.multi
+	
 	# def asset_create(self):
 	#     for line in self.filtered('asset_profile_id.equipment_category_id'):
 	#         # Create equipments

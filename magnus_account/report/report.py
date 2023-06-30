@@ -25,7 +25,7 @@ except ImportError:
 class Report(models.Model):
     _inherit = 'ir.actions.report'
 
-    @api.multi
+
     def render_qweb_pdf(self, res_ids=None, data=None):
         if not self.env.context.get('res_ids'):
             return super(

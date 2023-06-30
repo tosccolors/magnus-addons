@@ -5,7 +5,7 @@ from odoo import api, fields, models, _
 class HrTimesheetSheet(models.Model):
     _inherit = "hr_timesheet.sheet"
 
-    @api.multi
+    
     def _get_validator_user_ids(self):
         users = super(HrTimesheetSheet, self)._get_validator_user_ids()
         for timesheet in self:

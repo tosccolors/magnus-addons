@@ -124,27 +124,27 @@ class HrTimesheetSheet(models.Model):
 			latest_mileage = self.sudo().starting_mileage_editable
 		return latest_mileage
 
-	@api.multi
+	
 	@api.depends('employee_id','week_id')
 	def _get_starting_mileage(self):
 		for sheet in self:
 			sheet.vehicle = True if sheet._get_vehicle() else False
 			sheet.starting_mileage = sheet._get_latest_mileage()
 
-	@api.multi
+	
 	@api.depends('timesheet_ids.kilometers')
 	def _get_business_mileage(self):
 		for sheet in self:
 			sheet.business_mileage = sum(sheet.sudo().timesheet_ids.mapped('kilometers')) if sheet.timesheet_ids else 0
 
-	@api.multi
+	
 	@api.depends('end_mileage','business_mileage','starting_mileage')
 	def _get_private_mileage(self):
 		for sheet in self:
 			m = sheet.end_mileage - sheet.business_mileage - sheet.starting_mileage
 			sheet.private_mileage = m if m > 0 else 0
 
-	@api.one
+	
 	@api.depends('timesheet_ids')
 	def _get_overtime_hours(self):
 		aal_incl_ott = self.timesheet_ids.filtered(lambda a: not a.task_id.standby)
@@ -260,7 +260,7 @@ class HrTimesheetSheet(models.Model):
 	#          self.end_mileage = self.starting_mileage + self.business_mileage
 
 
-	@api.multi
+	
 	@api.depends('date_start', 'date_end')
 	def _compute_name(self):
 		locale = self.env.context.get('lang') or self.env.user.lang or 'en_US'
@@ -312,7 +312,7 @@ class HrTimesheetSheet(models.Model):
 	#     super(HrTimesheetSheet, self).onchange_employee_id()
 	#     return {'domain': {'week_id': self._get_week_domain()}}
 
-	@api.multi
+	
 	# need to work on this function deekshith
 	def duplicate_last_week(self):
 		if self.week_id and self.employee_id:
@@ -351,7 +351,7 @@ class HrTimesheetSheet(models.Model):
 		if self.end_mileage < total:
 			raise ValidationError(_('End Mileage cannot be lower than the Starting Mileage + Business Mileage.'))
 
-	@api.one
+	
 	def action_timesheet_draft(self):
 		"""
 		On timesheet reset draft check analytic shouldn't be in invoiced
@@ -381,7 +381,7 @@ class HrTimesheetSheet(models.Model):
 
 
 
-	@api.one
+	
 	def action_timesheet_confirm(self):
 		self._check_end_mileage()
 		vehicle = self._get_vehicle()
@@ -414,7 +414,7 @@ class HrTimesheetSheet(models.Model):
 			raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
 		return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
-	@api.one
+	
 	def create_overtime_entries(self):
 		analytic_line = self.env['account.analytic.line']
 		if self.overtime_hours > 0 and not self.overtime_analytic_line_id:
@@ -444,7 +444,7 @@ class HrTimesheetSheet(models.Model):
 				self.overtime_analytic_line_id.unlink()
 		return self.overtime_analytic_line_id
 
-	@api.one
+	
 	def action_timesheet_done(self):
 		"""
 		On timesheet confirmed update analytic state to confirmed
@@ -495,7 +495,7 @@ class HrTimesheetSheet(models.Model):
 		result._queue_recompute_timesheet(['timesheet_ids'])
 		return result
 
-	@api.one
+	
 	def write(self, vals):
 		result = super(
 			HrTimesheetSheet, self.with_context(_timesheet_write=True)
@@ -510,7 +510,7 @@ class HrTimesheetSheet(models.Model):
 			self._queue_recompute_timesheet(['timesheet_ids'])
 		return result
 
-	@api.multi
+	
 	def action_view_overtime_entry(self):
 		self.ensure_one()
 		action = self.env.ref('analytic.account_analytic_line_action_entries')
@@ -764,7 +764,7 @@ class HrTimesheetSheet(models.Model):
 # class DateRangeGenerator(models.TransientModel):
 # 	_inherit = 'date.range.generator'
 #
-# 	@api.multi
+# 	
 # 	def _compute_date_ranges(self):
 # 		self.ensure_one()
 # 		vals = rrule(freq=self.unit_of_time,

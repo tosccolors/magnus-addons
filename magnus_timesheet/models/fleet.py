@@ -24,7 +24,7 @@ class FleetVehicleOdometer(models.Model):
                                         'a unique date.')]
 
     @api.depends('value_period_update', 'value_update')
-    @api.multi
+
     def _compute_odometer_value(self):
         for odom in self:
             if odom.value_period_update > 0.0 and odom.value_update > 0.0:
@@ -101,7 +101,7 @@ class FleetVehicleOdometer(models.Model):
             res.with_context(odo_newer=True).odo_newer()
         return res
 
-    @api.multi
+
     def write(self, data):
         res = super(FleetVehicleOdometer, self).write(data)
         for record in self.filtered(lambda s: not s.env.context.get('odo_newer')):
@@ -110,7 +110,7 @@ class FleetVehicleOdometer(models.Model):
         return res
 
 
-    @api.multi
+
     def unlink(self):
         res = {}
         for odom in self:

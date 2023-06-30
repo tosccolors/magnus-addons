@@ -17,7 +17,7 @@ class MagnusPlanning(models.Model):
     _description = "Planning"
     # _rec_name = "user_id"
 
-#     @api.one
+#     
 #     @api.constrains('week_from', 'week_to', 'planning_quarter')
 #     def _check_weeks(self):
 #         start_date = self.week_from.date_start
@@ -170,7 +170,7 @@ class MagnusPlanning(models.Model):
 #         self.env.cr.execute(line_query)
 #
 #
-#     @api.one
+#     
 #     def _compute_planning_lines(self):
 #         self_planning = self.env.context.get('self_planning', False)
 #         self.planning_ids_compute = False
@@ -181,11 +181,11 @@ class MagnusPlanning(models.Model):
 #         else:
 #             self.get_planning_from_managers()
 #
-#     @api.one
+#     
 #     def compute_planning_lines(self):
 #         self._compute_planning_lines()
 #
-#     @api.one
+#     
 #     def _compute_emp_domain(self):
 #         user = self.employee_id.user_id
 #         self_planning = self.env.context.get('self_planning', False)
@@ -326,7 +326,7 @@ class MagnusPlanning(models.Model):
 #         # res._create_planning()
 #         return res
 #
-#     @api.multi
+#     
 #     def write(self, vals):
 #         cur_entries = self.planning_ids
 #         res = super(MagnusPlanning, self).write(vals)

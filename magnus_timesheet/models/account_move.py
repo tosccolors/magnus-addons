@@ -22,7 +22,7 @@ class AccountMoveLine(models.Model):
     )
 
 
-    @api.multi
+    
     @api.constrains('operating_unit_id', 'analytic_account_id','user_id')
     def _check_analytic_operating_unit(self):
         for rec in self.filtered('user_id'):
@@ -35,7 +35,7 @@ class AccountMoveLine(models.Model):
         super(AccountMoveLine, self - self.filtered('user_id'))._check_analytic_operating_unit()
 
     @api.onchange('analytic_account_id', 'user_id')
-    @api.multi
+    
     def onchange_operating_unit(self):
         super(AccountMoveLine, self).onchange_operating_unit()
         if self.user_id:
@@ -49,7 +49,7 @@ class AccountMove(models.Model):
     # it cannot be first posting. Then 'OU-balancing' lines are unlinked.
     # is_wip_move=fields.Boolean("Is WIP move")
     # wip_percentage=fields.Integer("WIP percentage")
-    @api.multi
+    
     def post(self, invoice=False):
         for move in self:
             if not move.company_id.ou_is_self_balanced or not move.name:
@@ -60,7 +60,7 @@ class AccountMove(models.Model):
         res = super(AccountMove, self).post(invoice=invoice)
         return res
 
-    @api.multi
+    
     def wip_move_create(self, wip_journal, name, ar_account_id, ref=None):
         self.ensure_one()
         move_date = datetime.strptime(str(self.date), "%Y-%m-%d")

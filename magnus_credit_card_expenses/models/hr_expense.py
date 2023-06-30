@@ -33,7 +33,7 @@ class HrExpense(models.Model):
 				vals.update({'currency_id':res_company.currency_id.id})
 		return super(HrExpense,self).create(vals)
 	
-	@api.multi
+	
 	def submit_expenses(self):
 		if any(expense.state != 'draft' for expense in self):
 			raise UserError(_("You cannot report twice the same line!"))
@@ -55,7 +55,7 @@ class HrExpense(models.Model):
 			'res_id': expense_sheet.id
 		}
 
-	@api.multi
+	
 	def _get_account_move_by_sheet(self):
 		""" Return a mapping between the expense sheet of current expense and its account move
             :returns dict where key is a sheet id, and value is an account move record
@@ -84,7 +84,7 @@ class HrExpense(models.Model):
 				move = move_grouped_by_sheet[expense.sheet_id.id]
 		return move_grouped_by_sheet
 
-	@api.multi
+	
 	def action_move_create(self):
 		'''
         main function that is called when trying to create the accounting entries related to an expense
@@ -178,7 +178,7 @@ class HrExpenseSheet(models.Model):
 			for line in res.expense_line_ids:
 				line.write({'is_from_crdit_card':True,'payment_mode':'company_account'})
 		return res
-	@api.multi
+	
 	def write(self,vals):
 		if self.filtered('is_from_crdit_card'):
 			credit_card_exp = True
@@ -194,7 +194,7 @@ class HrExpenseSheet(models.Model):
 				line.write({'is_from_crdit_card':credit_card_exp,'payment_mode':'company_account'})
 		return super(HrExpenseSheet,self).write(vals)
 	
-	@api.multi
+	
 	def action_partner_sheet_move_create(self):
 		if any(sheet.state != 'approve_partner' for sheet in self):
 			raise UserError(_("You can only generate accounting entry for approved expense(s)."))
@@ -220,7 +220,7 @@ class HrExpenseSheet(models.Model):
 			self.write({'state': 'done'})
 		return res
 	
-	@api.one
+	
 	@api.constrains('expense_line_ids')
 	def _check_amounts(self):
 		# DO NOT FORWARD-PORT! ONLY FOR v10
@@ -230,7 +230,7 @@ class HrExpenseSheet(models.Model):
 #             raise ValidationError(_('You cannot have a positive and negative amounts on the same expense report.'))
 
 	# adding server action function for the menuitem partner approval
-	# @api.multi
+	
 	# def partner_credit_card_approval_menu_action(self):
 	# 	get_logged_user_emp_id = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.user.id)])
 	# 	child_departs = self.env['hr.department'].sudo().search(

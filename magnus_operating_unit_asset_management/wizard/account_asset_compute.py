@@ -28,7 +28,7 @@ class AccountAssetCompute(models.TransientModel):
     operating_unit_id = fields.Many2one('operating.unit', string='Operating Unit', required=False)
 
     # Overridden:
-    @api.multi
+
     def _get_asset_to_compute(self):
         self.ensure_one()
         return self.env['account.asset'].search(
