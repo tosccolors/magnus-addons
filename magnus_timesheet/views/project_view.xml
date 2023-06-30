@@ -40,10 +40,10 @@
                                     <field name="ic_fee_rate"/>
                                     <field name="margin"/>
                             </tree>
-                                <form string="Fee Earners">
+                                <!--<form string="Fee Earners">
                                     <group>
                                         <field name="user_id" invisible="0"/>
-                                        <!--<field name="user_ids" widget="many2many_tags"/>-->
+                                        &lt;!&ndash;<field name="user_ids" widget="many2many_tags"/>&ndash;&gt;
                                         <field name="from_date" />
                                         <field name="product_id"/>
                                         <field name="fee_rate"/>
@@ -51,7 +51,7 @@
                                         <field name="cost_rate"/>
                                         <field name="margin"/>
                                     </group>
-                                </form>
+                                </form>-->
                             </field>
                         </group>
                     </page>

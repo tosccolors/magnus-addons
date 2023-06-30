@@ -165,6 +165,9 @@ class TaskUser(models.Model):
         string='Last Valid Fee Rate',
         store=True
     )
+    cost_rate = fields.Float(
+        string='Cost Rate',
+    )
 
     cost_rate = fields.Float(
         string='Cost Rate',
