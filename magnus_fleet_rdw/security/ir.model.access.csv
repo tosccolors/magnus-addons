@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vehicle_from_rdw,access_vehicle_from_rdw,model_vehicle_from_rdw,rdw_api_rights,1,1,1,1
+

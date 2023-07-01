@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2021 Hunki Enterprises BV
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+<record id="view_account_invoice_form" model="ir.ui.view">
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form" />
+    <field name="arch" type="xml">
+        <field name="invoice_origin" position="after">
+            <field name="source_email" attrs="{'invisible':[('move_type', 'in', ('out_invoice', 'out_refund'))]}"/>
+        </field>
+        <field name="ref" position="after">
+            <field
+                name="vendor_bill_id"
+                domain="[('partner_id','child_of', [partner_id]), ('state','in',('open','in_payment','paid')), ('move_type','=','in_invoice')]"
+                string="Auto-Complete" placeholder="Select an old vendor bill"
+                options="{'no_create': True}" context="{'show_total_amount': True}"
+                attrs="{'invisible':[('move_type', 'in', ('out_invoice', 'out_refund'))]}"
+            />
+        </field>
+    </field>
+</record>
+
+</odoo>

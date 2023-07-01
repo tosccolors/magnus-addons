@@ -1,0 +1,1720 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Account template -->
+        <record id="0010" model="account.account.template">
+            <field name="code">0010</field>
+            <field name="name">Aanschafwaarde Goodwill</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_1')])]"/>
+        </record>
+        <record id="0011" model="account.account.template">
+            <field name="code">0011</field>
+            <field name="name">Afschrijving Goodwill</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_1')])]"/>
+        </record>
+        <record id="0015" model="account.account.template">
+            <field name="code">0015</field>
+            <field name="name">Goodwill MMC (Qurius)</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_1')])]"/>
+        </record>
+        <record id="0016" model="account.account.template">
+            <field name="code">0016</field>
+            <field name="name">Afschrijving Goodwill MMC</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_1')])]"/>
+        </record>
+        <record id="0017" model="account.account.template">
+            <field name="code">0017</field>
+            <field name="name">Goodwill InterAcces</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_1')])]"/>
+        </record>
+        <record id="0018" model="account.account.template">
+            <field name="code">0018</field>
+            <field name="name">Afschrijving goodwill InterAcces</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_1')])]"/>
+        </record>
+        <record id="0100" model="account.account.template">
+            <field name="code">0100</field>
+            <field name="name">Aanschafwaarde Verbouwingen</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_2')])]"/>
+        </record>
+        <record id="0101" model="account.account.template">
+            <field name="code">0101</field>
+            <field name="name">Afschrijving Verbouwingen</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_2')])]"/>
+        </record>
+        <record id="0200" model="account.account.template">
+            <field name="code">0200</field>
+            <field name="name">Aanschafwaarde Software</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_3')])]"/>
+        </record>
+        <record id="0201" model="account.account.template">
+            <field name="code">0201</field>
+            <field name="name">Afschrijving Software</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_3')])]"/>
+        </record>
+        <record id="0230" model="account.account.template">
+            <field name="code">0230</field>
+            <field name="name">Aanschafwaarde Hardware</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_3'), ref('account_tag_4')])]"/>
+        </record>
+        <record id="0231" model="account.account.template">
+            <field name="code">0231</field>
+            <field name="name">Afschrijving Hardware</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_3'), ref('account_tag_4')])]"/>
+        </record>
+        <record id="0260" model="account.account.template">
+            <field name="code">0260</field>
+            <field name="name">Aanschafwaarde Inventaris</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_3'), ref('account_tag_5')])]"/>
+        </record>
+        <record id="0261" model="account.account.template">
+            <field name="code">0261</field>
+            <field name="name">Afschrijving Inventaris</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_3'), ref('account_tag_5')])]"/>
+        </record>
+        <record id="0300" model="account.account.template">
+            <field name="code">0300</field>
+            <field name="name">Aanschafwaarde Vervoermiddelen</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_6'), ref('account_tag_5')])]"/>
+        </record>
+        <record id="0301" model="account.account.template">
+            <field name="code">0301</field>
+            <field name="name">Afschrijving Vervoermiddelen</field>
+            <field name="user_type_id" ref="account.data_account_type_fixed_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_6'), ref('account_tag_5')])]"/>
+        </record>
+        <record id="0500" model="account.account.template">
+            <field name="code">0500</field>
+            <field name="name">Deelneming Magnus Red B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_8')])]"/>
+        </record>
+        <record id="0501" model="account.account.template">
+            <field name="code">0501</field>
+            <field name="name">Deelneming Magnus Blue B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_8')])]"/>
+        </record>
+        <record id="0502" model="account.account.template">
+            <field name="code">0502</field>
+            <field name="name">Deelneming Magnus Green B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_8')])]"/>
+        </record>
+        <record id="0503" model="account.account.template">
+            <field name="code">0503</field>
+            <field name="name">Deelneming bQuind B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_8')])]"/>
+        </record>
+        <record id="0510" model="account.account.template">
+            <field name="code">0510</field>
+            <field name="name">Deelneming Bquind</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_8')])]"/>
+        </record>
+        <record id="0530" model="account.account.template">
+            <field name="code">0530</field>
+            <field name="name">Deelneming Magnus Maleisië</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_8')])]"/>
+        </record>
+        <record id="0565" model="account.account.template">
+            <field name="code">0565</field>
+            <field name="name">Leningen u/g 1</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0570" model="account.account.template">
+            <field name="code">0570</field>
+            <field name="name">Waarborgsommen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_7'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0600" model="account.account.template">
+            <field name="code">0600</field>
+            <field name="name">Aandelenkapitaal</field>
+            <field name="user_type_id" ref="account.data_account_type_equity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_10'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0605" model="account.account.template">
+            <field name="code">0605</field>
+            <field name="name">Agio reserve</field>
+            <field name="user_type_id" ref="account.data_account_type_equity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_10'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0606" model="account.account.template">
+            <field name="code">0606</field>
+            <field name="name">Wettelijke reserves</field>
+            <field name="user_type_id" ref="account.data_account_type_equity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_10'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0607" model="account.account.template">
+            <field name="code">0607</field>
+            <field name="name">Overige reserves</field>
+            <field name="user_type_id" ref="account.data_account_type_equity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_10'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0730" model="account.account.template">
+            <field name="code">0730</field>
+            <field name="name">Overige voorzieningen</field>
+            <field name="user_type_id" ref="account.data_account_type_non_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_11'), ref('account_tag_9')])]"/>
+        </record>
+        <record id="0820" model="account.account.template">
+            <field name="code">0820</field>
+            <field name="name">Leningen Magnus Technology Consultants</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_37'), ref('account_tag_12'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1000" model="account.account.template">
+            <field name="code">1000</field>
+            <field name="name">Kas</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1021" model="account.account.template">
+            <field name="code">1021</field>
+            <field name="name">ABN 0243 1505 04</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1011" model="account.account.template">
+            <field name="code">1011</field>
+            <field name="name">ABN 24.30.54.319</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1051" model="account.account.template">
+            <field name="code">1051</field>
+            <field name="name">ABN 474 8579 64</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1001" model="account.account.template">
+            <field name="code">1001</field>
+            <field name="name">ABN 24 34 34 626</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1031" model="account.account.template">
+            <field name="code">1031</field>
+            <field name="name">ABN 57.43.25.948</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1002" model="account.account.template">
+            <field name="code">1002</field>
+            <field name="name">ABN 521 299 500 (Bankgar. dekkingsrek.)</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1111" model="account.account.template">
+            <field name="code">1111</field>
+            <field name="name">ABN 99.02.18.481 (g-rek)</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1101" model="account.account.template">
+            <field name="code">1101</field>
+            <field name="name">ABN 99 02 17 701 (G-rek)</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1131" model="account.account.template">
+            <field name="code">1131</field>
+            <field name="name">ABN 0994 173 202</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="1250" model="account.account.template">
+            <field name="code">1250</field>
+            <field name="name">Betalingen onderweg</field>
+            <field name="user_type_id" ref="account.data_account_type_liquidity"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_14'), ref('account_tag_13')])]"/>
+        </record>
+        <record id="recv" model="account.account.template">
+            <field name="code">1300</field>
+            <field name="name">Debiteuren</field>
+            <field name="user_type_id" ref="account.data_account_type_receivable"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_16')])]"/>
+        </record>
+        <record id="1350" model="account.account.template">
+            <field name="code">1350</field>
+            <field name="name">Dubieuze debiteuren</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_16')])]"/>
+        </record>
+        <record id="1410" model="account.account.template">
+            <field name="code">1410</field>
+            <field name="name">Voorschotten personeel</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1420" model="account.account.template">
+            <field name="code">1420</field>
+            <field name="name">Overige vorderingen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1430" model="account.account.template">
+            <field name="code">1430</field>
+            <field name="name">Vooruitbetaalde kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1450" model="account.account.template">
+            <field name="code">1450</field>
+            <field name="name">Betaalde kosten Magnus Red BV</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1451" model="account.account.template">
+            <field name="code">1451</field>
+            <field name="name">Betaalde kosten Blue</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1452" model="account.account.template">
+            <field name="code">1452</field>
+            <field name="name">Betaalde kosten Magnus Green B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1453" model="account.account.template">
+            <field name="code">1453</field>
+            <field name="name">Betaalde kosten bQuind</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1460" model="account.account.template">
+            <field name="code">1460</field>
+            <field name="name">Rek.crt. Magnus Red BV</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1461" model="account.account.template">
+            <field name="code">1461</field>
+            <field name="name">Rek.crt. Magnus Technology Consultants B.V. </field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1462" model="account.account.template">
+            <field name="code">1462</field>
+            <field name="name">Rek.crt. Magnus Technology Solutions B.V. </field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1463" model="account.account.template">
+            <field name="code">1463</field>
+            <field name="name">Rek.crt. bQuind B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1464" model="account.account.template">
+            <field name="code">1464</field>
+            <field name="name">Rek.Crt. EGC Holding</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1466" model="account.account.template">
+            <field name="code">1466</field>
+            <field name="name">Rek.crt. Magnus Group</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1470" model="account.account.template">
+            <field name="code">1470</field>
+            <field name="name">Rek.crt. The Good Work B.V. (N. Doeleman)</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1471" model="account.account.template">
+            <field name="code">1471</field>
+            <field name="name">Rek.crt. Biront BVBA</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1472" model="account.account.template">
+            <field name="code">1472</field>
+            <field name="name">Rek.crt. R.F. Th. Peters Beheer BV</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="1473" model="account.account.template">
+            <field name="code">1473</field>
+            <field name="name">Rek.crt. RCHJ B.V. (R. Verhulst)</field>
+            <field name="user_type_id" ref="account.data_account_type_current_assets"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_15'), ref('account_tag_17')])]"/>
+        </record>
+        <record id="pay" model="account.account.template">
+            <field name="code">1500</field>
+            <field name="name">Crediteuren</field>
+            <field name="user_type_id" ref="account.data_account_type_payable"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_19')])]"/>
+        </record>
+        <record id="1510" model="account.account.template">
+            <field name="code">1510</field>
+            <field name="name">Personeels Crediteuren</field>
+            <field name="user_type_id" ref="account.data_account_type_payable"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_19')])]"/>
+        </record>
+        <record id="vat_payable_l" model="account.account.template">
+            <field name="code">1601</field>
+            <field name="name">Btw af te dragen laag</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="vat_payable_h" model="account.account.template">
+            <field name="code">1602</field>
+            <field name="name">Btw af te dragen hoog</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="vat_payable_0" model="account.account.template">
+            <field name="code">1603</field>
+            <field name="name">Btw af te dragen overige</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="vat_refund_l" model="account.account.template">
+            <field name="code">1611</field>
+            <field name="name">Btw te vorderen laag</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="vat_refund_h" model="account.account.template">
+            <field name="code">1612</field>
+            <field name="name">Btw te vorderen hoog</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="1620" model="account.account.template">
+            <field name="code">1620</field>
+            <field name="name">Btw-afdracht</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="1625" model="account.account.template">
+            <field name="code">1625</field>
+            <field name="name">Btw oude jaren</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="vat_payable_v" model="account.account.template">
+            <field name="code">1631</field>
+            <field name="name">1631 Af te dragen Btw-verlegd </field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="1633" model="account.account.template">
+            <field name="code">1633</field>
+            <field name="name">Te vorderen BTW oninbare vorderingen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="1635" model="account.account.template">
+            <field name="code">1635</field>
+            <field name="name">BTW prive gebruik </field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_20')])]"/>
+        </record>
+        <record id="1660" model="account.account.template">
+            <field name="code">1660</field>
+            <field name="name">Loonheffing</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_21')])]"/>
+        </record>
+        <record id="1665" model="account.account.template">
+            <field name="code">1665</field>
+            <field name="name">Afdracht loonheffing</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_21')])]"/>
+        </record>
+        <record id="1670" model="account.account.template">
+            <field name="code">1670</field>
+            <field name="name">Vennootschapsbelasting</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_21')])]"/>
+        </record>
+        <record id="1700" model="account.account.template">
+            <field name="code">1700</field>
+            <field name="name">Netto lonen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1705" model="account.account.template">
+            <field name="code">1705</field>
+            <field name="name">Reservering vakantiegeld</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1710" model="account.account.template">
+            <field name="code">1710</field>
+            <field name="name">Reservering vakantiedagen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1715" model="account.account.template">
+            <field name="code">1715</field>
+            <field name="name">Reservering bonus</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1725" model="account.account.template">
+            <field name="code">1725</field>
+            <field name="name">Pensioenpremies</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1730" model="account.account.template">
+            <field name="code">1730</field>
+            <field name="name">Te betalen WIA/exedent premie</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1735" model="account.account.template">
+            <field name="code">1735</field>
+            <field name="name">Te betalen overlijdensrisico verzekering</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_22')])]"/>
+        </record>
+        <record id="1800" model="account.account.template">
+            <field name="code">1800</field>
+            <field name="name">Vooruit gefactureerde bedragen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1810" model="account.account.template">
+            <field name="code">1810</field>
+            <field name="name">Te betalen autokosten</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1820" model="account.account.template">
+            <field name="code">1820</field>
+            <field name="name">Te betalen accountantskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1840" model="account.account.template">
+            <field name="code">1840</field>
+            <field name="name">Te betalen dividend</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1850" model="account.account.template">
+            <field name="code">1850</field>
+            <field name="name">Te betalen Magnus Red BV</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1851" model="account.account.template">
+            <field name="code">1851</field>
+            <field name="name">Te betalen Magnus Blue B.V.</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1852" model="account.account.template">
+            <field name="code">1852</field>
+            <field name="name">Te betalen Magnus Green</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="1860" model="account.account.template">
+            <field name="code">1860</field>
+            <field name="name">Overige te betalen posten</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_38'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="2000" model="account.account.template">
+            <field name="code">2000</field>
+            <field name="name">Netto lonen</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_39'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="2310" model="account.account.template">
+            <field name="code">2310</field>
+            <field name="name">Doorbelasting (SLAM) Magnus Red BV</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_39'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="2311" model="account.account.template">
+            <field name="code">2311</field>
+            <field name="name">Doorbelasting (SLAM) Blue</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_39'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="2312" model="account.account.template">
+            <field name="code">2312</field>
+            <field name="name">Doorbelasting (SLAM) Green</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_39'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="2500" model="account.account.template">
+            <field name="code">2500</field>
+            <field name="name">Vraagposten</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_39'), ref('account_tag_18'), ref('account_tag_23')])]"/>
+        </record>
+        <record id="3200" model="account.account.template">
+            <field name="code">3200</field>
+            <field name="name">Onderhanden werk</field>
+            <field name="user_type_id" ref="account.data_account_type_current_liabilities"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_40'), ref('account_tag_18')])]"/>
+        </record>
+        <record id="4000" model="account.account.template">
+            <field name="code">4000</field>
+            <field name="name">Lonen en salarissen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4001" model="account.account.template">
+            <field name="code">4001</field>
+            <field name="name">Andere salaris componenten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4005" model="account.account.template">
+            <field name="code">4005</field>
+            <field name="name">Vakantiegeld</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4006" model="account.account.template">
+            <field name="code">4006</field>
+            <field name="name">Vakantiedagen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4007" model="account.account.template">
+            <field name="code">4007</field>
+            <field name="name">Overwerk</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4010" model="account.account.template">
+            <field name="code">4010</field>
+            <field name="name">Bonussen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4011" model="account.account.template">
+            <field name="code">4011</field>
+            <field name="name">Jubileum uitkering</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4013" model="account.account.template">
+            <field name="code">4013</field>
+            <field name="name">Bijzondere beloningen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4020" model="account.account.template">
+            <field name="code">4020</field>
+            <field name="name">Uitkering ziekengeld</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4021" model="account.account.template">
+            <field name="code">4021</field>
+            <field name="name">Ontvangen subsidie SO</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4030" model="account.account.template">
+            <field name="code">4030</field>
+            <field name="name">Sociale lasten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4031" model="account.account.template">
+            <field name="code">4031</field>
+            <field name="name">Eindheffing loonbelastng</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4032" model="account.account.template">
+            <field name="code">4032</field>
+            <field name="name">Pensioenpremies</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4033" model="account.account.template">
+            <field name="code">4033</field>
+            <field name="name">Wia / exedent verzekering</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4034" model="account.account.template">
+            <field name="code">4034</field>
+            <field name="name">Medische verzekering Werknemer</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4035" model="account.account.template">
+            <field name="code">4035</field>
+            <field name="name">Overlijdensrisicoverzekering</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4036" model="account.account.template">
+            <field name="code">4036</field>
+            <field name="name">Contractuele kosten vergoeding</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4045" model="account.account.template">
+            <field name="code">4045</field>
+            <field name="name">Managementvergoedingen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4050" model="account.account.template">
+            <field name="code">4050</field>
+            <field name="name">Kantinekosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4055" model="account.account.template">
+            <field name="code">4055</field>
+            <field name="name">Reiskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4058" model="account.account.template">
+            <field name="code">4058</field>
+            <field name="name">Belastingvrije uitkeringen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4060" model="account.account.template">
+            <field name="code">4060</field>
+            <field name="name">Wervingskosten personeel</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4061" model="account.account.template">
+            <field name="code">4061</field>
+            <field name="name">Opleidingskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4064" model="account.account.template">
+            <field name="code">4064</field>
+            <field name="name">Arbodienst</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4065" model="account.account.template">
+            <field name="code">4065</field>
+            <field name="name">Mobiele telefoonkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4070" model="account.account.template">
+            <field name="code">4070</field>
+            <field name="name">Geschenken personeel</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4071" model="account.account.template">
+            <field name="code">4071</field>
+            <field name="name">Geschenken personeel bijz. verstr.</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4080" model="account.account.template">
+            <field name="code">4080</field>
+            <field name="name">Bedrijfsuitjes/ Jaarlijks Diner</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4085" model="account.account.template">
+            <field name="code">4085</field>
+            <field name="name">Maaltijden kantoor</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4090" model="account.account.template">
+            <field name="code">4090</field>
+            <field name="name">Overige personeelskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4095" model="account.account.template">
+            <field name="code">4095</field>
+            <field name="name">Overige personeelskosten (WKR)</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4099" model="account.account.template">
+            <field name="code">4099</field>
+            <field name="name">Doorbelaste personeelskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_24')])]"/>
+        </record>
+        <record id="4100" model="account.account.template">
+            <field name="code">4100</field>
+            <field name="name">Huur</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4110" model="account.account.template">
+            <field name="code">4110</field>
+            <field name="name">Service kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4115" model="account.account.template">
+            <field name="code">4115</field>
+            <field name="name">Belastingen onr. Goed</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4125" model="account.account.template">
+            <field name="code">4125</field>
+            <field name="name">Schoonmaakkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4130" model="account.account.template">
+            <field name="code">4130</field>
+            <field name="name">Assurantie onroerend goed</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4135" model="account.account.template">
+            <field name="code">4135</field>
+            <field name="name">Beveiligingskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4190" model="account.account.template">
+            <field name="code">4190</field>
+            <field name="name">Overige huisvestingskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4199" model="account.account.template">
+            <field name="code">4199</field>
+            <field name="name">Doorbelaste huisvestingskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_25')])]"/>
+        </record>
+        <record id="4200" model="account.account.template">
+            <field name="code">4200</field>
+            <field name="name">Trainingskosten (extern)</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_26')])]"/>
+        </record>
+        <record id="4201" model="account.account.template">
+            <field name="code">4201</field>
+            <field name="name">Trainingskosten (intern)</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_26')])]"/>
+        </record>
+        <record id="4300" model="account.account.template">
+            <field name="code">4300</field>
+            <field name="name">Contributies/abonnementen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4305" model="account.account.template">
+            <field name="code">4305</field>
+            <field name="name">Kantoorbenodigdh./drukw.</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4310" model="account.account.template">
+            <field name="code">4310</field>
+            <field name="name">Onderhoud kantoorinventaris</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4315" model="account.account.template">
+            <field name="code">4315</field>
+            <field name="name">Telefoon/telefax</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4317" model="account.account.template">
+            <field name="code">4317</field>
+            <field name="name">Internetaansluiting</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4320" model="account.account.template">
+            <field name="code">4320</field>
+            <field name="name">Porti</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4330" model="account.account.template">
+            <field name="code">4330</field>
+            <field name="name">Softwarekosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4335" model="account.account.template">
+            <field name="code">4335</field>
+            <field name="name">SAP- Systeemkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4340" model="account.account.template">
+            <field name="code">4340</field>
+            <field name="name">Computerbenodigdheden</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4350" model="account.account.template">
+            <field name="code">4350</field>
+            <field name="name">Assurantie algemeen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4390" model="account.account.template">
+            <field name="code">4390</field>
+            <field name="name">Overige kantoorkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4399" model="account.account.template">
+            <field name="code">4399</field>
+            <field name="name">Doorbelaste kantoorkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_27')])]"/>
+        </record>
+        <record id="4400" model="account.account.template">
+            <field name="code">4400</field>
+            <field name="name">Leasekosten auto's</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4405" model="account.account.template">
+            <field name="code">4405</field>
+            <field name="name">Onderhoud auto's</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4410" model="account.account.template">
+            <field name="code">4410</field>
+            <field name="name">Brandstoffen auto's</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4420" model="account.account.template">
+            <field name="code">4420</field>
+            <field name="name">Wegenbelasting</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4425" model="account.account.template">
+            <field name="code">4425</field>
+            <field name="name">Bekeuringen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="True" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4450" model="account.account.template">
+            <field name="code">4450</field>
+            <field name="name">Vaste autovergoeding</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4470" model="account.account.template">
+            <field name="code">4470</field>
+            <field name="name">Eigen bijdrage auto's</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4480" model="account.account.template">
+            <field name="code">4480</field>
+            <field name="name">Privé-gebruik auto's</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4499" model="account.account.template">
+            <field name="code">4499</field>
+            <field name="name">Doorbelaste autokosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_28')])]"/>
+        </record>
+        <record id="4517" model="account.account.template">
+            <field name="code">4517</field>
+            <field name="name">Relatiegeschenken</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4535" model="account.account.template">
+            <field name="code">4535</field>
+            <field name="name">Advertenties</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4540" model="account.account.template">
+            <field name="code">4540</field>
+            <field name="name">Beurskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4550" model="account.account.template">
+            <field name="code">4550</field>
+            <field name="name">Websitekosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4565" model="account.account.template">
+            <field name="code">4565</field>
+            <field name="name">Klant evenementen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4570" model="account.account.template">
+            <field name="code">4570</field>
+            <field name="name">Marketing advieskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4585" model="account.account.template">
+            <field name="code">4585</field>
+            <field name="name">Next Continent budget kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4590" model="account.account.template">
+            <field name="code">4590</field>
+            <field name="name">Overige marketing/verkoopkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4599" model="account.account.template">
+            <field name="code">4599</field>
+            <field name="name">Doorbelaste marketingkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_29')])]"/>
+        </record>
+        <record id="4600" model="account.account.template">
+            <field name="code">4600</field>
+            <field name="name">Accountantskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_30')])]"/>
+        </record>
+        <record id="4605" model="account.account.template">
+            <field name="code">4605</field>
+            <field name="name">Advieskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_30')])]"/>
+        </record>
+        <record id="4610" model="account.account.template">
+            <field name="code">4610</field>
+            <field name="name">Juridische kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_30')])]"/>
+        </record>
+        <record id="4630" model="account.account.template">
+            <field name="code">4630</field>
+            <field name="name">Office meetings</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_30')])]"/>
+        </record>
+        <record id="4680" model="account.account.template">
+            <field name="code">4680</field>
+            <field name="name">Reis en verblijfkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_31')])]"/>
+        </record>
+        <record id="4685" model="account.account.template">
+            <field name="code">4685</field>
+            <field name="name">Sponsoring / Giften</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_31')])]"/>
+        </record>
+        <record id="4695" model="account.account.template">
+            <field name="code">4695</field>
+            <field name="name">Representatiekosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_31')])]"/>
+        </record>
+        <record id="4699" model="account.account.template">
+            <field name="code">4699</field>
+            <field name="name">Doorbelaste overige kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_31')])]"/>
+        </record>
+        <record id="4700" model="account.account.template">
+            <field name="code">4700</field>
+            <field name="name">Bankkosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_32')])]"/>
+        </record>
+        <record id="4715" model="account.account.template">
+            <field name="code">4715</field>
+            <field name="name">Kosten belastingdienst</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_32')])]"/>
+        </record>
+        <record id="4740" model="account.account.template">
+            <field name="code">4740</field>
+            <field name="name">Rente belastingdienst</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_32')])]"/>
+        </record>
+        <record id="4790" model="account.account.template">
+            <field name="code">4790</field>
+            <field name="name">Overige rentelasten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_32')])]"/>
+        </record>
+        <record id="4810" model="account.account.template">
+            <field name="code">4810</field>
+            <field name="name">Afschr.kosten Verbouwingen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_33')])]"/>
+        </record>
+        <record id="4830" model="account.account.template">
+            <field name="code">4830</field>
+            <field name="name">Afschr.kosten Hardware</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_33')])]"/>
+        </record>
+        <record id="4840" model="account.account.template">
+            <field name="code">4840</field>
+            <field name="name">Afschr.kosten Inventaris</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_33')])]"/>
+        </record>
+        <record id="4899" model="account.account.template">
+            <field name="code">4899</field>
+            <field name="name">Doorbelaste afschrijvingskosten</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_33')])]"/>
+        </record>
+        <record id="4920" model="account.account.template">
+            <field name="code">4920</field>
+            <field name="name">Boetes belastingdienst</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="4980" model="account.account.template">
+            <field name="code">4980</field>
+            <field name="name">Kasverschillen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="4985" model="account.account.template">
+            <field name="code">4985</field>
+            <field name="name">Betaalverschillen</field>
+            <field name="user_type_id" ref="account.data_account_type_expenses"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_41'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7000" model="account.account.template">
+            <field name="code">7000</field>
+            <field name="name">Inkoop subcontractors (intern) </field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7001" model="account.account.template">
+            <field name="code">7001</field>
+            <field name="name">Inkoop subcontractors (extern) </field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7010" model="account.account.template">
+            <field name="code">7010</field>
+            <field name="name">Inkoop hard-/software</field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7015" model="account.account.template">
+            <field name="code">7015</field>
+            <field name="name">Inkoop subcontractors EU</field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7016" model="account.account.template">
+            <field name="code">7016</field>
+            <field name="name">Inkoop hard-/software EU</field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7018" model="account.account.template">
+            <field name="code">7018</field>
+            <field name="name">Inkoop import subcontractors buiten EU</field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7019" model="account.account.template">
+            <field name="code">7019</field>
+            <field name="name">Inkoop import hard-/software buiten EU</field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="7020" model="account.account.template">
+            <field name="code">7020</field>
+            <field name="name">Project gerelateerde kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_direct_costs"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_42'), ref('account_tag_34')])]"/>
+        </record>
+        <record id="8000" model="account.account.template">
+            <field name="code">8000</field>
+            <field name="name">Omzet intercompany</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_35')])]"/>
+        </record>
+        <record id="8100" model="account.account.template">
+            <field name="code">8100</field>
+            <field name="name">Omzet consultants uren</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8110" model="account.account.template">
+            <field name="code">8110</field>
+            <field name="name">Omzet hard-/software</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8115" model="account.account.template">
+            <field name="code">8115</field>
+            <field name="name">Omzet Licenties</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8120" model="account.account.template">
+            <field name="code">8120</field>
+            <field name="name">Omzet doorberekende kosten</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8121" model="account.account.template">
+            <field name="code">8121</field>
+            <field name="name">Omzet kilometervergoeding</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8125" model="account.account.template">
+            <field name="code">8125</field>
+            <field name="name">Omzet SLA</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8130" model="account.account.template">
+            <field name="code">8130</field>
+            <field name="name">Omzet consultants uren 0% EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8140" model="account.account.template">
+            <field name="code">8140</field>
+            <field name="name">Omzet hard-/software 0% EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8150" model="account.account.template">
+            <field name="code">8150</field>
+            <field name="name">Omzet doorberekende kosten 0% EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8151" model="account.account.template">
+            <field name="code">8151</field>
+            <field name="name">Omzet kilometervergoeding 0% EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8160" model="account.account.template">
+            <field name="code">8160</field>
+            <field name="name">Omzet consultants uren niet-EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8170" model="account.account.template">
+            <field name="code">8170</field>
+            <field name="name">Omzet hard-/software niet-EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8180" model="account.account.template">
+            <field name="code">8180</field>
+            <field name="name">Omzet doorberekende kosten niet-EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8181" model="account.account.template">
+            <field name="code">8181</field>
+            <field name="name">Omzet kilometervergoeding niet-EU</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="8200" model="account.account.template">
+            <field name="code">8200</field>
+            <field name="name">Management fees</field>
+            <field name="user_type_id" ref="account.data_account_type_revenue"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_43'), ref('account_tag_36')])]"/>
+        </record>
+        <record id="9900" model="account.account.template">
+            <field name="code">9900</field>
+            <field name="name">Vpb normaal resultaat</field>
+            <field name="user_type_id" ref="account.data_unaffected_earnings"/>
+            <field name="chart_template_id" ref="magnus_chart_template"/>
+            <field eval="False" name="reconcile"/>
+            <field name="tag_ids" eval="[(6,0,[ref('account_tag_44'), ref('account_tag_36')])]"/>
+        </record>
+
+        <!-- Chart template -->
+        <record id="magnus_chart_template" model="account.chart.template">
+            <field name="cash_account_code_prefix">10</field>
+            <field name="bank_account_code_prefix">10</field>
+            <field name="code_digits">4</field>
+            <field name="property_account_receivable_id" ref="recv"/>
+            <field name="property_account_payable_id" ref="pay"/>
+            <field name="property_account_expense_categ_id" ref="4000"/>
+            <field name="property_account_income_categ_id" ref="8100"/>
+            <field name="property_stock_account_input_categ_id" ref="0730"/>
+            <field name="property_stock_account_output_categ_id" ref="0730"/>
+            <field name="property_stock_valuation_account_id" ref="0730"/>
+            <field name="expense_currency_exchange_account_id" ref="0730"/>
+            <field name="income_currency_exchange_account_id" ref="0730"/>
+        </record>
+
+    </data>
+</openerp>

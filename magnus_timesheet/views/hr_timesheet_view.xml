@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+
+   <record id="hr_timesheet_sheet_form_inherited" model="ir.ui.view">
+      <field name="name">hr.timesheet.sheet.form</field>
+      <field name="model">hr_timesheet.sheet</field>
+      <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//button[@name='action_timesheet_confirm']" position="replace">
+          <button name="action_timesheet_confirm" string="Submit to Manager" type="object" class="oe_highlight"
+            attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+        </xpath>
+        <xpath expr="//sheet/div[@class='oe_title']" position="before">
+            <field name="overtime_analytic_line_id" invisible="1"/>
+            <div class="oe_button_box" name="button_box">
+                <button class="oe_stat_button" name="action_view_overtime_entry" type="object" icon="fa-pencil-square-o" string="OvertimeEntry" attrs="{'invisible':['|',('overtime_analytic_line_id','=',False),('state','!=','done')]}" groups="hr_timesheet.group_hr_timesheet_user">
+                </button>
+            </div>
+        </xpath>
+        <xpath expr="//header/button[@name='action_timesheet_draft'][1]" position="attributes">
+          <attribute name="groups">magnus_timesheet.group_timesheet_manager</attribute>
+        </xpath>
+        <xpath expr="//field[@name='add_line_task_id']" position="attributes">
+          <attribute name="attrs">{'required': [('add_line_project_id', '!=',False)],'invisible': [('add_line_project_id', '=', False)]}</attribute>
+        </xpath>
+        <xpath expr="//group[1]/group[2]" position="replace">
+          <group>
+            <field name="starting_mileage"  attrs="{'invisible': [('vehicle', '=', False)]}"/>
+            <field name="starting_mileage_editable" attrs="{'invisible': [('vehicle', '=', True)]}"/>
+            <field name="vehicle" invisible="1" />
+            <field name="business_mileage" />
+            <field name="private_mileage" />
+            <field name="end_mileage" attrs="{'readonly': [('state', 'not in', ['new','draft'])]}"/>
+            <field name="overtime_hours_delta" widget="float_time"/>
+          </group>
+        </xpath>
+        <xpath expr="//group[1]/group[1]" position="replace">
+          <group>
+            <field name="week_id" attrs="{'readonly': [('state', 'not in', ['new'])]}" options="{'no_create': True, 'limit': 0}"/>
+            <label for="date_start" string="Timesheet Period"/>
+            <div><field name="date_start" class="oe_inline" readonly="1"/> to <field name="date_end" class="oe_inline" readonly="1"/></div>
+            <field name="name" invisible="1"/>
+            <field name="department_id" invisible="0"/>
+            <field name="company_id" groups="base.group_multi_company"/>
+            <field name="name" invisible="1"/>
+          </group>
+        </xpath>
+        <!-- Element '<xpath expr="//label[@for='date_from']">' cannot be located in parent view so replaced as expr="//notebook/page[1]/group[1]" -->
+        <xpath expr="//notebook/page[1]/group[1]" position="before">
+          <group states="new,draft"/>
+          <button name="duplicate_last_week" type="object" string="Duplicate Last Week" states="new,draft" class="oe_highlight"/>
+          <group states="new,draft"/>
+        </xpath>
+        <!-- Element '<xpath expr="//notebook/page[1]/widget[1]">' cannot be located in parent view so replaced as expr="//sheet/group[1]" -->
+        <!-- <xpath expr="//sheet/group[1]" position="before">
+          <div>
+              <label for="employee_id" class="oe_edit_only"/>
+              <h1><field name="employee_id" class="oe_inline" placeholder="Employee's Name"/></h1>
+          </div>
+        </xpath> -->
+        <xpath expr="//field[@name='employee_id']" position="attributes">
+          <attribute name="options">{'no_create': True}</attribute>
+          <attribute name="attrs">{'readonly': [('state', 'not in', ['new','draft'])]}</attribute>
+        </xpath>
+          <xpath expr="//field[@name='timesheet_ids']" position="attributes">
+                <attribute name="context">{'timesheet_date_start': date_start, 'timesheet_date_end': date_end}</attribute>
+            </xpath>
+        <xpath expr="//field[@name='timesheet_ids']/tree/field[@name='unit_amount']" position="after">
+          <field name="kilometers"/>
+        </xpath>
+
+        <xpath expr="//form/group/field[@name='user_id']" position="after">
+            <field name="operating_unit_id" attrs="{'invisible':[('operating_unit_id', '=', False)]}"/>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- not required since the attribute for task is added in the existing form -->
+    <!-- <record id="hr_timesheet_sheet_form_task_inherited" model="ir.ui.view">
+      <field name="name">hr_timesheet_task_form</field>
+      <field name="model">hr_timesheet.sheet</field>
+      <field name="inherit_id" ref="hr_timesheet_task.hr_timesheet_sheet_form"/>
+      <field name="arch" type="xml">
+          <xpath expr="//tree/field[@name='task_id']" position="attributes">
+            <attribute name="domain">[('project_id','=',project_id)]</attribute>
+          </xpath>
+      </field>
+    </record> -->
+
+    <record id="view_hr_timesheet_sheet_filter" model="ir.ui.view">
+      <field name="name">hr_timesheet.sheet.filter</field>
+      <field name="model">hr_timesheet.sheet</field>
+      <field name="arch" type="xml">
+          <search string="Search Timesheet">
+              <field name="date_start"/>
+              <filter name="new" string="In Draft" domain="[('state','in',('draft', 'new'))]" help="Unvalidated Timesheets"/>
+              <filter name="to_approve" string="To Approve" domain="[('state','=','confirm')]" help="Confirmed Timesheets"/>
+              <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
+              <field name="employee_id"/>
+              <field name="department_id"/>
+              <group expand="0" string="Group By">
+                  <filter string="Employees" name="employee_id" domain="[]" context="{'group_by':'employee_id'}"/>
+                  <filter string="Department" name="department_id" domain="[]" context="{'group_by':'department_id'}"/>
+              </group>
+          </search>
+      </field>
+    </record>
+      <record id="hr_timesheet_sheet_tree_inherited" model="ir.ui.view">
+      <field name="name">hr.timesheet.sheet.tree</field>
+      <field name="model">hr_timesheet.sheet</field>
+      <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_tree"/>
+      <field name="arch" type="xml">
+        <field name="employee_id" position="after">
+          <field name="week_id"/>
+        </field>
+        <field name="date_end" position="after">
+          <field name="private_mileage" sum="Total amount"/>
+          <field name="business_mileage" sum="Total amount"/>
+          <field name="overtime_hours_delta" widget="float_time" sum="Total amount"/>
+        </field>
+      </field>
+    </record>
+    <record id="act_hr_timesheet_sheet_form" model="ir.actions.act_window">
+      <field name="name">Timesheets to Approve</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">hr_timesheet.sheet</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" eval="False"/>
+      <field name="context">{'search_default_to_approve':1}</field>
+      <field name="search_view_id" ref="view_hr_timesheet_sheet_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          New timesheet to approve.
+        </p><p>
+          You must record timesheets every day and confirm at the end
+          of the week. Once the timesheet is confirmed, it should be
+          validated by a manager.
+        </p><p>
+          Timesheets can also be invoiced to customers, depending on the
+          configuration of each project's related contract.
+        </p>
+      </field>
+    </record>
+    
+
+<!--    <record model="ir.ui.view" id="view_hr_timesheet_sheet_pivot">
+        <field name="name">view.hr.timesheet.sheet.pivot</field>
+        <field name="model">hr_timesheet.sheet</field>
+        <field name="arch" type="xml">
+            <pivot string="My Timesheets" display_quantity="true">
+                <field name="week_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="private_mileage" type="measure"/>
+                <field name="business_mileage" type="measure"/>
+                <field name="overtime_hours" widget="float_time" type="measure"/>
+                <field name="overtime_hours_delta" widget="float_time" type="measure"/>
+            </pivot>
+        </field>
+    </record>-->
+
+
+    <!--My Timesheets action inherited-->
+    <record id="hr_timesheet_sheet.act_hr_timesheet_sheet_my_timesheets" model="ir.actions.act_window">
+      <!-- <field name="context">{'readonly_by_pass': True}</field> -->
+      <field name="view_mode">tree,pivot,form</field>
+    </record>
+
+    <record id="hr_timesheet.act_hr_timesheet_report" model="ir.actions.act_window">
+        <field name="domain">[('project_id', '!=', False), ('product_uom_id.name', '=', 'Hour(s)'), ('planned', '=', False)]</field>
+        <!--<field name="context">{"search_default_today":1, "search_default_filter_not_planned":1}</field>-->
+        <field name="context">{"search_default_today":1}</field>
+    </record>
+
+    <record id="hr_timesheet_line_search" model="ir.ui.view">
+        <field name="name">account.analytic.line.search</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <separator/>
+                <filter string="Not Planned" name="filter_not_planned" domain="[('planned','=',False)]"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <menuitem id="hr_timesheet.menu_timesheets_reports" name="Reports"
+            parent="hr_timesheet.timesheet_menu_root" sequence="99" groups="magnus_timesheet.group_magnus_reports"/>
+
+    <menuitem action="act_hr_timesheet_sheet_form" id="menu_act_hr_timesheet_sheet_form" parent="hr_timesheet.menu_hr_time_tracking" sequence="11"/>
+    
+    <menuitem name="My Current Timesheet" id="menu_act_hr_timesheet_sheet_form_my_current" parent="hr_timesheet.menu_hr_time_tracking" action="ir_actions_server_timesheet_sheet" sequence="2"/>
+
+    <record model="ir.ui.menu" id="hr_timesheet.menu_hr_activity_analysis">
+        <field name="name">Actual Activity Analysis</field>
+        <field name="sequence">9</field>
+    </record>
+
+  </data>
+</odoo>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  © 2021 Magnus (Willem Hulshof <w.hulshof@magnus.nl>)
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+
+<odoo>
+
+<!-- Form view for account mappings -->
+<record id="inter_ou_account_mapping_form" model="ir.ui.view">
+    <field name="name">inter.ou.account.mapping.form</field>
+    <field name="model">inter.ou.account.mapping</field>
+    <field name="arch" type="xml">
+        <form string="Inter OU Account Mapping">
+            <field name="company_id" groups="base.group_multi_company" widget="selection" invisible="not context.get('account_cutoff_mapping_main_view', False)" />
+            <field name="trading_partners"/>
+            <field name="account_id"/>
+            <field name="inter_ou_account_id"/>
+            <field name="revenue_account_id"/>
+            <field name="cost_account_id"/>
+        </form>
+    </field>
+</record>
+
+<!-- Tree view for account mappings -->
+<record id="inter_ou_account_mapping_tree" model="ir.ui.view">
+    <field name="name">inter.ou.account.mapping.tree</field>
+    <field name="model">inter.ou.account.mapping</field>
+    <field name="arch" type="xml">
+        <tree string="Inter OU Account Mapping" editable="bottom">
+            <field name="company_id" groups="base.group_multi_company" widget="selection" invisible="not context.get('inter_ou_account_mapping_main_view', False)" />
+            <field name="trading_partners"/>
+            <field name="account_id"/>
+            <field name="inter_ou_account_id"/>
+            <field name="revenue_account_id"/>
+            <field name="cost_account_id"/>
+        </tree>
+    </field>
+</record>
+
+<!-- Action for account mappings -->
+<record id="inter_ou_account_mapping_action" model="ir.actions.act_window">
+    <field name="name">Inter OU Account Mapping</field>
+    <field name="res_model">inter.ou.account.mapping</field>
+    <field name="view_mode">tree,form</field>
+    <field name="context">{'inter_ou_account_mapping_main_view': True}</field>
+    <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+        Click to start a new account mapping.
+        </p><p>
+        These account mappings allow you to have an account for inter operating revenue that is not the same as the original revenue account and vice versa, using the same concept as the fiscal positions.
+        </p>
+    </field>
+</record>
+
+<!-- Menu entry for account mapping -->
+<menuitem id="inter_ou_config" name="Inter_OU Configuration" parent="account.menu_finance_configuration"
+        sequence="80"/>
+
+<menuitem id="inter_ou_account_mapping_menu"
+    parent="inter_ou_config"
+    action="inter_ou_account_mapping_action"
+    sequence="50"/>
+
+</odoo>

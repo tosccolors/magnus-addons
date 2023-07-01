@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_planning_wizard" model="ir.ui.view">
+            <field name="name">Planning Wizard</field>
+            <field name="model">planning.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Planning Wizard" create="false">
+                    <p>
+                        Select Planning Period.
+                    </p>
+                    <field name="name" col="4" colspan="6"/>
+                    <footer>
+                        <button name="load_period" string="Load" type="object" class="oe_highlight"/>
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_view_view_planning_wizard" model="ir.actions.act_window">
+            <field name="name">Planning Wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">planning.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_planning_wizard"/>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>
