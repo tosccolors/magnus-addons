@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_hr_nmbrs_nationality,access_hr_nmbrs_nationality,model_hr_nmbrs_nationality,nmbrs_employee_interface,1,1,1,0

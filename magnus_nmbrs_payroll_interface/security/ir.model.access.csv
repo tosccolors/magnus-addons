@@ -1,3 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_payroll_entry,access_payroll_entry,model_payroll_entry,nmbrs_payroll_interface,1,1,1,1
-access_payroll_runs_nmbrs,access_payroll_runs_nmbrs,model_payroll_runs_nmbrs,nmbrs_payroll_interface,1,1,1,1
