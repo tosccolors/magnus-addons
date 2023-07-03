@@ -9,7 +9,7 @@
     'version': '10.0.1.0.0',
     'license': 'AGPL-3',
     'author': 'TOSC, Odoo Community Association (OCA)',
-    'website': 'https://www.magnus.nl',
+    'website': 'https://www.tosc.nl',
     'depends': [
         'date_range','account_fiscal_year'
     ],
