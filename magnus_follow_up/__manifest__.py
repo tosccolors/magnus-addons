@@ -35,7 +35,7 @@ This module adds customization for Magnus, like :\n
 - custom credit control per company, including invoices in appendix\n
 - open invoice status, showing latest status per open invoice for manual follow up\n
     """,
-    'author'  : 'Magnus - Willem Hulshof, D. Prosee',
+    'author'  : 'TOSC - Willem Hulshof, D. Prosee',
     'website' : 'http://www.tosc.nl',
     'depends' : ['account_credit_control','account'
     ],

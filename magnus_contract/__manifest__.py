@@ -15,7 +15,7 @@
     'author': "OpenERP SA, "
               "Tecnativa, "
               "LasLabs, "
-              "Magnus,"
+              "TOSC,"
               "Odoo Community Association (OCA)",
     'website': 'https://github.com/magnuscolors/magnus_contract',
     'depends': ['contract', 'magnus_timesheet'],

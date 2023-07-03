@@ -5,7 +5,7 @@
 # © 2014-2016 Tecnativa - Pedro M. Baeza
 # © 2016 Akretion (<http://www.akretion.com>).
 # © 2016 Aselcis (<http://www.aselcis.com>).
-# © 2018 Magnus (<http://www.tosc.nl>).
+# © 2018 Magnus (<http://www.magnus.nl>).
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
@@ -17,7 +17,7 @@
               "Tecnativa, "
               "Akretion, "
               "Odoo Community Association (OCA)"
-              "Magnus",
+              "TOSC",
     'category': 'Banking addons',
     'depends': [
         'account_payment_order',
