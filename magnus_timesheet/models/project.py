@@ -81,7 +81,8 @@ class Project(models.Model):
     standard_task_id = fields.Many2one(
         'project.task',
         compute=_compute_standard,
-        string='Standard Task'
+        string='Standard Task',
+        store=True
     )
 
     @api.one

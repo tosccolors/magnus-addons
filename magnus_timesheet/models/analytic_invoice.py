@@ -299,9 +299,9 @@ class AnalyticInvoice(models.Model):
 
     def _inverse_task_user(self):
         self.ensure_one()
-        not_existing_task_user = self.task_user_ids - self.task_user_ids.exists()
-        for task_user in not_existing_task_user:
-            task_user.create()
+        # not_existing_task_user = self.task_user_ids - self.task_user_ids.exists()
+        # for task_user in not_existing_task_user:
+        #     task_user.create()
         print(self.rc_toggle)
 
 
