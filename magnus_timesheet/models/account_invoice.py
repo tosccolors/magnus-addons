@@ -145,6 +145,24 @@ class AccountInvoice(models.Model):
         return res
 
     @api.multi
+    def action_invoice_paid(self):
+        to_pay_invoices = self.filtered(lambda inv: inv.state != 'paid')
+        res = super(AccountInvoice, self).action_invoice_paid()
+        to_pay_invoices.filtered('move_id.line_ids.trading_partner_code').add_trading_partner_to_bank_move_lines()
+        return res
+
+    @api.multi
+    def add_trading_partner_to_bank_move_lines(self):
+        for invoice in self:
+            reconcile_id = invoice.move_id.line_ids.filtered('trading_partner_code')[0].full_reconcile_id or False
+            if not reconcile_id:
+                continue
+            tpc = invoice.move_id.line_ids.mapped('trading_partner_code')
+            for aml in self.env('account.move.line').search([('full_reconcile_id','=', reconcile_id.id),('trading_partner_code','=', False)]):
+                aml.trading_partner_code = tpc
+
+
+    @api.multi
     def action_create_ic_lines(self):
         mapping_tp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=True, maptype='inter_to_regular')
         mapping_notp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=False, maptype='inter_to_regular')
