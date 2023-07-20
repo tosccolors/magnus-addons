@@ -11,20 +11,6 @@ from datetime import datetime, timedelta
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    # @api.depends('full_reconcile_id')
-    # def _compute_trading_partner_code(self):
-    #     for aml in self.filtered('full_reconcile_id'):
-    #
-    #             lambda ml: ml.invoice_id.partner_id.trading_partner_code or ml.invoice_id.partner_id.parent_id.trading_partner_code):
-    #         if aml.full_reconcile_id and not aml.trading_partner_code:
-    #             aml.trading_partner_code = aml.invoice_id.partner_id.trading_partner_code or aml.invoice_id.partner_id.parent_id.trading_partner_code
-    #
-    # def _inverse_trading_partner_code(self):
-    #     pass
-        # for aml in self:
-        #     if aml.trading_partner_code and aml.invoice_id and aml.reconciled:
-        #         aml.trading_partner_code = aml.invoice_id.partner_id.trading_partner_code or aml.invoice_id.partner_id.parent_id.trading_partner_code
-
     user_id = fields.Many2one(
         'res.users',
         string='Timesheet User'
@@ -58,7 +44,7 @@ class AccountMoveLine(models.Model):
                 self.user_id._get_operating_unit_id()
 
     def write(self, vals):
-        if self.filtered('trading_partner_code') and len(self) > 1 and 'full_reconcile_id' in vals:
+        if 'full_reconcile_id' in vals and self.filtered('trading_partner_code') and len(self) > 1 :
             tpc = False
             if vals['full_reconcile_id']:
                 for val in self.mapped(lambda x: x.partner_id.trading_partner_code or
