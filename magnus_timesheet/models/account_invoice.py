@@ -144,55 +144,6 @@ class AccountInvoice(models.Model):
                     invoice.action_wip_move_create()
         return res
 
-    ## overridden again!
-    # @api.multi
-    # def action_invoice_paid(self):
-    #     import pdb;
-    #     pdb.set_trace()
-    #     # lots of duplicate calls to action_invoice_paid, so we remove those already paid
-    #     to_pay_invoices = self.filtered(lambda inv: inv.state != 'paid')
-    #     if to_pay_invoices.filtered(lambda inv: inv.state not in ['auth', 'verified'] and
-    #                                             inv.type in ['in_invoice', 'in_refund']):
-    #         raise UserError(_('Invoice must be authorized and/or verified in order to set it to register payment.'))
-    #     if to_pay_invoices.filtered(lambda inv: inv.state not in ['open'] and
-    #                                             inv.type in ['out_invoice', 'out_refund']):
-    #         raise UserError(_('Invoice must be open in order to set it to register payment.'))
-    #     if to_pay_invoices.filtered(lambda inv: not inv.reconciled):
-    #         raise UserError(
-    #             _('You cannot pay an invoice which is partially paid. You need to reconcile payment entries first.'))
-    #     to_pay_invoices.filtered(lambda inv: inv.partner_id.trading_partner_code or
-    #                                          inv.partner_id.parent_id.trading_partner_code).add_trading_partner_to_bank_move_lines()
-    #     return to_pay_invoices.write({'state': 'paid'})
-
-
-    # @api.multi
-    # def action_invoice_re_open(self):
-    #     res = super(AccountInvoice, self).action_invoice_re_open()
-    #     self.remove_trading_partner_code_from_bank_move_line()
-    #     return res
-
-    # @api.multi
-    # def add_trading_partner_to_bank_move_lines(self):
-    #     import pdb; pdb.set_trace()
-    #     for invoice in self:
-    #         for line in invoice.move_id.line_ids:
-    #             reconcile_id = line.full_reconcile_id
-    #             tpc = line.trading_partner_code
-    #             if reconcile_id and tpc:
-    #                 # tpc = invoice.move_id.line_ids.mapped('trading_partner_code')
-    #                 # import pdb; pdb.set_trace()
-    #                 for aml in self.env['account.move.line'].sudo().search([
-    #                         ('full_reconcile_id','=', reconcile_id.id),
-    #                         ('trading_partner_code','!=', True)
-    #                         ]):
-    #                     aml.trading_partner_code = tpc
-    #                 break
-    #     return
-
-    # @api.multi
-    # def remove_trading_partner_code_from_bank_move_line(delf):
-
-
     @api.multi
     def action_create_ic_lines(self):
         mapping_tp = self.env['inter.ou.account.mapping']._get_mapping_dict(self.company_id, trading_partners=True, maptype='inter_to_regular')
