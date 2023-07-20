@@ -11,12 +11,29 @@ from datetime import datetime, timedelta
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    # @api.depends('full_reconcile_id')
+    # def _compute_trading_partner_code(self):
+    #     for aml in self.filtered('full_reconcile_id'):
+    #
+    #             lambda ml: ml.invoice_id.partner_id.trading_partner_code or ml.invoice_id.partner_id.parent_id.trading_partner_code):
+    #         if aml.full_reconcile_id and not aml.trading_partner_code:
+    #             aml.trading_partner_code = aml.invoice_id.partner_id.trading_partner_code or aml.invoice_id.partner_id.parent_id.trading_partner_code
+    #
+    # def _inverse_trading_partner_code(self):
+    #     pass
+        # for aml in self:
+        #     if aml.trading_partner_code and aml.invoice_id and aml.reconciled:
+        #         aml.trading_partner_code = aml.invoice_id.partner_id.trading_partner_code or aml.invoice_id.partner_id.parent_id.trading_partner_code
+
     user_id = fields.Many2one(
         'res.users',
         string='Timesheet User'
     )
     trading_partner_code = fields.Char(
         'Trading Partner Code',
+        # compute=_compute_trading_partner_code,
+        # inverse=_inverse_trading_partner_code,
+        # store= True,
         help="Specify code of Trading Partner"
     )
 
@@ -39,6 +56,29 @@ class AccountMoveLine(models.Model):
         if self.user_id:
             self.operating_unit_id = \
                 self.user_id._get_operating_unit_id()
+
+    def write(self, vals):
+        if self.filtered('trading_partner_code') and len(self) > 1 and 'full_reconcile_id' in vals:
+            tpc = False
+            if vals['full_reconcile_id']:
+                for val in self.mapped(lambda x: x.partner_id.trading_partner_code or
+                                                 x.partner_id.parent_id.trading_partner_id or
+                                                 False):
+                    if val != False:
+                        tpc = val
+                        break
+                if tpc == self.filtered('trading_partner_code')[0].trading_partner_code:
+                    aml_payments = self - self.filtered('trading_partner_code')
+                    aml_payments.write({'trading_partner_code': tpc})
+                else:
+                    raise UserError(_('The Trading Partner Code in the'
+                                      ' Invoice must be the '
+                                      'Trading Partner Code in the partner'
+                                      ' of the move line'))
+            else:
+                aml = self.filtered(lambda x: x.trading_partner_code and x.journal_id.type == 'bank')
+                aml.write({'trading_partner_code': tpc})
+        return super(AccountMoveLine, self).write(vals)
 
 class AccountMove(models.Model):
     _inherit = "account.move"
