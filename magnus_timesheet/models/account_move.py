@@ -61,9 +61,9 @@ class AccountMoveLine(models.Model):
                                       ' Invoice must be the '
                                       'Trading Partner Code in the partner'
                                       ' of the move line'))
-            else:
-                aml = self.filtered(lambda x: x.trading_partner_code and x.journal_id.type == 'bank')
-                aml.write({'trading_partner_code': tpc})
+            # else:
+            #     aml = self.filtered(lambda x: x.trading_partner_code and x.journal_id.type == 'bank')
+            #     aml.write({'trading_partner_code': tpc})
         return super(AccountMoveLine, self).write(vals)
 
 class AccountMove(models.Model):
