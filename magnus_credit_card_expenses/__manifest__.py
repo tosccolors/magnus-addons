@@ -46,7 +46,7 @@ defined. This is used for reconciliation of the expenses and the final expense i
         'security/hr_expense_security.xml',
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
-        'views/operating_unit_view.xml',
+        'views/company_view.xml',
         'views/hr_expense_views.xml',
         'views/menu_view.xml',
         ],

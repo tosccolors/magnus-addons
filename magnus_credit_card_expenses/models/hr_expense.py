@@ -39,13 +39,8 @@ class HrExpense(models.Model):
             raise UserError(_("You cannot report twice the same line!"))
         if len(self.mapped('employee_id')) != 1:
             raise UserError(_("You cannot report expenses for different employees in the same report!"))
-        journal = self[0].operating_unit_id.creditcard_decl_journal_id and self[0].operating_unit_id.creditcard_decl_journal_id.id or False
-        dic = {'expense_line_ids':[(6, 0, [line.id for line in self])], 'employee_id':self[0].employee_id.id, 'name': self[0].name if len(self.ids) == 1 else '','operating_unit_id':self[0].operating_unit_id.id,
-                                                             'is_from_crdit_card':self[0].is_from_crdit_card}
-        if journal:
-            dic.update({'bank_journal_id': journal})
-
-        expense_sheet = self.env['hr.expense.sheet'].create(dic)
+        expense_sheet = self.env['hr.expense.sheet'].create({'expense_line_ids':[(6, 0, [line.id for line in self])], 'employee_id':self[0].employee_id.id, 'name': self[0].name if len(self.ids) == 1 else '','operating_unit_id':self[0].operating_unit_id.id,
+                                                             'is_from_crdit_card':self[0].is_from_crdit_card})
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
@@ -61,7 +56,7 @@ class HrExpense(models.Model):
         '''
         for expense in self:
             if expense.is_from_crdit_card:
-                journal = expense.sheet_id.bank_journal_id
+                journal = expense.sheet_id.company_id.creditcard_decl_journal_id
             else:
                 journal = expense.sheet_id.company_id.decl_journal_id
 #             journal = expense.sheet_id.bank_journal_id if expense.payment_mode == 'company_account' else expense.sheet_id.journal_id
@@ -85,12 +80,12 @@ class HrExpense(models.Model):
             payment_id = False
             total, total_currency, move_lines = expense._compute_expense_totals(company_currency, move_lines, acc_date)
             if expense.is_from_crdit_card:
-                if not expense.sheet_id.bank_journal_id:
+                if not expense.sheet_id.company_id.creditcard_decl_journal_id:
                     raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
 #                 emp_account = expense.sheet_id.bank_journal_id.default_credit_account_id.id
-                emp_account = expense.sheet_id.bank_journal_id.default_credit_account_id.id
+                emp_account = expense.sheet_id.company_id.creditcard_decl_journal_id.default_credit_account_id.id
                 
-                journal = expense.sheet_id.bank_journal_id
+                journal = expense.sheet_id.company_id.creditcard_decl_journal_id
                 #create payment
                 payment_methods = (total < 0) and journal.outbound_payment_method_ids or journal.inbound_payment_method_ids
                 journal_currency = journal.currency_id or journal.company_id.currency_id
@@ -132,7 +127,7 @@ class HrExpense(models.Model):
             expense.sheet_id.write({'account_move_id': move.id})
             #updating the line_ids 1st line_id OU with creditcard_decl_journal_id OU
             if expense.is_from_crdit_card:
-                ou = expense.sheet_id.bank_journal_id.operating_unit_id
+                ou = expense.sheet_id.company_id.creditcard_decl_journal_id.operating_unit_id
                 if ou and expense.sheet_id.account_move_id:
                     expense.sheet_id.account_move_id.line_ids[0].operating_unit_id = ou.id
             move.post()
@@ -186,7 +181,7 @@ class HrExpenseSheet(models.Model):
         
         if self.is_from_crdit_card:
             for sheet in self:
-                if not sheet.bank_journal_id.id:
+                if not sheet.company_id.creditcard_decl_journal_id.id:
                     raise UserError(_("Please set Credit Card Expense journal in company configuration"))
         else:
             for sheet in self:
