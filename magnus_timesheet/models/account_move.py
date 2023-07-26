@@ -17,9 +17,6 @@ class AccountMoveLine(models.Model):
     )
     trading_partner_code = fields.Char(
         'Trading Partner Code',
-        # compute=_compute_trading_partner_code,
-        # inverse=_inverse_trading_partner_code,
-        # store= True,
         help="Specify code of Trading Partner"
     )
 
@@ -61,9 +58,6 @@ class AccountMoveLine(models.Model):
                                       ' Invoice must be the '
                                       'Trading Partner Code in the partner'
                                       ' of the move line'))
-            # else:
-            #     aml = self.filtered(lambda x: x.trading_partner_code and x.journal_id.type == 'bank')
-            #     aml.write({'trading_partner_code': tpc})
         return super(AccountMoveLine, self).write(vals)
 
 class AccountMove(models.Model):
