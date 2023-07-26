@@ -10,6 +10,8 @@ class StatusTimeReport(models.Model):
     @api.one
     @api.depends('department_id')
     def _get_atmost_parent_ou(self):
+        if not self.department_id:
+            self.operating_unit_id = False
         # calling atmost parent's operating unit
         self.env.cr.execute("""
                 SELECT * FROM (WITH RECURSIVE    
@@ -19,7 +21,7 @@ class StatusTimeReport(models.Model):
                 SELECT hr_department.id,hr_department.parent_id,hr_department.operating_unit_id 
                 FROM ancestors, hr_department WHERE hr_department.id = ancestors.parent_id
                 )TABLE ancestors )parents
-                WHERE parent_id IS NULL""" % (self.department_id.id or 0))
+                WHERE parent_id IS NULL""" % (self.department_id.id))
         dept_parent_ids = [x[2] for x in self.env.cr.fetchall() if x[2]]
         self.operating_unit_id = dept_parent_ids and dept_parent_ids[0] or False
 

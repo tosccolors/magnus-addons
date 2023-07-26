@@ -37,6 +37,7 @@ In the object hr. employee on the tab 'HR Settings' under the heading 'Status' c
         'views/hr_views.xml',
         'wizard/hr_employee_wizard_view.xml',
         'views/template_view.xml',
+        'views/res_users_views.xml'
     ],
     
     'installable': True,
