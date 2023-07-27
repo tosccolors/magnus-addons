@@ -11,6 +11,7 @@
                 <field name="analytic_account_code_nmbrs"/>
                 <field name="analytic_account_name_nmbrs"/>
                 <field name="analytic_account_odoo"/>
+                <field name="operating_unit"/>
             </tree>
         </field>
     </record>
