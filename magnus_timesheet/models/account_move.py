@@ -40,26 +40,6 @@ class AccountMoveLine(models.Model):
             self.operating_unit_id = \
                 self.user_id._get_operating_unit_id()
 
-    def write(self, vals):
-        if 'full_reconcile_id' in vals and self.filtered('trading_partner_code') and len(self) > 1 :
-            tpc = False
-            if vals['full_reconcile_id']:
-                for val in self.mapped(lambda x: x.partner_id.trading_partner_code or
-                                                 x.partner_id.parent_id.trading_partner_id or
-                                                 False):
-                    if val != False:
-                        tpc = val
-                        break
-                if tpc == self.filtered('trading_partner_code')[0].trading_partner_code:
-                    aml_payments = self - self.filtered('trading_partner_code')
-                    aml_payments.write({'trading_partner_code': tpc})
-                else:
-                    raise UserError(_('The Trading Partner Code in the'
-                                      ' Invoice must be the '
-                                      'Trading Partner Code in the partner'
-                                      ' of the move line'))
-        return super(AccountMoveLine, self).write(vals)
-
 class AccountMove(models.Model):
     _inherit = "account.move"
 
