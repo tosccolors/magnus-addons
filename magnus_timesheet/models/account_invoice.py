@@ -71,7 +71,8 @@ class AccountInvoice(models.Model):
 
     @api.model
     def invoice_line_move_line_get(self):
-        """Copy user_id and trading_partner_code from invoice line to move lines"""
+        """Copy user_id from invoice line to move lines. when trading_partner_code
+         in line link invoice_line to move_line"""
         res = super(AccountInvoice, self).invoice_line_move_line_get()
         ailo = self.env['account.invoice.line']
         for move_line_dict in res:
@@ -86,7 +87,7 @@ class AccountInvoice(models.Model):
     def line_get_convert(self, line, part):
         res = super(AccountInvoice, self).line_get_convert(line, part)
         res['user_id'] = line.get('user_id', False)
-        # res['trading_partner_code'] = line.get('trading_partner_code', False)
+        res['invoice_line_id'] = line.get('invoice_line_id', False)
         # if self.partner_id.trading_partner_code \
         #         and self.operating_unit_id.partner_id.trading_partner_code \
         #         and line.get('type', False) == 'dest':
