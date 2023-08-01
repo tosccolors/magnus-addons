@@ -65,14 +65,14 @@ class AccountInvoice(models.Model):
         except ZeroDivisionError:
             raise UserError(_('You cannot set a target amount if the invoice line amount is 0'))
 
-
     def reset_target_invoice_amount(self):
         for line in self.invoice_line_ids:
             line.discount = 0.0
 
     @api.model
     def invoice_line_move_line_get(self):
-        """Copy user_id and trading_partner_code from invoice line to move lines"""
+        """Copy user_id from invoice line to move lines. when trading_partner_code
+         in line link invoice_line to move_line"""
         res = super(AccountInvoice, self).invoice_line_move_line_get()
         ailo = self.env['account.invoice.line']
         for move_line_dict in res:
@@ -80,18 +80,18 @@ class AccountInvoice(models.Model):
             if iline.user_id:
                 move_line_dict['user_id'] = iline.user_id.id
             if iline.trading_partner_code:
-                move_line_dict['trading_partner_code'] = iline.trading_partner_code
+                move_line_dict['invoice_line_id'] = iline.id
         return res
 
     @api.model
     def line_get_convert(self, line, part):
         res = super(AccountInvoice, self).line_get_convert(line, part)
         res['user_id'] = line.get('user_id', False)
-        res['trading_partner_code'] = line.get('trading_partner_code', False)
-        if self.partner_id.trading_partner_code \
-                and self.operating_unit_id.partner_id.trading_partner_code \
-                and line.get('type', False) == 'dest':
-            res['trading_partner_code'] = self.partner_id.trading_partner_code
+        res['invoice_line_id'] = line.get('invoice_line_id', False)
+        # if self.partner_id.trading_partner_code \
+        #         and self.operating_unit_id.partner_id.trading_partner_code \
+        #         and line.get('type', False) == 'dest':
+        #     res['trading_partner_code'] = self.partner_id.trading_partner_code
         return res
 
     def inv_line_characteristic_hashcode(self, invoice_line):
