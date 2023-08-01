@@ -235,19 +235,11 @@ class AccountInvoice(models.Model):
     @api.multi
     def fill_trading_partner_code_supplier_invoice(self):
         for invoice in self:
-            if not (invoice.partner_id.trading_partner_code or invoice.partner_id.parent_id.trading_partner_code):
-                intercompany_lines = invoice.invoice_line_ids.filtered(
-                    lambda l: l.operating_unit_id != invoice.operating_unit_id)
-                if intercompany_lines:
-                    invoice_tpc = invoice.operating_unit_id.partner_id.trading_partner_code
-                    for line in intercompany_lines:
-                        line_tpc = line.operating_unit_id.partner_id.trading_partner_code
-                        trading_partners = invoice_tpc and line_tpc and invoice_tpc != line_tpc
-                        line.trading_partner_code = invoice_tpc if trading_partners else False
-            elif invoice.operating_unit_id.partner_id.trading_partner_code:
+            if (invoice.partner_id.trading_partner_code or invoice.partner_id.parent_id.trading_partner_code) and \
+                                                    invoice.operating_unit_id.partner_id.trading_partner_code:
                 invoice.invoice_line_ids.write(
-                                {'trading_partner_code': invoice.partner_id.trading_partner_code or
-                                                         invoice.partner_id.parent_id.trading_partner_code}
+                        {'trading_partner_code': invoice.partner_id.trading_partner_code or
+                                                 invoice.partner_id.parent_id.trading_partner_code}
                 )
 
     def set_move_to_draft(self):
