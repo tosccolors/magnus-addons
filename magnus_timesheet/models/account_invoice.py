@@ -334,7 +334,8 @@ class AccountInvoiceLine(models.Model):
     )
     trading_partner_code = fields.Char(
         'Trading Partner Code',
-        help="Specify code of Trading Partner"
+        help="Specify code of Trading Partner",
+        copy=False,
     )
     user_task_total_line_id = fields.Many2one(
         'analytic.user.total',
