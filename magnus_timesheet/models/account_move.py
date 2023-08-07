@@ -32,7 +32,7 @@ class AccountMoveLine(models.Model):
             pl.trading_partner_code = self.search([
                 ('full_reconcile_id','=', pl.full_reconcile_id.id),
                 ('invoice_id' ,'!=', False)
-                 ]).trading_partner_code
+                 ])[0].trading_partner_code
 
 
 

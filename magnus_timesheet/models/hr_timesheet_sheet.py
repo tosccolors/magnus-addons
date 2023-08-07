@@ -348,7 +348,6 @@ class HrTimesheetSheet(models.Model):
             raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
-
     @api.one
     def create_overtime_entries(self):
         analytic_line = self.env['account.analytic.line']
