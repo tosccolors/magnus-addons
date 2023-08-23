@@ -13,6 +13,10 @@ class HrExpense(models.Model):
     _inherit = 'hr.expense'
     
     is_from_crdit_card = fields.Boolean("is From Credit Card")
+    journal_id = fields.Many2one('account.journal', string='Expenses Journal',
+                                      states={'draft': [('readonly', False)]},
+                                      domain=[('type', 'in', ['cash', 'bank'])], readonly=True,
+                                      help="The payment method used when the expense is paid by the company.")
 
     @api.model
     def default_get(self, fields):
@@ -20,6 +24,11 @@ class HrExpense(models.Model):
         if self._context.get("from_credi_card_expense"):
             rec.update({'is_from_crdit_card': True})
         return rec
+
+    @api.onchange('operating_unit_id')
+    def _onchange_operating_unit(self):
+        if self.operating_unit_id:
+            self.journal_id = self.operating_unit_id.creditcard_decl_journal_id or self.operating_unit_id.creditcard_decl_journal_id.id            
     
     @api.model
     def create(self,vals):
@@ -39,7 +48,9 @@ class HrExpense(models.Model):
             raise UserError(_("You cannot report twice the same line!"))
         if len(self.mapped('employee_id')) != 1:
             raise UserError(_("You cannot report expenses for different employees in the same report!"))
-        journal = self[0].operating_unit_id.creditcard_decl_journal_id and self[0].operating_unit_id.creditcard_decl_journal_id.id or False
+        journal = self[0].journal_id and self[0].journal_id.id
+        if not journal:
+            journal = self[0].operating_unit_id.creditcard_decl_journal_id and self[0].operating_unit_id.creditcard_decl_journal_id.id or False
         dic = {'expense_line_ids':[(6, 0, [line.id for line in self])], 'employee_id':self[0].employee_id.id, 'name': self[0].name if len(self.ids) == 1 else '','operating_unit_id':self[0].operating_unit_id.id,
                                                              'is_from_crdit_card':self[0].is_from_crdit_card}
         if journal:
@@ -187,7 +198,7 @@ class HrExpenseSheet(models.Model):
         if self.is_from_crdit_card:
             for sheet in self:
                 if not sheet.bank_journal_id.id:
-                    raise UserError(_("Please set Credit Card Expense journal in company configuration"))
+                    raise UserError(_("Please set Credit Card Expense journal in operating unit configuration"))
         else:
             for sheet in self:
                 if not sheet.company_id.decl_journal_id.id:
