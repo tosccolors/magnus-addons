@@ -47,6 +47,18 @@
             	</field>
             </field>
         </record>
+
+        <record id="hr_expense_form_view_inherit" model="ir.ui.view">
+            <field name="name">hr.expense.form</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense_operating_unit.view_expenses_form"></field>
+            <field name="arch" type="xml">
+                <field name="operating_unit_id" position="after">
+                    <field name="is_from_crdit_card" invisible="1"/>
+                    <field name="journal_id" attrs="{'invisible':[('is_from_crdit_card', '=', False)]}"/>
+            	</field>
+            </field>
+        </record>
         
         <record id="view_hr_expense_filter_inherit" model="ir.ui.view">
             <field name="name">hr.expense.filter.view</field>
