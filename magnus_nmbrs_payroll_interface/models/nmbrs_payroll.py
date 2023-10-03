@@ -110,6 +110,9 @@ class PayrollEntry(models.Model):
                     raise UserError(_('Analytic account %s has no operating unit!') % analytic_account.name)
                 else:
                     line_operating_unit = analytic_account.operating_unit_ids[0].id
+            elif self.operating_unit:
+                line_operating_unit = self.operating_unit.id
+
             line_info = {
                 'account_id': chart_of_accounts.search([('code', '=', line[0].text), ('company_id', '=', self.operating_unit.company_id.id )]).id,
                 'analytic_account_id': analytic_account.id or False,
