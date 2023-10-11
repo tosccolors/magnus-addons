@@ -31,56 +31,72 @@ class hr_employee_landing_page(models.TransientModel):
             self.next_week_id = next_week_id.name
             self.next_week_id1 = next_week_id.name
 
-        #compute vaction balance
+        #compute vaccation balance
+        # 1. execute allocated_leaves
         self.env.cr.execute("""
-                SELECT allocated_leaves-leaves_taken FROM
-                    (SELECT 
-                        SUM(number_of_hours_temp) as allocated_leaves, employee_id
-                        FROM hr_holidays                               
-                        WHERE employee_id = %s
-                          AND type = 'add'
-                          AND state = 'validate'
-                        GROUP BY employee_id) hr1
-                    JOIN (SELECT 
-                        SUM(number_of_hours_temp) as leaves_taken, employee_id
+                        SELECT 
+                                SUM(number_of_hours_temp) as allocated_leaves
+                                FROM hr_holidays                               
+                                WHERE employee_id = %s
+                                  AND type = 'add'
+                                  AND state = 'validate'
+                                GROUP BY employee_id
+                """, (self.employee_id.id,))
+
+        allocated_leaves = 0
+        for al in self.env.cr.fetchall():
+            allocated_leaves += al[0]
+
+        # 2. execute leaves_taken
+        self.env.cr.execute("""               
+                     SELECT 
+                        SUM(number_of_hours_temp) as leaves_taken
                         FROM hr_holidays                               
                         WHERE employee_id = %s
                           AND type = 'remove'
                           AND state not in ('cancel', 'refuse')
-                        GROUP BY employee_id ) hr2
-                    on hr1.employee_id = hr2.employee_id
-        """, (self.employee_id.id, self.employee_id.id))
-        vacation_balance = 0
-        for x in self.env.cr.fetchall():
-            vacation_balance += x[0]
+                        GROUP BY employee_id                     
+        """, (self.employee_id.id,))
 
-        self.vacation_balance = vacation_balance
+        leaves_taken = 0
+        for lt in self.env.cr.fetchall():
+            leaves_taken += lt[0]
+
+        self.vacation_balance = allocated_leaves-leaves_taken
 
         user_id = self.env.user.id
         # compute overtime balance
+        # 1. execute overtime_hrs
         self.env.cr.execute("""
-                SELECT overtime_hrs-overtime_taken FROM
-                    (SELECT 
-                        SUM(unit_amount) as overtime_hrs, user_id
+                    SELECT 
+                    SUM(unit_amount) as overtime_hrs
+                    FROM account_analytic_line                               
+                    WHERE user_id = %s
+                      AND ot = true
+                      AND product_uom_id = 5
+                    GROUP BY user_id                           
+                        """, (user_id,))
+
+        overtime_hrs = 0
+        for oh in self.env.cr.fetchall():
+            overtime_hrs += oh[0]
+
+        # 2. execute overtime_taken
+        self.env.cr.execute("""
+                SELECT SUM(unit_amount) as overtime_taken
                         FROM account_analytic_line                               
                         WHERE user_id = %s
-                          AND ot = true
-                          AND product_uom_id = 5
-                        GROUP BY user_id) aa1
-                    JOIN (SELECT 
-                        SUM(unit_amount) as overtime_taken, user_id
-                        FROM account_analytic_line                               
-                        WHERE user_id = %s
-                          AND state != %s
+                          AND state != 'draft'
                           AND project_id IN (SELECT id FROM project_project WHERE overtime = true)
                           AND product_uom_id = 5
-                        GROUP BY user_id ) aa2
-                    on aa1.user_id = aa2.user_id
-                """, (user_id, user_id, 'draft'))
-        overtime_balance = 0
-        for x in self.env.cr.fetchall():
-            overtime_balance += x[0]
-        self.overtime_balance = overtime_balance
+                        GROUP BY user_id                     
+                """, (user_id,))
+
+        overtime_taken = 0
+        for ot in self.env.cr.fetchall():
+            overtime_taken += ot[0]
+
+        self.overtime_balance = overtime_hrs - overtime_taken
 
         current_year = datetime.now()
         first_date = str(current_year.year) + '-1-1'
