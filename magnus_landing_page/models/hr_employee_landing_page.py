@@ -46,7 +46,7 @@ class hr_employee_landing_page(models.TransientModel):
                         FROM hr_holidays                               
                         WHERE employee_id = %s
                           AND type = 'remove'
-                          AND state in ('written', 'validate')
+                          AND state not in ('cancel', 'refuse')
                         GROUP BY employee_id ) hr2
                     on hr1.employee_id = hr2.employee_id
         """, (self.employee_id.id, self.employee_id.id))
@@ -186,7 +186,7 @@ class hr_employee_landing_page(models.TransientModel):
                                     AND ((type = 'add'
                                     AND state = 'validate' ) OR 
                                     (type = 'remove'
-                            AND state = 'written'))                  
+                            AND state not in ('cancel', 'refuse')))                  
                                     """, (self.employee_id.id,))
 
         holidays = [x[0] for x in self.env.cr.fetchall()]
