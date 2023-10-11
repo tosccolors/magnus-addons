@@ -38,18 +38,18 @@ class hr_employee_landing_page(models.TransientModel):
                         SUM(number_of_hours_temp) as allocated_leaves, employee_id
                         FROM hr_holidays                               
                         WHERE employee_id = %s
-                          AND type = %s
-                          AND state = %s
+                          AND type = 'add'
+                          AND state = 'validate'
                         GROUP BY employee_id) hr1
                     JOIN (SELECT 
                         SUM(number_of_hours_temp) as leaves_taken, employee_id
                         FROM hr_holidays                               
                         WHERE employee_id = %s
-                          AND type = %s
-                          AND state = %s
+                          AND type = 'remove'
+                          AND state in ('written', 'validate')
                         GROUP BY employee_id ) hr2
                     on hr1.employee_id = hr2.employee_id
-        """, (self.employee_id.id, 'add', 'validate', self.employee_id.id, 'remove', 'written'))
+        """, (self.employee_id.id, self.employee_id.id))
         vacation_balance = 0
         for x in self.env.cr.fetchall():
             vacation_balance += x[0]
