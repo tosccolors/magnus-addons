@@ -25,6 +25,7 @@
     'data': [
         'security/magnus_security.xml',
         'security/ir.model.access.csv',
+        'views/hr_views.xml',
         'views/hr_employee_landing_page_views.xml',
         'views/hr_holidays_views.xml',
         'views/analytic_views.xml',
