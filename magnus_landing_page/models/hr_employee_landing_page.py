@@ -65,32 +65,49 @@ class hr_employee_landing_page(models.TransientModel):
         self.vacation_balance = allocated_leaves-leaves_taken
 
         user_id = self.env.user.id
+        department = self.employee_id.department_id
         # compute overtime balance
         # 1. execute overtime_hrs
-        self.env.cr.execute("""
-                    SELECT 
-                    SUM(unit_amount) as overtime_hrs
-                    FROM account_analytic_line                               
-                    WHERE user_id = %s
-                      AND ot = true
-                      AND product_uom_id = 5
-                    GROUP BY user_id                           
-                        """, (user_id,))
+        query = "SELECT SUM(unit_amount) as overtime_hrs FROM account_analytic_line  WHERE user_id = %s AND ot = true AND product_uom_id = 5"%(user_id)
+
+        not_cummlative_query = " AND date_part('year', date) = date_part('year', CURRENT_DATE)"
+        grp_query = " GROUP BY user_id"
+
+        if not department.cumm_overtime_cal:
+            query += not_cummlative_query
+        query += grp_query
+        # self.env.cr.execute("""
+        #             SELECT
+        #             SUM(unit_amount) as overtime_hrs
+        #             FROM account_analytic_line
+        #             WHERE user_id = %s
+        #               AND ot = true
+        #               AND product_uom_id = 5
+        #             GROUP BY user_id
+        #                 """, (user_id,))
+        self.env.cr.execute(query)
 
         overtime_hrs = 0
         for oh in self.env.cr.fetchall():
             overtime_hrs += oh[0]
 
         # 2. execute overtime_taken
-        self.env.cr.execute("""
-                SELECT SUM(unit_amount) as overtime_taken
-                        FROM account_analytic_line                               
-                        WHERE user_id = %s
-                          AND state != 'draft'
-                          AND project_id IN (SELECT id FROM project_project WHERE overtime = true)
-                          AND product_uom_id = 5
-                        GROUP BY user_id                     
-                """, (user_id,))
+        query = "SELECT SUM(unit_amount) as overtime_taken FROM account_analytic_line WHERE user_id = %s AND state != 'draft' AND project_id IN (SELECT id FROM project_project WHERE overtime = true) AND product_uom_id = 5"%(user_id)
+        if not department.cumm_overtime_cal:
+            query += not_cummlative_query
+        query += grp_query
+
+        self.env.cr.execute(query)
+
+        # self.env.cr.execute("""
+        #         SELECT SUM(unit_amount) as overtime_taken
+        #                 FROM account_analytic_line
+        #                 WHERE user_id = %s
+        #                   AND state != 'draft'
+        #                   AND project_id IN (SELECT id FROM project_project WHERE overtime = true)
+        #                   AND product_uom_id = 5
+        #                 GROUP BY user_id
+        #         """, (user_id,))
 
         overtime_taken = 0
         for ot in self.env.cr.fetchall():
