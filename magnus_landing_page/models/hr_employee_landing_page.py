@@ -54,7 +54,7 @@ class hr_employee_landing_page(models.TransientModel):
                         FROM hr_holidays                               
                         WHERE employee_id = %s
                           AND type = 'remove'
-                          AND state not in ('cancel', 'refuse')
+                          AND state in ('written')
                         GROUP BY employee_id                     
         """, (self.employee_id.id,))
 
