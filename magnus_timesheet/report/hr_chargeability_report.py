@@ -105,6 +105,7 @@ class HrChargeabilityReport(models.Model):
                     AND (aa.ot = FALSE or aa.ot is null)
                     AND aa.project_id IS NOT NULL 
                     AND resource.active = TRUE
+                    AND aa.state != 'change-chargecode'
                 GROUP BY 
                     aa.operating_unit_id, 
                     aa.user_id, 
