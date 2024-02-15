@@ -64,7 +64,20 @@ class HrChargeabilityReport(models.Model):
         tools.drop_view_if_exists(self.env.cr, 'hr_chargeability_report')
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW hr_chargeability_report AS (
-                SELECT
+            SELECT id,
+				date,
+				user_id,
+				operating_unit_id,
+				department_id,
+				external,
+				ts_optional,
+				ts_no_8_hours_day,
+				captured_hours,
+				chargeable_hours,
+				norm_hours,
+				chargeability
+            FROM
+                (SELECT
                     min(aa.id) as id,
                     aa.date as date,
                     aa.user_id as user_id,
@@ -115,7 +128,8 @@ class HrChargeabilityReport(models.Model):
                     emp.external, 
                     emp.timesheet_optional, 
                     emp.timesheet_no_8_hours_day
-				ORDER BY aa.date
+				ORDER BY aa.date) as selection
+				WHERE selection.captured_hours > 0
             )""" % (uom))
 
 
