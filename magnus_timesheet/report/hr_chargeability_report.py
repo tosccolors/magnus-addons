@@ -62,7 +62,7 @@ class HrChargeabilityReport(models.Model):
         """ """
         uom = self.env.ref('product.product_uom_hour').id
         tools.drop_view_if_exists(self.env.cr, 'hr_chargeability_report')
-        self.env.cr.execute(''''
+        self.env.cr.execute('''
             CREATE OR REPLACE VIEW hr_chargeability_report AS (
                 SELECT 
                     sq.id,
