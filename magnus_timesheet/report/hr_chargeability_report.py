@@ -85,7 +85,7 @@ class HrChargeabilityReport(models.Model):
 						ON (resource.user_id = aa.user_id)
 						JOIN hr_employee emp 
 						ON (emp.resource_id = resource.id)
-			WHERE aa.product_uom_id = 5
+			WHERE aa.product_uom_id = %s
 								AND aa.planned = FALSE
 								AND (aa.ot = FALSE or aa.ot is null)
 								AND aa.project_id IS NOT NULL 
@@ -124,7 +124,7 @@ class HrChargeabilityReport(models.Model):
 						ON (resource2.user_id = aa2.user_id)
 					JOIN date_range dr2 
 						ON (dr2.id = aa2.week_id)
-					WHERE aa2.product_uom_id = 5
+					WHERE aa2.product_uom_id = %s
 								AND aa2.planned = FALSE
 								AND (aa2.ot = FALSE or aa2.ot is null)
 								AND aa2.project_id IS NOT NULL 
