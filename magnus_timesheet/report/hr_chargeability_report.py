@@ -154,7 +154,7 @@ class HrChargeabilityReport(models.Model):
 					) as sq2
 					on (sq2.date = sq.date and sq2.user_id = sq.user_id)
 					ORDER BY date
-		    	)""" % (uom))
+		    	)""" % (uom,uom))
 
 
     @api.model
