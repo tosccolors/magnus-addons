@@ -34,6 +34,13 @@ class AccountMoveLine(models.Model):
                 ('invoice_id' ,'!=', False)
                  ])[0].trading_partner_code
 
+    def _inverse_trading_partner_code(self):
+        lines = self.filtered(lambda line:
+                              line.invoice_line_id or line.invoice_id)
+        if lines:
+            raise UserError(_('You shouldn\'t change the field trading_partner_code'
+                              ' in invoice related move lines since it is a computed field '
+                              ))
 
 
     user_id = fields.Many2one(
