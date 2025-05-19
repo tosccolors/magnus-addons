@@ -1,0 +1,5 @@
+<odoo>
+    <record id="group_show_crm_features" model="res.groups">
+        <field name="name">Show unused CRM features</field>
+    </record>
+</odoo>

@@ -1,0 +1,111 @@
+<odoo>
+
+    <record id="crm_lead_view_form" model="ir.ui.view">
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="ps_crm.crm_case_form_view_oppor_inherited" />
+        <field name="arch" type="xml">
+            <group name="tariffs" position="attributes">
+                <attribute name="string">Consultants &amp; tariffs</attribute>
+            </group>
+            <field name="activity_ids" position="replace" />
+        </field>
+    </record>
+
+    <record id="crm_lead_view_form_sale" model="ir.ui.view">
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="sale_crm.crm_case_form_view_oppor" />
+        <field name="arch" type="xml">
+            <button name="action_sale_quotations_new" position="attributes">
+                <attribute name="groups">ps_crm_magnus.group_show_crm_features</attribute>
+            </button>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="crm_case_kanban_view_leads">
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads" />
+        <field name="arch" type="xml">
+            <field name="user_id" position="before">
+                <field name="user_name" />
+                <field name="date_deadline" />
+                <field name="first_employee_name" />
+            </field>
+            <xpath
+                expr="//div/span[@t-if='record.partner_id.value']"
+                position="before"
+                >
+                <span t-if="record.partner_id.value">Customer:</span>
+            </xpath>
+            <xpath expr="//div[hasclass('o_kanban_record_title')]" position="after">
+                <xpath
+                    expr="//div/span[@t-if='record.partner_id.value']/.."
+                    position="move"
+                />
+                <div>
+                    Owner: <field name="user_name" />
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']/.." position="before">
+                <div t-if="record.date_deadline and record.date_deadline.value">
+                    Submission: <field name="date_deadline" />
+                </div>
+                <div
+                    t-if="record.first_employee_name and record.first_employee_name.value"
+                >
+                    Proposed:
+                    <field name="first_employee_name" />
+                </div>
+            </xpath>
+            <xpath
+                expr="//field[@name='priority' and @widget='priority']"
+                position="attributes"
+            >
+                <attribute name="invisible">True</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="quick_create_opportunity_form">
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="ps_crm.view_create_opportunity_simplified_inherit" />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//field[@name='priority' and @widget='priority']"
+                position="attributes"
+            >
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <field name="date_deadline" position="attributes">
+                <attribute name="string">Deadline submission</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="crm_case_tree_view_oppor_ps">
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="ps_crm.crm_case_tree_view_oppor_ps" />
+        <field name="arch" type="xml">
+            <field name="priority" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="tag_ids" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="contact_name" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="email_from" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="phone" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="activity_ids" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+            <field name="activity_date_deadline_my" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>
