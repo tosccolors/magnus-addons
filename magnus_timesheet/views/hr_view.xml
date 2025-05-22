@@ -36,6 +36,7 @@
                     <field name="timesheet_optional" />
                     <field name="timesheet_no_8_hours_day" />
                     <field name="no_ott_check" />
+                    <field name="allow_ott_holidays" />
                     <field name="overtime_hours" widget="float_time" invisible="1"/>
                 </xpath>
             </field>
@@ -53,6 +54,7 @@
                            attrs="{'required':[('parent_id', '=', False)],
                                     'invisible': [('parent_id', '!=', False)]}"/>
                     <field name="no_ott_check" />
+                    <field name="allow_ott_holidays" />
                 </field>
             </field>
         </record>

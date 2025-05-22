@@ -14,7 +14,10 @@
               <label for="overtime"/>
               <field name="overtime_hrs" class="oe_inline" string="Overtime hours"/>
               <label for="overtime_hrs"/>
-            </xpath>
+              <separator/>
+              <field name="is_vacation" class="oe_inline" />
+              <label for="is_vacation"/>
+             </xpath>
           </field>
         </record>
 

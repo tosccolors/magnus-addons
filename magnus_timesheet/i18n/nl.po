@@ -614,6 +614,12 @@ msgid "Each day from Monday to Friday needs to have at least 8 logged hours."
 msgstr "Each day from Monday to Friday needs to have at least 8 logged hours."
 
 #. module: magnus_timesheet
+#: code:addons/magnus_timesheet/models/hr_timesheet_sheet.py:329
+#, python-format
+msgid "You can take a maximum of 4 hours of overtime per week, and this may not be taken directly before or after vacation days"
+msgstr "Je kunt maximaal 4 uur overtime per week opnemen en dit mag niet aansluitend op vakantiedagen zijn"
+
+#. module: magnus_timesheet
 #: model:ir.model.fields,field_description:magnus_timesheet.field_magnus_planning_emp_domain_compute
 msgid "Emp domain compute"
 msgstr "Emp domain compute"
