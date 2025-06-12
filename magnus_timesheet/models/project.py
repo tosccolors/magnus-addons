@@ -61,6 +61,7 @@ class Project(models.Model):
     overtime_hrs = fields.Boolean(
         string='Overtime Hours'
     )
+    is_vacation = fields.Boolean(string='Is Vacation')
     invoice_principle = fields.Selection(
         [
         ('ff', 'Fixed Fee'),

@@ -325,6 +325,7 @@ class HrTimesheetSheet(models.Model):
         tot_ot_hrs = 0
         gtm = self.env.user.has_group("magnus_timesheet.group_timesheet_manager")
         no_ott_check = self.employee_id.no_ott_check or self.employee_id.department_id.no_ott_check
+        allow_ott_holidays = self.employee_id.allow_ott_holidays or self.employee_id.department_id.allow_ott_holidays
         for i in range(7):
             date = datetime.strftime(date_from + timedelta(days=i), "%Y-%m-%d")
             hour = sum(self.env['account.analytic.line'].search([
@@ -344,6 +345,21 @@ class HrTimesheetSheet(models.Model):
                 if not no_ott_check and float_compare(ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
                     raise UserError(_('Each day maximum 4 hours overtime taken allowed from Monday to Friday.'))
                 tot_ot_hrs += ot_hrs
+            if ot_aal and not allow_ott_holidays:
+                yesterday = datetime.strftime(date - timedelta(days=1), "%Y-%m-%d")
+                tomorrow = datetime.strftime(date + timedelta(days=1), "%Y-%m-%d")
+                if self.env['account.analytic.line'].search([
+                        ('employee_id', '=', self.employee_id.id),
+                        ('date', '>=', yesterday),
+                        ('date', '<=', tomorrow),
+                        ('sheet_id', '!=', False),
+                        ('project_id.is_vacation', '=', True),
+                ]):
+                    raise UserError(_(
+                        'You can take a maximum of 4 hours of overtime per week, and this may not be taken '
+                        'directly before or after vacation days'
+                    ))
+
         if not gtm and float_compare(tot_ot_hrs, 8, precision_digits=3, precision_rounding=None) > 0:
             raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
