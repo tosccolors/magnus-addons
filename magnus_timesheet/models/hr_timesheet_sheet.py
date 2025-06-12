@@ -346,6 +346,7 @@ class HrTimesheetSheet(models.Model):
                     raise UserError(_('Each day maximum 4 hours overtime taken allowed from Monday to Friday.'))
                 tot_ot_hrs += ot_hrs
             if ot_aal and not allow_ott_holidays:
+                date = datetime.strptime(date, "%Y-%m-%d").date()
                 yesterday = datetime.strftime(date - timedelta(days=1), "%Y-%m-%d")
                 tomorrow = datetime.strftime(date + timedelta(days=1), "%Y-%m-%d")
                 if self.env['account.analytic.line'].search([
