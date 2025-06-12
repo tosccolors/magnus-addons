@@ -1,0 +1,152 @@
+on: [push]
+name: Main
+
+jobs:
+  test:
+    name: Test Odoo
+
+    # we need an ancient ubuntu to have all python2 packages we need
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: ["2.7"]
+        odoo-version: ["10.0"]
+
+    steps:
+    - name: Install packages and configure environment
+      run: |
+        sudo apt update
+        sudo apt install postgresql python-pil libcups2-dev libxslt1-dev libxml2-dev python-lxml python-ldap libldap2-dev libsasl2-dev
+        sudo systemctl start postgresql
+        sudo -u postgres createuser --createdb runner
+        git config --global init.defaultBranch ${{matrix.odoo-version}}
+        git config --global advice.detachedHead false
+        git config --global pull.rebase false
+        git config --global user.email "runner@github.com"
+        git config --global user.name "Test runner"
+    - name: Set up Python ${{matrix.python-version}}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{matrix.python-version}}
+    - name: Install buildout and utils
+      run: |
+        python -m pip install --upgrade pip
+        pip install zc.buildout coverage
+    - name: Prepare buildout
+      run: |
+        # TODO think of a way to customize buildout options per PR, in a way that's reflected in deployment.
+        # something like include parts/magnuscolors/buildout.cfg but that's a chicken egg thing
+        git clone https://github.com/magnuscolors/voodoo-template ../voodoo-template -b 10.0-magnus --single-branch --depth=1
+        CFG=$(mktemp)
+        cat > $CFG <<EOF
+        [buildout]
+        extends = $(realpath $PWD/../voodoo-template/buildout.cfg)
+        find-links += 
+          https://github.com/shabda/pychart/tarball/master/pychart-1.39.tar.gz
+          https://github.com/anybox/anybox.recipe.odoo/tarball/master/anybox.recipe.odoo-1.9.3.dev0.tar.gz
+        
+        [odoo]
+        vcs-clear-retry = True
+        vcs-revert = True
+        git-depth = 1
+        addons +=
+          git https://github.com/magnuscolors/magnus-addons.git parts/magnus-addons \${odoo:release} depth=None
+        # the magnuscolors/operating-unit version used by the buildout is ancient
+          git https://github.com/oca/operating-unit parts/operating-unit \${odoo:release}
+        # this is missing from git alltogether
+          git https://github.com/onesteinbv/addons-onestein parts/onestein \${odoo:release}
+        merges +=
+          git https://github.com/$GITHUB_REPOSITORY parts/$(basename $GITHUB_REPOSITORY) $GITHUB_SHA branch=$GITHUB_REF
+        eggs +=
+          httplib2
+          zpl2
+          bcrypt<3.2.0
+          unittest2
+        [versions]
+        anybox.recipe.odoo=1.9.3.dev0
+        cryptography=3.3.2
+        decorator=4.4.2
+        feedparser=5.2.1
+        ftputil=3.4
+        gevent=1.1.2
+        greenlet=0.4.10
+        invoice2data=0.2.103
+        jira=2.0.0
+        jinja2=2.11.3
+        PyJWT=2.0.0
+        MarkupSafe=1.1.1
+        mock=3.0.5
+        oauthlib=3.1.0
+        Pillow=6.2.2
+        psycopg2=2.8.6
+        pychart=1.39
+        pycups=1.9.73
+        PyJWT=1.7.1
+        pyusb=1.0.2
+        pyotp=2.3.0
+        PyYAML=3.12
+        watchdog=0.10.6
+        werkzeug=0.11.11
+        EOF
+        echo "BUILDOUT_CFG=$CFG" >> $GITHUB_ENV
+        echo "START_ODOO=$(dirname $CFG)/bin/start_odoo -d $USER --stop-after-init" >> $GITHUB_ENV
+        mkdir $(dirname $CFG)/modules
+    - name: Run buildout
+      run: |
+        buildout -c $BUILDOUT_CFG
+        # there are some modules that break during installation, use manual list for now and fix them later
+        # echo "ODOO_ADDONS=$(find $(dirname $BUILDOUT_CFG)/parts/$(basename $GITHUB_REPOSITORY) -maxdepth 2 -name __openerp__.py -or -name __manifest__.py|xargs -l dirname|xargs -l basename|tr '\n' ',')" >> $GITHUB_ENV
+        echo "ODOO_ADDONS=magnus_timesheet" >> $GITHUB_ENV
+    - name: Prepare database
+      run: $START_ODOO -i account,account_operating_unit,calendar,connector_jira,crm,date_range,fleet,hr,hr_contract,hr_timesheet_sheet,l10n_nl,maintenance,project,sale,web_readonly_bypass
+    - name: Run tests
+      run: |
+        cd $(dirname $BUILDOUT_CFG)/parts/$(basename $GITHUB_REPOSITORY)
+        cat > .coveragerc <<EOF
+        [run]
+        source = $(dirname $BUILDOUT_CFG)/parts/$(basename $GITHUB_REPOSITORY)
+        omit =
+          __manifest__.py
+          tests/*
+          */controllers/controllers.py
+        branch = True
+        relative_files = True
+        EOF
+        ODOO_LOG=$(mktemp)
+        coverage run $START_ODOO -i $ODOO_ADDONS --test-enable 2>&1 | tee $ODOO_LOG
+        RESULT=${PIPESTATUS[0]}
+        echo "ODOO_LOG=$ODOO_LOG" >> $GITHUB_ENV
+        echo Odoo result: $RESULT
+        exit $RESULT
+    - name: Check for warnings
+      run: |
+        cd $(dirname $BUILDOUT_CFG)/parts/$(basename $GITHUB_REPOSITORY)
+        CHECK_SUITE_URL=$(curl -s -H "authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} | jq -r '.check_suite_url')
+        CHECK_RUN_ID=$(curl -s -H "authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.antiope-preview+json" $CHECK_SUITE_URL/check-runs | jq '.check_runs[] | select(.name=="Test Odoo (${{matrix.python-version}}, ${{matrix.odoo-version}})") | .id ')
+        grep ' WARNING ' $ODOO_LOG && \
+        curl -o /dev/null --silent -X POST -H "Accept: application/vnd.github.v3+json" \
+        -H 'Authorization: Bearer ${{secrets.GITHUB_TOKEN}}' \
+        https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA -d \
+        '{"state":"pending","context":"Log check","description":"There are warnings in the log","target_url": "${{github.server_url}}/${{github.repository}}/runs/'$CHECK_RUN_ID'#step:9:1"}' || \
+        true
+    - name: Upload coverage
+      run: |
+        cd $(dirname $BUILDOUT_CFG)/parts/$(basename $GITHUB_REPOSITORY)
+        git clone https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/$GITHUB_REPOSITORY -b gh-pages gh-pages
+        rm -rf gh-pages/coverage/$GITHUB_SHA
+        mkdir -p gh-pages/coverage
+        coverage html --omit '*/controllers/controllers.py'
+        COVERAGE=$(grep pc_cov htmlcov/index.html|grep --only-matching '[0-9.]*')
+        mv htmlcov gh-pages/coverage/$GITHUB_SHA
+        mv $ODOO_LOG gh-pages/coverage/$GITHUB_SHA
+        git -C gh-pages add .
+        git -C gh-pages commit -q -m '[ADD] coverage for $GITHUB_SHA'
+        # TODO rebase such that we only keep the last n results
+        git -C gh-pages push -q
+        # TODO for PRs, investigate https://diff-cover.readthedocs.io/en/latest/README.html
+        # TODO post a failure if coverage decreased
+        curl -o /dev/null --silent -X POST -H "Accept: application/vnd.github.v3+json" \
+        -H 'Authorization: Bearer ${{secrets.GITHUB_TOKEN}}' \
+        https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA -d \
+        '{"state":"success","context":"Coverage","description":"'$COVERAGE'%","target_url":"https://'$(dirname $GITHUB_REPOSITORY)'.github.io/'$(basename $GITHUB_REPOSITORY)'/coverage/'$GITHUB_SHA'"}'
+    # TODO add pylint, jslint, black, or just OCA's pre-commit config
