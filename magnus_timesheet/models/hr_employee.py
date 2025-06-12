@@ -50,8 +50,8 @@ class Employee(models.Model):
         readonly=True
     )
     no_ott_check = fields.Boolean(
-        'No OTT Check',
-        help="8 Hours OTT possible"
+        'Allow >4hrs OTT',
+        help="Allow more than 4 hours OTT"
     )
     allow_ott_holidays = fields.Boolean(
         'Allow ott next to holidays',
@@ -69,8 +69,8 @@ class Department(models.Model):
     )
 
     no_ott_check = fields.Boolean(
-        'No OTT Check',
-        help="8 Hours OTT possible"
+        'Allow >4hrs OTT',
+        help="Allow more than 4 hours OTT"
     )
 
     allow_ott_holidays = fields.Boolean(
