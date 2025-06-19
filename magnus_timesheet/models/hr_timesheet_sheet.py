@@ -345,7 +345,7 @@ class HrTimesheetSheet(models.Model):
                 if not no_ott_check and float_compare(ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
                     raise UserError(_('You can take a maximum of 4 hours of overtime per day.'))
                 tot_ot_hrs += ot_hrs
-                if not gtm and float_compare(tot_ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
+                if not no_ott_check and float_compare(tot_ot_hrs, 4, precision_digits=3, precision_rounding=None) > 0:
                     raise UserError(_('You can take a maximum of 4 hours of overtime per week.'))
             if ot_aal and not allow_ott_holidays:
                 date = datetime.strptime(date, "%Y-%m-%d").date()
