@@ -362,8 +362,8 @@ class HrTimesheetSheet(models.Model):
                         'directly before or after vacation days'
                     ))
 
-        if not gtm and float_compare(tot_ot_hrs, 8, precision_digits=3, precision_rounding=None) > 0:
-            raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
+#        if not gtm and float_compare(tot_ot_hrs, 8, precision_digits=3, precision_rounding=None) > 0:
+#            raise UserError(_('Maximum 8 hours overtime taken allowed in a week.'))
         return super(HrTimesheetSheet, self).action_timesheet_confirm()
 
     @api.one
