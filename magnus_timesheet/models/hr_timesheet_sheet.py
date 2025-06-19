@@ -352,10 +352,9 @@ class HrTimesheetSheet(models.Model):
                 yesterday = datetime.strftime(date - timedelta(days=1), "%Y-%m-%d")
                 tomorrow = datetime.strftime(date + timedelta(days=1), "%Y-%m-%d")
                 if self.env['account.analytic.line'].search([
-                        ('employee_id', '=', self.employee_id.id),
+                        ('sheet_id.employee_id', '=', self.employee_id.id),
                         ('date', '>=', yesterday),
                         ('date', '<=', tomorrow),
-                        ('sheet_id', '!=', False),
                         ('project_id.is_vacation', '=', True),
                 ]):
                     raise UserError(_(
