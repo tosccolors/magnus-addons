@@ -28,6 +28,7 @@
     # always loaded
     'data': [
         'views/account_analytic_view.xml',
+        'views/account_move_line.xml',
         'views/analytic_invoice.xml',
     ],
     # only loaded in demonstration mode

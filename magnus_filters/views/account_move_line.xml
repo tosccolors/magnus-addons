@@ -1,0 +1,11 @@
+<odoo>
+    <record id="view_account_move_line_filter" model="ir.ui.view">
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_account_move_line_filter" />
+        <field name="arch" type="xml">
+            <filter name="group_by_account" position="after">
+                <filter string="Analytic Account" name="group_by_analytic_account" domain="[]" context="{'group_by': 'analytic_account_id'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>
