@@ -22,7 +22,7 @@
 
     # any module necessary for this one to work correctly
     'depends': [
-                'magnus_timesheet'
+                'ps_timesheet_invoicing'
                 ],
 
     # always loaded
