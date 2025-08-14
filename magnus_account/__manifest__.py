@@ -9,6 +9,7 @@
     "category": "Accounting & Finance",
     "depends": [
         "account",
+        "account_move_cutoff",
     ],
     "installable": True,
     "data": [
