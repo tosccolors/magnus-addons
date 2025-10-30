@@ -13,5 +13,6 @@
     ],
     "installable": True,
     "data": [
+        "views/res_config_settings.xml",
     ],
 }
