@@ -14,6 +14,13 @@ class AccountMove(models.Model):
             self._onchange_currency()
         return result
 
+    def _get_deferred_journal(self):
+        self.ensure_one()
+        if self.journal_id.type == "general":
+            return self.company_id.general_cutoff_journal_id
+        else:
+            return super()._get_deferred_journal()
+
     def _get_deferrable_lines(self):
         return chain(
             super()._get_deferrable_lines(),
