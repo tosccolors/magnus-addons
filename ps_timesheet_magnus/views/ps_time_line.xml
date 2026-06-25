@@ -1,0 +1,11 @@
+<odoo>
+    <record id="view_hr_timesheet_line_pivot" model="ir.ui.view">
+        <field name="model">ps.time.line</field>
+        <field name="inherit_id" ref="ps_timesheet_lunch.view_hr_timesheet_line_pivot" />
+        <field name="arch" type="xml">
+            <pivot position="inside">
+                <field name="office_day_hub" type="measure" widget="integer" />
+            </pivot>
+        </field>
+    </record>
+</odoo>
