@@ -10,6 +10,7 @@
     "depends": [
         "account",
         "account_move_cutoff",
+        "account_statement_import_online",
     ],
     "installable": True,
     "data": [
